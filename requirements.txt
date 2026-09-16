@@ -1,0 +1,5 @@
+Flask>=3.1,<4
+Authlib>=1.6,<2
+python-dotenv>=1.0,<2
+PyJWT[crypto]>=2.8,<3
+requests>=2.32,<3

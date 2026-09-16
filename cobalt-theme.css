@@ -27,3 +27,72 @@ html[data-theme="dark"]{
   --blue-soft:#182541;
   --shadow:0 12px 30px rgba(0,0,0,.22);
 }
+
+/* Header controls: keep borders, sizing and wrapping clean at narrower widths. */
+.topbar-inner{min-width:0}
+.top-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0}
+#open-command,.account-button,.theme-button,.mobile-nav-btn{
+  border-color:color-mix(in srgb,var(--line) 86%,var(--blue));
+  background:color-mix(in srgb,var(--surface) 96%,var(--blue-soft));
+  box-shadow:0 1px 0 rgba(255,255,255,.5) inset;
+}
+#open-command:hover,.account-button:hover,.theme-button:hover,.mobile-nav-btn:hover{
+  border-color:var(--teal);
+  background:var(--blue-soft);
+}
+.account-button{min-width:0;max-width:150px;overflow:hidden}
+#account-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+html[data-theme="dark"] #open-command,
+html[data-theme="dark"] .account-button,
+html[data-theme="dark"] .theme-button,
+html[data-theme="dark"] .mobile-nav-btn{
+  border-color:#3b4965;
+  background:#171f30;
+  box-shadow:0 1px 0 rgba(255,255,255,.035) inset;
+}
+html[data-theme="dark"] #open-command:hover,
+html[data-theme="dark"] .account-button:hover,
+html[data-theme="dark"] .theme-button:hover,
+html[data-theme="dark"] .mobile-nav-btn:hover{
+  border-color:var(--teal);
+  background:#1c2944;
+}
+
+@media(max-width:1180px){
+  .topbar-inner{gap:12px}
+  .main-nav a{padding-inline:7px;font-size:.84rem}
+  .top-actions{gap:6px}
+  #open-command,.theme-button{padding-inline:9px}
+  .account-button{max-width:118px}
+}
+
+@media(max-width:1000px){
+  .topbar-inner{position:relative;flex-wrap:nowrap}
+  .mobile-nav-btn{flex:0 0 auto;margin-left:auto}
+  .top-actions{margin-left:0;flex:0 0 auto}
+  .main-nav{z-index:60}
+}
+
+@media(max-width:760px){
+  .topbar-inner{min-height:64px;gap:6px}
+  .brand{min-width:0}
+  .mobile-nav-btn{padding:7px 9px}
+  .top-actions{gap:5px}
+  #open-command{padding:7px 8px;font-size:.82rem}
+  .account-button{padding:4px;max-width:none}
+  .account-avatar{width:28px;height:28px}
+  .theme-button{padding:7px 8px}
+  #theme-label,#account-label{display:none}
+}
+
+@media(max-width:430px){
+  .shell{width:min(var(--max),calc(100% - 16px))}
+  .brand{gap:7px;font-size:.92rem}
+  .brand-mark{width:29px;height:29px;border-radius:8px}
+  .mobile-nav-btn{font-size:0;width:36px;height:36px;padding:0;position:relative}
+  .mobile-nav-btn::after{content:"☰";font-size:17px;line-height:1}
+  #open-command{font-size:0;width:36px;height:36px;padding:0;position:relative}
+  #open-command::after{content:"⌘K";font-size:.7rem;line-height:1}
+  .account-button,.theme-button{width:36px;height:36px;justify-content:center}
+}

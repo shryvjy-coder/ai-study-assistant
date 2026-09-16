@@ -56,55 +56,6 @@
   function openSettings(){buildSettings();const dialog=$('#studyai-settings-dialog');const mode=localStorage.getItem(NAV_KEY)||'auto';const option=$(`input[name="nav-mode"][value="${mode}"]`,dialog);if(option)option.checked=true;if(!dialog.open)dialog.showModal();}
   function addSettingsButton(){const actions=$('.top-actions');if(!actions||$('#settings-button'))return;const button=document.createElement('button');button.id='settings-button';button.className='settings-button';button.type='button';button.textContent='⚙';button.setAttribute('aria-label','Open settings');button.title='Settings';actions.insertBefore(button,$('#theme-toggle'));button.addEventListener('click',openSettings);}
 
-  function buildPasswordAnimation(){
-    const shell=$('#password-shell'); const toggle=$('#password-toggle'); const input=$('#auth-password');
-    if(!shell||!toggle||!input)return;
-
-    let mask=$('.password-crumble-mask',shell);
-    if(!mask){mask=document.createElement('span');mask.className='password-crumble-mask';mask.setAttribute('aria-hidden','true');shell.appendChild(mask);}
-
-    const drawMask=()=>{
-      const count=Math.min(input.value.length,24);
-      mask.innerHTML='';
-      for(let i=0;i<count;i++){
-        const dot=document.createElement('span'); dot.className='crumble-dot';
-        dot.style.setProperty('--dot-index',i);
-        for(let p=0;p<7;p++){
-          const speck=document.createElement('i');
-          const angle=(Math.random()*110-55)*Math.PI/180;
-          const distance=7+Math.random()*17;
-          speck.style.setProperty('--px',`${Math.cos(angle)*distance}px`);
-          speck.style.setProperty('--py',`${Math.sin(angle)*distance-3}px`);
-          speck.style.setProperty('--ps',`${1+Math.random()*1.7}px`);
-          speck.style.setProperty('--pd',`${260+Math.random()*260}ms`);
-          speck.style.setProperty('--pdelay',`${Math.random()*85}ms`);
-          dot.appendChild(speck);
-        }
-        mask.appendChild(dot);
-      }
-    };
-
-    input.addEventListener('input',()=>{ if(input.type==='password') drawMask(); });
-    drawMask();
-
-    toggle.addEventListener('click',()=>{
-      requestAnimationFrame(()=>{
-        const revealed=input.type==='text';
-        shell.classList.remove('crumbling','revealing-text','concealing-text');
-        if(revealed){
-          drawMask();
-          shell.classList.add('crumbling');
-          input.classList.add('password-text-hidden');
-          setTimeout(()=>{input.classList.remove('password-text-hidden');shell.classList.add('revealing-text');},260);
-          setTimeout(()=>shell.classList.remove('crumbling','revealing-text'),920);
-        }else{
-          shell.classList.add('concealing-text');
-          setTimeout(()=>{drawMask();shell.classList.remove('concealing-text');},220);
-        }
-      });
-    });
-  }
-
-  function init(){updateThemeToggle();addSettingsButton();buildRightRail();buildSettings();buildPasswordAnimation();const observer=new MutationObserver(updateThemeToggle);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});$('#theme-toggle')?.addEventListener('click',()=>setTimeout(updateThemeToggle,0));}
+  function init(){updateThemeToggle();addSettingsButton();buildRightRail();buildSettings();const observer=new MutationObserver(updateThemeToggle);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});$('#theme-toggle')?.addEventListener('click',()=>setTimeout(updateThemeToggle,0));}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

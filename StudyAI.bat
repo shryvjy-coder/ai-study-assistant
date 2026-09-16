@@ -30,7 +30,7 @@ echo StudyAI is starting in your browser...
 echo Keep this window open while using StudyAI.
 echo Press Ctrl+C here when you want to stop the server.
 echo.
-".venv\Scripts\python.exe" app.py
+".venv\Scripts\python.exe" launcher.py
 exit /b
 
 :error

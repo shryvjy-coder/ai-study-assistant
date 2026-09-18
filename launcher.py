@@ -5,10 +5,21 @@ from app import app, BASE_DIR
 
 def enhanced_index():
     html = (BASE_DIR / 'index.html').read_text(encoding='utf-8')
-    marker = '<script src="script.js"></script>'
-    enhancement = marker + '\n<script src="ui-enhancements.js"></script>'
-    if 'ui-enhancements.js' not in html:
-        html = html.replace(marker, enhancement)
+
+    style_marker = '<link rel="stylesheet" href="cobalt-theme.css" />'
+    style_enhancement = style_marker + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
+    if 'sat-exam-tools.css' not in html:
+        html = html.replace(style_marker, style_enhancement)
+
+    script_marker = '<script src="script.js"></script>'
+    script_enhancement = (
+        script_marker
+        + '\n<script src="ui-enhancements.js"></script>'
+        + '\n<script src="sat-exam-tools.js"></script>'
+    )
+    if 'sat-exam-tools.js' not in html:
+        html = html.replace(script_marker, script_enhancement)
+
     return Response(html, mimetype='text/html')
 
 

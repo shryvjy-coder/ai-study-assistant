@@ -518,3 +518,429 @@ body.mock-exam-active .studyai-right-rail{z-index:1}
   .review-page-actions .button{width:100%}
   .mock-formula-sheet{width:100vw;padding:18px}
 }
+
+
+/* Premium SAT practice hub redesign */
+.sat-practice-hub{
+  display:block;
+  width:min(1040px,100%);
+  margin:34px auto 28px;
+  padding:clamp(28px,5vw,56px);
+  border:1px solid color-mix(in srgb,var(--line) 80%,transparent);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 50% 0%,color-mix(in srgb,var(--blue-soft) 72%,transparent),transparent 38%),
+    linear-gradient(180deg,color-mix(in srgb,var(--surface) 98%,var(--blue-soft)),var(--surface));
+  box-shadow:
+    0 24px 70px rgba(34,56,108,.09),
+    0 1px 0 rgba(255,255,255,.72) inset;
+  overflow:hidden;
+  position:relative;
+}
+.sat-practice-hub::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:5px;
+  background:linear-gradient(90deg,var(--teal),color-mix(in srgb,var(--teal) 55%,#8f75ff),color-mix(in srgb,var(--blue) 38%,#c4b8ff));
+  opacity:.9;
+}
+.practice-hub-hero{
+  text-align:center;
+  max-width:720px;
+  margin:0 auto 26px;
+  position:relative;
+}
+.practice-hub-hero .small-label{
+  display:block;
+  margin-top:14px;
+  color:var(--teal);
+}
+.practice-hub-hero h2{
+  margin:6px 0 9px;
+  font-size:clamp(2.4rem,6vw,4rem);
+  letter-spacing:-.045em;
+  line-height:.98;
+}
+.practice-hub-hero p{
+  max-width:620px;
+  margin:0 auto;
+  color:var(--muted);
+  font-size:1rem;
+  line-height:1.65;
+}
+
+/* Original stacked-document mark inspired by "test papers", not the reference icon. */
+.practice-hub-mark{
+  width:66px;
+  height:62px;
+  margin:0 auto 8px;
+  position:relative;
+}
+.practice-hub-mark .sheet{
+  position:absolute;
+  width:42px;
+  height:50px;
+  border:2px solid var(--ink);
+  border-radius:9px;
+  background:var(--surface);
+  box-shadow:0 2px 0 color-mix(in srgb,var(--ink) 16%,transparent);
+}
+.practice-hub-mark .back{
+  left:19px;
+  top:0;
+  transform:rotate(5deg);
+  background:color-mix(in srgb,var(--blue-soft) 86%,var(--surface));
+  border-color:color-mix(in srgb,var(--ink) 75%,var(--teal));
+}
+.practice-hub-mark .middle{
+  left:12px;
+  top:5px;
+  transform:rotate(1deg);
+  background:color-mix(in srgb,var(--surface) 72%,var(--blue-soft));
+}
+.practice-hub-mark .front{
+  left:5px;
+  top:10px;
+  display:grid;
+  align-content:center;
+  gap:5px;
+  padding:9px 8px;
+}
+.practice-hub-mark .front i{
+  display:block;
+  height:2px;
+  border-radius:99px;
+  background:var(--ink);
+  opacity:.72;
+}
+.practice-hub-mark .front i:nth-child(2){width:72%}
+.practice-hub-mark .front i:nth-child(3){width:48%}
+
+/* Score outlook */
+.mock-score-outlook{
+  width:min(720px,100%);
+  margin:0 auto 34px;
+  padding:24px 26px;
+  text-align:center;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:color-mix(in srgb,var(--surface) 92%,var(--blue-soft));
+  box-shadow:0 10px 28px rgba(35,61,120,.06);
+}
+.mock-outlook-label{
+  display:block;
+  margin-bottom:5px;
+  font-size:.72rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+  color:var(--muted);
+}
+.mock-score-outlook>strong{
+  display:block;
+  min-height:52px;
+  font-family:var(--serif);
+  font-size:clamp(2.5rem,6vw,4.4rem);
+  line-height:1;
+  letter-spacing:-.04em;
+  color:color-mix(in srgb,var(--muted) 78%,var(--ink));
+}
+.mock-score-outlook>strong.has-score{color:var(--ink)}
+.mock-score-outlook p{
+  margin:9px 0 3px;
+  font-weight:750;
+  color:var(--ink);
+}
+.mock-score-outlook small{
+  display:block;
+  max-width:580px;
+  margin:0 auto;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+/* Toolbar above cards */
+.practice-hub-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  margin:0 0 12px;
+  padding:0 2px;
+}
+.practice-hub-toolbar>div{
+  display:grid;
+  gap:2px;
+}
+.practice-hub-toolbar strong{font-size:1.02rem}
+.practice-hub-toolbar span{
+  color:var(--muted);
+  font-size:.83rem;
+}
+
+/* Stack, not two-column grid. */
+.sat-practice-hub .mock-test-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+.mock-test-card-v2{
+  position:relative;
+  overflow:visible;
+  min-height:170px;
+  padding:0;
+  border:1.5px solid color-mix(in srgb,var(--ink) 72%,var(--line));
+  border-radius:18px;
+  background:var(--surface);
+  box-shadow:
+    7px 8px 0 color-mix(in srgb,var(--ink) 88%,#0000),
+    0 10px 24px rgba(25,41,78,.06);
+  transform:translate(0,0);
+  transition:
+    transform .32s cubic-bezier(.16,1,.3,1),
+    box-shadow .32s ease,
+    border-color .26s ease;
+}
+.mock-test-card-v2:hover{
+  transform:translate(-2px,-2px);
+  border-color:var(--teal);
+  box-shadow:
+    9px 10px 0 color-mix(in srgb,var(--teal-dark) 84%,var(--ink)),
+    0 16px 32px rgba(35,61,120,.11);
+}
+.mock-test-accent{
+  position:absolute;
+  left:0;
+  top:16px;
+  bottom:16px;
+  width:5px;
+  border-radius:0 6px 6px 0;
+  background:linear-gradient(180deg,var(--teal),color-mix(in srgb,var(--blue) 48%,#9f82ff));
+}
+.mock-test-main{
+  padding:19px 20px 17px 24px;
+  display:grid;
+  gap:14px;
+}
+.mock-test-identity{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:13px;
+  align-items:start;
+}
+.mock-test-doc-icon{
+  width:42px;
+  height:46px;
+  border:1.5px solid var(--ink);
+  border-radius:9px;
+  background:var(--paper);
+  display:grid;
+  align-content:center;
+  gap:4px;
+  padding:9px 8px;
+  position:relative;
+  box-shadow:3px 3px 0 color-mix(in srgb,var(--blue-soft) 75%,var(--line));
+}
+.mock-test-doc-icon::before{
+  content:"";
+  position:absolute;
+  right:-5px;
+  top:4px;
+  width:8px;
+  height:34px;
+  border-radius:0 6px 6px 0;
+  background:var(--teal);
+  z-index:-1;
+}
+.mock-test-doc-icon span{
+  height:2px;
+  border-radius:50px;
+  background:var(--ink);
+  opacity:.67;
+}
+.mock-test-doc-icon span:nth-child(2){width:72%}
+.mock-test-doc-icon span:nth-child(3){width:50%}
+.mock-test-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.mock-test-title-row h4{
+  margin:0;
+  font-size:1.18rem;
+  letter-spacing:-.015em;
+}
+.mock-test-identity p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:.87rem;
+}
+.mock-status-pill{
+  flex:0 0 auto;
+  padding:5px 9px;
+  border-radius:999px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:.7rem;
+  font-weight:850;
+}
+.mock-status-pill.completed{
+  color:var(--teal-dark);
+  background:var(--blue-soft);
+  border-color:color-mix(in srgb,var(--teal) 45%,var(--line));
+}
+.mock-test-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-left:55px;
+}
+.mock-test-meta span{
+  padding:5px 8px;
+  border-radius:8px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:.72rem;
+  font-weight:750;
+}
+.mock-test-footer{
+  display:grid;
+  grid-template-columns:minmax(160px,1fr) minmax(150px,.7fr) auto;
+  align-items:end;
+  gap:12px;
+  margin-left:55px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+}
+.mock-focus-profile,
+.mock-best-score{
+  display:grid;
+  gap:2px;
+}
+.mock-focus-profile>span,
+.mock-best-score>span{
+  font-size:.66rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted);
+  font-weight:900;
+}
+.mock-focus-profile strong,
+.mock-best-score strong{
+  font-size:.91rem;
+}
+.mock-focus-profile small,
+.mock-best-score small{
+  color:var(--muted);
+  font-size:.72rem;
+}
+.mock-best-score strong{
+  font-family:var(--serif);
+  font-size:1.35rem;
+  line-height:1;
+}
+.mock-best-score.muted-state strong{color:var(--muted)}
+.mock-start-button{
+  min-width:132px;
+  min-height:42px;
+  border-radius:999px;
+  padding-inline:16px;
+  box-shadow:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-weight:850;
+}
+.mock-start-button span{
+  transition:transform .24s cubic-bezier(.16,1,.3,1);
+}
+.mock-start-button:hover span{transform:translateX(3px)}
+
+/* Footer note gives the page a finished product feel. */
+.practice-hub-note{
+  margin-top:24px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  text-align:center;
+}
+.practice-hub-note>span{
+  padding:5px 8px;
+  border-radius:999px;
+  background:var(--blue-soft);
+  color:var(--teal-dark);
+  font-size:.7rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+}
+.practice-hub-note p{
+  margin:0;
+  color:var(--muted);
+  font-size:.76rem;
+}
+
+/* Dark mode keeps the thick-card style without harsh black blocks. */
+html[data-theme="dark"] .sat-practice-hub{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(70,104,185,.16),transparent 40%),
+    linear-gradient(180deg,#151c2b,#121824);
+  border-color:#2c3850;
+  box-shadow:0 28px 80px rgba(0,0,0,.28);
+}
+html[data-theme="dark"] .mock-test-card-v2{
+  border-color:#46526a;
+  box-shadow:7px 8px 0 #0b0f18,0 14px 26px rgba(0,0,0,.16);
+}
+html[data-theme="dark"] .mock-test-card-v2:hover{
+  border-color:var(--teal);
+  box-shadow:9px 10px 0 #213b7c,0 18px 34px rgba(0,0,0,.24);
+}
+
+@media(max-width:760px){
+  .sat-practice-hub{
+    margin-inline:0;
+    padding:30px 18px 34px;
+    border-radius:22px;
+  }
+  .practice-hub-toolbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .mock-test-title-row{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:7px;
+  }
+  .mock-test-meta,
+  .mock-test-footer{
+    margin-left:0;
+  }
+  .mock-test-footer{
+    grid-template-columns:1fr 1fr;
+  }
+  .mock-start-button{
+    grid-column:1/-1;
+    width:100%;
+  }
+}
+@media(max-width:520px){
+  .mock-score-outlook{padding:20px 14px}
+  .mock-test-main{padding:17px}
+  .mock-test-identity{grid-template-columns:auto 1fr}
+  .mock-test-meta{display:grid;grid-template-columns:1fr 1fr}
+  .mock-test-footer{grid-template-columns:1fr}
+  .mock-start-button{grid-column:auto}
+  .mock-test-card-v2{
+    box-shadow:5px 6px 0 color-mix(in srgb,var(--ink) 82%,transparent);
+  }
+}

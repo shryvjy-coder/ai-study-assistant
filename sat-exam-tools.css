@@ -25,3 +25,148 @@ html[data-theme="dark"] .desmos-mount{background:#fff}
 
 @media(max-width:900px){.sat-exam-lab{grid-template-columns:1fr}.mock-exam-shell{min-height:540px}.mock-exam-layout{display:block}.mock-calc-slot,.mock-splitter{display:none!important}.mock-question-pane{padding:20px}.mock-question-footer{grid-template-columns:1fr 1fr}.mock-question-dots{grid-column:1/-1;grid-row:1}.desmos-panel.desmos-floating{width:min(92vw,440px)!important;height:min(70vh,560px)!important;max-width:92vw;max-height:78vh}.mock-result-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.exam-setup-grid{grid-template-columns:1fr}.mock-exam-topbar{align-items:flex-start}.mock-top-actions{flex-wrap:wrap;justify-content:flex-end}.mock-question-footer{grid-template-columns:1fr 1fr}.mock-question-footer .button{width:100%}.module-transition,.mock-results{margin:30px 0;padding:22px}.scientific-calc{width:calc(100vw - 20px)!important;left:10px!important;right:auto!important;max-height:78vh}.calc-window-header small{display:none}}
+
+
+/* Mock setup dialog refinement */
+.sat-exam-lab{
+  grid-template-columns:minmax(0,1fr) auto;
+}
+.exam-launch-actions{
+  display:flex;
+  gap:9px;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+.mock-setup-dialog{
+  width:min(720px,calc(100vw - 28px));
+  max-height:min(86vh,760px);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:0;
+  background:var(--surface);
+  color:var(--ink);
+  box-shadow:0 30px 100px rgba(8,18,45,.28);
+  overflow:auto;
+  opacity:0;
+  transform:translateY(12px) scale(.985);
+  transition:
+    opacity .3s ease,
+    transform .42s cubic-bezier(.16,1,.3,1),
+    overlay .3s ease allow-discrete,
+    display .3s ease allow-discrete;
+}
+.mock-setup-dialog[open]{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.mock-setup-dialog::backdrop{
+  background:rgba(8,15,28,.48);
+  backdrop-filter:blur(8px);
+}
+@starting-style{
+  .mock-setup-dialog[open]{
+    opacity:0;
+    transform:translateY(12px) scale(.985);
+  }
+}
+.mock-setup-shell{
+  padding:24px;
+  display:grid;
+  gap:18px;
+}
+.mock-setup-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+}
+.mock-setup-head h3{
+  margin:5px 0 5px;
+  font-size:1.8rem;
+}
+.mock-setup-head p{
+  margin:0;
+  color:var(--muted);
+}
+.mock-setting-group{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  display:grid;
+  gap:9px;
+  background:var(--paper);
+}
+.mock-setting-group legend{
+  padding:0 7px;
+  font-weight:850;
+  color:var(--ink);
+}
+.mock-setting-choice{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:start;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--surface);
+  cursor:pointer;
+  transition:border-color .25s ease,background-color .25s ease,transform .25s cubic-bezier(.16,1,.3,1);
+}
+.mock-setting-choice:hover{
+  border-color:color-mix(in srgb,var(--teal) 60%,var(--line));
+  transform:translateY(-1px);
+}
+.mock-setting-choice:has(input:checked){
+  border-color:var(--teal);
+  background:var(--blue-soft);
+}
+.mock-setting-choice input{
+  width:auto;
+  margin-top:4px;
+  accent-color:var(--teal);
+}
+.mock-setting-choice span{
+  display:grid;
+  gap:3px;
+}
+.mock-setting-choice small{
+  color:var(--muted);
+  line-height:1.4;
+}
+.mock-setup-summary{
+  padding:11px 13px;
+  border-radius:10px;
+  background:var(--blue-soft);
+  color:var(--teal-dark);
+  font-size:.85rem;
+  font-weight:750;
+}
+.mock-setup-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:9px;
+}
+.calc-window-header{
+  cursor:grab;
+}
+html.studyai-dragging-window,
+html.studyai-dragging-window *{
+  cursor:grabbing!important;
+  user-select:none!important;
+}
+html.studyai-dragging-window .calc-window-header{
+  cursor:grabbing!important;
+}
+@media(max-width:900px){
+  .sat-exam-lab{grid-template-columns:1fr}
+  .exam-launch-actions{justify-content:flex-start}
+}
+@media(max-width:560px){
+  .mock-setup-shell{padding:18px}
+  .mock-setup-head{align-items:center}
+  .mock-setup-head h3{font-size:1.5rem}
+  .mock-setup-actions{display:grid;grid-template-columns:1fr 1fr}
+  .mock-setup-actions .button{width:100%}
+}

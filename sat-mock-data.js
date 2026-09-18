@@ -67,7 +67,7 @@
         ['However,',['Therefore,','For example,','Similarly,'],`The first trial involving ${topic} showed a large increase. _____ the second trial, under different conditions, showed almost no change.`],
         ['Therefore,',['However,','Meanwhile,','For example,'],`The revised method reduced measurement error in the study of ${topic}. _____ the researchers could compare the sites with greater confidence.`],
         ['For example,',['Nevertheless,','Consequently,','Similarly,'],`Several design details can influence responses to ${topic}. _____ changing the placement of a sign can alter which route visitors choose.`],
-        ['Similarly,',['Instead,','Therefore,','However,'],`The first site showed a gradual improvement after the change. _____ the second site improved at nearly the same rate.`]
+        ['Similarly,',['Instead,','Therefore,','However,'],`The first ${topic} site showed a gradual improvement after the change. _____ the second site improved at nearly the same rate.`]
       ];
       const [correct,wrong,passage]=rows[type], opts=shuf(r,[correct,...wrong]);
       return q(qid,'Reading & Writing',domain,'Transitions',level,'Which choice completes the text with the most logical transition?',opts,opts.indexOf(correct),`The relationship calls for “${correct}”`,passage);
@@ -94,25 +94,25 @@
     const a=2+Math.floor(r()*(4+d*3)),b=3+Math.floor(r()*(8+d*6)),c=4+Math.floor(r()*(10+d*8));
 
     if(domain==='Algebra'){
-      if(j%5===0){correct=2+Math.floor(r()*(8+d*4));const rhs=a*correct+b;stem=`If ${a}x + ${b} = ${rhs}, what is x?`;skill='Linear Equations in One Variable';explanation=`Subtract ${b}, then divide by ${a}: x = ${correct}.`;}
-      else if(j%5===1){const x1=1+Math.floor(r()*4),x2=x1+2+Math.floor(r()*3),s=1+Math.floor(r()*(4+d*2)),y1=s*x1+b,y2=s*x2+b;correct=s;stem=`A line passes through (${x1}, ${y1}) and (${x2}, ${y2}). What is its slope?`;skill='Linear Functions';explanation=`Slope = (${y2}-${y1})/(${x2}-${x1}) = ${s}.`;}
-      else if(j%5===2){const x=2+Math.floor(r()*6),y=1+Math.floor(r()*5);correct=x;stem=`The system x + y = ${x+y} and x - y = ${x-y} has solution (x, y). What is x?`;skill='Systems of Two Linear Equations';explanation=`Add the equations to get 2x = ${2*x}.`;}
-      else if(j%5===3){correct=3+Math.floor(r()*8);stem=`What is the greatest integer x satisfying ${a}x + ${b} ≤ ${a*correct+b}?`;skill='Linear Inequalities';explanation=`Solving gives x ≤ ${correct}.`;}
-      else{const x=2+Math.floor(r()*7),s=2+Math.floor(r()*5),k=1+Math.floor(r()*7);correct=s*x+k;stem=`For f(x) = ${s}x + ${k}, what is f(${x})?`;skill='Linear Functions';explanation=`Substitute ${x}: ${correct}.`;}
+      if(j%5===0){correct=2+Math.floor(r()*(8+d*4))+t*10;const rhs=a*correct+b;stem=`If ${a}x + ${b} = ${rhs}, what is x?`;skill='Linear Equations in One Variable';explanation=`Subtract ${b}, then divide by ${a}: x = ${correct}.`;}
+      else if(j%5===1){const x1=1+Math.floor(r()*4)+t*4,x2=x1+2+Math.floor(r()*3),s=1+Math.floor(r()*(4+d*2))+t,y1=s*x1+b,y2=s*x2+b;correct=s;stem=`A line passes through (${x1}, ${y1}) and (${x2}, ${y2}). What is its slope?`;skill='Linear Functions';explanation=`Slope = (${y2}-${y1})/(${x2}-${x1}) = ${s}.`;}
+      else if(j%5===2){const x=2+Math.floor(r()*6)+t*10,y=1+Math.floor(r()*5)+t;correct=x;stem=`The system x + y = ${x+y} and x - y = ${x-y} has solution (x, y). What is x?`;skill='Systems of Two Linear Equations';explanation=`Add the equations to get 2x = ${2*x}.`;}
+      else if(j%5===3){correct=3+Math.floor(r()*8)+t*10;stem=`What is the greatest integer x satisfying ${a}x + ${b} ≤ ${a*correct+b}?`;skill='Linear Inequalities';explanation=`Solving gives x ≤ ${correct}.`;}
+      else{const x=2+Math.floor(r()*7)+t*3,s=2+Math.floor(r()*5)+t,k=1+Math.floor(r()*7)+t;correct=s*x+k;stem=`For f(x) = ${s}x + ${k}, what is f(${x})?`;skill='Linear Functions';explanation=`Substitute ${x}: ${correct}.`;}
     }else if(domain==='Advanced Math'){
-      if(j%5===0){const p=2+Math.floor(r()*5),z=2+Math.floor(r()*6);correct=p+z;stem=`The equation (x - ${p})(x - ${z}) = 0 has two solutions. What is their sum?`;skill='Nonlinear Equations in One Variable';explanation=`The roots are ${p} and ${z}, summing to ${correct}.`;}
-      else if(j%5===1){const root=2+Math.floor(r()*(6+d*2));correct=root;stem=`If x is positive and x² = ${root*root}, what is x?`;skill='Nonlinear Equations in One Variable';explanation=`The positive square root is ${root}.`;}
-      else if(j%5===2){const k=2+Math.floor(r()*5),x=2+Math.floor(r()*6);correct=(x+k)*(x+k);stem=`What is (x + ${k})² when x = ${x}?`;skill='Equivalent Expressions';explanation=`(${x}+${k})² = ${correct}.`;}
-      else if(j%5===3){const start=2+Math.floor(r()*4),rate=2+Math.floor(r()*3),periods=2+Math.floor(r()*3);correct=start*Math.pow(rate,periods);stem=`A quantity starts at ${start} and is multiplied by ${rate} each period. What is its value after ${periods} periods?`;skill='Nonlinear Functions';explanation=`${start}(${rate})^${periods} = ${correct}.`;}
-      else{const x=2+Math.floor(r()*5),coef=2+Math.floor(r()*4),k=1+Math.floor(r()*5);correct=coef*x*x+k;stem=`For g(x) = ${coef}x² + ${k}, what is g(${x})?`;skill='Nonlinear Functions';explanation=`${coef}(${x}²)+${k} = ${correct}.`;}
+      if(j%5===0){const p=2+Math.floor(r()*5)+t*4,z=2+Math.floor(r()*6)+t*5;correct=p+z;stem=`The equation (x - ${p})(x - ${z}) = 0 has two solutions. What is their sum?`;skill='Nonlinear Equations in One Variable';explanation=`The roots are ${p} and ${z}, summing to ${correct}.`;}
+      else if(j%5===1){const root=2+Math.floor(r()*(6+d*2))+t*6;correct=root;stem=`If x is positive and x² = ${root*root}, what is x?`;skill='Nonlinear Equations in One Variable';explanation=`The positive square root is ${root}.`;}
+      else if(j%5===2){const k=2+Math.floor(r()*5)+t*2,x=2+Math.floor(r()*6)+t*4;correct=(x+k)*(x+k);stem=`What is (x + ${k})² when x = ${x}?`;skill='Equivalent Expressions';explanation=`(${x}+${k})² = ${correct}.`;}
+      else if(j%5===3){const start=2+Math.floor(r()*4)+t*2,rate=2+Math.floor(r()*3)+t,periods=2+Math.floor(r()*3);correct=start*Math.pow(rate,periods);stem=`A quantity starts at ${start} and is multiplied by ${rate} each period. What is its value after ${periods} periods?`;skill='Nonlinear Functions';explanation=`${start}(${rate})^${periods} = ${correct}.`;}
+      else{const x=2+Math.floor(r()*5)+t*3,coef=2+Math.floor(r()*4)+t,k=1+Math.floor(r()*5)+t;correct=coef*x*x+k;stem=`For g(x) = ${coef}x² + ${k}, what is g(${x})?`;skill='Nonlinear Functions';explanation=`${coef}(${x}²)+${k} = ${correct}.`;}
     }else if(domain==='Problem-Solving and Data Analysis'){
-      if(j%3===0){const base=20+Math.floor(r()*60),pct=[10,20,25,50][(t+i)%4];correct=base*(100+pct)/100;stem=`A value of ${base} increases by ${pct}%. What is the new value?`;skill='Percentages';explanation=`Multiply by ${1+pct/100}: ${correct}.`;}
-      else if(j%3===1){const ratio=2+Math.floor(r()*5),units=3+Math.floor(r()*7);correct=ratio*units;stem=`A mixture uses ${ratio} cups of water for every 1 cup of concentrate. How much water is needed for ${units} cups of concentrate?`;skill='Ratios, Rates and Proportions';explanation=`${ratio} × ${units} = ${correct}.`;}
+      if(j%3===0){const base=20+Math.floor(r()*60)+t*100,pct=[10,20,25,50][(t+i)%4];correct=base*(100+pct)/100;stem=`A value of ${base} increases by ${pct}%. What is the new value?`;skill='Percentages';explanation=`Multiply by ${1+pct/100}: ${correct}.`;}
+      else if(j%3===1){const ratio=2+Math.floor(r()*5)+t*2,units=3+Math.floor(r()*7)+t;correct=ratio*units;stem=`A mixture uses ${ratio} cups of water for every 1 cup of concentrate. How much water is needed for ${units} cups of concentrate?`;skill='Ratios, Rates and Proportions';explanation=`${ratio} × ${units} = ${correct}.`;}
       else{const vals=[a,b,c,a+b];correct=vals.reduce((x,y)=>x+y,0)/4;stem=`The data set is ${vals.join(', ')}. What is its mean?`;skill='One-variable Data';explanation=`Add the values and divide by 4: ${correct}.`;}
     }else{
-      if(j%3===0){const w=3+Math.floor(r()*8),h=4+Math.floor(r()*9);correct=w*h;stem=`A rectangle has width ${w} and height ${h}. What is its area?`;skill='Area and Volume';explanation=`Area = ${w} × ${h} = ${correct}.`;}
-      else if(j%3===1){const radius=2+Math.floor(r()*7);correct=2*radius;stem=`A circle has radius ${radius}. What is its diameter?`;skill='Circles';explanation=`Diameter = 2r = ${correct}.`;}
-      else{const triples=[[3,4,5],[5,12,13],[8,15,17]],z=triples[(t+i)%3];correct=z[2];stem=`A right triangle has legs ${z[0]} and ${z[1]}. What is the hypotenuse?`;skill='Right Triangles and Trigonometry';explanation=`By the Pythagorean theorem, the hypotenuse is ${correct}.`;}
+      if(j%3===0){const w=3+Math.floor(r()*8)+t*4,h=4+Math.floor(r()*9)+t*5;correct=w*h;stem=`A rectangle has width ${w} and height ${h}. What is its area?`;skill='Area and Volume';explanation=`Area = ${w} × ${h} = ${correct}.`;}
+      else if(j%3===1){const radius=2+Math.floor(r()*7)+t*5;correct=2*radius;stem=`A circle has radius ${radius}. What is its diameter?`;skill='Circles';explanation=`Diameter = 2r = ${correct}.`;}
+      else{const triples=[[3,4,5],[5,12,13],[8,15,17]],baseTri=triples[(t+i)%3],z=baseTri.map(v=>v*t);correct=z[2];stem=`A right triangle has legs ${z[0]} and ${z[1]}. What is the hypotenuse?`;skill='Right Triangles and Trigonometry';explanation=`By the Pythagorean theorem, the hypotenuse is ${correct}.`;}
     }
 
     if(spr)return{id:qid,section:'Math',domain,skill,level,stem,options:[],answer:null,correctAnswer:String(correct),acceptedAnswers:[String(correct)],explanation,passage:'',format:'spr'};
@@ -136,6 +136,6 @@
     getModule,
     getTestMeta(n){return tests[Math.max(0,Math.min(3,(Number(n)||1)-1))]},
     routeFromPerformance(ratio){if(ratio<.45)return'easy';if(ratio<.75)return'medium';return'hard'},
-    routeLabel(route){return route==='easy'?'Lower challenge':route==='hard'?'Higher challenge':'Standard challenge'}
+    routeLabel(route){return route==='easy'?'Easy route':route==='hard'?'Hard route':'Medium route'}
   };
 })();

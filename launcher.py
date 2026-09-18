@@ -7,8 +7,12 @@ def enhanced_index():
     html = (BASE_DIR / 'index.html').read_text(encoding='utf-8')
 
     style_marker = '<link rel="stylesheet" href="cobalt-theme.css" />'
-    style_enhancement = style_marker + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
-    if 'sat-exam-tools.css' not in html:
+    style_enhancement = (
+        style_marker
+        + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
+        + '\n  <link rel="stylesheet" href="site-premium.css" />'
+    )
+    if 'site-premium.css' not in html:
         html = html.replace(style_marker, style_enhancement)
 
     script_marker = '<script src="script.js"></script>'

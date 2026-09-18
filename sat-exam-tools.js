@@ -1,0 +1,790 @@
+(() => {
+  'use strict';
+
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const shuffle = (items) => {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  };
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const fmtTime = (seconds) => {
+    const s = Math.max(0, Math.ceil(seconds));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return h ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${m}:${String(sec).padStart(2,'0')}`;
+  };
+
+  const TIMING = {
+    normal: {'Reading & Writing': 32 * 60, 'Math': 35 * 60},
+    extra50: {'Reading & Writing': 48 * 60, 'Math': 53 * 60},
+    extra100: {'Reading & Writing': 64 * 60, 'Math': 70 * 60}
+  };
+
+  let exam = null;
+  let desmosCalculator = null;
+  let desmosLoading = null;
+  let calcAngleMode = 'deg';
+
+  function questionBank() {
+    try {
+      return typeof SAT_QUESTIONS !== 'undefined' && Array.isArray(SAT_QUESTIONS) ? SAT_QUESTIONS : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function addExamLab() {
+    const sat = $('#sat');
+    const disclaimer = $('.sat-disclaimer', sat);
+    if (!sat || !disclaimer || $('#sat-exam-lab')) return;
+
+    const bank = questionBank();
+    const rw = bank.filter(q => q.section === 'Reading & Writing').length;
+    const math = bank.filter(q => q.section === 'Math').length;
+
+    const lab = document.createElement('div');
+    lab.id = 'sat-exam-lab';
+    lab.className = 'sat-exam-lab';
+    lab.innerHTML = `
+      <div class="exam-lab-copy">
+        <span class="small-label">Mock exam mode</span>
+        <h3>Run a full two-section SAT practice session.</h3>
+        <p>Uses your original StudyAI question bank in Reading & Writing and Math modules. Timing follows the current digital SAT structure; this is practice content, not an official College Board test.</p>
+        <small class="mock-bank-note">Current bank: ${rw} Reading & Writing · ${math} Math questions. Mock module size automatically adapts to the questions available.</small>
+      </div>
+      <div class="exam-setup-grid">
+        <label>Timing
+          <select id="mock-time-mode">
+            <option value="normal">Normal time</option>
+            <option value="extra50">50% extra time</option>
+            <option value="extra100">100% extra time</option>
+          </select>
+        </label>
+        <label>Breaks
+          <select id="mock-break-mode">
+            <option value="normal">Normal breaks</option>
+            <option value="extended">Extended breaks</option>
+            <option value="needed">Breaks as needed</option>
+          </select>
+        </label>
+        <div class="exam-start-actions">
+          <button class="button primary" id="start-mock-test" type="button">Start mock test</button>
+          <button class="button secondary" id="open-desmos" type="button">Open Desmos</button>
+        </div>
+      </div>
+      <div class="exam-policy-note" id="exam-policy-note"></div>
+    `;
+    disclaimer.insertAdjacentElement('afterend', lab);
+
+    $('#mock-break-mode')?.addEventListener('change', updateBreakDescription);
+    $('#mock-time-mode')?.addEventListener('change', updateBreakDescription);
+    $('#start-mock-test')?.addEventListener('click', startMockExam);
+    $('#open-desmos')?.addEventListener('click', () => openDesmos('floating'));
+    updateBreakDescription();
+  }
+
+  function updateBreakDescription() {
+    const time = $('#mock-time-mode')?.value || 'normal';
+    const breaks = $('#mock-break-mode')?.value || 'normal';
+    const note = $('#exam-policy-note');
+    if (!note) return;
+    const t = time === 'normal' ? '32-minute R&W / 35-minute Math modules'
+      : time === 'extra50' ? '48-minute R&W / 53-minute Math modules'
+      : '64-minute R&W / 70-minute Math modules';
+    const b = breaks === 'normal' ? '10-minute scheduled break between sections'
+      : breaks === 'extended' ? '10-minute module breaks plus a 20-minute section break'
+      : 'standard section break, plus a Pause button whenever you need it; paused questions are hidden';
+    note.textContent = `${t} · ${b}.`;
+  }
+
+  function chooseModule(pool, section, module, targetSize, previousIds = new Set(), moduleOneScore = null) {
+    let available = pool.filter(q => !previousIds.has(q.id));
+    if (!available.length) available = [...pool];
+
+    if (module === 2 && moduleOneScore !== null) {
+      const highRoute = moduleOneScore >= 0.6;
+      const preferred = highRoute ? ['Advanced','Medium','Foundation'] : ['Foundation','Medium','Advanced'];
+      const ranked = [];
+      preferred.forEach(level => ranked.push(...shuffle(available.filter(q => q.level === level))));
+      available = ranked.length ? ranked : shuffle(available);
+    } else {
+      const levels = ['Foundation','Medium','Advanced'];
+      const buckets = levels.map(level => shuffle(available.filter(q => q.level === level)));
+      const balanced = [];
+      while (buckets.some(b => b.length)) {
+        buckets.forEach(b => { if (b.length) balanced.push(b.shift()); });
+      }
+      available = balanced.length ? balanced : shuffle(available);
+    }
+    return available.slice(0, Math.min(targetSize, available.length));
+  }
+
+  function buildInitialExam() {
+    const bank = questionBank();
+    const rwPool = bank.filter(q => q.section === 'Reading & Writing');
+    const mathPool = bank.filter(q => q.section === 'Math');
+    if (rwPool.length < 4 || mathPool.length < 4) return null;
+
+    const rwTarget = Math.max(2, Math.min(27, Math.floor(rwPool.length / 2)));
+    const mathTarget = Math.max(2, Math.min(22, Math.floor(mathPool.length / 2)));
+    const timingMode = $('#mock-time-mode')?.value || 'normal';
+    const breakMode = $('#mock-break-mode')?.value || 'normal';
+
+    const rw1 = chooseModule(rwPool, 'Reading & Writing', 1, rwTarget);
+    const math1 = chooseModule(mathPool, 'Math', 1, mathTarget);
+
+    return {
+      timingMode,
+      breakMode,
+      pools: {'Reading & Writing': rwPool, 'Math': mathPool},
+      targets: {'Reading & Writing': rwTarget, 'Math': mathTarget},
+      modules: {
+        'Reading & Writing:1': rw1,
+        'Math:1': math1
+      },
+      phase: 0,
+      phases: [
+        {section:'Reading & Writing', module:1},
+        {section:'Reading & Writing', module:2},
+        {section:'Math', module:1},
+        {section:'Math', module:2}
+      ],
+      currentIndex: 0,
+      answers: {},
+      flagged: new Set(),
+      completed: [],
+      remaining: 0,
+      deadline: 0,
+      timerId: null,
+      paused: false,
+      pauseStartedAt: 0
+    };
+  }
+
+  function startMockExam() {
+    exam = buildInitialExam();
+    if (!exam) {
+      showStudyToast('Add more original SAT questions before starting a mock test.');
+      return;
+    }
+    ensureExamShell();
+    $('#mock-exam-shell').classList.remove('hidden');
+    $('.sat-layout')?.classList.add('mock-dimmed');
+    enterPhase();
+    $('#mock-exam-shell').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function ensureExamShell() {
+    if ($('#mock-exam-shell')) return;
+    const lab = $('#sat-exam-lab');
+    if (!lab) return;
+    const shell = document.createElement('div');
+    shell.id = 'mock-exam-shell';
+    shell.className = 'mock-exam-shell hidden';
+    shell.innerHTML = `
+      <div class="mock-exam-topbar">
+        <div><span class="small-label" id="mock-section-label">SAT mock</span><strong id="mock-module-label"></strong></div>
+        <div class="mock-top-actions">
+          <button class="quiet-button hidden" id="mock-pause" type="button">Pause</button>
+          <button class="quiet-button hidden" id="mock-desmos-btn" type="button">Desmos</button>
+          <span class="mock-timer" id="mock-timer">--:--</span>
+          <button class="quiet-button" id="mock-exit" type="button">Exit</button>
+        </div>
+      </div>
+      <div class="mock-exam-layout" id="mock-exam-layout">
+        <main class="mock-question-pane" id="mock-question-pane"></main>
+        <div class="mock-splitter hidden" id="mock-splitter" role="separator" aria-orientation="vertical" aria-label="Resize calculator"></div>
+        <div class="mock-calc-slot hidden" id="mock-calc-slot"></div>
+      </div>
+      <div class="mock-pause-cover hidden" id="mock-pause-cover">
+        <div><span class="small-label">Timer paused</span><h3>Questions are hidden during your break.</h3><p>Your answers are safe. Resume when you're ready.</p><button class="button primary" id="mock-resume" type="button">Resume test</button></div>
+      </div>
+    `;
+    lab.insertAdjacentElement('afterend', shell);
+    $('#mock-exit')?.addEventListener('click', exitMock);
+    $('#mock-pause')?.addEventListener('click', pauseMock);
+    $('#mock-resume')?.addEventListener('click', resumeMock);
+    $('#mock-desmos-btn')?.addEventListener('click', () => openDesmos('split'));
+    setupSplitter();
+  }
+
+  function currentPhase() {
+    return exam?.phases?.[exam.phase] || null;
+  }
+
+  function moduleKey(phase = currentPhase()) {
+    return phase ? `${phase.section}:${phase.module}` : '';
+  }
+
+  function moduleQuestions() {
+    const phase = currentPhase();
+    if (!phase) return [];
+    const key = moduleKey(phase);
+    if (!exam.modules[key] && phase.module === 2) {
+      const firstKey = `${phase.section}:1`;
+      const firstQuestions = exam.modules[firstKey] || [];
+      const firstScore = scoreQuestions(firstQuestions).ratio;
+      const used = new Set(firstQuestions.map(q => q.id));
+      exam.modules[key] = chooseModule(exam.pools[phase.section], phase.section, 2, exam.targets[phase.section], used, firstScore);
+    }
+    return exam.modules[key] || [];
+  }
+
+  function enterPhase() {
+    if (!exam) return;
+    const phase = currentPhase();
+    if (!phase) return finishExam();
+    const questions = moduleQuestions();
+    exam.currentIndex = 0;
+    exam.paused = false;
+    exam.remaining = TIMING[exam.timingMode][phase.section];
+    setTimerFromRemaining();
+    $('#mock-section-label').textContent = phase.section;
+    $('#mock-module-label').textContent = `Module ${phase.module} · ${questions.length} StudyAI questions`;
+    $('#mock-pause')?.classList.toggle('hidden', exam.breakMode !== 'needed');
+    $('#mock-desmos-btn')?.classList.toggle('hidden', phase.section !== 'Math');
+    $('#mock-pause-cover')?.classList.add('hidden');
+    $('#mock-question-pane')?.classList.remove('question-hidden');
+    renderCurrentQuestion();
+    startTimer();
+  }
+
+  function setTimerFromRemaining() {
+    if (!exam) return;
+    exam.deadline = Date.now() + exam.remaining * 1000;
+    updateTimerDisplay();
+  }
+
+  function startTimer() {
+    stopTimer();
+    if (!exam || exam.paused) return;
+    exam.timerId = setInterval(() => {
+      exam.remaining = Math.max(0, (exam.deadline - Date.now()) / 1000);
+      updateTimerDisplay();
+      if (exam.remaining <= 0) completeModule(true);
+    }, 250);
+  }
+
+  function stopTimer() {
+    if (exam?.timerId) clearInterval(exam.timerId);
+    if (exam) exam.timerId = null;
+  }
+
+  function updateTimerDisplay() {
+    const timer = $('#mock-timer');
+    if (timer && exam) {
+      timer.textContent = fmtTime(exam.remaining);
+      timer.classList.toggle('timer-warning', exam.remaining <= 5 * 60);
+      timer.classList.toggle('timer-critical', exam.remaining <= 60);
+    }
+  }
+
+  function pauseMock() {
+    if (!exam || exam.breakMode !== 'needed' || exam.paused) return;
+    exam.remaining = Math.max(0, (exam.deadline - Date.now()) / 1000);
+    exam.paused = true;
+    stopTimer();
+    $('#mock-pause-cover')?.classList.remove('hidden');
+    $('#mock-question-pane')?.classList.add('question-hidden');
+    $('#mock-calc-slot')?.classList.add('calc-paused');
+    const floating = $('#desmos-panel.desmos-floating');
+    if (floating) floating.classList.add('calc-paused');
+  }
+
+  function resumeMock() {
+    if (!exam || !exam.paused) return;
+    exam.paused = false;
+    $('#mock-pause-cover')?.classList.add('hidden');
+    $('#mock-question-pane')?.classList.remove('question-hidden');
+    $('#mock-calc-slot')?.classList.remove('calc-paused');
+    $('#desmos-panel')?.classList.remove('calc-paused');
+    setTimerFromRemaining();
+    startTimer();
+  }
+
+  function renderCurrentQuestion() {
+    if (!exam) return;
+    const phase = currentPhase();
+    const questions = moduleQuestions();
+    const q = questions[exam.currentIndex];
+    const pane = $('#mock-question-pane');
+    if (!pane || !q) return;
+    const answer = exam.answers[q.id];
+    const flagged = exam.flagged.has(q.id);
+    pane.innerHTML = `
+      <div class="mock-progress-row">
+        <span>Question ${exam.currentIndex + 1} of ${questions.length}</span>
+        <button class="mock-flag ${flagged ? 'active' : ''}" id="mock-flag" type="button">${flagged ? '★ Marked' : '☆ Mark for review'}</button>
+      </div>
+      <article class="mock-question-card">
+        ${q.passage ? `<div class="mock-passage">${escapeHtml(q.passage).replace(/\n/g,'<br>')}</div>` : ''}
+        <h3>${escapeHtml(q.stem)}</h3>
+        <div class="mock-options">
+          ${q.options.map((option, index) => `<button type="button" class="mock-option ${answer === index ? 'selected' : ''}" data-answer="${index}"><span>${String.fromCharCode(65+index)}</span><strong>${escapeHtml(option)}</strong></button>`).join('')}
+        </div>
+      </article>
+      <div class="mock-question-footer">
+        <button class="button secondary" id="mock-prev" type="button" ${exam.currentIndex === 0 ? 'disabled' : ''}>← Previous</button>
+        <div class="mock-question-dots">${questions.map((item,i)=>`<button type="button" data-jump-q="${i}" class="${i===exam.currentIndex?'current':''} ${exam.answers[item.id] !== undefined ? 'answered' : ''} ${exam.flagged.has(item.id) ? 'flagged' : ''}">${i+1}</button>`).join('')}</div>
+        <button class="button primary" id="mock-next" type="button">${exam.currentIndex === questions.length - 1 ? 'Finish module' : 'Next →'}</button>
+      </div>
+    `;
+    $$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
+      exam.answers[q.id] = Number(btn.dataset.answer);
+      renderCurrentQuestion();
+    }));
+    $('#mock-flag', pane)?.addEventListener('click', () => {
+      if (exam.flagged.has(q.id)) exam.flagged.delete(q.id); else exam.flagged.add(q.id);
+      renderCurrentQuestion();
+    });
+    $('#mock-prev', pane)?.addEventListener('click', () => { exam.currentIndex = Math.max(0, exam.currentIndex - 1); renderCurrentQuestion(); });
+    $('#mock-next', pane)?.addEventListener('click', () => {
+      if (exam.currentIndex < questions.length - 1) { exam.currentIndex++; renderCurrentQuestion(); }
+      else completeModule(false);
+    });
+    $$('[data-jump-q]', pane).forEach(btn => btn.addEventListener('click', () => {
+      exam.currentIndex = Number(btn.dataset.jumpQ);
+      renderCurrentQuestion();
+    }));
+  }
+
+  function scoreQuestions(questions) {
+    const answered = questions.filter(q => exam.answers[q.id] !== undefined);
+    const correct = questions.filter(q => exam.answers[q.id] === q.answer).length;
+    return {correct, total: questions.length, answered: answered.length, ratio: questions.length ? correct / questions.length : 0};
+  }
+
+  function completeModule(autoEnded) {
+    if (!exam) return;
+    stopTimer();
+    const phase = currentPhase();
+    const questions = moduleQuestions();
+    const score = scoreQuestions(questions);
+    exam.completed.push({phase:{...phase}, score, autoEnded});
+    const isLast = exam.phase === exam.phases.length - 1;
+    if (isLast) return finishExam();
+    showModuleTransition(score, autoEnded);
+  }
+
+  function scheduledBreakSeconds(fromPhase, nextPhase) {
+    if (!exam || !fromPhase || !nextPhase) return 0;
+    const sectionChange = fromPhase.section !== nextPhase.section;
+    if (sectionChange) return exam.breakMode === 'extended' ? 20 * 60 : 10 * 60;
+    if (exam.breakMode === 'extended') return 10 * 60;
+    return 0;
+  }
+
+  function showModuleTransition(score, autoEnded) {
+    const pane = $('#mock-question-pane');
+    const from = currentPhase();
+    const next = exam.phases[exam.phase + 1];
+    const breakSeconds = scheduledBreakSeconds(from, next);
+    if (!pane) return;
+    pane.innerHTML = `
+      <div class="module-transition">
+        <span class="small-label">${autoEnded ? 'Time expired' : 'Module complete'}</span>
+        <h3>${escapeHtml(from.section)} Module ${from.module} finished.</h3>
+        <p>You answered ${score.answered} of ${score.total} questions. Results stay hidden until the end of the full mock test.</p>
+        ${breakSeconds ? `<div class="scheduled-break"><span>${from.section !== next.section ? 'Section break' : 'Extended module break'}</span><strong id="break-timer">${fmtTime(breakSeconds)}</strong></div>` : '<p class="muted">No scheduled break between these modules.</p>'}
+        <button class="button primary" id="continue-mock" type="button">${breakSeconds ? 'Start / skip break and continue' : 'Continue'}</button>
+      </div>
+    `;
+    let remainingBreak = breakSeconds;
+    let breakInterval = null;
+    if (breakSeconds) {
+      breakInterval = setInterval(() => {
+        remainingBreak = Math.max(0, remainingBreak - 1);
+        const el = $('#break-timer');
+        if (el) el.textContent = fmtTime(remainingBreak);
+        if (!remainingBreak) {
+          clearInterval(breakInterval);
+          advancePhase();
+        }
+      }, 1000);
+    }
+    $('#continue-mock')?.addEventListener('click', () => {
+      if (breakInterval) clearInterval(breakInterval);
+      advancePhase();
+    });
+  }
+
+  function advancePhase() {
+    if (!exam) return;
+    exam.phase++;
+    enterPhase();
+  }
+
+  function finishExam() {
+    if (!exam) return;
+    stopTimer();
+    closeDesmos();
+    const pane = $('#mock-question-pane');
+    const allQuestions = exam.phases.flatMap(phase => exam.modules[`${phase.section}:${phase.module}`] || []);
+    const overall = scoreQuestions(allQuestions);
+    const rwQs = allQuestions.filter(q => q.section === 'Reading & Writing');
+    const mathQs = allQuestions.filter(q => q.section === 'Math');
+    const rw = scoreQuestions(rwQs);
+    const math = scoreQuestions(mathQs);
+    if (pane) pane.innerHTML = `
+      <div class="mock-results">
+        <span class="small-label">Mock complete</span>
+        <h3>${overall.correct} / ${overall.total} correct</h3>
+        <p>This is a raw StudyAI practice result, not an SAT scaled score.</p>
+        <div class="mock-result-grid">
+          <div><span>Reading & Writing</span><strong>${rw.correct}/${rw.total}</strong><small>${Math.round(rw.ratio*100)}%</small></div>
+          <div><span>Math</span><strong>${math.correct}/${math.total}</strong><small>${Math.round(math.ratio*100)}%</small></div>
+          <div><span>Answered</span><strong>${overall.answered}/${overall.total}</strong><small>${overall.total-overall.answered} blank</small></div>
+        </div>
+        <div class="button-row"><button class="button primary" id="mock-again" type="button">New mock test</button><button class="button secondary" id="mock-done" type="button">Return to SAT practice</button></div>
+      </div>
+    `;
+    $('#mock-timer').textContent = 'Done';
+    $('#mock-pause')?.classList.add('hidden');
+    $('#mock-desmos-btn')?.classList.add('hidden');
+    $('#mock-again')?.addEventListener('click', startMockExam);
+    $('#mock-done')?.addEventListener('click', exitMock);
+  }
+
+  function exitMock() {
+    if (!exam) {
+      $('#mock-exam-shell')?.classList.add('hidden');
+      return;
+    }
+    stopTimer();
+    closeDesmos();
+    exam = null;
+    $('#mock-exam-shell')?.classList.add('hidden');
+    $('.sat-layout')?.classList.remove('mock-dimmed');
+  }
+
+  function ensureDesmosPanel() {
+    let panel = $('#desmos-panel');
+    if (panel) return panel;
+    panel = document.createElement('section');
+    panel.id = 'desmos-panel';
+    panel.className = 'desmos-panel hidden desmos-floating';
+    panel.innerHTML = `
+      <header class="calc-window-header" id="desmos-drag-handle">
+        <div><span class="calc-dot"></span><strong>Desmos</strong><small>Graphing Calculator</small></div>
+        <div class="calc-window-actions">
+          <button type="button" id="desmos-split">Split</button>
+          <button type="button" id="desmos-float">Float</button>
+          <button type="button" id="desmos-close" aria-label="Close calculator">×</button>
+        </div>
+      </header>
+      <div class="desmos-mount" id="desmos-mount"><div class="calc-loading">Loading Desmos…</div></div>
+      <footer class="calc-attribution">StudyAI practice tool · Desmos calculator</footer>
+    `;
+    document.body.appendChild(panel);
+    $('#desmos-close')?.addEventListener('click', closeDesmos);
+    $('#desmos-float')?.addEventListener('click', () => openDesmos('floating'));
+    $('#desmos-split')?.addEventListener('click', () => openDesmos('split'));
+    makeDraggable(panel, $('#desmos-drag-handle'));
+    if ('ResizeObserver' in window) new ResizeObserver(() => desmosCalculator?.resize?.()).observe(panel);
+    return panel;
+  }
+
+  function loadDesmos() {
+    if (window.Desmos) return Promise.resolve(window.Desmos);
+    if (desmosLoading) return desmosLoading;
+    desmosLoading = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://www.desmos.com/api/v1.12/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6';
+      script.async = true;
+      script.onload = () => resolve(window.Desmos);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return desmosLoading;
+  }
+
+  async function openDesmos(mode = 'floating') {
+    const panel = ensureDesmosPanel();
+    panel.classList.remove('hidden');
+    if (mode === 'split' && exam && $('#mock-calc-slot')) {
+      const slot = $('#mock-calc-slot');
+      slot.classList.remove('hidden');
+      $('#mock-splitter')?.classList.remove('hidden');
+      slot.appendChild(panel);
+      panel.classList.remove('desmos-floating');
+      panel.classList.add('desmos-split');
+      panel.style.cssText = '';
+    } else {
+      document.body.appendChild(panel);
+      panel.classList.remove('desmos-split');
+      panel.classList.add('desmos-floating');
+      if (!panel.style.width) {
+        panel.style.width = '440px';
+        panel.style.height = '560px';
+        panel.style.right = '24px';
+        panel.style.bottom = '24px';
+      }
+      $('#mock-calc-slot')?.classList.add('hidden');
+      $('#mock-splitter')?.classList.add('hidden');
+    }
+
+    try {
+      const DesmosLib = await loadDesmos();
+      const mount = $('#desmos-mount');
+      if (!desmosCalculator && mount && DesmosLib) {
+        mount.innerHTML = '';
+        desmosCalculator = DesmosLib.GraphingCalculator(mount, {
+          expressions: true,
+          settingsMenu: true,
+          keypad: true,
+          graphpaper: true,
+          expressionsTopbar: true
+        });
+      } else {
+        desmosCalculator?.resize?.();
+      }
+    } catch (_) {
+      const mount = $('#desmos-mount');
+      if (mount) mount.innerHTML = '<div class="calc-loading">Desmos could not load. Check your internet connection and try again.</div>';
+    }
+  }
+
+  function closeDesmos() {
+    const panel = $('#desmos-panel');
+    if (!panel) return;
+    panel.classList.add('hidden');
+    panel.classList.remove('desmos-split');
+    panel.classList.add('desmos-floating');
+    document.body.appendChild(panel);
+    $('#mock-calc-slot')?.classList.add('hidden');
+    $('#mock-splitter')?.classList.add('hidden');
+    desmosCalculator?.resize?.();
+  }
+
+  function makeDraggable(panel, handle) {
+    if (!panel || !handle) return;
+    let drag = null;
+    handle.addEventListener('pointerdown', event => {
+      if (!panel.classList.contains('desmos-floating') || event.target.closest('button')) return;
+      const rect = panel.getBoundingClientRect();
+      drag = {dx:event.clientX-rect.left, dy:event.clientY-rect.top};
+      panel.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointermove', event => {
+      if (!drag) return;
+      const w = panel.offsetWidth, h = panel.offsetHeight;
+      panel.style.left = `${clamp(event.clientX-drag.dx, 6, window.innerWidth-w-6)}px`;
+      panel.style.top = `${clamp(event.clientY-drag.dy, 6, window.innerHeight-h-6)}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+    });
+    const end = () => drag = null;
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  }
+
+  function setupSplitter() {
+    const splitter = $('#mock-splitter');
+    const layout = $('#mock-exam-layout');
+    const slot = $('#mock-calc-slot');
+    if (!splitter || !layout || !slot) return;
+    let active = false;
+    splitter.addEventListener('pointerdown', event => {
+      active = true;
+      splitter.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    });
+    splitter.addEventListener('pointermove', event => {
+      if (!active || slot.classList.contains('hidden')) return;
+      const rect = layout.getBoundingClientRect();
+      const calcWidth = clamp(rect.right - event.clientX, 300, Math.max(320, rect.width * 0.68));
+      slot.style.flexBasis = `${calcWidth}px`;
+      desmosCalculator?.resize?.();
+    });
+    const end = () => active = false;
+    splitter.addEventListener('pointerup', end);
+    splitter.addEventListener('pointercancel', end);
+  }
+
+  function addCambridgeCalculator() {
+    const toolsGrid = $('.tools-grid');
+    if (toolsGrid && !$('#cambridge-calc-card')) {
+      const card = document.createElement('article');
+      card.className = 'tool-card';
+      card.id = 'cambridge-calc-card';
+      card.innerHTML = `<span class="small-label">IGCSE · AS · A Level</span><h3>Scientific calculator</h3><p>A detachable calculator for arithmetic, powers, roots, logarithms and trigonometry.</p><button class="button compact secondary" id="open-scientific-calc" type="button">Open calculator</button>`;
+      toolsGrid.appendChild(card);
+      $('#open-scientific-calc')?.addEventListener('click', openScientificCalculator);
+    }
+
+    const notice = $('#curriculum-notice');
+    if (notice && !$('#cambridge-calc-shortcut')) {
+      const row = document.createElement('div');
+      row.id = 'cambridge-calc-shortcut';
+      row.className = 'cambridge-calc-shortcut hidden';
+      row.innerHTML = '<span>Cambridge study tools</span><button class="quiet-button" type="button">Scientific calculator</button>';
+      notice.insertAdjacentElement('afterend', row);
+      $('button', row)?.addEventListener('click', openScientificCalculator);
+    }
+    const board = $('#board-filter');
+    const sync = () => {
+      const text = `${board?.value || ''} ${$('#grade-filter')?.value || ''}`.toLowerCase();
+      const relevant = /cambridge|igcse|as level|a level/.test(text);
+      $('#cambridge-calc-shortcut')?.classList.toggle('hidden', !relevant);
+    };
+    board?.addEventListener('change', () => setTimeout(sync, 0));
+    $('#grade-filter')?.addEventListener('change', sync);
+    sync();
+  }
+
+  function ensureScientificPanel() {
+    let panel = $('#scientific-calc');
+    if (panel) return panel;
+    panel = document.createElement('section');
+    panel.id = 'scientific-calc';
+    panel.className = 'scientific-calc hidden';
+    panel.innerHTML = `
+      <header class="calc-window-header" id="scientific-drag-handle">
+        <div><span class="calc-dot"></span><strong>Scientific Calculator</strong><small>IGCSE · AS · A Level</small></div>
+        <div class="calc-window-actions"><button type="button" id="scientific-close">×</button></div>
+      </header>
+      <div class="scientific-body">
+        <div class="scientific-mode-row"><button class="active" data-angle="deg">DEG</button><button data-angle="rad">RAD</button></div>
+        <input id="scientific-expression" autocomplete="off" inputmode="text" placeholder="Enter an expression" aria-label="Calculator expression">
+        <div class="scientific-result" id="scientific-result">0</div>
+        <div class="scientific-keys">
+          ${[
+            ['AC','action','clear'],['⌫','action','back'],['(', 'insert','('],[')','insert',')'],['÷','insert','/'],
+            ['sin','func','sin('],['cos','func','cos('],['tan','func','tan('],['√','func','sqrt('],['×','insert','*'],
+            ['ln','func','ln('],['log','func','log('],['x²','action','square'],['xʸ','insert','^'],['−','insert','-'],
+            ['7','insert','7'],['8','insert','8'],['9','insert','9'],['π','insert','pi'],['+','insert','+'],
+            ['4','insert','4'],['5','insert','5'],['6','insert','6'],['e','insert','e'],['|x|','func','abs('],
+            ['1','insert','1'],['2','insert','2'],['3','insert','3'],['.','insert','.'],['=','action','equals'],
+            ['0','insert','0'],['ans','insert','ans'],['%','action','percent'],[',','insert',','],['EXP','func','exp(']
+          ].map(([label,type,value])=>`<button type="button" data-calc-type="${type}" data-calc-value="${value}">${label}</button>`).join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(panel);
+    panel.style.width = '360px';
+    panel.style.height = '570px';
+    panel.style.right = '28px';
+    panel.style.bottom = '28px';
+    $('#scientific-close')?.addEventListener('click', () => panel.classList.add('hidden'));
+    makeGenericDraggable(panel, $('#scientific-drag-handle'));
+    $$('.scientific-mode-row button', panel).forEach(btn => btn.addEventListener('click', () => {
+      calcAngleMode = btn.dataset.angle;
+      $$('.scientific-mode-row button', panel).forEach(b => b.classList.toggle('active', b === btn));
+    }));
+    $$('.scientific-keys button', panel).forEach(btn => btn.addEventListener('click', () => handleScientificKey(btn)));
+    $('#scientific-expression')?.addEventListener('keydown', event => {
+      if (event.key === 'Enter') { event.preventDefault(); evaluateScientific(); }
+    });
+    return panel;
+  }
+
+  function openScientificCalculator() {
+    const panel = ensureScientificPanel();
+    panel.classList.remove('hidden');
+  }
+
+  let scientificAns = 0;
+  function handleScientificKey(button) {
+    const input = $('#scientific-expression');
+    if (!input) return;
+    const type = button.dataset.calcType;
+    const value = button.dataset.calcValue;
+    if (type === 'insert' || type === 'func') {
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? start;
+      input.value = input.value.slice(0,start) + value + input.value.slice(end);
+      const pos = start + value.length;
+      input.setSelectionRange(pos,pos);
+      input.focus();
+      return;
+    }
+    if (value === 'clear') { input.value=''; $('#scientific-result').textContent='0'; return; }
+    if (value === 'back') { input.value = input.value.slice(0,-1); return; }
+    if (value === 'square') { input.value = `(${input.value || scientificAns})^2`; return; }
+    if (value === 'percent') { input.value = `(${input.value || scientificAns})/100`; return; }
+    if (value === 'equals') evaluateScientific();
+  }
+
+  function evaluateScientific() {
+    const input = $('#scientific-expression');
+    const result = $('#scientific-result');
+    if (!input || !result) return;
+    try {
+      let expr = input.value.trim();
+      if (!expr) return;
+      if (!/^[0-9+\-*/().,^\sA-Za-zπ]+$/.test(expr)) throw new Error('Unsupported input');
+      const ids = expr.match(/[A-Za-zπ]+/g) || [];
+      const allowed = new Set(['sin','cos','tan','sqrt','ln','log','abs','exp','pi','e','ans','π']);
+      if (ids.some(id => !allowed.has(id))) throw new Error('Unsupported function');
+      expr = expr.replace(/\^/g,'**').replace(/π/g,'pi');
+      const toRad = x => calcAngleMode === 'deg' ? x * Math.PI / 180 : x;
+      const fn = Function('sin','cos','tan','sqrt','ln','log','abs','exp','pi','e','ans', `"use strict"; return (${expr});`);
+      const value = fn(
+        x=>Math.sin(toRad(x)), x=>Math.cos(toRad(x)), x=>Math.tan(toRad(x)),
+        Math.sqrt, Math.log, Math.log10, Math.abs, Math.exp, Math.PI, Math.E, scientificAns
+      );
+      if (!Number.isFinite(value)) throw new Error('Math error');
+      scientificAns = value;
+      result.textContent = Number.isInteger(value) ? String(value) : String(Number(value.toPrecision(12)));
+    } catch (_) {
+      result.textContent = 'Error';
+    }
+  }
+
+  function makeGenericDraggable(panel, handle) {
+    if (!panel || !handle) return;
+    let drag = null;
+    handle.addEventListener('pointerdown', event => {
+      if (event.target.closest('button')) return;
+      const rect = panel.getBoundingClientRect();
+      drag = {dx:event.clientX-rect.left,dy:event.clientY-rect.top};
+      handle.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointermove', event => {
+      if (!drag) return;
+      panel.style.left = `${clamp(event.clientX-drag.dx, 6, window.innerWidth-panel.offsetWidth-6)}px`;
+      panel.style.top = `${clamp(event.clientY-drag.dy, 6, window.innerHeight-panel.offsetHeight-6)}px`;
+      panel.style.right='auto'; panel.style.bottom='auto';
+    });
+    const end=()=>drag=null;
+    handle.addEventListener('pointerup',end); handle.addEventListener('pointercancel',end);
+  }
+
+  function showStudyToast(message) {
+    const toast = $('#toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  function addSatCalculatorShortcut() {
+    const modes = $('.sat-mode-buttons');
+    if (!modes || $('#sat-calculator-shortcut')) return;
+    const button = document.createElement('button');
+    button.className = 'button ghost full';
+    button.id = 'sat-calculator-shortcut';
+    button.type = 'button';
+    button.textContent = 'Open Desmos calculator';
+    button.addEventListener('click', () => openDesmos('floating'));
+    modes.appendChild(button);
+  }
+
+  function init() {
+    addExamLab();
+    addSatCalculatorShortcut();
+    addCambridgeCalculator();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

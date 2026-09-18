@@ -52,10 +52,13 @@ function getMockHistory() {
     const history = getMockHistory();
     const key = String(testNumber);
     const current = history[key] || {attempts:0,best:0};
+    const estimatedScore = Number(summary.estimatedScore) || 0;
     history[key] = {
       attempts:(current.attempts || 0) + 1,
       best:Math.max(current.best || 0, summary.percent || 0),
       last:summary.percent || 0,
+      bestEstimatedScore:Math.max(current.bestEstimatedScore || 0, estimatedScore),
+      lastEstimatedScore:estimatedScore || current.lastEstimatedScore || 0,
       completedAt:new Date().toISOString()
     };
     localStorage.setItem(MOCK_HISTORY_KEY, JSON.stringify(history));
@@ -65,48 +68,147 @@ function getMockHistory() {
     return window.StudyAISATMocks || null;
   }
 
+  function scoreOutlook(history) {
+    const completed = Object.values(history).filter(item => Number(item.lastEstimatedScore) > 0);
+    if (!completed.length) {
+      return {
+        ready:false,
+        range:'—',
+        label:'Complete a full practice test to unlock your score outlook.',
+        detail:'StudyAI will use your recent estimated SAT scores to show a personal practice range here.'
+      };
+    }
+    const scores = completed.map(item => Number(item.lastEstimatedScore)).filter(Number.isFinite);
+    const average = scores.reduce((a,b)=>a+b,0) / scores.length;
+    const spread = scores.length === 1
+      ? 50
+      : Math.max(30, Math.min(90, (Math.max(...scores) - Math.min(...scores)) / 2 + 20));
+    const low = clamp(Math.round((average - spread) / 10) * 10, 400, 1600);
+    const high = clamp(Math.round((average + spread) / 10) * 10, 400, 1600);
+    return {
+      ready:true,
+      range:`${low}–${high}`,
+      label:`${scores.length} completed mock${scores.length === 1 ? '' : 's'} included`,
+      detail:'A rolling practice outlook based on your recent StudyAI estimated scores—not an official College Board prediction.'
+    };
+  }
+
   function renderMockCards() {
     const grid = $('#mock-test-grid');
     const data = mockData();
     if (!grid || !data) return;
     const history = getMockHistory();
+    const outlook = scoreOutlook(history);
+    const outlookBox = $('#mock-score-outlook');
+
+    if (outlookBox) {
+      outlookBox.innerHTML = `
+        <span class="mock-outlook-label">Score outlook</span>
+        <strong class="${outlook.ready ? 'has-score' : ''}">${outlook.range}</strong>
+        <p>${escapeHtml(outlook.label)}</p>
+        <small>${escapeHtml(outlook.detail)}</small>
+      `;
+    }
+
+    const focusProfiles = {
+      1:['Balanced start','Broad skill mix'],
+      2:['Analysis focus','Evidence + algebra'],
+      3:['Precision focus','Rhetoric + advanced math'],
+      4:['Challenge mix','High-variance finish']
+    };
+
     grid.innerHTML = data.tests.map(test => {
       const h = history[String(test.number)] || {};
-      const status = h.attempts ? `${h.attempts} attempt${h.attempts === 1 ? '' : 's'} · Best ${Math.round(h.best || 0)}%` : 'Not taken yet';
+      const hasAttempts = Number(h.attempts) > 0;
+      const bestScore = Number(h.bestEstimatedScore) || 0;
+      const statusText = hasAttempts ? `${h.attempts} completed` : 'Ready to begin';
+      const actionText = hasAttempts ? 'Retake test' : 'Start test';
+      const profile = focusProfiles[test.number] || ['Adaptive practice','Full SAT mix'];
+
       return `
-        <article class="mock-test-card">
-          <div class="mock-test-number">0${test.number}</div>
-          <div>
-            <span class="small-label">Full-length adaptive</span>
-            <h4>${escapeHtml(test.title)}</h4>
-            <p>${escapeHtml(test.subtitle)} · 54 Reading & Writing + 44 Math</p>
-            <small>${status}</small>
+        <article class="mock-test-card mock-test-card-v2">
+          <div class="mock-test-accent" aria-hidden="true"></div>
+          <div class="mock-test-main">
+            <div class="mock-test-identity">
+              <div class="mock-test-doc-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+              <div>
+                <div class="mock-test-title-row">
+                  <h4>${escapeHtml(test.title)}</h4>
+                  <span class="mock-status-pill ${hasAttempts ? 'completed' : ''}">${statusText}</span>
+                </div>
+                <p>${escapeHtml(test.subtitle)}</p>
+              </div>
+            </div>
+
+            <div class="mock-test-meta">
+              <span>98 questions</span>
+              <span>4 modules</span>
+              <span>Adaptive Module 2</span>
+              <span>Desmos + formula sheet</span>
+            </div>
+
+            <div class="mock-test-footer">
+              <div class="mock-focus-profile">
+                <span>Test profile</span>
+                <strong>${escapeHtml(profile[0])}</strong>
+                <small>${escapeHtml(profile[1])}</small>
+              </div>
+              ${hasAttempts ? `
+                <div class="mock-best-score">
+                  <span>Best estimate</span>
+                  <strong>${bestScore || '—'}</strong>
+                  <small>${Math.round(h.best || 0)}% operational accuracy</small>
+                </div>` : `
+                <div class="mock-best-score muted-state">
+                  <span>Score estimate</span>
+                  <strong>—</strong>
+                  <small>Complete the test to unlock</small>
+                </div>`}
+              <button class="button primary mock-start-button" type="button" data-start-mock="${test.number}">${actionText} <span aria-hidden="true">→</span></button>
+            </div>
           </div>
-          <button class="button primary compact" type="button" data-start-mock="${test.number}">Start</button>
         </article>`;
     }).join('');
+
     $$('[data-start-mock]', grid).forEach(button => button.addEventListener('click', () => openMockSetup(Number(button.dataset.startMock))));
   }
 
-    function addExamLab() {
+  function addExamLab() {
     const sat = $('#sat');
     const disclaimer = $('.sat-disclaimer', sat);
     if (!sat || !disclaimer || $('#sat-exam-lab')) return;
 
-    const lab = document.createElement('div');
+    const lab = document.createElement('section');
     lab.id = 'sat-exam-lab';
-    lab.className = 'sat-exam-lab sat-mock-suite';
+    lab.className = 'sat-exam-lab sat-mock-suite sat-practice-hub';
     lab.innerHTML = `
-      <div class="exam-lab-copy">
-        <span class="small-label">Full-length SAT practice</span>
-        <h3>Four complete adaptive mock tests.</h3>
-        <p>Each test has 27 questions in each Reading & Writing module and 22 questions in each Math module. Module 1 contains a broad difficulty mix; Module 2 changes based on Module 1 performance.</p>
-        <small class="mock-bank-note">All StudyAI questions are original. The suite follows current digital SAT structure and content-domain proportions without copying official or third-party questions.</small>
+      <div class="practice-hub-hero">
+        <div class="practice-hub-mark" aria-hidden="true">
+          <span class="sheet back"></span>
+          <span class="sheet middle"></span>
+          <span class="sheet front"><i></i><i></i><i></i></span>
+        </div>
+        <span class="small-label">StudyAI exam lab</span>
+        <h2>Practice Tests</h2>
+        <p>Four full-length adaptive SAT simulations, built to feel focused and exam-like without copying Bluebook's interface.</p>
       </div>
-      <div class="exam-launch-actions">
-        <button class="button secondary" id="open-desmos" type="button">Open Desmos</button>
+
+      <div class="mock-score-outlook" id="mock-score-outlook"></div>
+
+      <div class="practice-hub-toolbar">
+        <div>
+          <strong>Choose a full-length test</strong>
+          <span>Each test is unique and uses its own question bank.</span>
+        </div>
+        <button class="button secondary compact" id="open-desmos" type="button">Open Desmos</button>
       </div>
+
       <div class="mock-test-grid" id="mock-test-grid"></div>
+
+      <div class="practice-hub-note">
+        <span>Original StudyAI content</span>
+        <p>98 questions per test · 27 + 27 Reading & Writing · 22 + 22 Math · adaptive Module 2 · estimated SAT score report</p>
+      </div>
     `;
     disclaimer.insertAdjacentElement('afterend', lab);
 

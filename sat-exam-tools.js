@@ -257,6 +257,96 @@ function getMockHistory() {
     };
   }
 
+  function enterMockFullscreen() {
+    document.body.classList.add('mock-exam-active');
+    const root = document.documentElement;
+    if (!document.fullscreenElement && root.requestFullscreen) {
+      root.requestFullscreen({navigationUI:'hide'}).catch(() => {});
+    }
+  }
+
+  function leaveMockFullscreen() {
+    document.body.classList.remove('mock-exam-active');
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  function difficultyParameter(question, route = 'medium') {
+    const base = question.level === 'Foundation' ? -1.05 : question.level === 'Advanced' ? 1.05 : 0;
+    const routeShift = route === 'easy' ? -0.12 : route === 'hard' ? 0.12 : 0;
+    return base + routeShift;
+  }
+
+  function estimateSectionScore(questions, section, route = 'medium') {
+    const operational = questions.filter(q => !q.pretest);
+    const responses = operational.map(q => ({
+      q,
+      correct: answerCorrect(q) ? 1 : 0,
+      difficulty: difficultyParameter(q, route)
+    }));
+
+    const correctCount = responses.reduce((sum, item) => sum + item.correct, 0);
+    const total = responses.length;
+    if (!total) return {score:200, low:200, high:240, theta:-3.5, correct:0, total:0, misses:{}};
+
+    let theta;
+    if (correctCount === total) {
+      theta = 3.5;
+    } else if (correctCount === 0) {
+      theta = -3.5;
+    } else {
+      let bestTheta = -3.5;
+      let bestLogLikelihood = -Infinity;
+      for (let t = -3.5; t <= 3.5001; t += 0.02) {
+        let ll = 0;
+        for (const item of responses) {
+          const p = 1 / (1 + Math.exp(-(t - item.difficulty)));
+          ll += item.correct ? Math.log(Math.max(p, 1e-9)) : Math.log(Math.max(1 - p, 1e-9));
+        }
+        if (ll > bestLogLikelihood) {
+          bestLogLikelihood = ll;
+          bestTheta = t;
+        }
+      }
+      theta = bestTheta;
+    }
+
+    let scaled = 200 + 600 / (1 + Math.exp(-1.05 * theta));
+    if (correctCount === total) scaled = 800;
+    if (correctCount === 0) scaled = 200;
+    const score = clamp(Math.round(scaled / 10) * 10, 200, 800);
+
+    const baseSpread = section === 'Reading & Writing' ? 40 : 30;
+    const routeSpread = route === 'medium' ? 10 : 0;
+    const spread = baseSpread + routeSpread;
+    const low = clamp(Math.round((score - spread) / 10) * 10, 200, 800);
+    const high = clamp(Math.round((score + spread) / 10) * 10, 200, 800);
+
+    const misses = {Foundation:0, Medium:0, Advanced:0};
+    const hits = {Foundation:0, Medium:0, Advanced:0};
+    for (const item of responses) {
+      const level = item.q.level || 'Medium';
+      if (item.correct) hits[level] = (hits[level] || 0) + 1;
+      else misses[level] = (misses[level] || 0) + 1;
+    }
+
+    return {score,low,high,theta,correct:correctCount,total,misses,hits,route};
+  }
+
+  function scoreExplanation(sectionResult) {
+    const misses = sectionResult.misses;
+    const easyMisses = misses.Foundation || 0;
+    const mediumMisses = misses.Medium || 0;
+    const hardMisses = misses.Advanced || 0;
+    const parts = [];
+    if (easyMisses) parts.push(`${easyMisses} Foundation miss${easyMisses===1?'':'es'} had comparatively stronger downward pressure`);
+    if (mediumMisses) parts.push(`${mediumMisses} Medium miss${mediumMisses===1?'':'es'} had moderate impact`);
+    if (hardMisses) parts.push(`${hardMisses} Advanced miss${hardMisses===1?'':'es'} had less downward pressure than missing an easier item`);
+    if (!parts.length) parts.push('No operational questions were missed');
+    return parts.join(' · ');
+  }
+
   function startMockExam() {
     exam = buildInitialExam();
     if (!exam) {
@@ -264,10 +354,11 @@ function getMockHistory() {
       return;
     }
     ensureExamShell();
+    enterMockFullscreen();
     $('#mock-exam-shell').classList.remove('hidden');
     $('.sat-layout')?.classList.add('mock-dimmed');
     enterPhase();
-    $('#mock-exam-shell').scrollIntoView({behavior:'smooth', block:'start'});
+    $('#mock-question-pane')?.focus?.({preventScroll:true});
   }
 
   function ensureExamShell() {
@@ -549,33 +640,70 @@ function getMockHistory() {
     closeDesmos();
     const pane = $('#mock-question-pane');
     const allQuestions = exam.phases.flatMap(phase => exam.modules[`${phase.section}:${phase.module}`] || []);
-    const overall = scoreQuestions(allQuestions);
-    const rw = scoreQuestions(allQuestions.filter(q => q.section === 'Reading & Writing'));
-    const math = scoreQuestions(allQuestions.filter(q => q.section === 'Math'));
-    const percent = overall.total ? Math.round(overall.correct / overall.total * 100) : 0;
-    saveMockHistory(exam.testNumber, {percent});
+    const rwQuestions = allQuestions.filter(q => q.section === 'Reading & Writing');
+    const mathQuestions = allQuestions.filter(q => q.section === 'Math');
+    const rwRouteKey = exam.routes['Reading & Writing'] || 'medium';
+    const mathRouteKey = exam.routes['Math'] || 'medium';
+    const rwEstimate = estimateSectionScore(rwQuestions, 'Reading & Writing', rwRouteKey);
+    const mathEstimate = estimateSectionScore(mathQuestions, 'Math', mathRouteKey);
+    const totalScore = rwEstimate.score + mathEstimate.score;
+    const totalLow = rwEstimate.low + mathEstimate.low;
+    const totalHigh = rwEstimate.high + mathEstimate.high;
+    const overallAnswered = allQuestions.filter(answerPresent).length;
+
+    const rwRoute = mockData()?.routeLabel(rwRouteKey) || '';
+    const mathRoute = mockData()?.routeLabel(mathRouteKey) || '';
+    const percent = Math.round((rwEstimate.correct + mathEstimate.correct) / Math.max(1, rwEstimate.total + mathEstimate.total) * 100);
+    saveMockHistory(exam.testNumber, {percent, estimatedScore:totalScore});
     renderMockCards();
 
-    const rwRoute = mockData()?.routeLabel(exam.routes['Reading & Writing'] || 'medium') || '';
-    const mathRoute = mockData()?.routeLabel(exam.routes['Math'] || 'medium') || '';
-
     if (pane) pane.innerHTML = `
-      <div class="mock-results">
+      <div class="mock-results sat-score-report">
         <span class="small-label">${escapeHtml(exam.meta?.title || 'Mock test')} complete</span>
-        <h3>${percent}% operational accuracy</h3>
-        <p>You completed all four modules. Like the real SAT design, each module also contained two unscored pretest questions, so this raw result is based on 90 operational questions and is not an official SAT scaled score.</p>
-        <div class="mock-result-grid">
-          <div><span>Reading & Writing</span><strong>${rw.correct}/${rw.total}</strong><small>${Math.round(rw.ratio*100)}% · ${escapeHtml(rwRoute)}</small></div>
-          <div><span>Math</span><strong>${math.correct}/${math.total}</strong><small>${Math.round(math.ratio*100)}% · ${escapeHtml(mathRoute)}</small></div>
-          <div><span>Total questions</span><strong>98</strong><small>${overall.answered}/98 answered</small></div>
+        <div class="estimated-score-hero">
+          <div>
+            <small>StudyAI estimated SAT score</small>
+            <strong>${totalScore}</strong>
+            <span>Estimated range ${totalLow}–${totalHigh}</span>
+          </div>
+          <p>This is an evidence-based practice estimate, not an official College Board score. College Board uses calibrated Item Response Theory parameters that are not publicly available.</p>
         </div>
+
+        <div class="score-section-grid">
+          <article>
+            <span>Reading & Writing</span>
+            <strong>${rwEstimate.score}</strong>
+            <small>Range ${rwEstimate.low}–${rwEstimate.high} · ${escapeHtml(rwRoute)}</small>
+            <p>${rwEstimate.correct}/${rwEstimate.total} operational questions correct</p>
+          </article>
+          <article>
+            <span>Math</span>
+            <strong>${mathEstimate.score}</strong>
+            <small>Range ${mathEstimate.low}–${mathEstimate.high} · ${escapeHtml(mathRoute)}</small>
+            <p>${mathEstimate.correct}/${mathEstimate.total} operational questions correct</p>
+          </article>
+        </div>
+
+        <div class="score-method-card">
+          <h4>Why this estimate landed here</h4>
+          <p><strong>Reading & Writing:</strong> ${escapeHtml(scoreExplanation(rwEstimate))}.</p>
+          <p><strong>Math:</strong> ${escapeHtml(scoreExplanation(mathEstimate))}.</p>
+          <p>The estimator excludes all 8 pretest questions, treats blanks as incorrect, models Foundation, Medium, and Advanced items at different difficulty levels, and uses the adaptive Module 2 route as a small difficulty adjustment. The resulting ability estimate is converted to the SAT's 200–800 section scale and rounded to the nearest 10 points.</p>
+        </div>
+
+        <div class="mock-result-grid">
+          <div><span>Operational accuracy</span><strong>${percent}%</strong><small>${rwEstimate.correct + mathEstimate.correct}/${rwEstimate.total + mathEstimate.total} scored items</small></div>
+          <div><span>Questions answered</span><strong>${overallAnswered}/98</strong><small>8 pretest items were unscored</small></div>
+          <div><span>Adaptive routes</span><strong>${rwRouteKey.toUpperCase()} / ${mathRouteKey.toUpperCase()}</strong><small>R&W / Math</small></div>
+        </div>
+
         <div class="button-row"><button class="button primary" id="mock-again" type="button">Retake this test</button><button class="button secondary" id="mock-done" type="button">Choose another test</button></div>
       </div>`;
     $('#mock-timer').textContent = 'Done';
     $('#mock-pause')?.classList.add('hidden');
     $('#mock-desmos-btn')?.classList.add('hidden');
     $('#mock-again')?.addEventListener('click', () => {
-      const n=exam.testNumber;
+      const n = exam.testNumber;
       exitMock();
       openMockSetup(n);
     });
@@ -583,15 +711,14 @@ function getMockHistory() {
   }
 
   function exitMock() {
-    if (!exam) {
-      $('#mock-exam-shell')?.classList.add('hidden');
-      return;
+    if (exam) {
+      stopTimer();
+      closeDesmos();
     }
-    stopTimer();
-    closeDesmos();
     exam = null;
     $('#mock-exam-shell')?.classList.add('hidden');
     $('.sat-layout')?.classList.remove('mock-dimmed');
+    leaveMockFullscreen();
   }
 
   function ensureDesmosPanel() {

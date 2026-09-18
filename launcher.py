@@ -19,6 +19,7 @@ def enhanced_index():
     script_enhancement = (
         script_marker
         + '\n<script src="ui-enhancements.js"></script>'
+        + '\n<script src="flashcard-enhancements.js"></script>'
         + '\n<script src="sat-mock-data.js"></script>'
         + '\n<script src="sat-exam-tools.js"></script>'
     )

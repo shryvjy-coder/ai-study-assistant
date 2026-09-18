@@ -616,6 +616,7 @@
 
     const stopDragging = () => {
       drag = null;
+      window.removeEventListener('pointermove', onMove);
       document.documentElement.classList.remove('studyai-dragging-window');
     };
 
@@ -810,6 +811,7 @@
 
     const stopDragging = () => {
       drag = null;
+      window.removeEventListener('pointermove', onMove);
       document.documentElement.classList.remove('studyai-dragging-window');
     };
 

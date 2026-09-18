@@ -31,6 +31,7 @@
   let desmosCalculator = null;
   let desmosLoading = null;
   let calcAngleMode = 'deg';
+  let mockPreferences = {timingMode:'normal', breakMode:'normal'};
 
   function questionBank() {
     try {
@@ -56,52 +57,98 @@
       <div class="exam-lab-copy">
         <span class="small-label">Mock exam mode</span>
         <h3>Run a full two-section SAT practice session.</h3>
-        <p>Uses your original StudyAI question bank in Reading & Writing and Math modules. Timing follows the current digital SAT structure; this is practice content, not an official College Board test.</p>
+        <p>Uses your original StudyAI question bank in Reading & Writing and Math modules. Choose timing and break accommodations after you click Start mock test.</p>
         <small class="mock-bank-note">Current bank: ${rw} Reading & Writing · ${math} Math questions. Mock module size automatically adapts to the questions available.</small>
       </div>
-      <div class="exam-setup-grid">
-        <label>Timing
-          <select id="mock-time-mode">
-            <option value="normal">Normal time</option>
-            <option value="extra50">50% extra time</option>
-            <option value="extra100">100% extra time</option>
-          </select>
-        </label>
-        <label>Breaks
-          <select id="mock-break-mode">
-            <option value="normal">Normal breaks</option>
-            <option value="extended">Extended breaks</option>
-            <option value="needed">Breaks as needed</option>
-          </select>
-        </label>
-        <div class="exam-start-actions">
-          <button class="button primary" id="start-mock-test" type="button">Start mock test</button>
-          <button class="button secondary" id="open-desmos" type="button">Open Desmos</button>
-        </div>
+      <div class="exam-launch-actions">
+        <button class="button primary" id="start-mock-test" type="button">Start mock test</button>
+        <button class="button secondary" id="open-desmos" type="button">Open Desmos</button>
       </div>
-      <div class="exam-policy-note" id="exam-policy-note"></div>
     `;
     disclaimer.insertAdjacentElement('afterend', lab);
 
-    $('#mock-break-mode')?.addEventListener('change', updateBreakDescription);
-    $('#mock-time-mode')?.addEventListener('change', updateBreakDescription);
-    $('#start-mock-test')?.addEventListener('click', startMockExam);
+    $('#start-mock-test')?.addEventListener('click', openMockSetup);
     $('#open-desmos')?.addEventListener('click', () => openDesmos('floating'));
-    updateBreakDescription();
   }
 
-  function updateBreakDescription() {
-    const time = $('#mock-time-mode')?.value || 'normal';
-    const breaks = $('#mock-break-mode')?.value || 'normal';
-    const note = $('#exam-policy-note');
-    if (!note) return;
-    const t = time === 'normal' ? '32-minute R&W / 35-minute Math modules'
-      : time === 'extra50' ? '48-minute R&W / 53-minute Math modules'
-      : '64-minute R&W / 70-minute Math modules';
-    const b = breaks === 'normal' ? '10-minute scheduled break between sections'
-      : breaks === 'extended' ? '10-minute module breaks plus a 20-minute section break'
-      : 'standard section break, plus a Pause button whenever you need it; paused questions are hidden';
+  function ensureMockSetupDialog() {
+    let dialog = $('#mock-setup-dialog');
+    if (dialog) return dialog;
+
+    dialog = document.createElement('dialog');
+    dialog.id = 'mock-setup-dialog';
+    dialog.className = 'mock-setup-dialog';
+    dialog.innerHTML = `
+      <form method="dialog" class="mock-setup-shell" id="mock-setup-form">
+        <div class="mock-setup-head">
+          <div><span class="small-label">Before you begin</span><h3>Mock test settings</h3><p>Choose the timing and break setup you want for this attempt.</p></div>
+          <button class="quiet-button" id="mock-setup-close" type="button">Close</button>
+        </div>
+
+        <fieldset class="mock-setting-group">
+          <legend>Timing</legend>
+          <label class="mock-setting-choice"><input type="radio" name="mock-time" value="normal" checked><span><strong>Normal time</strong><small>32 min R&W · 35 min Math per module</small></span></label>
+          <label class="mock-setting-choice"><input type="radio" name="mock-time" value="extra50"><span><strong>50% extra time</strong><small>48 min R&W · 53 min Math per module</small></span></label>
+          <label class="mock-setting-choice"><input type="radio" name="mock-time" value="extra100"><span><strong>100% extra time</strong><small>64 min R&W · 70 min Math per module</small></span></label>
+        </fieldset>
+
+        <fieldset class="mock-setting-group">
+          <legend>Breaks</legend>
+          <label class="mock-setting-choice"><input type="radio" name="mock-break" value="normal" checked><span><strong>Normal breaks</strong><small>10-minute scheduled break between sections</small></span></label>
+          <label class="mock-setting-choice"><input type="radio" name="mock-break" value="extended"><span><strong>Extended breaks</strong><small>10-minute module breaks and a 20-minute section break</small></span></label>
+          <label class="mock-setting-choice"><input type="radio" name="mock-break" value="needed"><span><strong>Breaks as needed</strong><small>Pause the timer whenever needed; questions and calculators are hidden while paused</small></span></label>
+        </fieldset>
+
+        <div class="mock-setup-summary" id="mock-setup-summary"></div>
+        <div class="mock-setup-actions">
+          <button class="button secondary" id="mock-setup-cancel" type="button">Cancel</button>
+          <button class="button primary" id="mock-setup-begin" type="submit">Begin mock test</button>
+        </div>
+      </form>
+    `;
+    document.body.appendChild(dialog);
+
+    const close = () => dialog.close();
+    $('#mock-setup-close', dialog)?.addEventListener('click', close);
+    $('#mock-setup-cancel', dialog)?.addEventListener('click', close);
+    dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
+    $$('input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
+    $('#mock-setup-form', dialog)?.addEventListener('submit', event => {
+      event.preventDefault();
+      mockPreferences = {
+        timingMode: $('input[name="mock-time"]:checked', dialog)?.value || 'normal',
+        breakMode: $('input[name="mock-break"]:checked', dialog)?.value || 'normal'
+      };
+      dialog.close();
+      startMockExam();
+    });
+    updateMockSetupSummary();
+    return dialog;
+  }
+
+  function updateMockSetupSummary() {
+    const dialog = $('#mock-setup-dialog');
+    const note = $('#mock-setup-summary', dialog);
+    if (!dialog || !note) return;
+    const time = $('input[name="mock-time"]:checked', dialog)?.value || 'normal';
+    const breaks = $('input[name="mock-break"]:checked', dialog)?.value || 'normal';
+    const t = time === 'normal' ? 'Standard module timing'
+      : time === 'extra50' ? '50% extra module time'
+      : '100% extra module time';
+    const b = breaks === 'normal' ? 'normal scheduled breaks'
+      : breaks === 'extended' ? 'extended scheduled breaks'
+      : 'pause whenever needed with questions hidden';
     note.textContent = `${t} · ${b}.`;
+  }
+
+  function openMockSetup() {
+    const dialog = ensureMockSetupDialog();
+    const time = $(`input[name="mock-time"][value="${mockPreferences.timingMode}"]`, dialog);
+    const breaks = $(`input[name="mock-break"][value="${mockPreferences.breakMode}"]`, dialog);
+    if (time) time.checked = true;
+    if (breaks) breaks.checked = true;
+    updateMockSetupSummary();
+    if (!dialog.open) dialog.showModal();
   }
 
   function chooseModule(pool, section, module, targetSize, previousIds = new Set(), moduleOneScore = null) {
@@ -134,8 +181,8 @@
 
     const rwTarget = Math.max(2, Math.min(27, Math.floor(rwPool.length / 2)));
     const mathTarget = Math.max(2, Math.min(22, Math.floor(mathPool.length / 2)));
-    const timingMode = $('#mock-time-mode')?.value || 'normal';
-    const breakMode = $('#mock-break-mode')?.value || 'normal';
+    const timingMode = mockPreferences.timingMode || 'normal';
+    const breakMode = mockPreferences.breakMode || 'normal';
 
     const rw1 = chooseModule(rwPool, 'Reading & Writing', 1, rwTarget);
     const math1 = chooseModule(mathPool, 'Math', 1, mathTarget);
@@ -566,24 +613,42 @@
   function makeDraggable(panel, handle) {
     if (!panel || !handle) return;
     let drag = null;
-    handle.addEventListener('pointerdown', event => {
-      if (!panel.classList.contains('desmos-floating') || event.target.closest('button')) return;
-      const rect = panel.getBoundingClientRect();
-      drag = {dx:event.clientX-rect.left, dy:event.clientY-rect.top};
-      panel.setPointerCapture?.(event.pointerId);
-      event.preventDefault();
-    });
-    handle.addEventListener('pointermove', event => {
+
+    const stopDragging = () => {
+      drag = null;
+      document.documentElement.classList.remove('studyai-dragging-window');
+    };
+
+    const onMove = event => {
       if (!drag) return;
-      const w = panel.offsetWidth, h = panel.offsetHeight;
-      panel.style.left = `${clamp(event.clientX-drag.dx, 6, window.innerWidth-w-6)}px`;
-      panel.style.top = `${clamp(event.clientY-drag.dy, 6, window.innerHeight-h-6)}px`;
+      if ((event.buttons & 1) !== 1) {
+        stopDragging();
+        return;
+      }
+      const w = panel.offsetWidth;
+      const h = panel.offsetHeight;
+      panel.style.left = `${clamp(event.clientX - drag.dx, 6, window.innerWidth - w - 6)}px`;
+      panel.style.top = `${clamp(event.clientY - drag.dy, 6, window.innerHeight - h - 6)}px`;
       panel.style.right = 'auto';
       panel.style.bottom = 'auto';
+    };
+
+    const onUp = () => stopDragging();
+
+    handle.addEventListener('pointerdown', event => {
+      if (!panel.classList.contains('desmos-floating') || event.button !== 0 || event.target.closest('button')) return;
+      const rect = panel.getBoundingClientRect();
+      drag = {dx:event.clientX - rect.left, dy:event.clientY - rect.top};
+      document.documentElement.classList.add('studyai-dragging-window');
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp, {once:true});
+      window.addEventListener('pointercancel', onUp, {once:true});
+      event.preventDefault();
     });
-    const end = () => drag = null;
-    handle.addEventListener('pointerup', end);
-    handle.addEventListener('pointercancel', end);
+
+    window.addEventListener('pointerup', stopDragging);
+    window.addEventListener('blur', stopDragging);
+    handle.addEventListener('lostpointercapture', stopDragging);
   }
 
   function setupSplitter() {
@@ -742,21 +807,37 @@
   function makeGenericDraggable(panel, handle) {
     if (!panel || !handle) return;
     let drag = null;
+
+    const stopDragging = () => {
+      drag = null;
+      document.documentElement.classList.remove('studyai-dragging-window');
+    };
+
+    const onMove = event => {
+      if (!drag) return;
+      if ((event.buttons & 1) !== 1) {
+        stopDragging();
+        return;
+      }
+      panel.style.left = `${clamp(event.clientX - drag.dx, 6, window.innerWidth - panel.offsetWidth - 6)}px`;
+      panel.style.top = `${clamp(event.clientY - drag.dy, 6, window.innerHeight - panel.offsetHeight - 6)}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+    };
+
     handle.addEventListener('pointerdown', event => {
-      if (event.target.closest('button')) return;
+      if (event.button !== 0 || event.target.closest('button')) return;
       const rect = panel.getBoundingClientRect();
-      drag = {dx:event.clientX-rect.left,dy:event.clientY-rect.top};
-      handle.setPointerCapture?.(event.pointerId);
+      drag = {dx:event.clientX - rect.left, dy:event.clientY - rect.top};
+      document.documentElement.classList.add('studyai-dragging-window');
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', stopDragging, {once:true});
+      window.addEventListener('pointercancel', stopDragging, {once:true});
       event.preventDefault();
     });
-    handle.addEventListener('pointermove', event => {
-      if (!drag) return;
-      panel.style.left = `${clamp(event.clientX-drag.dx, 6, window.innerWidth-panel.offsetWidth-6)}px`;
-      panel.style.top = `${clamp(event.clientY-drag.dy, 6, window.innerHeight-panel.offsetHeight-6)}px`;
-      panel.style.right='auto'; panel.style.bottom='auto';
-    });
-    const end=()=>drag=null;
-    handle.addEventListener('pointerup',end); handle.addEventListener('pointercancel',end);
+
+    window.addEventListener('pointerup', stopDragging);
+    window.addEventListener('blur', stopDragging);
   }
 
   function showStudyToast(message) {

@@ -373,6 +373,8 @@ function getMockHistory() {
         <div><span class="small-label" id="mock-section-label">SAT mock</span><strong id="mock-module-label"></strong></div>
         <div class="mock-top-actions">
           <button class="quiet-button hidden" id="mock-pause" type="button">Pause</button>
+          <button class="quiet-button mock-tool-button" id="mock-review-btn" type="button">Review</button>
+          <button class="quiet-button hidden mock-tool-button" id="mock-formula-btn" type="button">Formula sheet</button>
           <button class="quiet-button hidden" id="mock-desmos-btn" type="button">Desmos</button>
           <span class="mock-timer" id="mock-timer">--:--</span>
           <button class="quiet-button" id="mock-exit" type="button">Exit</button>
@@ -386,11 +388,31 @@ function getMockHistory() {
       <div class="mock-pause-cover hidden" id="mock-pause-cover">
         <div><span class="small-label">Timer paused</span><h3>Questions are hidden during your break.</h3><p>Your answers are safe. Resume when you're ready.</p><button class="button primary" id="mock-resume" type="button">Resume test</button></div>
       </div>
+      <div class="mock-formula-overlay hidden" id="mock-formula-overlay" aria-hidden="true">
+        <section class="mock-formula-sheet" role="dialog" aria-modal="false" aria-labelledby="mock-formula-title">
+          <header>
+            <div><span class="small-label">Math reference</span><h3 id="mock-formula-title">Formula sheet</h3></div>
+            <button class="quiet-button" id="mock-formula-close" type="button">Close</button>
+          </header>
+          <div class="formula-groups">
+            <article><h4>Algebra</h4><p><strong>Slope:</strong> m = (y₂ − y₁)/(x₂ − x₁)</p><p><strong>Quadratic formula:</strong> x = (−b ± √(b² − 4ac))/(2a)</p><p><strong>Vertex x-coordinate:</strong> x = −b/(2a)</p><p><strong>Distance:</strong> d = √((x₂ − x₁)² + (y₂ − y₁)²)</p></article>
+            <article><h4>Triangles & trigonometry</h4><p><strong>Triangle area:</strong> A = ½bh</p><p><strong>Pythagorean theorem:</strong> a² + b² = c²</p><p><strong>sin θ:</strong> opposite / hypotenuse</p><p><strong>cos θ:</strong> adjacent / hypotenuse</p><p><strong>tan θ:</strong> opposite / adjacent</p></article>
+            <article><h4>Special right triangles</h4><p><strong>45°–45°–90°:</strong> x, x, x√2</p><p><strong>30°–60°–90°:</strong> x, x√3, 2x</p></article>
+            <article><h4>Circles</h4><p><strong>Area:</strong> A = πr²</p><p><strong>Circumference:</strong> C = 2πr</p><p><strong>Arc length:</strong> (θ/360°)·2πr</p><p><strong>Sector area:</strong> (θ/360°)·πr²</p></article>
+            <article><h4>Volume</h4><p><strong>Rectangular prism:</strong> V = lwh</p><p><strong>Cylinder:</strong> V = πr²h</p><p><strong>Cone:</strong> V = ⅓πr²h</p><p><strong>Pyramid:</strong> V = ⅓Bh</p><p><strong>Sphere:</strong> V = ⁴⁄₃πr³</p></article>
+            <article><h4>Data & percentages</h4><p><strong>Mean:</strong> sum of values / number of values</p><p><strong>Percent change:</strong> (new − original)/original × 100%</p><p><strong>Probability:</strong> favorable outcomes / total outcomes</p></article>
+          </div>
+        </section>
+      </div>
     `;
     lab.insertAdjacentElement('afterend', shell);
     $('#mock-exit')?.addEventListener('click', exitMock);
     $('#mock-pause')?.addEventListener('click', pauseMock);
     $('#mock-resume')?.addEventListener('click', resumeMock);
+    $('#mock-review-btn')?.addEventListener('click', renderReviewPage);
+    $('#mock-formula-btn')?.addEventListener('click', openFormulaSheet);
+    $('#mock-formula-close')?.addEventListener('click', closeFormulaSheet);
+    $('#mock-formula-overlay')?.addEventListener('click', event => { if (event.target.id === 'mock-formula-overlay') closeFormulaSheet(); });
     $('#mock-desmos-btn')?.addEventListener('click', () => openDesmos('split'));
     setupSplitter();
   }
@@ -417,6 +439,79 @@ function getMockHistory() {
     return exam.modules[key] || [];
   }
 
+  function openFormulaSheet() {
+    if (currentPhase()?.section !== 'Math') return;
+    const overlay = $('#mock-formula-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('hidden');
+    overlay.setAttribute('aria-hidden','false');
+  }
+
+  function closeFormulaSheet() {
+    const overlay = $('#mock-formula-overlay');
+    if (!overlay) return;
+    overlay.classList.add('hidden');
+    overlay.setAttribute('aria-hidden','true');
+  }
+
+  function renderReviewPage() {
+    if (!exam || exam.paused) return;
+    closeFormulaSheet();
+    const questions = moduleQuestions();
+    const pane = $('#mock-question-pane');
+    const phase = currentPhase();
+    if (!pane || !phase) return;
+
+    const answered = questions.filter(answerPresent).length;
+    const marked = questions.filter(q => exam.flagged.has(q.id)).length;
+    const blank = questions.length - answered;
+
+    pane.innerHTML = `
+      <section class="mock-review-page">
+        <div class="mock-review-heading">
+          <div>
+            <span class="small-label">${escapeHtml(phase.section)} · Module ${phase.module}</span>
+            <h2>Review your module</h2>
+            <p>Open any question to change your answer or review a marked item. The timer continues while you are on this page.</p>
+          </div>
+          <div class="review-summary">
+            <div><strong>${answered}</strong><span>Answered</span></div>
+            <div><strong>${blank}</strong><span>Blank</span></div>
+            <div><strong>${marked}</strong><span>Marked</span></div>
+          </div>
+        </div>
+
+        <div class="review-legend">
+          <span><i class="answered"></i> Answered</span>
+          <span><i class="blank"></i> Blank</span>
+          <span><i class="marked"></i> Marked for review</span>
+        </div>
+
+        <div class="review-question-grid">
+          ${questions.map((q,i) => {
+            const isAnswered = answerPresent(q);
+            const isMarked = exam.flagged.has(q.id);
+            return `<button type="button" class="review-question-tile ${isAnswered?'answered':'blank'} ${isMarked?'marked':''}" data-review-question="${i}">
+              <span class="review-q-number">${i+1}</span>
+              <span class="review-q-status">${isMarked ? '★ Marked' : isAnswered ? 'Answered' : 'Blank'}</span>
+            </button>`;
+          }).join('')}
+        </div>
+
+        <div class="review-page-actions">
+          <button class="button secondary" id="review-return" type="button">← Return to questions</button>
+          <button class="button primary" id="review-submit" type="button">Submit module</button>
+        </div>
+      </section>`;
+
+    $$('[data-review-question]', pane).forEach(button => button.addEventListener('click', () => {
+      exam.currentIndex = Number(button.dataset.reviewQuestion);
+      renderCurrentQuestion();
+    }));
+    $('#review-return', pane)?.addEventListener('click', renderCurrentQuestion);
+    $('#review-submit', pane)?.addEventListener('click', () => completeModule(false));
+  }
+
   function enterPhase() {
     if (!exam) return;
     const phase = currentPhase();
@@ -429,7 +524,9 @@ function getMockHistory() {
     $('#mock-section-label').textContent = `${exam.meta?.title || 'SAT mock'} · ${phase.section}`;
     $('#mock-module-label').textContent = `Module ${phase.module} · ${questions.length} questions`;
     $('#mock-pause')?.classList.toggle('hidden', exam.breakMode !== 'needed');
+    $('#mock-formula-btn')?.classList.toggle('hidden', phase.section !== 'Math');
     $('#mock-desmos-btn')?.classList.toggle('hidden', phase.section !== 'Math');
+    closeFormulaSheet();
     $('#mock-pause-cover')?.classList.add('hidden');
     $('#mock-question-pane')?.classList.remove('question-hidden');
     renderCurrentQuestion();
@@ -470,6 +567,7 @@ function getMockHistory() {
     if (!exam || exam.breakMode !== 'needed' || exam.paused) return;
     exam.remaining = Math.max(0, (exam.deadline - Date.now()) / 1000);
     exam.paused = true;
+    closeFormulaSheet();
     stopTimer();
     $('#mock-pause-cover')?.classList.remove('hidden');
     $('#mock-question-pane')?.classList.add('question-hidden');
@@ -510,6 +608,7 @@ function getMockHistory() {
 
   function renderCurrentQuestion() {
     if (!exam) return;
+    closeFormulaSheet();
     const questions = moduleQuestions();
     const q = questions[exam.currentIndex];
     const pane = $('#mock-question-pane');
@@ -523,17 +622,23 @@ function getMockHistory() {
     pane.innerHTML = `
       <div class="mock-progress-row">
         <span>Question ${exam.currentIndex + 1} of ${questions.length}</span>
-        <button class="mock-flag ${flagged ? 'active' : ''}" id="mock-flag" type="button">${flagged ? '★ Marked' : '☆ Mark for review'}</button>
+        <button class="review-page-link" id="question-review-page" type="button">Review module</button>
       </div>
       <article class="mock-question-card">
         ${q.passage ? `<div class="mock-passage">${escapeHtml(q.passage).replace(/\n/g,'<br>')}</div>` : ''}
-        <h3>${escapeHtml(q.stem)}</h3>
+        <div class="mock-question-heading">
+          <h3>${escapeHtml(q.stem)}</h3>
+          <button class="mock-flag prominent ${flagged ? 'active' : ''}" id="mock-flag" type="button" aria-pressed="${flagged ? 'true' : 'false'}">
+            <span class="flag-star">${flagged ? '★' : '☆'}</span>
+            <span>${flagged ? 'Marked for review' : 'Mark for review'}</span>
+          </button>
+        </div>
         ${response}
       </article>
       <div class="mock-question-footer">
         <button class="button secondary" id="mock-prev" type="button" ${exam.currentIndex===0?'disabled':''}>← Previous</button>
         <div class="mock-question-dots">${questions.map((item,i)=>`<button type="button" data-jump-q="${i}" class="${i===exam.currentIndex?'current':''} ${answerPresent(item)?'answered':''} ${exam.flagged.has(item.id)?'flagged':''}">${i+1}</button>`).join('')}</div>
-        <button class="button primary" id="mock-next" type="button">${exam.currentIndex===questions.length-1?'Finish module':'Next →'}</button>
+        <button class="button primary" id="mock-next" type="button">${exam.currentIndex===questions.length-1?'Review module →':'Next →'}</button>
       </div>`;
 
     $$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
@@ -542,20 +647,26 @@ function getMockHistory() {
     }));
     $('#mock-spr-answer', pane)?.addEventListener('input', event => {
       exam.answers[q.id] = event.target.value;
-      const dot = $$(`[data-jump-q]`, pane)[exam.currentIndex];
+      const dot = $$('[data-jump-q]', pane)[exam.currentIndex];
       dot?.classList.toggle('answered', String(event.target.value).trim() !== '');
     });
     $('#mock-flag', pane)?.addEventListener('click', () => {
       if (exam.flagged.has(q.id)) exam.flagged.delete(q.id); else exam.flagged.add(q.id);
       renderCurrentQuestion();
     });
+    $('#question-review-page', pane)?.addEventListener('click', renderReviewPage);
     $('#mock-prev', pane)?.addEventListener('click', () => { exam.currentIndex=Math.max(0,exam.currentIndex-1); renderCurrentQuestion(); });
     $('#mock-next', pane)?.addEventListener('click', () => {
-      if (exam.currentIndex < questions.length-1) { exam.currentIndex++; renderCurrentQuestion(); }
-      else completeModule(false);
+      if (exam.currentIndex < questions.length-1) {
+        exam.currentIndex++;
+        renderCurrentQuestion();
+      } else {
+        renderReviewPage();
+      }
     });
     $$('[data-jump-q]', pane).forEach(btn => btn.addEventListener('click', () => {
-      exam.currentIndex=Number(btn.dataset.jumpQ); renderCurrentQuestion();
+      exam.currentIndex=Number(btn.dataset.jumpQ);
+      renderCurrentQuestion();
     }));
   }
 
@@ -576,6 +687,7 @@ function getMockHistory() {
 
   function completeModule(autoEnded) {
     if (!exam) return;
+    closeFormulaSheet();
     stopTimer();
     const phase = currentPhase();
     const questions = moduleQuestions();
@@ -711,6 +823,7 @@ function getMockHistory() {
   }
 
   function exitMock() {
+    closeFormulaSheet();
     if (exam) {
       stopTimer();
       closeDesmos();

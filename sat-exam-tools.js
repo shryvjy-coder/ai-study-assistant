@@ -32,6 +32,8 @@
   let desmosLoading = null;
   let calcAngleMode = 'deg';
   let mockPreferences = {timingMode:'normal', breakMode:'normal'};
+  let selectedMockTest = 1;
+  const MOCK_HISTORY_KEY = 'studyai-sat-mock-history-v1';
 
   function questionBank() {
     try {
@@ -41,34 +43,75 @@
     }
   }
 
-  function addExamLab() {
+function getMockHistory() {
+    try { return JSON.parse(localStorage.getItem(MOCK_HISTORY_KEY) || '{}'); }
+    catch (_) { return {}; }
+  }
+
+  function saveMockHistory(testNumber, summary) {
+    const history = getMockHistory();
+    const key = String(testNumber);
+    const current = history[key] || {attempts:0,best:0};
+    history[key] = {
+      attempts:(current.attempts || 0) + 1,
+      best:Math.max(current.best || 0, summary.percent || 0),
+      last:summary.percent || 0,
+      completedAt:new Date().toISOString()
+    };
+    localStorage.setItem(MOCK_HISTORY_KEY, JSON.stringify(history));
+  }
+
+  function mockData() {
+    return window.StudyAISATMocks || null;
+  }
+
+  function renderMockCards() {
+    const grid = $('#mock-test-grid');
+    const data = mockData();
+    if (!grid || !data) return;
+    const history = getMockHistory();
+    grid.innerHTML = data.tests.map(test => {
+      const h = history[String(test.number)] || {};
+      const status = h.attempts ? `${h.attempts} attempt${h.attempts === 1 ? '' : 's'} · Best ${Math.round(h.best || 0)}%` : 'Not taken yet';
+      return `
+        <article class="mock-test-card">
+          <div class="mock-test-number">0${test.number}</div>
+          <div>
+            <span class="small-label">Full-length adaptive</span>
+            <h4>${escapeHtml(test.title)}</h4>
+            <p>${escapeHtml(test.subtitle)} · 54 Reading & Writing + 44 Math</p>
+            <small>${status}</small>
+          </div>
+          <button class="button primary compact" type="button" data-start-mock="${test.number}">Start</button>
+        </article>`;
+    }).join('');
+    $$('[data-start-mock]', grid).forEach(button => button.addEventListener('click', () => openMockSetup(Number(button.dataset.startMock))));
+  }
+
+    function addExamLab() {
     const sat = $('#sat');
     const disclaimer = $('.sat-disclaimer', sat);
     if (!sat || !disclaimer || $('#sat-exam-lab')) return;
 
-    const bank = questionBank();
-    const rw = bank.filter(q => q.section === 'Reading & Writing').length;
-    const math = bank.filter(q => q.section === 'Math').length;
-
     const lab = document.createElement('div');
     lab.id = 'sat-exam-lab';
-    lab.className = 'sat-exam-lab';
+    lab.className = 'sat-exam-lab sat-mock-suite';
     lab.innerHTML = `
       <div class="exam-lab-copy">
-        <span class="small-label">Mock exam mode</span>
-        <h3>Run a full two-section SAT practice session.</h3>
-        <p>Uses your original StudyAI question bank in Reading & Writing and Math modules. Choose timing and break accommodations after you click Start mock test.</p>
-        <small class="mock-bank-note">Current bank: ${rw} Reading & Writing · ${math} Math questions. Mock module size automatically adapts to the questions available.</small>
+        <span class="small-label">Full-length SAT practice</span>
+        <h3>Four complete adaptive mock tests.</h3>
+        <p>Each test has 27 questions in each Reading & Writing module and 22 questions in each Math module. Module 1 contains a broad difficulty mix; Module 2 changes based on Module 1 performance.</p>
+        <small class="mock-bank-note">All StudyAI questions are original. The suite follows current digital SAT structure and content-domain proportions without copying official or third-party questions.</small>
       </div>
       <div class="exam-launch-actions">
-        <button class="button primary" id="start-mock-test" type="button">Start mock test</button>
         <button class="button secondary" id="open-desmos" type="button">Open Desmos</button>
       </div>
+      <div class="mock-test-grid" id="mock-test-grid"></div>
     `;
     disclaimer.insertAdjacentElement('afterend', lab);
 
-    $('#start-mock-test')?.addEventListener('click', openMockSetup);
     $('#open-desmos')?.addEventListener('click', () => openDesmos('floating'));
+    renderMockCards();
   }
 
   function ensureMockSetupDialog() {
@@ -81,7 +124,7 @@
     dialog.innerHTML = `
       <form method="dialog" class="mock-setup-shell" id="mock-setup-form">
         <div class="mock-setup-head">
-          <div><span class="small-label">Before you begin</span><h3>Mock test settings</h3><p>Choose the timing and break setup you want for this attempt.</p></div>
+          <div><span class="small-label">Before you begin</span><h3 id="mock-setup-title">Mock test settings</h3><p>Choose the timing and break setup you want for this attempt.</p></div>
           <button class="quiet-button" id="mock-setup-close" type="button">Close</button>
         </div>
 
@@ -141,8 +184,12 @@
     note.textContent = `${t} · ${b}.`;
   }
 
-  function openMockSetup() {
+  function openMockSetup(testNumber = 1) {
+    selectedMockTest = Math.max(1, Math.min(4, Number(testNumber) || 1));
     const dialog = ensureMockSetupDialog();
+    const meta = mockData()?.getTestMeta(selectedMockTest);
+    const title = $('#mock-setup-title', dialog);
+    if (title) title.textContent = meta ? `${meta.title} settings` : 'Mock test settings';
     const time = $(`input[name="mock-time"][value="${mockPreferences.timingMode}"]`, dialog);
     const breaks = $(`input[name="mock-break"][value="${mockPreferences.breakMode}"]`, dialog);
     if (time) time.checked = true;
@@ -174,51 +221,46 @@
   }
 
   function buildInitialExam() {
-    const bank = questionBank();
-    const rwPool = bank.filter(q => q.section === 'Reading & Writing');
-    const mathPool = bank.filter(q => q.section === 'Math');
-    if (rwPool.length < 4 || mathPool.length < 4) return null;
-
-    const rwTarget = Math.max(2, Math.min(27, Math.floor(rwPool.length / 2)));
-    const mathTarget = Math.max(2, Math.min(22, Math.floor(mathPool.length / 2)));
-    const timingMode = mockPreferences.timingMode || 'normal';
-    const breakMode = mockPreferences.breakMode || 'normal';
-
-    const rw1 = chooseModule(rwPool, 'Reading & Writing', 1, rwTarget);
-    const math1 = chooseModule(mathPool, 'Math', 1, mathTarget);
+    const data = mockData();
+    if (!data) return null;
+    const testNumber = selectedMockTest;
+    const rw1 = data.getModule(testNumber, 'Reading & Writing', 1, 'mixed');
+    const math1 = data.getModule(testNumber, 'Math', 1, 'mixed');
+    if (rw1.length !== 27 || math1.length !== 22) return null;
 
     return {
-      timingMode,
-      breakMode,
-      pools: {'Reading & Writing': rwPool, 'Math': mathPool},
-      targets: {'Reading & Writing': rwTarget, 'Math': mathTarget},
-      modules: {
-        'Reading & Writing:1': rw1,
-        'Math:1': math1
+      testNumber,
+      meta:data.getTestMeta(testNumber),
+      timingMode:mockPreferences.timingMode || 'normal',
+      breakMode:mockPreferences.breakMode || 'normal',
+      modules:{
+        'Reading & Writing:1':rw1,
+        'Math:1':math1
       },
-      phase: 0,
-      phases: [
-        {section:'Reading & Writing', module:1},
-        {section:'Reading & Writing', module:2},
-        {section:'Math', module:1},
-        {section:'Math', module:2}
+      routes:{},
+      phase:0,
+      phases:[
+        {section:'Reading & Writing',module:1},
+        {section:'Reading & Writing',module:2},
+        {section:'Math',module:1},
+        {section:'Math',module:2}
       ],
-      currentIndex: 0,
-      answers: {},
-      flagged: new Set(),
-      completed: [],
-      remaining: 0,
-      deadline: 0,
-      timerId: null,
-      paused: false,
-      pauseStartedAt: 0
+      currentIndex:0,
+      answers:{},
+      flagged:new Set(),
+      completed:[],
+      remaining:0,
+      deadline:0,
+      timerId:null,
+      paused:false,
+      pauseStartedAt:0
     };
   }
 
   function startMockExam() {
     exam = buildInitialExam();
     if (!exam) {
-      showStudyToast('Add more original SAT questions before starting a mock test.');
+      showStudyToast('The full mock-test data could not load. Restart StudyAI and try again.');
       return;
     }
     ensureExamShell();
@@ -272,14 +314,14 @@
 
   function moduleQuestions() {
     const phase = currentPhase();
-    if (!phase) return [];
+    if (!phase || !exam) return [];
     const key = moduleKey(phase);
     if (!exam.modules[key] && phase.module === 2) {
-      const firstKey = `${phase.section}:1`;
-      const firstQuestions = exam.modules[firstKey] || [];
-      const firstScore = scoreQuestions(firstQuestions).ratio;
-      const used = new Set(firstQuestions.map(q => q.id));
-      exam.modules[key] = chooseModule(exam.pools[phase.section], phase.section, 2, exam.targets[phase.section], used, firstScore);
+      const firstQuestions = exam.modules[`${phase.section}:1`] || [];
+      const firstScore = scoreQuestions(firstQuestions);
+      const route = mockData().routeFromPerformance(firstScore.ratio);
+      exam.routes[phase.section] = route;
+      exam.modules[key] = mockData().getModule(exam.testNumber, phase.section, 2, route);
     }
     return exam.modules[key] || [];
   }
@@ -293,8 +335,8 @@
     exam.paused = false;
     exam.remaining = TIMING[exam.timingMode][phase.section];
     setTimerFromRemaining();
-    $('#mock-section-label').textContent = phase.section;
-    $('#mock-module-label').textContent = `Module ${phase.module} · ${questions.length} StudyAI questions`;
+    $('#mock-section-label').textContent = `${exam.meta?.title || 'SAT mock'} · ${phase.section}`;
+    $('#mock-module-label').textContent = `Module ${phase.module} · ${questions.length} questions`;
     $('#mock-pause')?.classList.toggle('hidden', exam.breakMode !== 'needed');
     $('#mock-desmos-btn')?.classList.toggle('hidden', phase.section !== 'Math');
     $('#mock-pause-cover')?.classList.add('hidden');
@@ -356,15 +398,37 @@
     startTimer();
   }
 
+  function answerPresent(q) {
+    const value = exam?.answers?.[q.id];
+    return value !== undefined && value !== null && String(value).trim() !== '';
+  }
+
+  function answerCorrect(q) {
+    if (!answerPresent(q)) return false;
+    const value = exam.answers[q.id];
+    if (q.format === 'spr') {
+      const entered = String(value).trim().replace(/,/g,'');
+      return (q.acceptedAnswers || [q.correctAnswer]).some(ans => {
+        const expected = String(ans).trim().replace(/,/g,'');
+        const a = Number(entered), b = Number(expected);
+        return Number.isFinite(a) && Number.isFinite(b) ? Math.abs(a-b) < 1e-9 : entered === expected;
+      });
+    }
+    return Number(value) === Number(q.answer);
+  }
+
   function renderCurrentQuestion() {
     if (!exam) return;
-    const phase = currentPhase();
     const questions = moduleQuestions();
     const q = questions[exam.currentIndex];
     const pane = $('#mock-question-pane');
     if (!pane || !q) return;
     const answer = exam.answers[q.id];
     const flagged = exam.flagged.has(q.id);
+    const response = q.format === 'spr'
+      ? `<div class="mock-spr-wrap"><label for="mock-spr-answer">Your answer</label><input id="mock-spr-answer" class="mock-spr-answer" inputmode="decimal" autocomplete="off" value="${escapeHtml(answer ?? '')}" placeholder="Enter answer"><small>Student-produced response</small></div>`
+      : `<div class="mock-options">${q.options.map((option,index)=>`<button type="button" class="mock-option ${Number(answer)===index?'selected':''}" data-answer="${index}"><span>${String.fromCharCode(65+index)}</span><strong>${escapeHtml(option)}</strong></button>`).join('')}</div>`;
+
     pane.innerHTML = `
       <div class="mock-progress-row">
         <span>Question ${exam.currentIndex + 1} of ${questions.length}</span>
@@ -373,39 +437,50 @@
       <article class="mock-question-card">
         ${q.passage ? `<div class="mock-passage">${escapeHtml(q.passage).replace(/\n/g,'<br>')}</div>` : ''}
         <h3>${escapeHtml(q.stem)}</h3>
-        <div class="mock-options">
-          ${q.options.map((option, index) => `<button type="button" class="mock-option ${answer === index ? 'selected' : ''}" data-answer="${index}"><span>${String.fromCharCode(65+index)}</span><strong>${escapeHtml(option)}</strong></button>`).join('')}
-        </div>
+        ${response}
       </article>
       <div class="mock-question-footer">
-        <button class="button secondary" id="mock-prev" type="button" ${exam.currentIndex === 0 ? 'disabled' : ''}>← Previous</button>
-        <div class="mock-question-dots">${questions.map((item,i)=>`<button type="button" data-jump-q="${i}" class="${i===exam.currentIndex?'current':''} ${exam.answers[item.id] !== undefined ? 'answered' : ''} ${exam.flagged.has(item.id) ? 'flagged' : ''}">${i+1}</button>`).join('')}</div>
-        <button class="button primary" id="mock-next" type="button">${exam.currentIndex === questions.length - 1 ? 'Finish module' : 'Next →'}</button>
-      </div>
-    `;
+        <button class="button secondary" id="mock-prev" type="button" ${exam.currentIndex===0?'disabled':''}>← Previous</button>
+        <div class="mock-question-dots">${questions.map((item,i)=>`<button type="button" data-jump-q="${i}" class="${i===exam.currentIndex?'current':''} ${answerPresent(item)?'answered':''} ${exam.flagged.has(item.id)?'flagged':''}">${i+1}</button>`).join('')}</div>
+        <button class="button primary" id="mock-next" type="button">${exam.currentIndex===questions.length-1?'Finish module':'Next →'}</button>
+      </div>`;
+
     $$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
       exam.answers[q.id] = Number(btn.dataset.answer);
       renderCurrentQuestion();
     }));
+    $('#mock-spr-answer', pane)?.addEventListener('input', event => {
+      exam.answers[q.id] = event.target.value;
+      const dot = $$(`[data-jump-q]`, pane)[exam.currentIndex];
+      dot?.classList.toggle('answered', String(event.target.value).trim() !== '');
+    });
     $('#mock-flag', pane)?.addEventListener('click', () => {
       if (exam.flagged.has(q.id)) exam.flagged.delete(q.id); else exam.flagged.add(q.id);
       renderCurrentQuestion();
     });
-    $('#mock-prev', pane)?.addEventListener('click', () => { exam.currentIndex = Math.max(0, exam.currentIndex - 1); renderCurrentQuestion(); });
+    $('#mock-prev', pane)?.addEventListener('click', () => { exam.currentIndex=Math.max(0,exam.currentIndex-1); renderCurrentQuestion(); });
     $('#mock-next', pane)?.addEventListener('click', () => {
-      if (exam.currentIndex < questions.length - 1) { exam.currentIndex++; renderCurrentQuestion(); }
+      if (exam.currentIndex < questions.length-1) { exam.currentIndex++; renderCurrentQuestion(); }
       else completeModule(false);
     });
     $$('[data-jump-q]', pane).forEach(btn => btn.addEventListener('click', () => {
-      exam.currentIndex = Number(btn.dataset.jumpQ);
-      renderCurrentQuestion();
+      exam.currentIndex=Number(btn.dataset.jumpQ); renderCurrentQuestion();
     }));
   }
 
   function scoreQuestions(questions) {
-    const answered = questions.filter(q => exam.answers[q.id] !== undefined);
-    const correct = questions.filter(q => exam.answers[q.id] === q.answer).length;
-    return {correct, total: questions.length, answered: answered.length, ratio: questions.length ? correct / questions.length : 0};
+    const operational = questions.filter(q => !q.pretest);
+    const correct = operational.filter(answerCorrect).length;
+    const answered = questions.filter(answerPresent).length;
+    const operationalAnswered = operational.filter(answerPresent).length;
+    return {
+      correct,
+      total:operational.length,
+      questionTotal:questions.length,
+      answered,
+      operationalAnswered,
+      ratio:operational.length ? correct / operational.length : 0
+    };
   }
 
   function completeModule(autoEnded) {
@@ -438,7 +513,7 @@
       <div class="module-transition">
         <span class="small-label">${autoEnded ? 'Time expired' : 'Module complete'}</span>
         <h3>${escapeHtml(from.section)} Module ${from.module} finished.</h3>
-        <p>You answered ${score.answered} of ${score.total} questions. Results stay hidden until the end of the full mock test.</p>
+        <p>You answered ${score.answered} of ${score.questionTotal} questions. Results stay hidden until the end of the full mock test.</p>
         ${breakSeconds ? `<div class="scheduled-break"><span>${from.section !== next.section ? 'Section break' : 'Extended module break'}</span><strong id="break-timer">${fmtTime(breakSeconds)}</strong></div>` : '<p class="muted">No scheduled break between these modules.</p>'}
         <button class="button primary" id="continue-mock" type="button">${breakSeconds ? 'Start / skip break and continue' : 'Continue'}</button>
       </div>
@@ -475,27 +550,35 @@
     const pane = $('#mock-question-pane');
     const allQuestions = exam.phases.flatMap(phase => exam.modules[`${phase.section}:${phase.module}`] || []);
     const overall = scoreQuestions(allQuestions);
-    const rwQs = allQuestions.filter(q => q.section === 'Reading & Writing');
-    const mathQs = allQuestions.filter(q => q.section === 'Math');
-    const rw = scoreQuestions(rwQs);
-    const math = scoreQuestions(mathQs);
+    const rw = scoreQuestions(allQuestions.filter(q => q.section === 'Reading & Writing'));
+    const math = scoreQuestions(allQuestions.filter(q => q.section === 'Math'));
+    const percent = overall.total ? Math.round(overall.correct / overall.total * 100) : 0;
+    saveMockHistory(exam.testNumber, {percent});
+    renderMockCards();
+
+    const rwRoute = mockData()?.routeLabel(exam.routes['Reading & Writing'] || 'medium') || '';
+    const mathRoute = mockData()?.routeLabel(exam.routes['Math'] || 'medium') || '';
+
     if (pane) pane.innerHTML = `
       <div class="mock-results">
-        <span class="small-label">Mock complete</span>
-        <h3>${overall.correct} / ${overall.total} correct</h3>
-        <p>This is a raw StudyAI practice result, not an SAT scaled score.</p>
+        <span class="small-label">${escapeHtml(exam.meta?.title || 'Mock test')} complete</span>
+        <h3>${percent}% operational accuracy</h3>
+        <p>You completed all four modules. Like the real SAT design, each module also contained two unscored pretest questions, so this raw result is based on 90 operational questions and is not an official SAT scaled score.</p>
         <div class="mock-result-grid">
-          <div><span>Reading & Writing</span><strong>${rw.correct}/${rw.total}</strong><small>${Math.round(rw.ratio*100)}%</small></div>
-          <div><span>Math</span><strong>${math.correct}/${math.total}</strong><small>${Math.round(math.ratio*100)}%</small></div>
-          <div><span>Answered</span><strong>${overall.answered}/${overall.total}</strong><small>${overall.total-overall.answered} blank</small></div>
+          <div><span>Reading & Writing</span><strong>${rw.correct}/${rw.total}</strong><small>${Math.round(rw.ratio*100)}% · ${escapeHtml(rwRoute)}</small></div>
+          <div><span>Math</span><strong>${math.correct}/${math.total}</strong><small>${Math.round(math.ratio*100)}% · ${escapeHtml(mathRoute)}</small></div>
+          <div><span>Total questions</span><strong>98</strong><small>${overall.answered}/98 answered</small></div>
         </div>
-        <div class="button-row"><button class="button primary" id="mock-again" type="button">New mock test</button><button class="button secondary" id="mock-done" type="button">Return to SAT practice</button></div>
-      </div>
-    `;
+        <div class="button-row"><button class="button primary" id="mock-again" type="button">Retake this test</button><button class="button secondary" id="mock-done" type="button">Choose another test</button></div>
+      </div>`;
     $('#mock-timer').textContent = 'Done';
     $('#mock-pause')?.classList.add('hidden');
     $('#mock-desmos-btn')?.classList.add('hidden');
-    $('#mock-again')?.addEventListener('click', startMockExam);
+    $('#mock-again')?.addEventListener('click', () => {
+      const n=exam.testNumber;
+      exitMock();
+      openMockSetup(n);
+    });
     $('#mock-done')?.addEventListener('click', exitMock);
   }
 

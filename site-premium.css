@@ -823,3 +823,388 @@ html[data-theme="dark"] .footer{
     transition:none!important;
   }
 }
+
+
+/* ---------- Warm expressive StudyAI palette ----------
+   Inspired by the reference's warmth and punch, while keeping StudyAI original. */
+:root{
+  --paper:#f6f3ec;
+  --surface:#fffdf8;
+  --surface-2:#efeae1;
+  --ink:#181816;
+  --muted:#6f6b63;
+  --line:#d8d0c5;
+
+  /* Existing component names keep working, but the palette is richer. */
+  --teal:#3157d5;
+  --teal-dark:#223ca4;
+  --teal-soft:#e6ebff;
+  --blue:#7755e7;
+  --blue-soft:#eeeaff;
+
+  --accent-orange:#ff5b38;
+  --accent-orange-dark:#d94325;
+  --accent-gold:#f3c847;
+  --accent-violet:#7550df;
+  --accent-mint:#55bda4;
+  --accent-pink:#e874a2;
+
+  --shadow:0 12px 30px rgba(35,30,22,.09);
+  --premium-card-border:#24231f;
+  --premium-soft-shadow:0 18px 46px rgba(48,38,26,.09);
+  --premium-card-shadow:6px 7px 0 #20201d,0 12px 28px rgba(48,38,26,.07);
+  --premium-hover-shadow:8px 9px 0 #223ca4,0 18px 36px rgba(49,55,120,.12);
+}
+
+html[data-theme="dark"]{
+  --paper:#151515;
+  --surface:#1e1e1d;
+  --surface-2:#282725;
+  --ink:#f7f3e9;
+  --muted:#bbb4a9;
+  --line:#45413b;
+  --teal:#7c9cff;
+  --teal-dark:#a8baff;
+  --teal-soft:#222c4d;
+  --blue:#a58aff;
+  --blue-soft:#2a2444;
+
+  --accent-orange:#ff7658;
+  --accent-orange-dark:#ff5b38;
+  --accent-gold:#f2cb59;
+  --accent-violet:#a58aff;
+  --accent-mint:#72d1b9;
+  --accent-pink:#ef8fb6;
+
+  --premium-card-border:#5a554d;
+  --premium-card-shadow:6px 7px 0 #080808,0 14px 30px rgba(0,0,0,.22);
+  --premium-hover-shadow:8px 9px 0 #304b9b,0 20px 38px rgba(0,0,0,.3);
+}
+
+body{
+  background:
+    radial-gradient(circle at 16% 2%,rgba(243,200,71,.12),transparent 20%),
+    radial-gradient(circle at 82% 4%,rgba(117,80,223,.10),transparent 21%),
+    var(--paper);
+}
+
+/* Inkier outlines and warmer surfaces make cards feel more tactile. */
+.hero-summary,
+.feature-strip-grid a,
+.chapter-rail,
+.reader,
+.sat-score-card,
+.sat-sidebar,
+.sat-main,
+.workspace-sidebar,
+.workspace-editor-card,
+.folder-row,
+.practice-shell,
+.metric-grid article,
+.dashboard-card,
+.planner-form,
+.tutor-input,
+.tutor-answer,
+.tool-card{
+  border-color:color-mix(in srgb,var(--premium-card-border) 76%,var(--line));
+}
+
+/* Primary actions become the warm focal point, like the reference, without copying it. */
+.button.primary{
+  color:#fff;
+  border-color:#1f1e1b;
+  background:linear-gradient(180deg,#ff6848,var(--accent-orange));
+  box-shadow:3px 4px 0 #1f1e1b;
+}
+.button.primary:hover{
+  background:linear-gradient(180deg,#ff7658,#ef4e2d);
+  box-shadow:5px 6px 0 #1f1e1b,0 10px 20px rgba(255,91,56,.18);
+}
+.button.primary:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--accent-gold) 75%,#fff);
+  outline-offset:3px;
+}
+
+.button.secondary,.file-button{
+  border-color:#25241f;
+  background:var(--surface);
+  color:var(--ink);
+  box-shadow:2px 3px 0 #25241f;
+}
+.button.secondary:hover,.file-button:hover{
+  border-color:var(--teal);
+  background:color-mix(in srgb,var(--blue-soft) 64%,var(--surface));
+  color:var(--teal-dark);
+}
+
+/* Brand mark uses a layered-paper feel rather than one flat blue tile. */
+.brand-mark{
+  position:relative;
+  overflow:visible;
+  color:#fff;
+  border-color:#1f1e1b;
+  background:linear-gradient(145deg,var(--teal),var(--accent-violet));
+  box-shadow:3px 3px 0 #1f1e1b;
+}
+.brand-mark::before,
+.brand-mark::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:82%;
+  height:82%;
+  border:1.5px solid #1f1e1b;
+  border-radius:8px;
+}
+.brand-mark::before{
+  right:-6px;
+  top:-5px;
+  background:var(--accent-gold);
+}
+.brand-mark::after{
+  right:-10px;
+  top:-1px;
+  background:var(--accent-orange);
+}
+
+/* Navigation: cobalt structure with warm interaction highlights. */
+.main-nav{
+  border-color:#292823;
+  background:rgba(255,253,248,.76);
+}
+.main-nav a:hover{
+  background:color-mix(in srgb,var(--accent-gold) 30%,var(--surface));
+  color:var(--ink);
+}
+#open-command,.account-button,.theme-button,.mobile-nav-btn,.settings-button{
+  border-color:#2c2a26;
+  background:color-mix(in srgb,var(--surface) 94%,var(--accent-gold));
+}
+#open-command:hover,.account-button:hover,.theme-button:hover,.mobile-nav-btn:hover,.settings-button:hover{
+  border-color:var(--teal);
+  background:var(--blue-soft);
+}
+
+/* Section underline is now multicolor and more visible. */
+.section-head::after{
+  width:126px;
+  height:4px;
+  background:linear-gradient(90deg,var(--accent-orange) 0 32%,var(--accent-gold) 32% 58%,var(--accent-violet) 58% 79%,var(--teal) 79%);
+}
+
+/* The hero gets subtle color blocks rather than a sterile blue glow. */
+.hero::before{
+  width:min(820px,75vw);
+  height:min(820px,75vw);
+  background:
+    radial-gradient(circle at 38% 38%,rgba(243,200,71,.22),transparent 29%),
+    radial-gradient(circle at 62% 45%,rgba(117,80,223,.15),transparent 36%),
+    radial-gradient(circle at 50% 62%,rgba(49,87,213,.12),transparent 42%);
+}
+.hero .kicker{
+  display:inline-flex;
+  padding:6px 10px;
+  border:1.5px solid #24231f;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--accent-gold) 38%,var(--surface));
+  color:var(--ink);
+}
+.trust-row span:nth-child(1){background:color-mix(in srgb,var(--accent-gold) 22%,var(--surface))}
+.trust-row span:nth-child(2){background:color-mix(in srgb,var(--accent-mint) 18%,var(--surface))}
+.trust-row span:nth-child(3){background:color-mix(in srgb,var(--accent-violet) 13%,var(--surface))}
+
+.hero-summary::before{
+  width:7px;
+  background:linear-gradient(180deg,var(--accent-orange),var(--accent-gold) 38%,var(--accent-violet) 68%,var(--teal));
+}
+.rule-progress span{
+  background:linear-gradient(90deg,var(--accent-orange),var(--accent-gold) 42%,var(--accent-violet) 72%,var(--teal));
+}
+
+/* Feature cards each get their own restrained accent identity. */
+.feature-strip-grid a{position:relative;overflow:hidden}
+.feature-strip-grid a::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:5px;
+}
+.feature-strip-grid a:nth-child(1)::before{background:var(--accent-orange)}
+.feature-strip-grid a:nth-child(2)::before{background:var(--teal)}
+.feature-strip-grid a:nth-child(3)::before{background:var(--accent-violet)}
+.feature-strip-grid a:nth-child(4)::before{background:var(--accent-gold)}
+.feature-strip-grid a:nth-child(1)>span{color:var(--accent-orange-dark)}
+.feature-strip-grid a:nth-child(2)>span{color:var(--teal)}
+.feature-strip-grid a:nth-child(3)>span{color:var(--accent-violet)}
+.feature-strip-grid a:nth-child(4)>span{color:#a77b00}
+
+/* Active / selected states are richer than a single pale-blue fill. */
+.chapter-list button.active,
+.segmented.vertical button.active,
+.article-tabs button.active{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent-gold) 24%,var(--surface)),color-mix(in srgb,var(--blue-soft) 72%,var(--surface)));
+  color:var(--ink);
+}
+.chapter-list button.active,
+.segmented.vertical button.active{
+  box-shadow:inset 4px 0 0 var(--accent-orange);
+}
+
+.curriculum-notice,
+.sat-disclaimer{
+  border-left-color:var(--accent-orange);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent-gold) 20%,var(--surface)),color-mix(in srgb,var(--blue-soft) 50%,var(--surface)));
+  color:var(--ink);
+}
+
+/* Progress cards use different accents, making the dashboard easier to scan. */
+.metric-grid article:nth-child(1)::before{background:var(--accent-orange)}
+.metric-grid article:nth-child(2)::before{background:var(--accent-gold)}
+.metric-grid article:nth-child(3)::before{background:var(--teal)}
+.metric-grid article:nth-child(4)::before{background:var(--accent-violet)}
+
+/* Tool cards get alternating accent bars. */
+.tool-card:nth-child(4n+1)::before{background:var(--accent-orange)}
+.tool-card:nth-child(4n+2)::before{background:var(--teal)}
+.tool-card:nth-child(4n+3)::before{background:var(--accent-violet)}
+.tool-card:nth-child(4n+4)::before{background:var(--accent-gold)}
+
+/* Workspace and study surfaces get warmer paper tones. */
+.reader,
+.workspace-editor-card,
+.practice-shell,
+.tutor-answer{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.34),transparent 22%),
+    var(--surface);
+}
+.article-head,
+.workspace-editor-top{
+  background:
+    linear-gradient(120deg,color-mix(in srgb,var(--accent-gold) 13%,var(--surface)),color-mix(in srgb,var(--blue-soft) 40%,var(--surface)));
+}
+
+/* Flashcards become intentionally colorful, not just white slabs. */
+.flashcard-front-face{
+  background:
+    radial-gradient(circle at 88% 10%,rgba(243,200,71,.20),transparent 28%),
+    radial-gradient(circle at 10% 88%,rgba(49,87,213,.12),transparent 32%),
+    var(--surface)!important;
+}
+.flashcard-back-face{
+  background:
+    radial-gradient(circle at 88% 10%,rgba(117,80,223,.17),transparent 30%),
+    radial-gradient(circle at 10% 88%,rgba(255,91,56,.12),transparent 32%),
+    var(--surface)!important;
+}
+.flashcard{filter:drop-shadow(7px 9px 0 #1f1e1b)}
+.card-label{
+  display:inline-flex;
+  width:max-content;
+  padding:5px 9px;
+  border:1px solid #24231f;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--accent-gold) 35%,var(--surface));
+  color:var(--ink)!important;
+}
+
+/* SAT practice dashboard gets the reference's warm energy through original colors. */
+.sat-practice-hub{
+  background:
+    radial-gradient(circle at 18% 0%,rgba(243,200,71,.16),transparent 25%),
+    radial-gradient(circle at 82% 0%,rgba(117,80,223,.13),transparent 26%),
+    var(--surface);
+  border-color:#292823;
+}
+.sat-practice-hub::before{
+  height:6px;
+  background:linear-gradient(90deg,var(--accent-orange),var(--accent-gold),var(--accent-violet),var(--teal));
+}
+.practice-hub-mark .back{background:var(--accent-violet)}
+.practice-hub-mark .middle{background:var(--accent-gold)}
+.practice-hub-mark .front{background:var(--surface)}
+.mock-test-accent{
+  background:linear-gradient(180deg,var(--accent-orange),var(--accent-gold) 42%,var(--accent-violet) 72%,var(--teal));
+}
+.mock-test-doc-icon::before{background:var(--accent-gold)}
+.mock-status-pill.completed{
+  color:var(--ink);
+  background:color-mix(in srgb,var(--accent-mint) 24%,var(--surface));
+  border-color:#24231f;
+}
+.mock-score-outlook{
+  border-color:#292823;
+  background:
+    linear-gradient(135deg,color-mix(in srgb,var(--accent-gold) 15%,var(--surface)),color-mix(in srgb,var(--blue-soft) 38%,var(--surface)));
+}
+
+/* Small chips and badges get more visible contrast. */
+.folio,
+.practice-hub-note>span,
+.mock-setup-summary{
+  border:1px solid color-mix(in srgb,#24231f 66%,var(--line));
+  color:var(--ink);
+  background:color-mix(in srgb,var(--accent-gold) 28%,var(--surface));
+}
+
+/* Inputs keep warm paper surfaces and stronger ink borders. */
+input,select,textarea{
+  border-color:color-mix(in srgb,#292823 42%,var(--line))!important;
+  background:#fffefb!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--teal)!important;
+  box-shadow:0 0 0 4px rgba(49,87,213,.13)!important;
+}
+
+/* Footer has a colorful edge rather than looking like another plain block. */
+.footer{
+  position:relative;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(243,200,71,.16),transparent 22%),
+    radial-gradient(circle at 92% 10%,rgba(117,80,223,.10),transparent 25%),
+    var(--surface);
+}
+.footer::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:4px;
+  background:linear-gradient(90deg,var(--accent-orange),var(--accent-gold),var(--accent-violet),var(--teal));
+}
+
+/* Dark theme: keep the same accent personality, without bright cream surfaces. */
+html[data-theme="dark"] body{
+  background:
+    radial-gradient(circle at 14% 0%,rgba(243,200,71,.07),transparent 21%),
+    radial-gradient(circle at 86% 0%,rgba(165,138,255,.08),transparent 23%),
+    var(--paper);
+}
+html[data-theme="dark"] .main-nav{
+  background:rgba(30,30,29,.82);
+  border-color:#5a554d;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{
+  background:#242321!important;
+}
+html[data-theme="dark"] .button.primary{
+  color:#fff;
+  border-color:#080808;
+  box-shadow:3px 4px 0 #080808;
+}
+html[data-theme="dark"] .button.secondary,
+html[data-theme="dark"] .file-button{
+  border-color:#70695f;
+  background:#201f1d;
+  box-shadow:2px 3px 0 #080808;
+}
+html[data-theme="dark"] .flashcard{filter:drop-shadow(7px 9px 0 #080808)}
+html[data-theme="dark"] .card-label,
+html[data-theme="dark"] .folio,
+html[data-theme="dark"] .practice-hub-note>span{
+  color:var(--ink)!important;
+  border-color:#70695f;
+  background:color-mix(in srgb,var(--accent-gold) 16%,var(--surface));
+}

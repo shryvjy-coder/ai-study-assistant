@@ -11,6 +11,7 @@ def enhanced_index():
         style_marker
         + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
+        + '\n  <link rel="stylesheet" href="personal-ai.css" />'
     )
     if 'site-premium.css' not in html:
         html = html.replace(style_marker, style_enhancement)
@@ -22,6 +23,7 @@ def enhanced_index():
         + '\n<script src="flashcard-enhancements.js"></script>'
         + '\n<script src="sat-mock-data.js"></script>'
         + '\n<script src="sat-exam-tools.js"></script>'
+        + '\n<script src="personal-ai.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

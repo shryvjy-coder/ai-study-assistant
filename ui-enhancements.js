@@ -18,7 +18,7 @@
   function buildLeftRail() {
     if ($('#studyai-right-rail')) return;
     const links = [
-      ['Home', '#home', '⌂'],['Study', '#study', '▤'],['SAT', '#sat', 'A'],['Workspace', '#workspace', '✎'],
+      ['Home', '#home', '⌂'],['Study', '#study', '▤'],['SAT', '#sat', 'A'],['Workspace', '#workspace', '✎'],['Personal AI', '#personal-ai', '✦'],
       ['Flashcards', '#flashcards', '◇'],['Practice', '#practice', '✓'],['Progress', '#progress', '↗'],
       ['Planner', '#planner', '□'],['Tutor', '#tutor', '?'],['Tools', '#tools', '⋯']
     ];

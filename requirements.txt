@@ -3,3 +3,5 @@ Authlib>=1.6,<2
 python-dotenv>=1.0,<2
 PyJWT[crypto]>=2.8,<3
 requests>=2.32,<3
+pypdf>=5.0,<7
+python-docx>=1.2,<2

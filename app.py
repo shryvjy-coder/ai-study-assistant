@@ -192,9 +192,17 @@ def index():
 @app.get('/<path:path>')
 def static_files(path):
     # API and auth routes are defined before this catch-all route by Flask's routing table.
+    # Serve only explicitly permitted browser assets. Never expose .env, SQLite,
+    # Python source, git internals, or other server-side files through this route.
+    allowed_extensions = {'.css', '.js', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.woff2'}
     file_path = BASE_DIR / path
-    if file_path.is_file() and BASE_DIR in file_path.resolve().parents:
+    if (file_path.suffix.lower() in allowed_extensions
+            and not any(part.startswith('.') for part in Path(path).parts)
+            and file_path.is_file()
+            and BASE_DIR in file_path.resolve().parents):
         return send_from_directory(BASE_DIR, path)
+    if path.startswith(('api/', 'auth/')):
+        return jsonify({'ok': False, 'error': 'Not found'}), 404
     return send_from_directory(BASE_DIR, 'index.html')
 
 
@@ -336,6 +344,10 @@ def oauth_callback(provider):
         app.logger.exception('OAuth callback failed for %s', provider)
         return redirect('/?auth_error=oauth_failed')
 
+
+# Register separately maintained Personal AI endpoints before starting Flask.
+from personal_ai import register_personal_ai
+register_personal_ai(app, current_user)
 
 init_db()
 configure_oauth()

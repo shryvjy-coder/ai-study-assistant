@@ -198,5 +198,49 @@ The current build is a strong local/full-stack MVP and portfolio base, not yet a
 
 ## Interaction fixes in this build
 
-- Password fields now include an accessible Show/Hide control. Revealing a password uses a short particle-dissolve transition, with a reduced-motion fallback.
+- Password fields now include an accessible simple Show/Hide control, with no custom password animations.
 - Flashcards now use a true two-sided 3D flip interaction. Click, tap, or focus and activate the card to switch between question and answer.
+
+
+---
+
+## Personal AI — grounded notes and audio discussions
+
+Personal AI is a separate section of StudyAI. Open it using **StudyAI.bat** (which starts
+`launcher.py`) rather than Live Server or `app.py` directly.
+
+**Sources:** Upload selectable-text PDF, DOCX, TXT or Markdown notes (8 MB per file,
+up to 48,000 extracted characters per note), paste text, or import the current
+chapter outline or a saved Workspace note. Select up to 8 sources with a total
+of 52,000 characters. Scanned/image-only PDFs are not supported yet.
+
+**AI tools:** Summarize, generate structured notes, improve existing notes without
+adding unsupported factual content, ask a source-grounded question, or generate
+an editable eight-turn, two-speaker audio discussion. The discussion can be
+synthesized into a downloadable WAV file with two clearly labeled AI voices.
+Generated notes can be copied or saved to the StudyAI Workspace.
+
+**Set up AI generation:**
+
+1. Copy `.env.example` to `.env` in the StudyAI project folder.
+2. Add your own `OPENAI_API_KEY=...` line in `.env`. Never put the key in JavaScript,
+   HTML, a public GitHub commit or a screenshot.
+3. Run `StudyAI.bat`. Existing installations detect and install the new PDF/DOCX
+   libraries when needed. Sign in with a StudyAI account before generating AI content.
+4. In Personal AI, select your notes and choose a tool. Generating text or audio
+   uses the API account's usage/billing, and an internet connection is required.
+
+The backend defaults to `gpt-4o-mini` for text and `tts-1` for speech; override
+`STUDYAI_TEXT_MODEL` or `STUDYAI_SPEECH_MODEL` in `.env` if desired.
+This is a StudyAI source-grounded workflow, **not** NotebookLM or an identical
+replica of its features. Model results can still be wrong; check references.
+
+**Privacy and limits:** Source text is stored in this browser, separately scoped
+for guest/account use. Personal AI source documents and generated WAV audio are
+not written to the server's database or uploaded to GitHub, and source libraries
+are not included in account sync. Selected source text is sent to the configured
+OpenAI API only when generation is requested. Saved generated notes do become
+Workspace notes and follow normal StudyAI workspace sync rules. Do not upload
+secrets or other sensitive records. There is basic per-user usage throttling,
+but a public deployment still needs robust account protection, costs/quotas,
+data deletion and privacy controls, and HTTPS.

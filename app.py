@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / '.env')
 
 app = Flask(__name__, static_folder=None)
-app.secret_key = os.getenv('SECRET_KEY', 'dev-change-this-secret-key')
+app.secret_key = os.getenv('SECRET_KEY') or 'dev-change-this-secret-key'
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',

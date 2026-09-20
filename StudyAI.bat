@@ -25,6 +25,14 @@ if not exist ".venv\Scripts\python.exe" (
     if errorlevel 1 goto :error
 )
 
+rem Existing installations may need new Personal AI PDF/DOCX dependencies.
+".venv\Scripts\python.exe" -c "import pypdf, docx" >nul 2>&1
+if errorlevel 1 (
+    echo Installing new StudyAI features...
+    ".venv\Scripts\python.exe" -m pip install -r requirements.txt
+    if errorlevel 1 goto :error
+)
+
 start "" "http://127.0.0.1:5000"
 echo StudyAI is starting in your browser...
 echo Keep this window open while using StudyAI.

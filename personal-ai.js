@@ -266,56 +266,32 @@
     const topic = $('#pai-topic-topic');
     if (!board || !grade || !subject || !topic) return;
 
-    // Primary path: use the dedicated bridge that reads StudyAI's working
-    // Study Library controls. This avoids cross-script scope problems.
-    const bridge = window.StudyAICurriculum;
-    if (bridge && typeof bridge.boards === 'function') {
-      const boards = bridge.boards();
-      const boardChoice = level === 'init'
-        ? (document.querySelector('#board-filter')?.value || boards[0])
-        : (board.value || boards[0]);
-      fillTopicSelect(board,boards,boardChoice);
-
-      const grades = bridge.grades(board.value);
-      const gradeChoice = level === 'init'
-        ? (document.querySelector('#grade-filter')?.value || grades[0])
-        : (grade.value || grades[0]);
-      fillTopicSelect(grade,grades,gradeChoice);
-
-      const subjects = bridge.subjects(board.value,grade.value);
-      const subjectChoice = level === 'init'
-        ? (document.querySelector('#subject-filter')?.value || subjects[0])
-        : (subject.value || subjects[0]);
-      fillTopicSelect(subject,subjects,subjectChoice);
-
-      const topicTitles = bridge.topics(board.value,grade.value,subject.value);
-      const topicChoice = topic.value || topicTitles[0];
-      fillTopicSelect(topic,topicTitles,topicChoice);
+    // Preferred path: StudyAI core publishes the curriculum itself. This is
+    // deterministic and does not depend on rendered Study Library controls.
+    const core = window.StudyAICurriculumData;
+    if (core && typeof core.boards === 'function') {
+      const boards = core.boards();
+      fillTopicSelect(board,boards,boards.includes(board.value) ? board.value : boards[0]);
+      const grades = core.grades(board.value);
+      fillTopicSelect(grade,grades,grades.includes(grade.value) ? grade.value : grades[0]);
+      const subjects = core.subjects(board.value,grade.value);
+      fillTopicSelect(subject,subjects,subjects.includes(subject.value) ? subject.value : subjects[0]);
+      const entries = core.topics(board.value,grade.value,subject.value);
+      const previous = topic.value;
+      topic.innerHTML='';
+      entries.forEach(entry=>{
+        const option=document.createElement('option');
+        option.value=entry.id;
+        option.textContent=entry.title;
+        if(entry.id===previous) option.selected=true;
+        topic.appendChild(option);
+      });
       updateTopicPreview();
       return;
     }
 
-    // Emergency fallback for an unusual page load.
-    const coreBoard = document.querySelector('#board-filter');
-    const coreGrade = document.querySelector('#grade-filter');
-    const coreSubject = document.querySelector('#subject-filter');
-    if (!coreBoard || !coreGrade || !coreSubject) {
-      $('#pai-topic-preview').textContent = 'StudyAI curriculum controls are still loading. Refresh the page once.';
-      return;
-    }
-    const boards = optionValues(coreBoard);
-    fillTopicSelect(board,boards,coreBoard.value || boards[0]);
-    syncStudyLibrary(board.value,'','');
-    const grades = optionValues(coreGrade);
-    fillTopicSelect(grade,grades,coreGrade.value || grades[0]);
-    syncStudyLibrary(board.value,grade.value,'');
-    const subjects = optionValues(coreSubject);
-    fillTopicSelect(subject,subjects,coreSubject.value || subjects[0]);
-    syncStudyLibrary(board.value,grade.value,subject.value);
-    const titles = [...document.querySelectorAll('#chapter-list .chapter-item')]
-      .map(item => item.dataset.topic || item.textContent.replace(/^✓\s*/,'').trim()).filter(Boolean);
-    fillTopicSelect(topic,titles,titles[0]);
-    updateTopicPreview();
+    const preview=$('#pai-topic-preview');
+    if(preview) preview.textContent='Curriculum is loading…';
   }
 
   function updateTopicPreview() {
@@ -376,6 +352,7 @@
     const count = topicEntries().length;
     panel.dataset.topicCount = String(count);
     updateTopicPicker('init');
+    window.addEventListener('studyai:curriculum-ready',()=>updateTopicPicker('init'),{once:true});
     $('#pai-topic-board').addEventListener('change',()=>updateTopicPicker('board'));
     $('#pai-topic-grade').addEventListener('change',()=>updateTopicPicker('grade'));
     $('#pai-topic-subject').addEventListener('change',()=>updateTopicPicker('subject'));

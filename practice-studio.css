@@ -1,0 +1,55 @@
+/* Original StudyAI SAT Practice Studio */
+.practice-studio-section{background:var(--paper)}
+.ps-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.ps-builder,.ps-runner{
+ min-width:0;border:1.5px solid var(--premium-card-border,var(--line));
+ border-radius:20px;background:var(--surface);padding:clamp(18px,3vw,29px);
+ box-shadow:5px 6px 0 color-mix(in srgb,var(--ink) 72%,transparent);
+}
+.ps-builder h3,.ps-results h3{font-family:var(--serif);font-size:clamp(1.5rem,3.5vw,2.2rem);margin:4px 0 18px}
+.ps-mode-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:10px 0 20px}
+.ps-mode-grid button{
+ padding:14px 10px;min-width:0;border:1.5px solid var(--line);border-radius:13px;
+ background:var(--surface);color:var(--ink);text-align:left;font:inherit;cursor:pointer;
+ transition:transform .2s ease,border-color .2s ease,background-color .2s ease
+}
+.ps-mode-grid button strong,.ps-mode-grid button small{display:block;overflow-wrap:anywhere}
+.ps-mode-grid button strong{font-size:.87rem}
+.ps-mode-grid button small{font-size:.72rem;margin-top:7px;color:var(--muted);line-height:1.4}
+.ps-mode-grid button.active{border-color:var(--teal);background:var(--teal-soft);color:var(--teal-dark);box-shadow:2px 3px 0 var(--teal)}
+.ps-mode-grid button.active small{color:var(--teal-dark)}
+.ps-mode-grid button:hover{transform:translateY(-2px);border-color:var(--teal)}
+.ps-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ps-fields label{display:block;min-width:0;color:var(--ink);font-size:.83rem;font-weight:700}
+.ps-fields select,.ps-fields input{display:block;width:100%;max-width:100%;min-width:0;margin-top:6px;box-sizing:border-box}
+.ps-preview{margin:14px 0;color:var(--teal);font-size:.88rem;font-weight:700}
+.ps-help,.ps-disclaimer{font-size:.78rem;line-height:1.6;color:var(--muted)}
+.ps-disclaimer{margin:18px 0 0;max-width:740px}
+.ps-runner[hidden],.ps-builder[hidden]{display:none!important}
+.ps-runner-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-weight:700}
+.ps-clock{font-variant-numeric:tabular-nums;font-size:1.2rem;color:var(--accent-orange-dark)}
+.ps-question{max-width:930px;margin:auto}
+.ps-crumb{margin:22px 0 8px;font-size:.78rem;font-weight:700;color:var(--teal)}
+.ps-question h3{font-family:var(--serif);font-size:clamp(1.35rem,2.8vw,1.9rem);line-height:1.35}
+.ps-passage{padding:16px;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;background:var(--paper);white-space:pre-wrap;line-height:1.65}
+.ps-choices{display:grid;gap:10px;margin:19px 0}
+.ps-choices button{display:flex;align-items:start;gap:12px;text-align:left;min-width:0;padding:13px;border:1.5px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;overflow-wrap:anywhere}
+.ps-choices button span{flex:0 0 25px;font-weight:800;color:var(--teal)}
+.ps-choices button:hover:not(:disabled){border-color:var(--teal);background:var(--teal-soft)}
+.ps-choices button.correct{border-color:var(--accent-mint);background:color-mix(in srgb,var(--accent-mint) 15%,var(--surface))}
+.ps-choices button.wrong{border-color:var(--accent-orange);background:color-mix(in srgb,var(--accent-orange) 12%,var(--surface))}
+.ps-choices button:disabled{cursor:default}
+.ps-feedback{padding:14px;border-radius:12px;margin-bottom:12px;border:1px solid var(--line);line-height:1.6}
+.ps-feedback.correct{background:color-mix(in srgb,var(--accent-mint) 12%,var(--surface))}
+.ps-feedback.wrong{background:color-mix(in srgb,var(--accent-orange) 11%,var(--surface))}
+.ps-feedback p{margin:5px 0 0}
+.ps-runner-actions,.ps-result-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:18px}
+.ps-breakdown{margin-top:20px;border-top:1px solid var(--line);padding-top:15px}
+.ps-breakdown h4{font-family:var(--serif);margin:0 0 12px}
+.ps-breakdown-row{display:flex;justify-content:space-between;gap:16px;align-items:center;border-bottom:1px solid var(--line);padding:10px 0}
+.ps-breakdown-row span{font-variant-numeric:tabular-nums;color:var(--muted)}
+button[data-ps-mode]:focus-visible,.ps-choices button:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+@media(max-width:1100px){.ps-mode-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.ps-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ps-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:490px){.ps-mode-grid,.ps-fields{grid-template-columns:minmax(0,1fr)}.ps-breakdown-row{flex-direction:column;align-items:flex-start;gap:3px}}
+@media(prefers-reduced-motion:reduce){.ps-mode-grid button{transition:none}}

@@ -8,7 +8,7 @@
   const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const bank=bridge.getSatQuestions().filter(q=>q&&q.id&&q.section&&q.skill&&q.stem&&Array.isArray(q.options)&&q.options.length===4);
   const LEVELS=['Foundation','Medium','Advanced'];
-  const random=items=>[...items].sort(()=>Math.random()-.5);
+  const random=items=>{const arr=[...items];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr};
   let session=null,interval=null;
   function makeUI(){
     const sibling=$('#practice');

@@ -14,7 +14,7 @@
   const correct=items=>items.filter(h=>h.correct===true).length;
   const unique=[...new Set(current.map(h=>h.key).filter(Boolean))].length;
   const byDay=Array.from({length:7},(_,i)=>{
-   const start=now-(6-i)*24*60*60*1000;
+   const start=now-(7-i)*24*60*60*1000;
    const end=start+24*60*60*1000;
    return current.filter(h=>h.at>=start&&h.at<end).length;
   });
@@ -74,7 +74,7 @@
    '<div class="weekly-chart" id="weekly-chart" aria-label="Daily practice count"></div>',
    '<p id="weekly-goal-note" class="weekly-note"></p>',
    '<div class="weekly-goal-panel"><div><strong>Weekly practice goal</strong><p>Optional, adjustable, and never required to use StudyAI.</p></div>',
-   '<div class="weekly-goal-actions"><label>Questions this week<input type="number" id="weekly-goal-input" min="0" max="500" step="5" placeholder="No goal"></label>',
+   '<div class="weekly-goal-actions"><label>Questions in 7 days<input type="number" id="weekly-goal-input" min="0" max="500" step="5" placeholder="No goal"></label>',
    '<button type="button" class="button secondary compact" id="weekly-save-goal">Save goal</button></div>',
    '<div class="weekly-goal-track"><span id="weekly-goal-bar" style="width:0%"></span></div><small id="weekly-goal-progress">No goal set</small></div>',
    '<div class="weekly-next"><p><strong>Current attention:</strong> <span id="weekly-weak"></span></p><p><strong>Review backlog:</strong> <span id="weekly-todo"></span></p></div>',

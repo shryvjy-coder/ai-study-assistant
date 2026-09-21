@@ -130,7 +130,7 @@ function smartReviewCandidates(now=Date.now()){
   const title=first.title||first.skill||'Practice mistakes';
   results.push({
    key:'mistake|'+unit,type:'mistake',priority:86+Math.min(20,misses*3)+Math.min(8,rows.length*2),
-   title,detail:rows.length+' unanswered review question'+(rows.length===1?'':'s')+
+   title,detail:rows.length+' open review question'+(rows.length===1?'':'s')+
     ' · '+misses+' recorded miss'+(misses===1?'':'es')+'.',
    label,action:'Review mistakes',meta:first.kind==='curriculum'?[first.grade,first.subject].filter(Boolean).join(' · '):first.section,
    mistakeId:first.id,unit
@@ -158,7 +158,7 @@ function smartReviewCandidates(now=Date.now()){
   if(!entry)return;
   results.push({
    key:'flag|'+topicId,type:'flag',priority:40,title:entry.title,
-   detail:'You manually added this topic to your review list.',
+   detail:'This topic is on your review list.',
    label:'Your review list',action:'Open topic',meta:[entry.grade,entry.subject].join(' · '),
    topicId
   });
@@ -174,7 +174,9 @@ function runSmartReview(item){
   mistakeFilter='open';expandedMistakeId=item.mistakeId;
   retryMistakeId=null;explanationMistakeId=null;
   renderMistakeNotebook();
-  document.querySelector('[data-mistake-id="'+CSS.escape(item.mistakeId)+'"]')?.scrollIntoView({behavior:'smooth',block:'center'});
+  [...document.querySelectorAll('#mistake-list [data-mistake-id]')]
+   .find(node=>node.dataset.mistakeId===item.mistakeId)
+   ?.scrollIntoView({behavior:'smooth',block:'center'});
   return;
  }
  if(item.type==='mastery'){

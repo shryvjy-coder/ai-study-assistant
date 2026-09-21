@@ -128,7 +128,7 @@
    plans.push({date:dayString(addDays(start,day)),items:tasks,unused:budget});
   }
   return {version:1,generatedAt:Date.now(),minutes,section,examDate:config.examDate||'',cram:!!config.cram,
-   days:plans,diagnosticEvidence:skills.some(x=>x.attempts>0),skillCount:skills.length,mistakeCount:satMistakes.length};
+   days:plans,completed:{},diagnosticEvidence:skills.some(x=>x.attempts>0),skillCount:skills.length,mistakeCount:satMistakes.length};
  }
  function render(plan){
   const box=$('#satplan-output');if(!box)return;
@@ -136,16 +136,22 @@
   lastPlan=plan;
   $('#satplan-heading').textContent=plan.cram?'SAT cram · '+plan.days.length+' days':'Your SAT '+plan.days.length+'-day plan';
   const label=plan.section==='both'?'Both SAT sections':plan.section;
+  const totalTasks=plan.days.reduce((n,d)=>n+d.items.length,0);
+  const done=plan.days.reduce((n,d)=>n+d.items.filter(t=>plan.completed?.[d.date+'|'+t.id]).length,0);
   box.innerHTML='<div class="satplan-intro">Created '+new Date(plan.generatedAt).toLocaleString()+
-   ' · '+safe(label)+' · '+plan.minutes+' minutes/day'+(plan.examDate?' · SAT '+safe(plan.examDate):'')+
+   ' · '+safe(label)+' · '+plan.minutes+' minutes/day · '+done+'/'+totalTasks+' tasks marked done'+(plan.examDate?' · SAT '+safe(plan.examDate):'')+
    '<p>Based on recorded practice, open mistakes and available original questions. Regenerate when your practice changes.</p></div>'+
    plan.days.map((day,index)=>{
     const d=parseDay(day.date),total=day.items.reduce((n,item)=>n+item.minutes,0);
-    return '<section class="satplan-day"><div class="satplan-day-head"><strong>Day '+(index+1)+' · '+formatDay(d)+'</strong><span>'+total+' planned min</span></div>'+
-     (day.items.length?day.items.map((task,i)=>
-      '<button type="button" class="satplan-task" data-satplan-day="'+index+'" data-satplan-item="'+i+'">'+
-      '<span><strong>'+safe(task.title)+'</strong><small>'+safe(task.detail)+'</small></span><span>'+task.minutes+' min →</span></button>'
-     ).join(''):'<p class="muted">Light review or rest today.</p>')+'</section>';
+    const completed=day.items.filter(task=>plan.completed?.[day.date+'|'+task.id]).length;
+    return '<section class="satplan-day"><div class="satplan-day-head"><strong>Day '+(index+1)+' · '+formatDay(d)+'</strong><span>'+total+' planned min · '+completed+'/'+day.items.length+' done</span></div>'+
+     (day.items.length?day.items.map((task,i)=>{
+      const key=day.date+'|'+task.id,isDone=!!plan.completed?.[key];
+      return '<div class="satplan-task-row '+(isDone?'is-complete':'')+'">'+
+       '<button type="button" class="satplan-task" data-satplan-day="'+index+'" data-satplan-item="'+i+'">'+
+       '<span><strong>'+safe(task.title)+'</strong><small>'+safe(task.detail)+'</small></span><span>'+task.minutes+' min →</span></button>'+
+       '<button type="button" class="satplan-check" data-satplan-check="'+safe(key)+'" aria-pressed="'+isDone+'">'+(isDone?'✓ Done':'Mark done')+'</button></div>';
+     }).join(''):'<p class="muted">Light review or rest today.</p>')+'</section>';
    }).join('')+
    '<p class="satplan-note">Practice times are estimates. StudyAI does not predict your official SAT score. The current question bank is limited and repeated attempts reduce diagnostic value.</p>';
  }
@@ -222,9 +228,20 @@
   $('#satplan-generate').addEventListener('click',()=>generate(false));
   $('#satplan-cram').addEventListener('click',()=>generate(true));
   $('#satplan-output').addEventListener('click',e=>{
+   const check=e.target.closest('[data-satplan-check]');
+   if(check&&lastPlan){
+    const key=check.dataset.satplanCheck;
+    if(!lastPlan.completed||typeof lastPlan.completed!=='object')lastPlan.completed={};
+    if(lastPlan.completed[key])delete lastPlan.completed[key];
+    else lastPlan.completed[key]=true;
+    bridge.saveSatPlan(lastPlan);
+    render(lastPlan);
+    return;
+   }
    const button=e.target.closest('[data-satplan-day][data-satplan-item]');
-   const day=lastPlan?.days[Number(button?.dataset.satplanDay)];
-   const task=day?.items[Number(button?.dataset.satplanItem)];
+   if(!button)return;
+   const day=lastPlan?.days[Number(button.dataset.satplanDay)];
+   const task=day?.items[Number(button.dataset.satplanItem)];
    if(task)openTask(task);
   });
   const saved=bridge.getSatPlan();

@@ -5,11 +5,11 @@ const SAT_QUESTIONS = [{"id": "sat1", "section": "Reading & Writing", "domain": 
 const STORAGE_KEY='studyai-multicurriculum-v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
+const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
-let activeDeck=[],cardIndex=0,cardFlipped=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
+let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
 function save(){
  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
  scheduleCloudSave();
@@ -429,15 +429,212 @@ function updateTopicActions(){const e=currentEntry();if(!e)return;$('#complete-b
 function toggle(arr,key){const i=arr.indexOf(key);i>=0?arr.splice(i,1):arr.push(key);save()}
 function searchAll(q){q=q.trim().toLowerCase();if(!q)return[];return STUDY_DATA.filter(e=>[e.title,e.subject,e.grade,e.board,e.summary,...e.keyPoints].join(' ').toLowerCase().includes(q)).slice(0,24)}
 function showSearch(){const r=searchAll($('#global-search').value),box=$('#search-results');box.classList.toggle('hidden',!r.length);box.innerHTML=r.length?r.map(e=>`<button data-id="${esc(e.id)}"><strong>${esc(e.title)}</strong><span>${esc(e.board)} · ${esc(e.grade)} · ${esc(e.subject)}</span></button>`).join(''):'<p>No matching topic found.</p>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>{const e=STUDY_DATA.find(x=>x.id===b.dataset.id);current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title);box.classList.add('hidden')})}
+// Spaced repetition v1: bounded intervals, persisted in existing account state.
+const SRS_MINUTE=60*1000, SRS_DAY=24*60*SRS_MINUTE, SRS_MAX_MINUTES=365*24*60;
+function scheduledCard(card){
+ const record=state.flashcardSchedule?.[card.id];
+ return record&&Number.isFinite(record.dueAt)?record:null;
+}
+function srsCardCatalog(){
+ return state.reviewCardCatalog&&typeof state.reviewCardCatalog==='object'?state.reviewCardCatalog:{};
+}
+function srsDueCards(now=Date.now()){
+ const catalog=srsCardCatalog();
+ return Object.values(catalog).filter(card=>
+  card&&typeof card.id==='string'&&typeof card.front==='string'&&typeof card.back==='string'&&
+  scheduledCard(card)&&scheduledCard(card).dueAt<=now)
+ .sort((a,b)=>scheduledCard(a).dueAt-scheduledCard(b).dueAt);
+}
+function reviewTimeLabel(dueAt,now=Date.now()){
+ if(!Number.isFinite(dueAt))return 'Not scheduled';
+ const remaining=dueAt-now;
+ if(remaining<=0)return 'Due now';
+ const mins=Math.ceil(remaining/SRS_MINUTE);
+ if(mins<60)return 'In '+mins+' min';
+ const hours=Math.ceil(remaining/(60*SRS_MINUTE));
+ if(hours<24)return 'In '+hours+' hr';
+ const days=Math.ceil(remaining/SRS_DAY);
+ return days===1?'Tomorrow':'In '+days+' days';
+}
+function nextSrsInterval(previous,rating){
+ const old=Math.max(0,Number(previous?.intervalMinutes)||0);
+ const repeats=Math.max(0,Number(previous?.repetitions)||0);
+ if(rating==='again')return 1;
+ if(rating==='hard')return old<60?10:Math.min(SRS_MAX_MINUTES,Math.max(60,Math.ceil(old*1.2)));
+ if(rating==='good')return old<60?24*60:Math.min(SRS_MAX_MINUTES,Math.max(3*24*60,Math.ceil(old*2.2)));
+ if(rating==='easy')return old<60?4*24*60:Math.min(SRS_MAX_MINUTES,Math.max(4*24*60,Math.ceil(old*2.8)));
+ return 0;
+}
+function srsSummary(){
+ const catalog=srsCardCatalog(),scheduled=state.flashcardSchedule||{};
+ const live=Object.keys(catalog).filter(id=>catalog[id]&&scheduled[id]&&Number.isFinite(scheduled[id].dueAt));
+ const now=Date.now(),due=live.filter(id=>scheduled[id].dueAt<=now).length;
+ const upcoming=live.map(id=>scheduled[id].dueAt).filter(time=>time>now).sort((a,b)=>a-b)[0]||null;
+ return {scheduled:live.length,due,upcoming};
+}
+function renderSrsDashboard(){
+ const stats=srsSummary();
+ if($('#srs-due-count'))$('#srs-due-count').textContent=stats.due;
+ if($('#srs-next-due'))$('#srs-next-due').textContent=stats.due
+  ? 'Pick up the cards ready for review.'
+  : stats.upcoming?'Next review '+reviewTimeLabel(stats.upcoming).toLowerCase()+'.'
+  : 'Rate a card to start scheduling reviews.';
+ if($('#srs-progress-due'))$('#srs-progress-due').textContent=stats.due;
+ if($('#srs-progress-scheduled'))$('#srs-progress-scheduled').textContent=stats.scheduled;
+ if($('#srs-progress-next'))$('#srs-progress-next').textContent=stats.upcoming?reviewTimeLabel(stats.upcoming):'—';
+ if($('#srs-progress-note'))$('#srs-progress-note').textContent=stats.due
+  ? 'Your '+stats.due+' due card'+(stats.due===1?' is':'s are')+' waiting. Open the review queue to recall them.'
+  : stats.scheduled?'You are caught up right now. New reviews will appear as cards become due.'
+  : 'Start with a chapter, Workspace, Personal AI or wrong-answer deck. Rate a revealed card to schedule it.';
+ if($('#srs-start-due'))$('#srs-start-due').textContent='Review '+stats.due+' due card'+(stats.due===1?'':'s')+' →';
+ if($('#srs-progress-open'))$('#srs-progress-open').textContent='Review '+stats.due+' due card'+(stats.due===1?'':'s')+' →';
+}
+function renderSrsCardStatus(){
+ const el=$('#srs-card-status'),hint=$('#srs-rating-hint'),card=activeDeck[cardIndex];
+ if(!el)return;
+ if(!card){
+  el.textContent=dueReviewSession?'All caught up — no cards left in this review session.':'Choose a deck to begin.';
+  if(hint)hint.textContent='Open a deck and reveal a card to rate your recall.';
+  return;
+ }
+ const record=scheduledCard(card);
+ const legacy=state.flashcardState?.[card.id];
+ el.textContent=record
+  ? (record.dueAt<=Date.now()?'Due now':'Next review '+reviewTimeLabel(record.dueAt).toLowerCase())+
+    ' · '+record.reviews+' review'+(record.reviews===1?'':'s')
+  : legacy&&legacy!=='New'?'Previous status: '+legacy+' · not scheduled yet':'New card · not scheduled yet';
+ if(hint)hint.textContent=cardFlipped
+  ? 'How well did you recall it? Choose one rating to schedule your next review.'
+  : 'Reveal the answer before rating. Skip / Next does not alter your schedule.';
+}
+function refreshSrsRatingButtons(){
+ const available=!!activeDeck[cardIndex]&&cardFlipped;
+ $$('[data-srs-rating]').forEach(b=>b.disabled=!available);
+ renderSrsCardStatus();
+}
+function loadDueReviews(){
+ const due=srsDueCards();
+ if(!due.length){
+  toast('No scheduled cards due. Load a topic and rate cards to get started.');
+  location.hash='#flashcards';
+  renderSrsDashboard();
+  return;
+ }
+ activeDeck=due;
+ dueReviewSession=true;
+ cardIndex=0;
+ $('#deck-source').value='due';
+ renderCard();renderFlashStats();
+ location.hash='#flashcards';
+ toast('Due review session ready: '+due.length+' card'+(due.length===1?'':'s')+'.');
+}
 function topicCards(e){const prompts=[['What is the big idea?',e.summary],...e.keyPoints.slice(0,4).map((x,i)=>[`Key idea ${i+1}: ${e.title}`,x])];return prompts.map((x,i)=>({id:`${e.id}|${i}`,front:x[0],back:x[1],source:e.title}))}
-function loadDeckFromCurrent(){const e=currentEntry();if(!e)return toast('Open a topic first');activeDeck=topicCards(e);cardIndex=0;renderCard();renderFlashStats();location.hash='#flashcards'}
-function renderCard(){const c=activeDeck[cardIndex],card=$('#flashcard');if(!c){cardFlipped=false;card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.setAttribute('aria-label','Flip flashcard to reveal the answer');$('#card-label').textContent='No deck loaded';$('#card-front').textContent='Open a study topic and choose “Study as flashcards”.';$('#card-back').textContent='';return}cardFlipped=false;card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.setAttribute('aria-label','Flip flashcard to reveal the answer');$('#card-label').textContent=`${cardIndex+1} / ${activeDeck.length} · ${c.source}`;$('#card-front').textContent=c.front;$('#card-back').textContent=c.back;$('#favorite-card').textContent=state.favoriteCards.includes(c.id)?'★ Favorite':'☆ Favorite'}
-function renderFlashStats(){let n=0,l=0,m=0;activeDeck.forEach(c=>{const s=state.flashcardState[c.id]||'New';if(s==='New')n++;else if(s==='Learning')l++;else m++});$('#fc-new').textContent=n;$('#fc-learning').textContent=l;$('#fc-mastered').textContent=m}
+function loadDeckFromCurrent(){const e=currentEntry();if(!e)return toast('Open a topic first');dueReviewSession=false;activeDeck=topicCards(e);cardIndex=0;renderCard();renderFlashStats();location.hash='#flashcards'}
+function renderCard(){
+ const c=activeDeck[cardIndex],card=$('#flashcard');
+ cardFlipped=false;card.classList.remove('flipped');card.setAttribute('aria-pressed','false');
+ card.setAttribute('aria-label','Flip flashcard to reveal the answer');
+ if(!c){
+  $('#card-label').textContent=dueReviewSession?'Review complete':'No deck loaded';
+  $('#card-front').textContent=dueReviewSession?'You are caught up! Return when the next review is due.':'Open a study topic or choose a saved deck.';
+  $('#card-back').textContent='';
+  $('#favorite-card').disabled=true;
+  $('#next-card').disabled=true;
+  refreshSrsRatingButtons();
+  return;
+ }
+ $('#favorite-card').disabled=false;$('#next-card').disabled=false;
+ $('#card-label').textContent=(cardIndex+1)+' / '+activeDeck.length+' · '+c.source;
+ $('#card-front').textContent=c.front;
+ $('#card-back').textContent=c.back;
+ $('#favorite-card').textContent=state.favoriteCards.includes(c.id)?'★ Favorite':'☆ Favorite';
+ refreshSrsRatingButtons();
+}
+function renderFlashStats(){
+ let n=0,l=0,m=0,due=0,now=Date.now();
+ activeDeck.forEach(c=>{
+  const record=scheduledCard(c),legacy=state.flashcardState?.[c.id]||'New';
+  if(record){
+   if(record.dueAt<=now)due++;
+   if(record.repetitions>=2&&record.intervalMinutes>=3*24*60)m++;
+   else l++;
+  }else if(legacy==='Mastered')m++;
+  else if(legacy==='Learning')l++;
+  else n++;
+ });
+ $('#fc-new').textContent=n;$('#fc-learning').textContent=l;$('#fc-mastered').textContent=m;
+ $('#fc-due').textContent=due;
+ renderSrsDashboard();
+}
 function workspaceCards(note){if(!note)return[];const parts=note.content.split(/\n+/).map(x=>x.trim()).filter(x=>x.length>20).slice(0,12);return parts.map((p,i)=>({id:`ws|${note.id}|${i}`,front:`Explain: ${p.slice(0,80)}${p.length>80?'…':''}`,back:p,source:note.title}))}
-function rebuildDeckSources(){let opts='<option value="current">Current study topic</option><option value="mistakes">Wrong answers</option>';state.workspaceNotes.forEach(n=>opts+=`<option value="ws:${n.id}">${esc(n.title)}</option>`);$('#deck-source').innerHTML=opts}
-function loadDeckSource(){const v=$('#deck-source').value;if(v==='current')return loadDeckFromCurrent();if(v==='mistakes')return loadMistakeDeck(mistakeRecords());if(v.startsWith('ws:')){const n=state.workspaceNotes.find(x=>x.id===v.slice(3));activeDeck=workspaceCards(n);cardIndex=0;renderCard();renderFlashStats()}}
-function setCardState(s){const c=activeDeck[cardIndex];if(!c)return;state.flashcardState[c.id]=s;save();renderFlashStats();nextCard()}
-function nextCard(){if(!activeDeck.length)return;cardIndex=(cardIndex+1)%activeDeck.length;renderCard()}
+function rebuildDeckSources(){
+ const previous=$('#deck-source').value;
+ let opts='<option value="current">Current study topic</option><option value="due">Due reviews</option><option value="mistakes">Wrong answers</option>';
+ state.workspaceNotes.forEach(n=>opts+='<option value="ws:'+esc(n.id)+'">'+esc(n.title)+'</option>');
+ $('#deck-source').innerHTML=opts;
+ if(previous&&Array.from($('#deck-source').options).some(option=>option.value===previous))$('#deck-source').value=previous;
+}
+function loadDeckSource(){
+ const v=$('#deck-source').value;
+ if(v==='due')return loadDueReviews();
+ if(v==='current')return loadDeckFromCurrent();
+ if(v==='mistakes')return loadMistakeDeck(mistakeRecords());
+ if(v.startsWith('ws:')){
+  const n=state.workspaceNotes.find(x=>x.id===v.slice(3));
+  dueReviewSession=false;activeDeck=workspaceCards(n);cardIndex=0;renderCard();renderFlashStats();
+ }
+}
+function rateFlashcard(rating){
+ const card=activeDeck[cardIndex];
+ if(!card||!cardFlipped||!['again','hard','good','easy'].includes(rating))return;
+ if(!state.flashcardSchedule||typeof state.flashcardSchedule!=='object')state.flashcardSchedule={};
+ if(!state.reviewCardCatalog||typeof state.reviewCardCatalog!=='object')state.reviewCardCatalog={};
+ if(!state.reviewCardCatalog[card.id]&&Object.keys(state.reviewCardCatalog).length>=500){
+  toast('500 saved review cards reached. Reset an old deck before adding more.');return;
+ }
+ const previous=scheduledCard(card);
+ const intervalMinutes=nextSrsInterval(previous,rating);
+ if(!intervalMinutes)return;
+ const now=Date.now();
+ const repetitions=rating==='again'?0:(previous?.repetitions||0)+1;
+ state.flashcardSchedule[card.id]={
+  intervalMinutes,dueAt:now+intervalMinutes*SRS_MINUTE,lastReviewedAt:now,
+  repetitions,lapses:(previous?.lapses||0)+(rating==='again'?1:0),
+  reviews:(previous?.reviews||0)+1,lastRating:rating
+ };
+ state.reviewCardCatalog[card.id]={
+  id:card.id,front:String(card.front||'').slice(0,1500),
+  back:String(card.back||'').slice(0,1800),source:String(card.source||'Flashcards').slice(0,100)
+ };
+ state.flashcardState[card.id]=
+  repetitions>=2&&intervalMinutes>=3*24*60?'Mastered':'Learning';
+ save();
+ if(dueReviewSession){
+  activeDeck.splice(cardIndex,1);
+  if(cardIndex>=activeDeck.length)cardIndex=0;
+  renderCard();
+  renderFlashStats();
+ }else nextCard();
+ renderSrsDashboard();
+ toast(rating[0].toUpperCase()+rating.slice(1)+' · next review '+reviewTimeLabel(now+intervalMinutes*SRS_MINUTE,now).toLowerCase());
+}
+function nextCard(){
+ if(!activeDeck.length)return;
+ cardIndex=(cardIndex+1)%activeDeck.length;renderCard();renderFlashStats();
+}
+function resetCurrentDeckSchedule(){
+ if(!activeDeck.length)return toast('Load a deck first.');
+ if(!confirm('Reset ratings and review dates for all cards in this deck?'))return;
+ activeDeck.forEach(card=>{
+  delete state.flashcardSchedule?.[card.id];
+  delete state.reviewCardCatalog?.[card.id];
+  delete state.flashcardState?.[card.id];
+ });
+ save();
+ if(dueReviewSession){activeDeck=[];dueReviewSession=false;$('#deck-source').value='current';}
+ cardIndex=0;renderCard();renderFlashStats();
+ toast('Current deck schedule reset.');
+}
 
 // SAT
 function satSectionQuestions(){return SAT_QUESTIONS.filter(q=>q.section===satSection)}

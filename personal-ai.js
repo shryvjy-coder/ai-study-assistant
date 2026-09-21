@@ -200,7 +200,7 @@
     if (total > MAX_TOTAL) return notify('Select fewer notes: the limit is 52,000 characters.','error');
     const question = $('#pai-question').value.trim();
     if (mode === 'ask' && !question) return notify('Type a question about your notes.','error');
-    if (!providerReady) return notify('Personal AI needs a server-side API key. Follow the setup note below.','error');
+    if (!providerReady) return notify('Personal AI needs a server-side Gemini API key. Follow the setup note below.','error');
 
     busy=true;
     const buttons = $$('[data-pai-mode]');
@@ -272,7 +272,7 @@
 
   async function makeAudio() {
     if (!currentScript || busy) return;
-    if (!providerReady) return notify('An API key is needed to generate audio.','error');
+    if (!providerReady) return notify('A Gemini API key is needed to generate audio.','error');
     busy=true;
     const button=$('#pai-generate-audio');
     button.disabled=true;
@@ -356,9 +356,9 @@
             <h2>Personal AI <span aria-hidden="true">✦</span></h2>
             <p>Turn your material into clearer notes, grounded answers, and a two-voice study discussion. Select exactly which sources the AI can use.</p>
           </div>
-          <div class="pai-availability"><span class="pai-status-dot"></span><strong id="pai-provider-status">Checking AI setup…</strong><small>Server-side AI · Your selected sources only</small></div>
+          <div class="pai-availability"><span class="pai-status-dot"></span><strong id="pai-provider-status">Checking Gemini setup…</strong><small>Gemini-powered · server-side key</small></div>
         </header>
-        <div class="pai-privacy"><strong>Before you start</strong><p>Only upload notes you have permission to share. Selected text is sent to the configured AI provider when you generate; documents stay in this browser and are not added to account sync. This is not a private on-device AI. Avoid uploading passwords, personal records or other sensitive information.</p></div>
+        <div class="pai-privacy"><strong>Before you start</strong><p>Only upload notes you have permission to share. Selected text is sent to Google's Gemini API when you generate; documents stay in this browser and are not added to account sync. This is not a private on-device AI. Google states free-tier Gemini API data may be used to improve its products, so avoid passwords, personal records or other sensitive information.</p></div>
         <div class="pai-layout">
           <aside class="pai-library">
             <div class="pai-card-head"><div><span class="small-label">01 · Source library</span><h3>Bring your material</h3></div><span class="pai-count" id="pai-library-count">0</span></div>
@@ -391,7 +391,7 @@
               <button type="button" class="button primary" data-pai-mode="ask">Ask Personal AI →</button>
             </div>
             <div id="pai-message" class="pai-message" role="status">Add a source to get started.</div>
-            <div class="pai-config-note">AI generation requires a StudyAI account and the site owner's server-side API key. Uploading, pasting and viewing sources work without an API key.</div>
+            <div class="pai-config-note">AI generation requires a StudyAI account and a server-side Gemini API key. Gemini's free tier has usage/rate limits. Uploading, pasting and viewing sources work without an API key.</div>
           </div>
 
           <article class="pai-results">
@@ -462,10 +462,10 @@
       const me=await readResponse(meResponse);
       providerReady=!!status.configured;
       scope=me.user?.id ? 'account-'+String(me.user.id) : 'guest';
-      $('#pai-provider-status').textContent=providerReady ? 'AI connection ready' : 'AI key not configured';
+      $('#pai-provider-status').textContent=providerReady ? 'Gemini connection ready' : 'Gemini key not configured';
       $('.pai-availability')?.classList.toggle('ready',providerReady);
       if (providerReady && !me.user) notify('Sign in to generate AI notes and audio. You can add sources first.');
-      else if (!providerReady) notify('Your source library is ready. AI generation needs OPENAI_API_KEY in the server .env file.');
+      else if (!providerReady) notify('Your source library is ready. AI generation needs GEMINI_API_KEY in the server .env file.');
       restore();
     } catch (_) {
       $('#pai-provider-status').textContent='Server connection needed';

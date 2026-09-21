@@ -123,3 +123,138 @@ html[data-theme="dark"] .pai-library,html[data-theme="dark"] .pai-studio,html[da
 html[data-theme="dark"] .pai-mode-grid button{border-color:var(--line)}
 html[data-theme="dark"] .pai-availability{box-shadow:3px 4px 0 #080808}
 @media(prefers-reduced-motion:reduce){.pai-mode-grid button,.pai-upload{transition:none!important}}
+
+
+/* Personal AI Topic Mode */
+.pai-topic-mode{
+  position:relative;
+  margin:22px 0;
+  padding:22px;
+  border:1.5px solid var(--premium-card-border);
+  border-radius:20px;
+  background:
+    linear-gradient(135deg,color-mix(in srgb,var(--accent-gold) 15%,transparent),transparent 34%),
+    linear-gradient(315deg,color-mix(in srgb,var(--accent-violet) 10%,transparent),transparent 38%),
+    var(--surface);
+  box-shadow:5px 6px 0 color-mix(in srgb,var(--ink) 82%,transparent);
+  overflow:hidden;
+}
+.pai-topic-mode::before{
+  content:"";
+  position:absolute;
+  inset:0 auto auto 0;
+  width:100%;
+  height:5px;
+  background:linear-gradient(90deg,var(--accent-gold),var(--accent-orange),var(--teal),var(--accent-violet));
+}
+.pai-topic-heading{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:18px}
+.pai-topic-heading h3{margin:4px 0 5px;font-size:clamp(1.35rem,2vw,1.85rem);color:var(--ink)}
+.pai-topic-heading p{margin:0;max-width:760px;color:var(--muted);font-size:.84rem;line-height:1.55}
+.pai-depth-wrap{min-width:155px;display:grid;gap:5px}
+.pai-depth-wrap label,.pai-topic-selectors label{font-size:.7rem;font-weight:850;color:var(--muted);letter-spacing:.02em}
+.pai-depth-wrap select,.pai-topic-selectors select{
+  width:100%;
+  margin-top:5px;
+  min-height:42px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:8px 10px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:.8rem;
+}
+.pai-topic-selectors{display:grid;grid-template-columns:1fr .9fr 1fr 1.35fr;gap:10px}
+.pai-topic-preview{
+  margin-top:12px;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:color-mix(in srgb,var(--teal-soft) 35%,var(--surface));
+}
+.pai-topic-preview strong{display:block;font-size:.9rem;color:var(--ink)}
+.pai-topic-preview p{margin:4px 0 0;color:var(--muted);font-size:.76rem;line-height:1.5}
+.pai-topic-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 15px}
+.pai-topic-actions>span{font-size:.71rem;color:var(--muted);line-height:1.45}
+.pai-topic-tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.pai-topic-tools button{
+  min-height:78px;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+  color:var(--ink);
+  text-align:left;
+  display:grid;
+  align-content:center;
+  gap:4px;
+  cursor:pointer;
+  transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease;
+}
+.pai-topic-tools button:hover:not(:disabled){transform:translateY(-2px);border-color:var(--teal);box-shadow:2px 3px 0 color-mix(in srgb,var(--ink) 55%,transparent)}
+.pai-topic-tools button:disabled{opacity:.62;cursor:wait}
+.pai-topic-tools strong{font-size:.78rem}
+.pai-topic-tools small{font-size:.65rem;color:var(--muted);line-height:1.3}
+.pai-topic-mode.is-unavailable{opacity:.7}
+
+.pai-structured{display:grid;gap:12px;margin-top:14px}
+.pai-quiz-head,.pai-cardset-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:11px 12px;
+  border-radius:12px;
+  background:var(--blue-soft);
+}
+.pai-quiz-head strong,.pai-cardset-head strong{font-size:.85rem;color:var(--teal-dark)}
+.pai-quiz-head span,.pai-cardset-head span{font-size:.7rem;color:var(--muted)}
+.pai-cardset-head>div{display:grid;gap:2px}
+.pai-quiz-card{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--paper);
+}
+.pai-quiz-card h4{margin:0 0 10px;font-size:.84rem;line-height:1.45;color:var(--ink)}
+.pai-quiz-options{display:grid;gap:7px}
+.pai-quiz-options button{
+  width:100%;
+  padding:9px 10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface);
+  color:var(--ink);
+  text-align:left;
+  font:inherit;
+  font-size:.75rem;
+  line-height:1.4;
+  cursor:pointer;
+}
+.pai-quiz-options button:hover:not(:disabled){border-color:var(--teal)}
+.pai-quiz-options button.is-correct{border-color:var(--accent-mint);background:color-mix(in srgb,var(--accent-mint) 18%,var(--surface))}
+.pai-quiz-options button.is-wrong{border-color:var(--accent-orange);background:color-mix(in srgb,var(--accent-orange) 12%,var(--surface))}
+.pai-quiz-feedback{margin-top:10px;padding:9px 10px;border-radius:9px;background:var(--surface-2);font-size:.72rem;line-height:1.5;color:var(--ink)}
+.pai-generated-card{
+  width:100%;
+  min-height:88px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:14px;
+  background:var(--paper);
+  color:var(--ink);
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+  transition:transform .2s ease,border-color .2s ease;
+}
+.pai-generated-card:hover{transform:translateY(-1px);border-color:var(--accent-violet)}
+.pai-generated-front{font-size:.8rem;font-weight:800;line-height:1.45}
+.pai-generated-back{font-size:.78rem;line-height:1.55;color:var(--ink)}
+.pai-generated-card.is-flipped{background:color-mix(in srgb,var(--blue-soft) 42%,var(--surface));border-color:var(--accent-violet)}
+
+@media(max-width:1100px){.pai-topic-tools{grid-template-columns:repeat(3,1fr)}.pai-topic-selectors{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.pai-topic-mode{padding:17px}.pai-topic-heading{display:grid;align-items:start}.pai-depth-wrap{min-width:0}.pai-topic-selectors{grid-template-columns:1fr}.pai-topic-tools{grid-template-columns:1fr 1fr}.pai-cardset-head,.pai-quiz-head{align-items:flex-start;flex-direction:column}}
+@media(max-width:390px){.pai-topic-tools{grid-template-columns:1fr}}
+html[data-theme="dark"] .pai-topic-mode{box-shadow:5px 6px 0 #080808}
+@media(prefers-reduced-motion:reduce){.pai-topic-tools button,.pai-generated-card{transition:none!important}}

@@ -4,7 +4,7 @@
  const bridge=window.StudyAIPracticeBridge;
  if(!bridge)return;
  const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
- const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+ const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let lastPlan=null;
  const today=()=>{
   const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());
@@ -37,7 +37,7 @@
   const picked=new Set(pool.filter(t=>t.kind==='flag'||t.kind==='mastery').map(t=>t.topicId||t.unit));
   const additions=bridge.getCurriculum().filter(e=>(board==='All'||e.board===board)
    &&!picked.has(e.id)&&!picked.has('curriculum|'+e.id)
-   &&!bridge.getMastery()['curriculum|'+e.id])
+   &&!bridge.getMastery()['curriculum|'+e.id]
    &&!(bridge.exportState()?.completed||[]).includes(e.id))
    .slice(0,16).map(e=>({kind:'new',id:'new|'+e.id,title:e.title,detail:e.grade+' · '+e.subject,topicId:e.id,board:e.board,minutes:30}));
   return [...pool,...additions];

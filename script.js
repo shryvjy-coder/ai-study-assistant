@@ -5,7 +5,7 @@ const SAT_QUESTIONS = [{"id": "sat1", "section": "Reading & Writing", "domain": 
 const STORAGE_KEY='studyai-multicurriculum-v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
+const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
@@ -37,6 +37,94 @@ async function saveCloudState(showToast=false){
 }
 const keyOf=e=>e.id;
 const currentEntry=()=>STUDY_DATA.find(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&e.title===current.topic);
+
+// Mastery Engine v1
+// Curriculum topics are current school mastery units; SAT already exposes skill-level metadata.
+// A light Bayesian prior prevents one answer from producing a misleading 0% or 100%.
+function masteryKeyForEntry(entry){return 'curriculum|'+entry.id}
+function masteryKeyForSat(q){return ['sat',q.section,q.domain,q.skill].join('|')}
+function masteryStatus(score,attempts=0){
+ if(!attempts)return {label:'Not started',className:''};
+ if(score<55)return {label:'Needs attention',className:'attention'};
+ if(score<75)return {label:'Developing',className:'developing'};
+ return {label:'Secure',className:'secure'};
+}
+function recordMasteryEvidence(meta,correct){
+ if(!meta||!meta.key)return;
+ if(!state.mastery||typeof state.mastery!=='object')state.mastery={};
+ if(!Array.isArray(state.masteryHistory))state.masteryHistory=[];
+ const previous=state.mastery[meta.key]||{key:meta.key,kind:meta.kind||'curriculum',label:meta.label||'Practice unit',board:meta.board||'',grade:meta.grade||'',subject:meta.subject||'',topicId:meta.topicId||'',section:meta.section||'',domain:meta.domain||'',skill:meta.skill||'',attempts:0,correct:0,streak:0,score:50,lastPracticed:0};
+ previous.attempts=(previous.attempts||0)+1;
+ previous.correct=(previous.correct||0)+(correct?1:0);
+ previous.streak=correct?(previous.streak||0)+1:0;
+ previous.lastPracticed=Date.now();
+ previous.score=Math.round(100*((previous.correct||0)+1)/(previous.attempts+2));
+ previous.label=meta.label||previous.label;
+ previous.board=meta.board||previous.board;
+ previous.grade=meta.grade||previous.grade;
+ previous.subject=meta.subject||previous.subject;
+ previous.topicId=meta.topicId||previous.topicId;
+ previous.section=meta.section||previous.section;
+ previous.domain=meta.domain||previous.domain;
+ previous.skill=meta.skill||previous.skill;
+ state.mastery[meta.key]=previous;
+ state.masteryHistory.push({key:meta.key,kind:previous.kind,correct:!!correct,source:meta.source||'practice',difficulty:meta.difficulty||'',at:previous.lastPracticed});
+ if(state.masteryHistory.length>1200)state.masteryHistory=state.masteryHistory.slice(-1200);
+}
+function curriculumMasteryEvidence(entry,correct){
+ if(!entry)return;
+ recordMasteryEvidence({key:masteryKeyForEntry(entry),kind:'curriculum',label:entry.title,board:entry.board,grade:entry.grade,subject:entry.subject,topicId:entry.id,source:'curriculum-quiz'},correct);
+}
+function satMasteryEvidence(q,correct){
+ if(!q)return;
+ recordMasteryEvidence({key:masteryKeyForSat(q),kind:'sat',label:q.skill,section:q.section,domain:q.domain,skill:q.skill,subject:q.section,source:'sat-practice',difficulty:q.level||''},correct);
+}
+function masteryRecords(){return Object.values(state.mastery||{}).filter(r=>r&&r.attempts>0)}
+function masterySnapshot(){
+ const records=masteryRecords();
+ if(!records.length)return {records:[],overall:null,secure:0,attention:0};
+ const overall=Math.round(records.reduce((sum,r)=>sum+(r.score||0),0)/records.length);
+ const secure=records.filter(r=>r.score>=75&&r.attempts>=3).length;
+ const attention=records.filter(r=>r.score<55).length;
+ return {records,overall,secure,attention};
+}
+function openMasteryRecord(record){
+ if(record.kind==='curriculum'&&record.topicId){jumpToEntry(record.topicId);return}
+ if(record.kind==='sat'){
+  satSection=record.section||satSection;
+  renderSatFilters();
+  if($('#sat-domain')&&record.domain){$('#sat-domain').value=record.domain;renderSatFilters()}
+  if($('#sat-skill')&&record.skill)$('#sat-skill').value=record.skill;
+  location.hash='#sat';
+ }
+}
+function renderMasteryDashboard(){
+ const metric=$('#metric-mastery'),overallEl=$('#mastery-overall');
+ if(!metric||!overallEl)return;
+ const snap=masterySnapshot();
+ metric.textContent=snap.overall===null?'—':snap.overall+'%';
+ const note=$('#metric-mastery-note');
+ if(note)note.textContent=snap.records.length?(snap.records.length+' practiced unit'+(snap.records.length===1?'':'s')):'practice evidence';
+ overallEl.textContent=snap.overall===null?'—':snap.overall+'%';
+ $('#mastery-practiced').textContent=snap.records.length;
+ $('#mastery-secure').textContent=snap.secure;
+ $('#mastery-attention').textContent=snap.attention;
+ const evidence=$('#mastery-evidence');
+ if(evidence)evidence.textContent=snap.records.length?(snap.records.reduce((n,r)=>n+r.attempts,0)+' answered questions across '+snap.records.length+' unit'+(snap.records.length===1?'':'s')+'.'):'Answer curriculum or SAT practice questions to begin.';
+ const list=$('#mastery-list');
+ if(!list)return;
+ if(!snap.records.length){list.innerHTML='<p class="muted">Your weakest practiced topics and skills will appear here.</p>';return}
+ const priority=[...snap.records].sort((a,b)=>(a.score-b.score)||(b.attempts-a.attempts)||(b.lastPracticed-a.lastPracticed)).slice(0,6);
+ list.innerHTML=priority.map(r=>{
+  const status=masteryStatus(r.score,r.attempts);
+  const context=r.kind==='sat'?(r.section+' · '+r.domain):[r.board,r.grade,r.subject].filter(Boolean).join(' · ');
+  return '<button type="button" class="mastery-row" data-mastery-key="'+esc(r.key)+'">'+
+   '<span class="mastery-row-title"><strong>'+esc(r.label)+'</strong><small>'+esc(context)+'</small><span class="mastery-status '+status.className+'">'+status.label+'</span></span>'+
+   '<span class="mastery-track" aria-hidden="true"><span style="width:'+Math.max(2,r.score)+'%"></span></span>'+
+   '<span class="mastery-row-score"><strong>'+r.score+'%</strong><small>'+r.correct+'/'+r.attempts+' correct</small></span></button>';
+ }).join('');
+ list.querySelectorAll('[data-mastery-key]').forEach(button=>button.onclick=()=>{const record=(state.mastery||{})[button.dataset.masteryKey];if(record)openMasteryRecord(record)});
+}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function setTheme(theme){state.theme=theme;document.documentElement.dataset.theme=theme;$('#theme-label').textContent=theme==='dark'?'Light mode':'Dark mode';$('#theme-icon').textContent=theme==='dark'?'☀':'◐';save()}
 function toggleThemePremium(){
@@ -107,7 +195,7 @@ function renderSatDomainCards(){$('#sat-domain-cards').innerHTML=Object.keys(SAT
 function updateSatSummary(){const all=state.satHistory;const overall=all.length?Math.round(all.reduce((a,b)=>a+b.correct,0)/all.length*100):0;$('#sat-overall').textContent=overall+'%';$('#hero-sat').textContent=overall+'%';$('#sat-streak').textContent=all.length?`${all.length} SAT questions answered in this browser`:'No SAT practice yet';$('#metric-sat').textContent=overall+'%'}
 function startSat(timed=false){const domain=$('#sat-domain').value,skill=$('#sat-skill').value,level=$('#sat-level').value,count=+$('#sat-count').value;let pool=SAT_QUESTIONS.filter(q=>q.section===satSection);if(!timed)pool=pool.filter(q=>q.domain===domain&&q.skill===skill&&q.level===level);if(!pool.length)pool=SAT_QUESTIONS.filter(q=>q.section===satSection&&q.domain===domain&&q.skill===skill);if(pool.length<count){const more=SAT_QUESTIONS.filter(q=>q.section===satSection&&q.domain===domain&&!pool.includes(q));pool=[...pool,...more]}satRun=shuffle([...pool]).slice(0,Math.min(count,pool.length));satIndex=0;satScore=0;if(!satRun.length)return toast('No questions match this filter yet');$('#sat-runner').classList.remove('hidden');renderSatQuestion()}
 function renderSatQuestion(){const q=satRun[satIndex];$('#sat-runner').innerHTML=`<div class="runner-top"><div><strong>${esc(q.section)}</strong><div class="runner-meta">${esc(q.domain)} · ${esc(q.skill)} · ${esc(q.level)}</div></div><span>${satIndex+1} / ${satRun.length}</span></div>${q.passage?`<div class="question-passage">${esc(q.passage)}</div>`:''}<div class="question-stem">${esc(q.stem)}</div><div class="options">${q.options.map((o,i)=>`<button class="option-btn" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}</div><div id="sat-feedback"></div>`;$('#sat-runner').querySelectorAll('.option-btn').forEach(b=>b.onclick=()=>answerSat(+b.dataset.i))}
-function answerSat(i){const q=satRun[satIndex],ok=i===q.answer;if(ok)satScore++;state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:ok?1:0});save();$('#sat-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#sat-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Not quite'}</strong><p>${esc(q.explanation)}</p><div class="runner-actions"><span>Set score: ${satScore}/${satIndex+1}</span><button class="button primary compact" id="sat-next">${satIndex===satRun.length-1?'Finish':'Next'}</button></div></div>`;$('#sat-next').onclick=()=>{if(satIndex<satRun.length-1){satIndex++;renderSatQuestion()}else finishSat()};updateSatSummary();updateDashboard()}
+function answerSat(i){const q=satRun[satIndex],ok=i===q.answer;if(ok)satScore++;state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:ok?1:0});satMasteryEvidence(q,ok);save();$('#sat-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#sat-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Not quite'}</strong><p>${esc(q.explanation)}</p><div class="runner-actions"><span>Set score: ${satScore}/${satIndex+1}</span><button class="button primary compact" id="sat-next">${satIndex===satRun.length-1?'Finish':'Next'}</button></div></div>`;$('#sat-next').onclick=()=>{if(satIndex<satRun.length-1){satIndex++;renderSatQuestion()}else finishSat()};updateSatSummary();updateDashboard()}
 function finishSat(){$('#sat-runner').innerHTML=`<div class="quiz-result"><span class="small-label">SAT practice complete</span><h3>${satScore} / ${satRun.length}</h3><p>Review the domains below, then run another targeted set on the weakest one.</p><button class="button primary" id="sat-again">Practice again</button></div>`;$('#sat-again').onclick=()=>startSat(false);renderSatDomainCards()}
 
 // Curriculum quiz from note data
@@ -115,7 +203,7 @@ function populateQuizFilters(){const boards=uniq(STUDY_DATA.map(e=>e.board));fil
 function makeCurriculumQuestion(e){const others=shuffle(STUDY_DATA.filter(x=>x.subject===e.subject&&x.id!==e.id)).slice(0,3).map(x=>x.summary);const options=shuffle([e.summary,...others]);return {entry:e,stem:`Which statement best matches ${e.title}?`,options,answer:options.indexOf(e.summary),explanation:e.summary}}
 function startQuiz(){const b=$('#quiz-board').value,g=$('#quiz-grade').value,s=$('#quiz-subject').value,t=$('#quiz-chapter').value,n=+$('#quiz-length').value;let pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s&&(t==='all'||e.title===t));if(pool.length<n)pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s);activeQuiz=shuffle(pool).slice(0,Math.min(n,pool.length)).map(makeCurriculumQuestion);quizIndex=0;quizScore=0;$('#quiz-setup').classList.add('hidden');$('#quiz-result').classList.add('hidden');$('#quiz-runner').classList.remove('hidden');renderQuizQuestion()}
 function renderQuizQuestion(){const q=activeQuiz[quizIndex];$('#quiz-runner').innerHTML=`<div class="runner-top"><strong>${esc(q.entry.subject)} practice</strong><span>${quizIndex+1} / ${activeQuiz.length}</span></div><div class="question-stem">${esc(q.stem)}</div><div class="options">${q.options.map((o,i)=>`<button class="option-btn" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}</div><div id="quiz-feedback"></div>`;$('#quiz-runner').querySelectorAll('.option-btn').forEach(b=>b.onclick=()=>answerQuiz(+b.dataset.i))}
-function answerQuiz(i){const q=activeQuiz[quizIndex],ok=i===q.answer;if(ok)quizScore++;else if(!state.review.includes(q.entry.id))state.review.push(q.entry.id);save();$('#quiz-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#quiz-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Review this topic'}</strong><p>${esc(q.explanation)}</p><button class="button primary compact" id="quiz-next">${quizIndex===activeQuiz.length-1?'Finish':'Next'}</button></div>`;$('#quiz-next').onclick=()=>{if(quizIndex<activeQuiz.length-1){quizIndex++;renderQuizQuestion()}else finishQuiz()}}
+function answerQuiz(i){const q=activeQuiz[quizIndex],ok=i===q.answer;if(ok)quizScore++;else if(!state.review.includes(q.entry.id))state.review.push(q.entry.id);curriculumMasteryEvidence(q.entry,ok);save();$('#quiz-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#quiz-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Review this topic'}</strong><p>${esc(q.explanation)}</p><button class="button primary compact" id="quiz-next">${quizIndex===activeQuiz.length-1?'Finish':'Next'}</button></div>`;$('#quiz-next').onclick=()=>{if(quizIndex<activeQuiz.length-1){quizIndex++;renderQuizQuestion()}else finishQuiz()}}
 function finishQuiz(){state.quizHistory.push({date:new Date().toISOString(),score:quizScore,total:activeQuiz.length});save();$('#quiz-runner').classList.add('hidden');$('#quiz-result').classList.remove('hidden');$('#quiz-result').innerHTML=`<span class="small-label">Practice complete</span><h3>${quizScore} / ${activeQuiz.length}</h3><p>Missed topics were added to your review queue.</p><button class="button primary" id="quiz-again">Build another set</button>`;$('#quiz-again').onclick=()=>{$('#quiz-result').classList.add('hidden');$('#quiz-setup').classList.remove('hidden')};updateDashboard()}
 
 // Workspace
@@ -128,7 +216,7 @@ function addFolder(){const f=$('#new-folder-name').value.trim();if(f&&!state.fol
 
 function renderPlannerBoards(){fillSelect($('#planner-board'),['All',...uniq(STUDY_DATA.map(e=>e.board))],$('#planner-board').value||'All')}
 function buildPlan(){const board=$('#planner-board').value,mins=+$('#daily-time').value;let pool=[...state.review.map(id=>STUDY_DATA.find(e=>e.id===id)).filter(Boolean),...STUDY_DATA.filter(e=>!state.completed.includes(e.id))];pool=pool.filter((e,i,a)=>a.findIndex(x=>x.id===e.id)===i&&(board==='All'||e.board===board));const per=Math.max(1,Math.round(mins/35));$('#planner-heading').textContent='Seven-day revision map';$('#planner-output').innerHTML=Array.from({length:7},(_,d)=>{const items=pool.slice(d*per,(d+1)*per);return `<div class="plan-day"><strong>Day ${d+1}</strong>${items.length?items.map(e=>`<p>${state.review.includes(e.id)?'Review':'Study'} · ${esc(e.subject)} · ${esc(e.title)}</p>`).join(''):'<p>Buffer, catch-up or SAT mixed practice.</p>'}</div>`}).join('')}
-function updateDashboard(){const total=STUDY_DATA.length,done=state.completed.length,pct=Math.round(done/total*100),avg=state.quizHistory.length?Math.round(state.quizHistory.reduce((a,h)=>a+h.score/h.total,0)/state.quizHistory.length*100):0;$('#hero-percent').textContent=pct+'%';$('#hero-progress').style.width=pct+'%';$('#hero-completed').textContent=done;$('#hero-review').textContent=state.review.length;$('#hero-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-complete').textContent=pct+'%';$('#metric-total').textContent=total;$('#metric-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-review').textContent=state.review.length;$('#subject-progress').innerHTML=uniq(STUDY_DATA.map(e=>e.board)).map(b=>{const all=STUDY_DATA.filter(e=>e.board===b),d=all.filter(e=>state.completed.includes(e.id)).length,p=Math.round(d/all.length*100);return `<div class="progress-row"><div class="progress-row-top"><span>${esc(b)}</span><strong>${p}%</strong></div><div class="mastery-bar"><span style="width:${p}%"></span></div></div>`}).join('');renderLists();updateSatSummary()}
+function updateDashboard(){const total=STUDY_DATA.length,done=state.completed.length,pct=Math.round(done/total*100),avg=state.quizHistory.length?Math.round(state.quizHistory.reduce((a,h)=>a+h.score/h.total,0)/state.quizHistory.length*100):0;$('#hero-percent').textContent=pct+'%';$('#hero-progress').style.width=pct+'%';$('#hero-completed').textContent=done;$('#hero-review').textContent=state.review.length;$('#hero-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-complete').textContent=pct+'%';$('#metric-total').textContent=total;$('#metric-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-review').textContent=state.review.length;$('#subject-progress').innerHTML=uniq(STUDY_DATA.map(e=>e.board)).map(b=>{const all=STUDY_DATA.filter(e=>e.board===b),d=all.filter(e=>state.completed.includes(e.id)).length,p=Math.round(d/all.length*100);return `<div class="progress-row"><div class="progress-row-top"><span>${esc(b)}</span><strong>${p}%</strong></div><div class="mastery-bar"><span style="width:${p}%"></span></div></div>`}).join('');renderMasteryDashboard();renderLists();updateSatSummary()}
 function renderLists(){const row=(id,arr)=>{const es=arr.map(k=>STUDY_DATA.find(e=>e.id===k)).filter(Boolean);$(id).innerHTML=es.length?es.slice(0,20).map(e=>`<button data-id="${esc(e.id)}">${esc(e.title)}<small>${esc(e.board)} · ${esc(e.grade)}</small></button>`).join(''):'<p class="muted">Nothing here yet.</p>';$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))};row('#bookmark-list',state.bookmarks);row('#review-list',state.review)}
 function jumpToEntry(id){const e=STUDY_DATA.find(x=>x.id===id);if(!e)return;current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title);location.hash='#study'}
 function tutor(){const q=$('#tutor-query').value,r=searchAll(q).slice(0,6);$('#tutor-answer').innerHTML=r.length?r.map(e=>`<div class="tutor-result"><strong>${esc(e.title)}</strong><p>${esc(e.summary)}</p><button data-id="${esc(e.id)}">Open note</button></div>`).join(''):'<p>I could not find that in the material stored locally. Try a topic name, formula keyword or concept.</p>';$('#tutor-answer').querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))}

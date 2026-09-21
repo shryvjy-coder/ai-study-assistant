@@ -21,6 +21,7 @@
 .ps-mode-grid button:hover{transform:translateY(-2px);border-color:var(--teal)}
 .ps-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .ps-fields label{display:block;min-width:0;color:var(--ink);font-size:.83rem;font-weight:700}
+.ps-builder:not(.ps-custom) .ps-custom-field{display:none}
 .ps-fields select,.ps-fields input{display:block;width:100%;max-width:100%;min-width:0;margin-top:6px;box-sizing:border-box}
 .ps-preview{margin:14px 0;color:var(--teal);font-size:.88rem;font-weight:700}
 .ps-help,.ps-disclaimer{font-size:.78rem;line-height:1.6;color:var(--muted)}

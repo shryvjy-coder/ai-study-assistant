@@ -466,6 +466,7 @@
     $('#pai-load-generated-cards')?.addEventListener('click',()=>{
       if (!generatedCards.length) return;
       try {
+        if (typeof dueReviewSession !== 'undefined') dueReviewSession=false;
         activeDeck = generatedCards.map((item,index)=>({
           id:`pai|${Date.now()}|${index}`,
           front:item.front,

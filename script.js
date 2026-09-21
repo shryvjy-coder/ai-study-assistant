@@ -363,7 +363,8 @@ window.StudyAIPracticeBridge={
  openSat:(section,domain,skill)=>practiceMistakeUnit({kind:'sat',section,domain,skill}),
  openDue:()=>loadDueReviews(),
  openMistakes:()=>{mistakeFilter='open';renderMistakeNotebook();location.hash='#mistake-notebook'},
- exportState:()=>state
+ exportState:()=>state,
+ setWeeklyGoal:value=>{state.weeklyPracticeGoal=Math.max(0,Math.min(500,Math.round(Number(value)||0)));save()}
 };
 
 

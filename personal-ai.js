@@ -467,7 +467,7 @@
     const buttons = $('[data-pai-mode],[data-pai-topic-mode]');
     buttons.forEach(button=>button.disabled=true);
     const clicked=trigger || $(`[data-pai-mode="${mode}"]`) || $(`[data-pai-topic-mode="${mode}"]`);
-    const oldLabel=clicked?.textContent || '';
+    const oldMarkup=clicked?.innerHTML || '';
     if (clicked) clicked.textContent = mode==='podcast'?'Writing discussion…':'Generating…';
     notify(mode==='podcast'?'Creating a grounded two-voice discussion…':'Reading the selected notes…');
     try {
@@ -515,7 +515,7 @@
     finally {
       busy=false;
       buttons.forEach(button=>button.disabled=false);
-      if (clicked) clicked.textContent=oldLabel;
+      if (clicked) clicked.innerHTML=oldMarkup;
     }
   }
 

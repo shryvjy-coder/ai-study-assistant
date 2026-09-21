@@ -137,8 +137,9 @@
 
 <section class="section paper" id="flashcards">
   <div class="shell">
-    <header class="section-head split"><div><p class="kicker">Flashcards</p><h2>Recall before you reread.</h2><p>Generate a deck from the current topic or your own workspace notes.</p></div><div class="flashcard-stats"><span>New<strong id="fc-new">0</strong></span><span>Learning<strong id="fc-learning">0</strong></span><span>Mastered<strong id="fc-mastered">0</strong></span></div></header>
-    <div class="deck-toolbar"><select id="deck-source"></select><button class="quiet-button" id="shuffle-deck">Shuffle</button><button class="quiet-button" id="reset-deck">Reset states</button></div>
+    <header class="section-head split"><div><p class="kicker">Flashcards · spaced repetition</p><h2>Recall before you reread.</h2><p>Reveal the answer, rate your recall, and StudyAI schedules the next review.</p></div><div class="flashcard-stats"><span>Due in deck<strong id="fc-due">0</strong></span><span>New<strong id="fc-new">0</strong></span><span>Learning<strong id="fc-learning">0</strong></span><span>Secure<strong id="fc-mastered">0</strong></span></div></header>
+    <div class="srs-summary"><div><span class="small-label">Daily recall</span><strong><span id="srs-due-count">0</span> cards due</strong><small id="srs-next-due">Rate a card to start scheduling reviews.</small></div><button class="button primary compact" type="button" id="srs-start-due">Review due cards →</button></div>
+    <div class="deck-toolbar"><select id="deck-source" aria-label="Choose flashcard deck"></select><button class="quiet-button" id="shuffle-deck" type="button">Shuffle</button><button class="quiet-button" id="reset-deck" type="button">Reset deck schedule</button></div>
     <div class="flashcard-stage">
       <button class="flashcard" id="flashcard" type="button" aria-pressed="false" aria-label="Flip flashcard to reveal the answer">
         <span class="flashcard-inner">
@@ -155,7 +156,15 @@
         </span>
       </button>
     </div>
-    <div class="flashcard-controls"><button class="button ghost" data-fc-state="new">New</button><button class="button secondary" data-fc-state="learning">Learning</button><button class="button primary" data-fc-state="mastered">Mastered</button><button class="quiet-button" id="favorite-card">Favorite</button><button class="quiet-button" id="next-card">Next →</button></div>
+    <div class="srs-card-status" id="srs-card-status" role="status">Choose a deck to get started.</div>
+    <p class="srs-rating-hint" id="srs-rating-hint">Flip the card before rating your recall. Ratings schedule the next review.</p>
+    <div class="flashcard-controls srs-rating-controls" role="group" aria-label="Rate your recall">
+      <button class="button ghost" type="button" data-srs-rating="again" disabled><strong>Again</strong><small>1 minute</small></button>
+      <button class="button secondary" type="button" data-srs-rating="hard" disabled><strong>Hard</strong><small>10 minutes to longer</small></button>
+      <button class="button secondary" type="button" data-srs-rating="good" disabled><strong>Good</strong><small>1 day or longer</small></button>
+      <button class="button primary" type="button" data-srs-rating="easy" disabled><strong>Easy</strong><small>4 days or longer</small></button>
+    </div>
+    <div class="flashcard-controls srs-navigation"><button class="quiet-button" type="button" id="favorite-card">Favorite</button><button class="quiet-button" type="button" id="next-card">Skip / Next →</button></div>
   </div>
 </section>
 
@@ -190,6 +199,15 @@
         </div>
         <div class="mastery-section-head"><div><span class="small-label">Priority review</span><h4>What should you strengthen next?</h4></div></div>
         <div id="mastery-list" class="mastery-list"><p class="muted">Your weakest practiced topics and skills will appear here.</p></div>
+      </article>
+      <article class="dashboard-card wide srs-progress-card" id="spaced-repetition">
+        <div class="card-head"><div><span class="small-label">Learning engine · 03</span><h3>Spaced repetition</h3><p class="srs-progress-description">Your next reviews are scheduled from how well you recall each card.</p></div><button class="button primary compact" type="button" id="srs-progress-open">Review due cards →</button></div>
+        <div class="srs-progress-stats">
+          <div><span>Due now</span><strong id="srs-progress-due">0</strong><small>ready to review</small></div>
+          <div><span>Scheduled</span><strong id="srs-progress-scheduled">0</strong><small>rated cards</small></div>
+          <div><span>Next review</span><strong id="srs-progress-next">—</strong><small>after upcoming deadline</small></div>
+        </div>
+        <p class="srs-progress-note" id="srs-progress-note">Start with a chapter or Workspace deck, then rate a revealed card to schedule it.</p>
       </article>
       <article class="dashboard-card wide mistake-notebook-card" id="mistake-notebook">
         <div class="card-head mistake-notebook-heading">

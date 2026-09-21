@@ -100,7 +100,7 @@ function openMasteryRecord(record){
 }
 // Smart Review Queue: deterministic recommendations from existing learning evidence.
 // Does not infer exam probabilities, claim calibrated retention, or change mastery scores.
-function smartReviewCandidates(now=Date.now()){
+function smartReviewCandidates(now=Date.now(),limit=8){
  const due=srsDueCards(now);
  const open=mistakeRecords().filter(item=>(item.status||'open')==='open');
  const weak=masteryRecords().filter(item=>item.score<75);
@@ -165,7 +165,7 @@ function smartReviewCandidates(now=Date.now()){
  });
  const rank={due:0,mistake:1,mastery:2,flag:3};
  results.sort((a,b)=>b.priority-a.priority||(rank[a.type]-rank[b.type])||a.title.localeCompare(b.title));
- return {items:results.slice(0,8),due:due.length,mistakes:open.length,weak:weak.length,total:results.length};
+ return {items:results.slice(0,Math.max(1,Math.min(100,limit))),due:due.length,mistakes:open.length,weak:weak.length,total:results.length};
 }
 function runSmartReview(item){
  if(!item)return;
@@ -330,7 +330,7 @@ window.StudyAIPracticeBridge={
  getCurriculum:()=>STUDY_DATA,
  getMastery:()=>state.mastery||{},
  getMistakes:()=>mistakeRecords(),
- getReviewQueue:()=>smartReviewCandidates(),
+ getReviewQueue:(limit=8)=>smartReviewCandidates(Date.now(),limit),
  getReviewCards:()=>srsDueCards(),
  getReviewSummary:()=>srsSummary(),
  recordAttempt:(q,chosen,correct,mode='custom-test')=>{

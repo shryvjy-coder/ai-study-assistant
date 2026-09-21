@@ -157,7 +157,7 @@ def _extract_text_response(data):
 
 
 def _gemini_text(user_prompt, json_mode=False, max_tokens=3000):
-    model = os.getenv("STUDYAI_GEMINI_TEXT_MODEL", "gemini-2.5-flash").strip()
+    model = os.getenv("STUDYAI_GEMINI_TEXT_MODEL", "gemini-3.6-flash").strip()
     generation = {
         "temperature": 0.35,
         "maxOutputTokens": max_tokens,
@@ -341,7 +341,7 @@ def register_personal_ai(app, current_user):
             "ok": True,
             "configured": _provider_ready(),
             "provider": "Gemini",
-            "text_model": os.getenv("STUDYAI_GEMINI_TEXT_MODEL", "gemini-2.5-flash"),
+            "text_model": os.getenv("STUDYAI_GEMINI_TEXT_MODEL", "gemini-3.6-flash"),
             "tts_model": os.getenv("STUDYAI_GEMINI_TTS_MODEL", "gemini-2.5-flash-preview-tts"),
             "formats": [".txt", ".md", ".pdf", ".docx"],
             "requires_sign_in": True,

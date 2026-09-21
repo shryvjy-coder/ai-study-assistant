@@ -58,6 +58,30 @@ or contradictory areas under 'Needs checking'. Cite [S#] throughout.""",
     "ask": """Answer the student's question ONLY from the selected sources, using [S#] for factual claims.
 When the answer is absent, say it is not established by the notes and state what extra information
 would be needed. Do not provide outside facts.""",
+    "explain": """Explain the selected material as a clear lesson. Follow the student's requested depth
+(Quick, Standard, or Deep) when supplied. Build from the source's own definitions and relationships,
+use a simple progression from idea -> connection -> method/application, and end with 3 retrieval
+questions. Do not introduce facts that are not in the selected sources. Cite [S#] throughout.""",
+    "revision": """Turn the selected material into concise exam-revision notes. Prioritise: must-know ideas,
+definitions, formulas/relationships that actually appear in the sources, methods, common mistakes,
+and a 10-minute active-recall checklist. Keep it scan-friendly and cite substantive points [S#].
+Do not invent syllabus requirements or exam facts absent from the sources.""",
+    "teach": """Teach the selected material as a mini lesson using only the sources. Start with a short mental
+model, then explain the ideas in a logical sequence, include 'Pause and recall' checkpoints, and finish
+with a short mixed self-check. Match the requested depth if supplied. Do not silently add outside facts.
+Use [S#] citations for substantive claims.""",
+    "quiz": """Create a source-grounded multiple-choice quiz. Output ONLY valid JSON:
+{"questions":[{"question":"...","options":["...","...","...","..."],"answerIndex":0,
+"explanation":"...","references":"[S1]"}]}.
+Create exactly 6 questions. Each must have exactly 4 options and one correct answer. Questions and
+correct answers must be supported by the selected sources. Distractors may recombine source terms but
+must not require outside knowledge. Explanations must say why the supported answer follows from the
+notes and include source markers.""",
+    "flashcards": """Create active-recall flashcards strictly from the selected sources. Output ONLY valid JSON:
+{"cards":[{"front":"...","back":"...","references":"[S1]"}]}.
+Create 10 cards. Make fronts specific retrieval prompts rather than vague labels. Keep backs concise but
+complete enough to check recall. Include formulas or methods only when present in the sources. Do not
+add outside facts.""",
     "podcast": """Create a two-speaker study AUDIO DISCUSSION SCRIPT strictly grounded in the notes.
 Output only valid JSON with this structure:
 {"title":"...","turns":[{"speaker":"Host","text":"..."},{"speaker":"Guide","text":"..."}],"references":"..."}.
@@ -236,6 +260,66 @@ def _source_prompt(sources):
     )
 
 
+def _json_object(raw, label):
+    stripped = re.sub(r"^\x60{3}(?:json)?\s*|\s*\x60{3}$", "", raw.strip(), flags=re.I)
+    try:
+        parsed = json.loads(stripped)
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError(f"Gemini's {label} was not formatted correctly. Generate it again.") from exc
+    if not isinstance(parsed, dict):
+        raise RuntimeError(f"Gemini's {label} was incomplete. Generate it again.")
+    return parsed
+
+
+def _clean_quiz(raw):
+    parsed = _json_object(raw, "quiz")
+    items = parsed.get("questions")
+    if not isinstance(items, list) or not 4 <= len(items) <= 8:
+        raise RuntimeError("Gemini's quiz was incomplete. Generate it again.")
+    questions = []
+    for item in items[:8]:
+        if not isinstance(item, dict):
+            raise RuntimeError("Gemini returned an invalid quiz question.")
+        question = str(item.get("question") or "").strip()
+        options = item.get("options")
+        answer = item.get("answerIndex")
+        explanation = str(item.get("explanation") or "").strip()
+        references = str(item.get("references") or "").strip()
+        if not (10 <= len(question) <= 500) or not isinstance(options, list) or len(options) != 4:
+            raise RuntimeError("Gemini returned an invalid quiz question.")
+        options = [str(option).strip()[:260] for option in options]
+        if any(not option for option in options) or not isinstance(answer, int) or not 0 <= answer < 4:
+            raise RuntimeError("Gemini returned invalid quiz choices.")
+        if not (8 <= len(explanation) <= 800):
+            raise RuntimeError("Gemini returned an invalid quiz explanation.")
+        questions.append({
+            "question": question,
+            "options": options,
+            "answerIndex": answer,
+            "explanation": explanation,
+            "references": references[:120],
+        })
+    return {"questions": questions}
+
+
+def _clean_flashcards(raw):
+    parsed = _json_object(raw, "flashcard set")
+    items = parsed.get("cards")
+    if not isinstance(items, list) or not 6 <= len(items) <= 16:
+        raise RuntimeError("Gemini's flashcard set was incomplete. Generate it again.")
+    cards = []
+    for item in items[:16]:
+        if not isinstance(item, dict):
+            raise RuntimeError("Gemini returned an invalid flashcard.")
+        front = str(item.get("front") or "").strip()
+        back = str(item.get("back") or "").strip()
+        references = str(item.get("references") or "").strip()
+        if not (5 <= len(front) <= 360) or not (2 <= len(back) <= 800):
+            raise RuntimeError("Gemini returned an invalid flashcard.")
+        cards.append({"front": front, "back": back, "references": references[:120]})
+    return {"cards": cards}
+
+
 def _clean_script(raw):
     stripped = re.sub(r"^\x60{3}(?:json)?\s*|\s*\x60{3}$", "", raw.strip(), flags=re.I)
     try:
@@ -410,19 +494,24 @@ def register_personal_ai(app, current_user):
                 f"Student question: {question}\n\n"
                 f"Selected source notes:\n{context}"
             )
-            output = _gemini_text(prompt, json_mode=(mode == "podcast"), max_tokens=3200 if mode != "podcast" else 2400)
+            structured_modes = {"podcast", "quiz", "flashcards"}
+            output = _gemini_text(
+                prompt,
+                json_mode=(mode in structured_modes),
+                max_tokens=3200 if mode != "podcast" else 2400,
+            )
+            source_refs = [{"ref": ref, "title": title} for ref, title, _ in sources]
             if mode == "podcast":
-                return jsonify({
-                    "ok": True,
-                    "mode": mode,
-                    "script": _clean_script(output),
-                    "sources": [{"ref": ref, "title": title} for ref, title, _ in sources],
-                })
+                return jsonify({"ok": True, "mode": mode, "script": _clean_script(output), "sources": source_refs})
+            if mode == "quiz":
+                return jsonify({"ok": True, "mode": mode, "quiz": _clean_quiz(output), "sources": source_refs})
+            if mode == "flashcards":
+                return jsonify({"ok": True, "mode": mode, "flashcards": _clean_flashcards(output), "sources": source_refs})
             return jsonify({
                 "ok": True,
                 "mode": mode,
                 "text": output,
-                "sources": [{"ref": ref, "title": title} for ref, title, _ in sources],
+                "sources": source_refs,
             })
         except ValueError as exc:
             return _error(str(exc), 422)

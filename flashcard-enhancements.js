@@ -220,6 +220,7 @@
       button.onclick = () => {
         const entry = currentEntry();
         if (!entry) return typeof toast === 'function' && toast('Open a topic first');
+        if (typeof dueReviewSession !== 'undefined') dueReviewSession=false;
         activeDeck = enhancedTopicCards(entry);
         cardIndex = 0;
         renderCard();

@@ -19,11 +19,12 @@ def enhanced_index():
     script_marker = '<script src="script.js"></script>'
     script_enhancement = (
         script_marker
+        + '\n<script>try { window.STUDYAI_CURRICULUM = STUDY_DATA; } catch (e) { window.STUDYAI_CURRICULUM = []; }</script>'
         + '\n<script src="ui-enhancements.js"></script>'
         + '\n<script src="flashcard-enhancements.js"></script>'
         + '\n<script src="sat-mock-data.js"></script>'
         + '\n<script src="sat-exam-tools.js"></script>'
-        + '\n<script src="personal-ai.js?v=topic-mode-fix-2"></script>'
+        + '\n<script src="personal-ai.js?v=topic-mode-fix-3"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

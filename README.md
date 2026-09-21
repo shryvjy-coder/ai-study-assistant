@@ -261,7 +261,7 @@ recommendation; separate weak-mastery evidence may still recommend that topic.
 questions next, then weak practiced skills/topics, then existing review-list
 topics. The labels explain why each action appears. This is an MVP heuristic;
 it is not a calibrated retention estimate, an official exam score, or
-AI-generated advice. There is **no exam-date scheduling yet**. The queue does
+AI-generated advice. Exam-date scheduling is available separately in the Smart Study Planner. The queue does
 not update mastery simply because a recommendation was clicked, and
 it does not require a Gemini connection.
 
@@ -304,6 +304,57 @@ until the corresponding card receives a new rating.
 regular account-sync state along with their question/answer text. Personal AI's
 original uploaded source documents are still stored separately in the browser;
 rating a card saves only that card's text, not its full source document.
+
+---
+
+## Practice Studio, Smart Planner, and weekly report
+
+Start StudyAI with `StudyAI.bat` and open **Practice Studio**, which appears
+after Curriculum Practice. It uses the project's **50 original SAT questions**
+(12 Reading & Writing, 38 Math), not copied College Board questions.
+Available modes:
+
+- **Diagnostic:** a preliminary, domain-balanced check across the chosen
+  SAT section(s). Its per-domain breakdown is an early learning signal, not a
+  validated diagnostic or official SAT score prediction.
+- **Adaptive practice:** a simple transparent difficulty heuristic: after
+  incorrect answers it seeks Foundation items, after two consecutive correct
+  answers it seeks Advanced items, otherwise it seeks Medium. It prefers weak
+  recorded skills when similarly suitable questions are available. The question
+  pool is small and no question repeats *within* a session.
+- **Custom test:** set section, domain, skill, difficulty, question count,
+  and optional timer (0 = untimed).
+- **Timed sprint:** ten questions in ten minutes, or fewer if the selected
+  filters have fewer questions.
+- **Mixed retrieval:** bring together skills with low recorded mastery and
+  others from the selected SAT section(s).
+
+**Skipping an item never counts as an incorrect answer.** Only answered
+items update SAT mastery and the Wrong Answer Notebook. Timed sessions
+finish when time expires; actual scores report answered questions, separately
+from skips. A completed session writes a short summary to the same
+local/account-synced StudyAI state. The interface shows the *actual available*
+question count so restrictive filters are not silently padded. Repeating the
+limited bank will eventually make accuracy less representative.
+
+**Smart Study Planner:** Under Planner, optionally provide an exam date and
+your daily minutes, then generate up to seven days of suggestions using
+the full Smart Review Queue plus relevant uncompleted curriculum topics.
+Use the three-day cram preset for a shorter review map; it will not
+schedule days after a supplied earlier exam date. Click any task to open
+flashcards, the Wrong Answer Notebook, SAT practice, or the matching topic.
+The plan is a saved snapshot and must be regenerated as your practice changes.
+Durations are estimates, not promises of what you can learn in that time.
+
+**Weekly learning report:** Under Progress, view answered questions, practice
+accuracy, distinct practiced units, seven-day activity, weak areas, due
+flashcards and unresolved wrong answers. An optional, editable questions-per-
+seven-days goal is stored with your account progress. This is an activity
+summary—not an assessment of intelligence or a standardized exam forecast.
+Use Refresh report if you practice without leaving the Progress page.
+
+These additions require no Gemini key and do not change the existing SQLite
+schema, because they use StudyAI's existing local-first state sync.
 
 ---
 

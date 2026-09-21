@@ -4,6 +4,32 @@ StudyAI is a student-built study platform covering CBSE, Cambridge IGCSE, Cambri
 
 ## What changed in this build
 
+### Connected deadlines and planner follow-through
+
+- Add up to 40 exam, topic, or revision goals under Planner → Goals and deadlines.
+- Upcoming deadlines, today's plan, and overdue tasks now contribute explained priorities to Smart Review. Recommendations for the same practiced unit are merged.
+- School plans support Mark done / Reopen, persisted through the existing local and account state. Completion never awards mastery.
+- Both planners reserve the minutes allocated by the other saved plan. The selected daily allowance is a combined budget. Existing plans are not silently rewritten. Regenerate to apply new goals or a changed budget.
+- An optional saved exam goal supplies the date when the matching planner date is blank. School planning stops before exam day and prioritizes topic deadlines. Unfinished deadline tasks that do not fit are reported, not inserted beyond their deadline.
+- Today and overdue combines unfinished school and SAT tasks with direct actions and completion controls.
+
+Spaced repetition was already present before this batch. This update fixes an empty due queue leaving the previous deck active, shows the actual next interval on rating buttons, and preserves card IDs when the same generated Personal AI deck is loaded again. Legacy progress remains intact.
+
+Practice Studio now resets filters when opened from another tool, measures time against a wall-clock deadline, reports unanswered questions separately, explains adaptive selection, and keeps diagnostic provenance in mastery history. Mock-result ingestion defensively excludes blanks and pretests. A cloud-save race is fixed so edits made during an upload schedule a follow-up upload.
+
+**Verification:** 41 automated Chromium integration checks against Flask with a temporary SQLite database, plus syntax checks for all 14 JavaScript files. Coverage includes all four flashcard sources, hidden-card protection, intervals, minute/visibility refresh, local and signed-in reloads, per-deck reset, goal validation/caps, planner budgeting/completion, practice filters/timing, and mobile light/dark layouts. Personal AI responses are fixtures in these tests; live Gemini generation is not tested.
+
+Run the browser regression suite after installing the Python requirements and Playwright (`npm install --no-save playwright` and `npx playwright install chromium`):
+
+```sh
+node tests/learning-integration.cjs
+```
+
+The suite starts its own Flask server and uses a temporary test account/database. `TEST_CHROMIUM` can select an existing Chromium executable and `PYTHON` can select a Python executable. Tests do not use real accounts or API secrets.
+
+The existing SAT diagnostic, adaptive practice, custom tests, reports, and search tools remain in place. Trustworthy curriculum subskills and curriculum diagnostics still require better source content. This update does not turn the template-based curriculum question generator into a validated assessment.
+
+
 ### Premium motion
 - Smooth section reveals
 - Softer iPhone-inspired spring/ease curves without copying Apple UI

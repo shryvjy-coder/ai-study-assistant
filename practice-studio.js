@@ -147,12 +147,13 @@
     const questions=m==='adaptive'?[]:pickQuestions(pool,n,m);
     session={mode:m,pool,questions,target:n,index:0,answers:[],seen:new Set(),started:Date.now(),remaining:Math.max(0,Math.min(120,+(m==='sprint'?10:$('#ps-time').value)||0))*60,finished:false,current:null,answered:false};
     $('#ps-builder').hidden=true;$('#ps-runner').hidden=false;
+    session.deadline=session.remaining?Date.now()+session.remaining*1000:null;
     if(session.remaining)interval=setInterval(tick,1000);
     nextQuestion();
   }
   function tick(){
     if(!session||session.finished)return;
-    session.remaining=Math.max(0,session.remaining-1);
+    session.remaining=Math.max(0,Math.ceil((session.deadline-Date.now())/1000));
     const timer=$('#ps-clock');if(timer)timer.textContent=formatTime(session.remaining);
     if(!session.remaining)finish('Time expired');
   }
@@ -169,6 +170,7 @@
       '<div class="ps-runner-head"><span>'+safe(session.mode.replace(/-/g,' '))+' · '+progress+' / '+session.target+'</span>'+timer+'</div>',
       '<div class="ps-question"><div class="ps-crumb">'+safe(q.section)+' · '+safe(q.domain)+' · '+safe(q.skill)+' · '+safe(q.level)+'</div>',
       q.passage?'<div class="ps-passage">'+safe(q.passage)+'</div>':'',
+      (session.mode==='adaptive'?'<p class="ps-help">Selected for '+safe(levelForAdaptive())+' difficulty based on recent answers. Among matching questions, lower recorded mastery comes first.</p>':''),
       '<h3>'+safe(q.stem)+'</h3>',
       '<div class="ps-choices">'+q.options.map((choice,i)=>'<button type="button" data-ps-choice="'+i+'"><span>'+String.fromCharCode(65+i)+'</span>'+safe(choice)+'</button>').join('')+'</div>',
       '<div id="ps-feedback" role="status"></div>',
@@ -180,6 +182,7 @@
   }
   function answer(index){
     if(!session||session.finished||session.answered)return;
+    if(session.deadline&&Date.now()>=session.deadline){finish('Time expired');return}
     const q=session.current,correct=index===q.answer;
     session.answered=true;
     session.answers.push({id:q.id,q,chosen:index,correct,skipped:false});
@@ -203,14 +206,15 @@
     session.finished=true;
     if(interval){clearInterval(interval);interval=null}
     const answered=session.answers.filter(a=>!a.skipped),correct=answered.filter(a=>a.correct).length;
-    const summary={kind:'sat',mode:session.mode,correct,total:answered.length,skipped:session.answers.filter(a=>a.skipped).length,section:$('#ps-section').value,durationSec:Math.round((Date.now()-session.started)/1000)};
+    const unanswered=Math.max(0,session.target-answered.length-session.answers.filter(a=>a.skipped).length);
+    const summary={unanswered,kind:'sat',mode:session.mode,correct,total:answered.length,skipped:session.answers.filter(a=>a.skipped).length,section:$('#ps-section').value,durationSec:Math.round((Date.now()-session.started)/1000)};
     if(answered.length)bridge.recordTest(summary);
     const grouped=new Map();
     answered.forEach(a=>{let k=a.q.section+' · '+a.q.domain;let row=grouped.get(k)||{correct:0,total:0};row.total++;if(a.correct)row.correct++;grouped.set(k,row)});
     const details=[...grouped].map(([name,row])=>'<div class="ps-breakdown-row"><strong>'+safe(name)+'</strong><span>'+row.correct+' / '+row.total+' correct'+(row.total<3?' · early evidence':'')+'</span></div>').join('');
     $('#ps-runner').innerHTML=[
       '<div class="ps-results"><span class="small-label">'+safe(reason)+'</span><h3>'+correct+' / '+answered.length+' correct</h3>',
-      '<p>'+session.answers.filter(a=>a.skipped).length+' skipped · '+(session.mode==='diagnostic'?'This is an initial skill check, not a standardized test score.':'Your answered questions have updated StudyAI mastery.')+'</p>',
+      '<p>'+session.answers.filter(a=>a.skipped).length+' skipped · '+unanswered+' unanswered · '+(session.mode==='diagnostic'?'This is an initial skill check, not a standardized test score.':'Your answered questions have updated StudyAI mastery.')+'</p>',
       '<div class="ps-breakdown"><h4>Domain breakdown</h4>'+(details||'<p>No answered questions yet.</p>')+'</div>',
       '<div class="ps-result-actions"><button type="button" class="button primary" id="ps-again">Build another session →</button>',
       '<button type="button" class="button secondary" id="ps-mistakes">Open Wrong Answer Notebook</button></div></div>'
@@ -233,7 +237,8 @@
       const m=['diagnostic','adaptive','custom','sprint','mixed'].includes(config.mode)?config.mode:'custom';
       setMode(m);
       const section=$('#ps-section');
-      if(section&&['all','Reading & Writing','Math'].includes(config.section))section.value=config.section;
+      if(section)section.value=['all','Reading & Writing','Math'].includes(config.section)?config.section:'all';
+      $('#ps-domain').value='all';$('#ps-skill').value='all';$('#ps-level').value='all';$('#ps-time').value=m==='sprint'?'10':'0';
       populateDomains();
       const domain=$('#ps-domain');
       if(domain&&config.domain&&[...domain.options].some(o=>o.value===config.domain))domain.value=config.domain;
@@ -254,6 +259,7 @@
       return true;
     }
   };
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&session?.deadline&&!session.finished)tick()});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',makeUI);
   else makeUI();
 })();

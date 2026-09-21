@@ -32,7 +32,7 @@
    unit:item.unit||'',topicId:item.topicId||'',mistakeId:item.mistakeId||'',id:item.key};
  }
  function candidates(board){
-  const pool=bridge.getReviewQueue(100).items.map(taskFor)
+  const pool=bridge.getReviewQueue(100).items.filter(item=>!['planned','goal'].includes(item.type)).map(taskFor)
    .filter(t=>board==='All'||boardOfTask(t)===board||t.kind==='due');
   const picked=new Set(pool.filter(t=>t.kind==='flag'||t.kind==='mastery').map(t=>t.topicId||t.unit));
   const currentId=bridge.exportState()?.lastTopic;
@@ -47,7 +47,9 @@
     return weight(b)-weight(a)||(a.order||0)-(b.order||0);
    })
    .slice(0,16).map(e=>({kind:'new',id:'new|'+e.id,title:e.title,detail:e.grade+' · '+e.subject,topicId:e.id,board:e.board,minutes:30}));
-  return [...pool,...additions];
+  const goalTasks=(window.StudyAIPlanning?.topicTasks(board)||[]);
+  const goalIds=new Set(goalTasks.map(t=>t.topicId));
+  return [...goalTasks,...pool.filter(t=>!goalIds.has(t.topicId||t.unit?.replace(/^curriculum\|/,''))),...additions.filter(t=>!goalIds.has(t.topicId))];
  }
  function calculate(config){
   const start=today();
@@ -55,24 +57,29 @@
   if(config.examDate){
    const [y,m,d]=config.examDate.split('-').map(Number);
    const exam=new Date(y,m-1,d);
-   if(!Number.isFinite(exam.getTime())||exam<start)return {error:'Choose an exam date that is today or later.'};
-   days=Math.min(config.cram?3:7,Math.round((exam-start)/86400000)+1);
+   if(isoLocal(exam)!==config.examDate||exam<=start)return {error:'Choose a future exam date. Practice is scheduled before exam day.'};
+   days=Math.min(config.cram?3:7,Math.round((exam-start)/86400000));
   }else if(config.cram)days=3;
   const minutes=Math.max(15,Math.min(240,Number(config.minutes)||60));
-  const queue=candidates(config.board);
+  const queue=candidates(config.board).map(task=>task.minutes>minutes
+   ? {...task,minutes,detail:task.detail+' · focused session within your daily budget'}:task);
+  const blocked=window.StudyAIPlanning?.reservedMinutes('sat')||{};
+  let unmet=0;
   let index=0;
   const schedule=Array.from({length:days},(_,i)=>{
-   let budget=minutes;
+   const date=isoLocal(addDays(start,i));
+   let budget=Math.max(0,minutes-(blocked[date]||0));
    const actions=[];
    while(index<queue.length&&actions.length<4&&budget>=5){
     const entry=queue[index];
-    const time=Math.min(entry.minutes,budget);
-    if(time<5)break;
+    if(entry.deadline&&entry.deadline<date){index++;unmet++;continue}
+    const time=entry.minutes;
+    if(time>budget)break;
     actions.push({...entry,minutes:time});index++;budget-=time;
    }
    return {date:isoLocal(addDays(start,i)),items:actions,unused:budget};
   });
-  return {version:1,generatedAt:Date.now(),board:config.board,examDate:config.examDate||'',cram:!!config.cram,minutes,days:schedule,remaining:Math.max(0,queue.length-index)};
+  return {version:1,generatedAt:Date.now(),board:config.board,examDate:config.examDate||'',cram:!!config.cram,minutes,completed:{},unmet,days:schedule,remaining:Math.max(0,queue.length-index)};
  }
  function render(plan){
   const box=$('#planner-output');if(!box)return;
@@ -85,10 +92,12 @@
    plan.days.map((day,i)=>{
     const [y,m,d]=day.date.split('-').map(Number);
     return '<section class="ps-plan-day"><div class="ps-plan-day-heading"><strong>Day '+(i+1)+' · '+formatDate(new Date(y,m-1,d))+'</strong><span>'+day.items.reduce((sum,t)=>sum+t.minutes,0)+' planned minutes</span></div>'+
-      (day.items.length?day.items.map(task=>'<button type="button" class="ps-plan-task" data-plan-task="'+safe(task.id)+'">'+
-       '<span><strong>'+safe(task.title)+'</strong><small>'+safe(task.detail)+'</small></span><span>'+task.minutes+' min →</span></button>').join(''):'<p class="muted">Catch up, rest, or revisit something you want to clarify.</p>')+
+      (day.items.length?day.items.map(task=>{const key=day.date+'|'+task.id,done=!!plan.completed?.[key];return '<div class="satplan-task-row '+(done?'is-complete':'')+'"><button type="button" class="ps-plan-task" data-plan-task="'+safe(task.id)+'">'+
+       '<span><strong>'+safe(task.title)+'</strong><small>'+safe(task.detail)+'</small></span><span>'+task.minutes+' min →</span></button>'+
+       '<button type="button" class="satplan-check" data-school-check="'+safe(key)+'" aria-pressed="'+done+'">'+(done?'✓ Done':'Mark done')+'</button></div>'}).join(''):'<p class="muted">Catch up, rest, or revisit something you want to clarify.</p>')+
       '</section>';
    }).join('')+
+   (plan.unmet?'<p class="ps-plan-error">'+plan.unmet+' deadline tasks could not fit before their due dates. Adjust your time or deadlines.</p>':'')+
    (plan.remaining?'<p class="ps-plan-more">'+plan.remaining+' more study opportunities remain after this plan. Increase the daily time or regenerate for the next week.</p>':'')+
    '<p class="ps-plan-disclaimer">Estimated times are planning suggestions, not predictions. A task is only completed when you actually study it.</p>';
  }
@@ -106,6 +115,7 @@
  function generate(cram=false){
   const config={minutes:Number($('#daily-time').value),board:$('#planner-board').value,
    examDate:$('#smart-exam-date').value,cram};
+  if(!config.examDate)config.examDate=window.StudyAIPlanning?.nextExam(config.board)?.date||'';
   const plan=calculate(config);
   if(!plan.error)bridge.savePlanner(plan);
   render(plan);
@@ -123,6 +133,12 @@
   button.onclick=()=>generate(false);
   $('#smart-cram').addEventListener('click',()=>generate(true));
   $('#planner-output').addEventListener('click',e=>{
+   const check=e.target.closest('[data-school-check]');
+   if(check&&lastPlan){
+    const key=check.dataset.schoolCheck;lastPlan.completed=lastPlan.completed||{};
+    if(lastPlan.completed[key])delete lastPlan.completed[key];else lastPlan.completed[key]=true;
+    bridge.savePlanner(lastPlan);render(lastPlan);return;
+   }
    const target=e.target.closest('[data-plan-task]');
    const task=lastPlan?.days.flatMap(d=>d.items).find(t=>t.id===target?.dataset.planTask);
    if(task)act(task);
@@ -130,6 +146,7 @@
   const saved=bridge.getPlanner();
   if(saved?.version===1&&Array.isArray(saved.days))render(saved);
  }
+ window.StudyAISchoolPlanner={build:calculate,openTask:act,render};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);
  else mount();
 })();

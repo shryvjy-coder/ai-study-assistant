@@ -36,6 +36,7 @@ def enhanced_index():
         + '\n<script src="weekly-learning-report.js"></script>'
         + '\n<script src="sat-study-planner.js"></script>'
         + '\n<script src="revision-sheets.js"></script>'
+        + '\n<script src="learning-planner.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

@@ -7,12 +7,13 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
-let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,authMode='login';
+let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
 let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
 function save(){
  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
  scheduleCloudSave();
+ window.dispatchEvent(new Event('studyai:state-changed'));
 }
 function setSyncUI(status,message){
  const dot=$('#sync-indicator'),detail=$('#sync-detail');
@@ -21,19 +22,22 @@ function setSyncUI(status,message){
  detail.textContent=message||({syncing:'Saving to your account…',saved:'Up to date',error:'Could not sync. Your local copy is safe.'}[status]||'');
 }
 function scheduleCloudSave(){
- if(!cloudUser||cloudSyncing)return;
+ if(!cloudUser)return;
+ if(cloudSyncing){cloudDirty=true;return}
  clearTimeout(cloudSaveTimer);setSyncUI('syncing','Saving to your account…');
  cloudSaveTimer=setTimeout(()=>saveCloudState(false),650);
 }
 async function saveCloudState(showToast=false){
  if(!cloudUser)return false;
+ if(cloudSyncing){cloudDirty=true;return false}
+ cloudDirty=false;
  clearTimeout(cloudSaveTimer);cloudSaveTimer=null;cloudSyncing=true;setSyncUI('syncing','Saving to your account…');
  try{
   const r=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state})});
   if(!r.ok)throw new Error('sync failed');
   setSyncUI('saved','Up to date · saved to your account');if(showToast)toast('Study data synced');return true;
  }catch(e){setSyncUI('error','Sync paused. Your local copy is safe.');if(showToast)toast('Could not sync right now');return false}
- finally{cloudSyncing=false}
+ finally{cloudSyncing=false;if(cloudDirty){cloudDirty=false;scheduleCloudSave()}}
 }
 const keyOf=e=>e.id;
 const currentEntry=()=>STUDY_DATA.find(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&e.title===current.topic);
@@ -71,13 +75,13 @@ function recordMasteryEvidence(meta,correct){
  state.masteryHistory.push({key:meta.key,kind:previous.kind,correct:!!correct,source:meta.source||'practice',difficulty:meta.difficulty||'',at:previous.lastPracticed});
  if(state.masteryHistory.length>1200)state.masteryHistory=state.masteryHistory.slice(-1200);
 }
-function curriculumMasteryEvidence(entry,correct){
+function curriculumMasteryEvidence(entry,correct,source='curriculum-quiz'){
  if(!entry)return;
- recordMasteryEvidence({key:masteryKeyForEntry(entry),kind:'curriculum',label:entry.title,board:entry.board,grade:entry.grade,subject:entry.subject,topicId:entry.id,source:'curriculum-quiz'},correct);
+ recordMasteryEvidence({key:masteryKeyForEntry(entry),kind:'curriculum',label:entry.title,board:entry.board,grade:entry.grade,subject:entry.subject,topicId:entry.id,source},correct);
 }
-function satMasteryEvidence(q,correct){
+function satMasteryEvidence(q,correct,source='sat-practice'){
  if(!q)return;
- recordMasteryEvidence({key:masteryKeyForSat(q),kind:'sat',label:q.skill,section:q.section,domain:q.domain,skill:q.skill,subject:q.section,source:'sat-practice',difficulty:q.level||''},correct);
+ recordMasteryEvidence({key:masteryKeyForSat(q),kind:'sat',label:q.skill,section:q.section,domain:q.domain,skill:q.skill,subject:q.section,source,difficulty:q.level||''},correct);
 }
 function masteryRecords(){return Object.values(state.mastery||{}).filter(r=>r&&r.attempts>0)}
 function masterySnapshot(){
@@ -163,12 +167,21 @@ function smartReviewCandidates(now=Date.now(),limit=8){
    topicId
   });
  });
- const rank={due:0,mistake:1,mastery:2,flag:3};
+ const additions=window.StudyAIPlanning?.recommendations(now)||[];
+ additions.forEach(item=>{
+  const existing=results.find(row=>item.unit&&row.unit===item.unit);
+  if(existing){
+   existing.priority=Math.max(existing.priority,item.priority);
+   existing.detail+=' '+item.detail;
+  }else results.push(item);
+ });
+ const rank={due:0,planned:1,goal:2,mistake:3,mastery:4,flag:5};
  results.sort((a,b)=>b.priority-a.priority||(rank[a.type]-rank[b.type])||a.title.localeCompare(b.title));
  return {items:results.slice(0,Math.max(1,Math.min(100,limit))),due:due.length,mistakes:open.length,weak:weak.length,total:results.length};
 }
 function runSmartReview(item){
  if(!item)return;
+ if(item.type==='planned'||item.type==='goal'){window.StudyAIPlanning?.open(item);return}
  if(item.type==='due'){loadDueReviews();return}
  if(item.type==='mistake'){
   mistakeFilter='open';expandedMistakeId=item.mistakeId;
@@ -314,9 +327,9 @@ function captureMockResults(records){
  let count=0;
  records.forEach(record=>{
   const q=record?.question;
-  if(!q||q.pretest||!q.id)return;
+  if(!q||q.pretest||!q.id||record.chosen==null||String(record.chosen).trim()==='')return;
   const correct=record.correct===true;
-  satMasteryEvidence(q,correct);
+  satMasteryEvidence(q,correct,'sat-mock');
   state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:correct?1:0});
   noteMistakeResult(q,'sat',record.chosen,correct,'sat-mock');
   count++;
@@ -336,11 +349,11 @@ window.StudyAIPracticeBridge={
  recordAttempt:(q,chosen,correct,mode='custom-test')=>{
   if(!q||typeof correct!=='boolean')return;
   if(q.entry){
-   curriculumMasteryEvidence(q.entry,correct);
+   curriculumMasteryEvidence(q.entry,correct,mode);
    if(!correct&&!state.review.includes(q.entry.id))state.review.push(q.entry.id);
    noteMistakeResult(q,'curriculum',chosen,correct,mode);
   }else if(q.section&&q.skill){
-   satMasteryEvidence(q,correct);
+   satMasteryEvidence(q,correct,mode);
    state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:correct?1:0});
    noteMistakeResult(q,'sat',chosen,correct,mode);
   }else return;
@@ -358,6 +371,8 @@ window.StudyAIPracticeBridge={
   save();updateDashboard();
  },
  savePlanner:(plan)=>{state.smartPlannerPlan=plan;save()},
+ getGoals:()=>Array.isArray(state.learningGoals)?state.learningGoals:[],
+ saveGoals:goals=>{if(Array.isArray(goals)){state.learningGoals=goals.slice(0,40);save()}},
  getPlanner:()=>state.smartPlannerPlan||null,
  saveSatPlan:(plan)=>{state.satPlannerPlan=plan;save()},
  getSatPlan:()=>state.satPlannerPlan||null,
@@ -650,7 +665,6 @@ function reviewTimeLabel(dueAt,now=Date.now()){
 }
 function nextSrsInterval(previous,rating){
  const old=Math.max(0,Number(previous?.intervalMinutes)||0);
- const repeats=Math.max(0,Number(previous?.repetitions)||0);
  if(rating==='again')return 1;
  if(rating==='hard')return old<60?10:Math.min(SRS_MAX_MINUTES,Math.max(60,Math.ceil(old*1.2)));
  if(rating==='good')return old<60?24*60:Math.min(SRS_MAX_MINUTES,Math.max(3*24*60,Math.ceil(old*2.2)));
@@ -701,13 +715,19 @@ function renderSrsCardStatus(){
   : 'Reveal the answer before rating. Skip / Next does not alter your schedule.';
 }
 function refreshSrsRatingButtons(){
- const available=!!activeDeck[cardIndex]&&cardFlipped;
- $$('[data-srs-rating]').forEach(b=>b.disabled=!available);
+ const card=activeDeck[cardIndex],available=!!card&&cardFlipped;
+ $$('[data-srs-rating]').forEach(b=>{
+  b.disabled=!available;
+  const interval=nextSrsInterval(card?scheduledCard(card):null,b.dataset.srsRating);
+  if(b.querySelector('small'))b.querySelector('small').textContent=reviewTimeLabel(Date.now()+interval*SRS_MINUTE);
+ });
  renderSrsCardStatus();
 }
 function loadDueReviews(){
  const due=srsDueCards();
  if(!due.length){
+  activeDeck=[];dueReviewSession=true;cardIndex=0;
+  $('#deck-source').value='due';renderCard();renderFlashStats();
   toast('No scheduled cards due. Load a topic and rate cards to get started.');
   location.hash='#flashcards';
   renderSrsDashboard();

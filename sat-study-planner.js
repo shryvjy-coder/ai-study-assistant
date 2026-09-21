@@ -86,13 +86,13 @@
     &&(section==='both'||m.section===section));
   const chosenSections=section==='both'?SECTIONS:[section];
   const plans=[];
+  const blocked=window.StudyAIPlanning?.reservedMinutes('school')||{};
   for(let day=0;day<days;day++){
-   let budget=minutes;
+   let budget=Math.max(0,minutes-(blocked[dayString(addDays(start,day))]||0));
    const tasks=[],daySections=chosenSections.length===2&&day%2===1?[chosenSections[1],chosenSections[0]]:chosenSections;
    const add=task=>{
-    if(budget<8||tasks.length>=5)return false;
-    const allocation=Math.min(budget,task.minutes);
-    if(allocation<8)return false;
+    if(budget<task.minutes||tasks.length>=5)return false;
+    const allocation=task.minutes;
     tasks.push({...task,minutes:allocation});budget-=allocation;return true;
    };
    if(day===0&&skills.every(s=>s.attempts===0)&&budget>=25){
@@ -111,6 +111,7 @@
     turns++;
     if(!pool?.length)continue;
     const index=cursors[selectedSection]++%pool.length,skill=pool[index];
+    if(tasks.some(t=>t.type==='skill'&&t.section===skill.section&&t.skill===skill.skill))continue;
     const context=skill.score===null?'No recorded practice yet':
      skill.score+'% early mastery estimate from '+skill.attempts+' answer'+(skill.attempts===1?'':'s');
     if(!add({id:'skill|'+day+'|'+skill.id,type:'skill',section:skill.section,domain:skill.domain,skill:skill.skill,
@@ -158,6 +159,7 @@
  function generate(cram=false){
   const config={section:$('#satplan-section').value,minutes:Number($('#satplan-minutes').value),
    examDate:$('#satplan-date').value,cram};
+  if(!config.examDate)config.examDate=window.StudyAIPlanning?.nextExam('SAT')?.date||'';
   const plan=build(config);
   if(!plan.error){
    bridge.setSatPlanPrefs(config);
@@ -264,6 +266,7 @@
    renderInsights();
   }
  }
+ window.StudyAISatPlanner={build,openTask,render};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);
  else mount();
 })();

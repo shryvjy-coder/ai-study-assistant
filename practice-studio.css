@@ -183,3 +183,20 @@ button[data-ps-mode]:focus-visible,.ps-choices button:focus-visible{outline:3px 
  #revision-sheet-panel .revision-sheet-actions,#revision-sheet-close,#revision-sheet-feedback{display:none!important}
  #revision-sheet-panel .revision-sheet-top{margin-bottom:6px!important}
 }
+
+/* Goals and shared planner agenda */
+.learning-goals{margin-top:2rem}
+.learning-goals h3{margin-top:1.2rem}
+.learning-goal-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1.2rem 0}
+.learning-goal-form label{display:grid;gap:.4rem;min-width:0}
+.learning-goal-form input,.learning-goal-form select{width:100%;min-width:0;box-sizing:border-box}
+.learning-goal-form [hidden]{display:none}
+.learning-goal{display:flex;align-items:center;gap:.75rem;padding:1rem 0;border-bottom:1px solid var(--line,#aaa5)}
+.learning-goal>div,.learning-goal>.ps-plan-task{flex:1;min-width:0}
+.learning-goal strong,.learning-goal small{display:block;overflow-wrap:anywhere}
+.learning-goal small{margin-top:.3rem;color:var(--muted)}
+.learning-goal.is-complete strong{text-decoration:line-through}
+.learning-goals button:focus-visible,.satplan-check:focus-visible{outline:3px solid var(--teal,#385bcc);outline-offset:3px}
+.ps-plan-task{min-width:0}
+@media(max-width:640px){.learning-goal-form{grid-template-columns:1fr}.learning-goal{flex-wrap:wrap}.learning-goal>div,.learning-goal>.ps-plan-task{flex-basis:100%}}
+html[data-theme="dark"] .learning-goals input[type="date"]{color-scheme:dark}

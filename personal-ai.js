@@ -435,6 +435,7 @@
   function renderFlashcards(cards, refs = []) {
     currentQuiz = null;
     generatedCards = Array.isArray(cards) ? cards : [];
+    const deckId='pai|'+(window.crypto?.randomUUID?.()||Date.now()+'|'+Math.random().toString(36).slice(2));
     showStructured('AI flashcards', refs);
     const box = $('#pai-structured');
     const intro = document.createElement('div');
@@ -468,7 +469,7 @@
       try {
         if (typeof dueReviewSession !== 'undefined') dueReviewSession=false;
         activeDeck = generatedCards.map((item,index)=>({
-          id:`pai|${Date.now()}|${index}`,
+          id:`${deckId}|${index}`,
           front:item.front,
           back:item.back,
           source:'Personal AI'

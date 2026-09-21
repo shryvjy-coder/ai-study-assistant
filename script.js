@@ -530,7 +530,7 @@ function loadDueReviews(){
  toast('Due review session ready: '+due.length+' card'+(due.length===1?'':'s')+'.');
 }
 function topicCards(e){const prompts=[['What is the big idea?',e.summary],...e.keyPoints.slice(0,4).map((x,i)=>[`Key idea ${i+1}: ${e.title}`,x])];return prompts.map((x,i)=>({id:`${e.id}|${i}`,front:x[0],back:x[1],source:e.title}))}
-function loadDeckFromCurrent(){const e=currentEntry();if(!e)return toast('Open a topic first');dueReviewSession=false;activeDeck=topicCards(e);cardIndex=0;renderCard();renderFlashStats();location.hash='#flashcards'}
+function loadDeckFromCurrent(){const e=currentEntry();if(!e)return toast('Open a topic first');dueReviewSession=false;$('#deck-source').value='current';activeDeck=topicCards(e);cardIndex=0;renderCard();renderFlashStats();location.hash='#flashcards'}
 function renderCard(){
  const c=activeDeck[cardIndex],card=$('#flashcard');
  cardFlipped=false;card.classList.remove('flipped');card.setAttribute('aria-pressed','false');

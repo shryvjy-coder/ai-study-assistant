@@ -269,7 +269,7 @@ function mistakeRecords(){
 function noteMistakeResult(q,kind,chosen,correct,source){
  if(!q)return;
  const entry=kind==='curriculum'?q.entry:null;
- const key=kind==='curriculum'?(entry?'curriculum|'+entry.id:null):(q.id?'sat|'+q.id:null);
+ const key=kind==='curriculum'?(entry?'curriculum|'+entry.id+(q.id?'|'+q.id:''):null):(q.id?'sat|'+q.id:null);
  if(!key)return;
  if(!Array.isArray(state.mistakes))state.mistakes=[];
  const now=Date.now();
@@ -324,6 +324,47 @@ function captureMockResults(records){
  if(count){save();updateDashboard();}
 }
 window.StudyAIRecordMockResults=captureMockResults;
+// Dedicated practice workflows use these narrow methods rather than modifying core quiz state.
+window.StudyAIPracticeBridge={
+ getSatQuestions:()=>SAT_QUESTIONS,
+ getCurriculum:()=>STUDY_DATA,
+ getMastery:()=>state.mastery||{},
+ getMistakes:()=>mistakeRecords(),
+ getReviewQueue:()=>smartReviewCandidates(),
+ getReviewCards:()=>srsDueCards(),
+ getReviewSummary:()=>srsSummary(),
+ recordAttempt:(q,chosen,correct,mode='custom-test')=>{
+  if(!q||typeof correct!=='boolean')return;
+  if(q.entry){
+   curriculumMasteryEvidence(q.entry,correct);
+   if(!correct&&!state.review.includes(q.entry.id))state.review.push(q.entry.id);
+   noteMistakeResult(q,'curriculum',chosen,correct,mode);
+  }else if(q.section&&q.skill){
+   satMasteryEvidence(q,correct);
+   state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:correct?1:0});
+   noteMistakeResult(q,'sat',chosen,correct,mode);
+  }else return;
+  save();updateDashboard();
+ },
+ recordTest:(summary)=>{
+  if(!summary||!Number.isFinite(summary.total)||summary.total<=0)return;
+  if(summary.kind==='curriculum'){
+   state.quizHistory.push({date:new Date().toISOString(),score:summary.correct,total:summary.total,mode:summary.mode||'custom-test'});
+   if(state.quizHistory.length>500)state.quizHistory=state.quizHistory.slice(-500);
+  }
+  state.practiceStudioHistory=Array.isArray(state.practiceStudioHistory)?state.practiceStudioHistory:[];
+  state.practiceStudioHistory.push({date:new Date().toISOString(),...summary});
+  if(state.practiceStudioHistory.length>100)state.practiceStudioHistory=state.practiceStudioHistory.slice(-100);
+  save();updateDashboard();
+ },
+ savePlanner:(plan)=>{state.smartPlannerPlan=plan;save()},
+ getPlanner:()=>state.smartPlannerPlan||null,
+ openTopic:(id)=>jumpToEntry(id),
+ openSat:(section,domain,skill)=>practiceMistakeUnit({kind:'sat',section,domain,skill}),
+ openDue:()=>loadDueReviews(),
+ openMistakes:()=>{mistakeFilter='open';renderMistakeNotebook();location.hash='#mistake-notebook'},
+ exportState:()=>state
+};
 
 
 function mistakeAnswerText(item,selected){

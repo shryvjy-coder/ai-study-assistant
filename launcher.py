@@ -12,6 +12,7 @@ def enhanced_index():
         + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
         + '\n  <link rel="stylesheet" href="practice-studio.css" />'
+        + '\n  <link rel="stylesheet" href="command-center.css" />'
         + '\n  <link rel="stylesheet" href="personal-ai.css" />'
     )
     if 'site-premium.css' not in html:
@@ -30,6 +31,7 @@ def enhanced_index():
         + '\n<script src="sat-exam-tools.js"></script>'
         + '\n<script src="personal-ai.js"></script>'
         + '\n<script src="practice-studio.js"></script>'
+        + '\n<script src="command-center.js"></script>'
         + '\n<script src="smart-study-planner.js"></script>'
         + '\n<script src="weekly-learning-report.js"></script>'
         + '\n<script src="sat-study-planner.js"></script>'

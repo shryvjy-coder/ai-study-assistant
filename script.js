@@ -212,7 +212,7 @@ function renderMistakeNotebook(){
  $('#mistake-open-count').textContent=counts.open;
  $('#mistake-recovered-count').textContent=counts.recovered;
  $('#mistake-understood-count').textContent=counts.understood;
- $('[data-mistake-filter]').forEach(button=>{
+ document.querySelectorAll('[data-mistake-filter]').forEach(button=>{
   const active=button.dataset.mistakeFilter===mistakeFilter;
   button.classList.toggle('active',active);
   button.setAttribute('aria-pressed',String(active));
@@ -348,7 +348,7 @@ function practiceMistakeUnit(item){
   return;
  }
  satSection=item.section||satSection;
- $('#sat-section-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.satSection===satSection));
+ document.querySelectorAll('#sat-section-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.satSection===satSection));
  renderSatFilters();
  if(item.domain){$('#sat-domain').value=item.domain;renderSatFilters()}
  if(item.skill)$('#sat-skill').value=item.skill;
@@ -370,7 +370,7 @@ function loadMistakeDeck(rows){
  toast('Wrong-answer flashcards loaded.');
 }
 function bindMistakeNotebook(){
- $('[data-mistake-filter]').forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('[data-mistake-filter]').forEach(button=>button.addEventListener('click',()=>{
   mistakeFilter=button.dataset.mistakeFilter||'open';
   expandedMistakeId=null;retryMistakeId=null;explanationMistakeId=null;
   renderMistakeNotebook();

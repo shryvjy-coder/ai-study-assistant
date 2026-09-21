@@ -158,7 +158,17 @@ def _gemini_post(model, payload, timeout=75):
             detail = ""
         raise RuntimeError("Gemini could not process this request." + (f" {detail[:180]}" if detail else ""))
     if not response.ok:
-        raise RuntimeError("Gemini is temporarily unavailable. Try again later.")
+        try:
+            detail = response.json().get("error", {}).get("message", "")
+        except Exception:
+            detail = ""
+        status = response.status_code
+        message = f"Gemini returned HTTP {status}."
+        if detail:
+            message += f" Google says: {detail[:400]}"
+        else:
+            message += " Try again later or check your Gemini API project/quota."
+        raise RuntimeError(message)
 
     try:
         return response.json()

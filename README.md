@@ -368,9 +368,12 @@ stops before the exam day and stays within the requested daily minute budget.
 It prioritizes recorded weak skills and open SAT mistakes, adds uncovered skills,
 and includes original-question diagnostic / mixed / short timed practice. Click
 a task to open the relevant Practice Studio configuration or Wrong Answer
-Notebook. Saved plan and settings use the existing local/account state; the
-plan is a snapshot and must be regenerated after additional practice. Time
-allocations are suggestions, not measured completion or score predictions.
+Notebook. Use **Mark done** to record which planned tasks you actually finished;
+opening a task never automatically marks it complete or changes mastery.
+Saved plans, manually checked tasks, and settings use the existing
+local/account state. A plan is a snapshot and must be regenerated after
+additional practice. Time allocations are suggestions, not measured completion
+or score predictions.
 StudyAI does not automatically schedule or administer official Bluebook tests.
 
 **SAT skill insights:** Progress now shows answered SAT practice totals,

@@ -35,23 +35,29 @@
   const pool=bridge.getReviewQueue(100).items.map(taskFor)
    .filter(t=>board==='All'||boardOfTask(t)===board||t.kind==='due');
   const picked=new Set(pool.filter(t=>t.kind==='flag'||t.kind==='mastery').map(t=>t.topicId||t.unit));
+  const currentId=bridge.exportState()?.lastTopic;
+  const currentEntry=bridge.getCurriculum().find(e=>e.id===currentId);
+  const preferredBoard=board==='All'?(currentEntry?.board||null):board;
   const additions=bridge.getCurriculum().filter(e=>(board==='All'||e.board===board)
    &&!picked.has(e.id)&&!picked.has('curriculum|'+e.id)
    &&!bridge.getMastery()['curriculum|'+e.id]
    &&!(bridge.exportState()?.completed||[]).includes(e.id))
+   .sort((a,b)=>{
+    const weight=e=>(e.board===preferredBoard?4:0)+(e.grade===currentEntry?.grade?3:0)+(e.subject===currentEntry?.subject?2:0);
+    return weight(b)-weight(a)||(a.order||0)-(b.order||0);
+   })
    .slice(0,16).map(e=>({kind:'new',id:'new|'+e.id,title:e.title,detail:e.grade+' · '+e.subject,topicId:e.id,board:e.board,minutes:30}));
   return [...pool,...additions];
  }
  function calculate(config){
   const start=today();
   let days=7;
-  if(config.cram)days=3;
-  else if(config.examDate){
+  if(config.examDate){
    const [y,m,d]=config.examDate.split('-').map(Number);
    const exam=new Date(y,m-1,d);
    if(!Number.isFinite(exam.getTime())||exam<start)return {error:'Choose an exam date that is today or later.'};
-   days=Math.min(7,Math.round((exam-start)/86400000)+1);
-  }
+   days=Math.min(config.cram?3:7,Math.round((exam-start)/86400000)+1);
+  }else if(config.cram)days=3;
   const minutes=Math.max(15,Math.min(240,Number(config.minutes)||60));
   const queue=candidates(config.board);
   let index=0;
@@ -72,7 +78,7 @@
   const box=$('#planner-output');if(!box)return;
   if(plan.error){box.innerHTML='<p class="ps-plan-error" role="alert">'+safe(plan.error)+'</p>';return}
   lastPlan=plan;
-  $('#planner-heading').textContent=plan.cram?'Three-day exam cram':'Your smart seven-day plan';
+  $('#planner-heading').textContent=plan.cram?'Exam cram · '+plan.days.length+' day'+(plan.days.length===1?'':'s'):'Your smart '+plan.days.length+'-day plan';
   box.innerHTML='<div class="ps-plan-intro">Created '+new Date(plan.generatedAt).toLocaleString()+' · '+plan.minutes+' min/day'+
    (plan.examDate?' · exam '+safe(plan.examDate):'')+
    '<p>A practical snapshot from the current review queue. Regenerate after practice as your priorities change.</p></div>'+

@@ -363,6 +363,17 @@ window.StudyAIPracticeBridge={
  getSatPlan:()=>state.satPlannerPlan||null,
  setSatPlanPrefs:(prefs)=>{state.satPlannerPrefs=prefs;save()},
  getSatPlanPrefs:()=>state.satPlannerPrefs||null,
+ saveRevisionNote:(title,content,source)=>{
+  if(typeof content!=='string'||!content.trim())return false;
+  const note={id:'revision|'+Date.now()+'|'+Math.random().toString(36).slice(2,7),
+   title:String(title||'Revision sheet').slice(0,120),folder:'General',
+   source:String(source||'StudyAI library').slice(0,180),
+   content:content.slice(0,40000),updated:Date.now()};
+  state.workspaceNotes=Array.isArray(state.workspaceNotes)?state.workspaceNotes:[];
+  state.workspaceNotes.unshift(note);
+  save();renderWorkspace();
+  return true;
+ },
  openTopic:(id)=>jumpToEntry(id),
  openSat:(section,domain,skill)=>practiceMistakeUnit({kind:'sat',section,domain,skill}),
  openDue:()=>loadDueReviews(),

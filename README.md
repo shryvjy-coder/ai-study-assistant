@@ -210,15 +210,26 @@ Personal AI is a separate section of StudyAI. Open it using **StudyAI.bat** (whi
 `launcher.py`) rather than Live Server or `app.py` directly.
 
 **Sources:** Upload selectable-text PDF, DOCX, TXT or Markdown notes (8 MB per file,
-up to 48,000 extracted characters per note), paste text, or import the current
-chapter outline or a saved Workspace note. Select up to 8 sources with a total
-of 52,000 characters. Scanned/image-only PDFs are not supported yet.
+up to 48,000 extracted characters per note), paste text, import the current
+chapter outline or a saved Workspace note, or use **Topic Mode** to choose a
+StudyAI curriculum → class/stage → subject → topic directly. Select up to 8
+sources with a total of 52,000 characters. A StudyAI topic can stay selected
+alongside uploaded school notes, so Personal AI can work from both at once.
+Scanned/image-only PDFs are not supported yet.
+
+**Topic Mode:** Students can start without their own notes. Choose a StudyAI topic,
+pick Quick / Standard / Deep explanation depth, then use Explain Topic, Revision
+Notes, Teach Me, Quiz Me, Make Flashcards, or Audio Lesson. Quiz Me creates a
+six-question interactive grounded MCQ set. Make Flashcards creates ten active-recall
+cards that can be studied inside Personal AI or loaded into the existing StudyAI
+flashcard deck.
 
 **AI tools:** Summarize, generate structured notes, improve existing notes without
-adding unsupported factual content, ask a source-grounded question, or generate
-an editable eight-turn, two-speaker audio discussion. The discussion can be
-synthesized into a downloadable WAV file with two clearly labeled AI voices.
-Generated notes can be copied or saved to the StudyAI Workspace.
+adding unsupported factual content, ask a source-grounded question, generate
+topic explanations/revision lessons, build grounded quizzes and flashcards, or
+generate an editable eight-turn, two-speaker audio discussion. The discussion can
+be synthesized into a downloadable WAV file with two clearly labeled AI voices.
+Generated text notes can be copied or saved to the StudyAI Workspace.
 
 **Set up AI generation:**
 

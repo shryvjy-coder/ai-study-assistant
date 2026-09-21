@@ -510,6 +510,40 @@
     } catch(e){notify(e.message,'error');}
   }
 
+  function importLearningContext() {
+    try {
+      const bridge=window.StudyAIPracticeBridge;
+      if(!bridge)return notify('StudyAI learning data is not available right now.','error');
+      const state=bridge.exportState()||{},mastery=Object.values(bridge.getMastery()||{}).filter(x=>x&&x.attempts>0);
+      const weak=[...mastery].sort((a,b)=>(a.score||0)-(b.score||0)).slice(0,8);
+      const mistakes=bridge.getMistakes().filter(x=>(x.status||'open')==='open').slice(0,8);
+      const review=bridge.getReviewSummary();
+      const sat=mastery.filter(x=>x.kind==='sat').sort((a,b)=>(a.score||0)-(b.score||0)).slice(0,6);
+      const text=[
+        'StudyAI learning context — generated from recorded practice data.',
+        'This is activity evidence, not an official assessment or exam-score prediction.',
+        '',
+        'Review workload:',
+        '- Due flashcards: '+(review?.due||0),
+        '- Open wrong answers: '+mistakes.length,
+        '- Practiced mastery units: '+mastery.length,
+        '',
+        'Lowest practiced mastery units:',
+        ...(weak.length?weak.map(x=>'- '+x.label+' — '+x.score+'% from '+x.correct+'/'+x.attempts+' correct'):['- No practiced mastery data yet.']),
+        '',
+        'Lowest practiced SAT skills:',
+        ...(sat.length?sat.map(x=>'- '+[x.section,x.domain,x.skill].filter(Boolean).join(' · ')+' — '+x.score+'% from '+x.correct+'/'+x.attempts+' correct'):['- No SAT mastery data yet.']),
+        '',
+        'Open mistakes:',
+        ...(mistakes.length?mistakes.map(x=>'- '+[x.title||x.skill,x.subject||x.section,x.domain].filter(Boolean).join(' · ')+' — missed '+(x.missCount||1)+' time'+((x.missCount||1)===1?'':'s')):['- No open wrong answers.']),
+        '',
+        'Weekly practice goal: '+(state.weeklyPracticeGoal?state.weeklyPracticeGoal+' answered questions':'not set')+'.',
+        'Use these records only to tailor study priorities; do not infer ability beyond the recorded evidence.'
+      ].join('\n');
+      addSource('My StudyAI learning context',text,'StudyAI progress');
+    } catch(e){notify(e.message,'error');}
+  }
+
   function importChapter() {
     try {
       if (typeof currentEntry !== 'function') return notify('Open a chapter in the Study Library first.','error');
@@ -752,6 +786,7 @@
             <label class="pai-upload" for="pai-file"><span aria-hidden="true">↑</span><strong>Upload notes</strong><small>PDF, DOCX, TXT, MD · up to 8 MB per file</small><input id="pai-file" type="file" accept=".pdf,.docx,.txt,.md" multiple></label>
             <div class="pai-import-actions">
               <button type="button" id="pai-import-chapter" class="button secondary compact">＋ Current chapter</button>
+              <button type="button" id="pai-import-learning" class="button secondary compact">＋ My learning context</button>
               <div class="pai-import-workspace">
                 <select id="pai-workspace-select" aria-label="Choose a workspace note"><option value="">Choose an existing note…</option></select>
                 <button id="pai-import-workspace" class="button secondary compact" type="button">Import</button>
@@ -821,6 +856,7 @@
       } catch(e){notify(e.message,'error');}
     });
     $('#pai-import-chapter').addEventListener('click',importChapter);
+    $('#pai-import-learning').addEventListener('click',importLearningContext);
     $('#pai-workspace-select').addEventListener('focus',refreshWorkspaceChoices);
     $('#pai-import-workspace').addEventListener('click',importWorkspace);
     $('#pai-clear').addEventListener('click',()=>{

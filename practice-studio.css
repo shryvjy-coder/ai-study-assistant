@@ -146,3 +146,33 @@ button[data-ps-mode]:focus-visible,.ps-choices button:focus-visible{outline:3px 
 .sat-insight-track span{display:block;height:100%;background:var(--teal);border-radius:10px}
 @media(max-width:840px){.satplan-layout{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:580px){.sat-insight-metrics{grid-template-columns:1fr 1fr}.sat-insight-row{grid-template-columns:minmax(0,1fr) 44px}.sat-insight-track{grid-column:1/-1;grid-row:2}.satplan-task{flex-direction:column;align-items:stretch}.satplan-task>span:last-child{align-self:flex-end}}
+
+
+/* Source-based revision sheets */
+.revision-entry-actions{display:flex;gap:8px;flex-wrap:wrap}
+.revision-sheet-panel[hidden]{display:none!important}
+.revision-sheet-panel{min-width:0;margin:24px 0 0;padding:20px;border:1.5px solid var(--premium-card-border);border-radius:16px;background:var(--surface);color:var(--ink);box-shadow:4px 5px 0 color-mix(in srgb,var(--ink) 65%,transparent)}
+.revision-sheet-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:15px}
+.revision-sheet-top h3{font-family:var(--serif);font-size:clamp(1.45rem,3vw,2.15rem);margin:4px 0;overflow-wrap:anywhere}
+.revision-sheet-top p{margin:2px 0;color:var(--muted)}
+.revision-sheet-group{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--surface) 85%,var(--paper))}
+.revision-sheet-group h4{margin:0 0 8px;font-family:var(--serif);font-size:1.1rem}
+.revision-sheet-group p{margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.revision-sheet-group ol{margin:0;padding-left:20px}
+.revision-sheet-group li{margin:6px 0;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.revision-sheet-source{color:var(--muted);font-size:.73rem;border-top:1px dashed var(--line);padding-top:10px}
+.revision-sheet-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 5px}
+#revision-sheet-feedback{display:block;margin-top:8px;color:var(--teal);font-size:.78rem}
+@media(max-width:620px){.revision-sheet-top{flex-direction:column}.revision-sheet-actions .button{flex:1 1 140px}}
+@media print{
+ @page{size:auto;margin:14mm}
+ body *{visibility:hidden!important}
+ #revision-sheet-panel,#revision-sheet-panel *{visibility:visible!important}
+ #revision-sheet-panel{position:absolute!important;top:0!important;left:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important;color:#111!important;font-size:10pt!important}
+ #revision-sheet-panel h3{color:#111!important}
+ #revision-sheet-panel .revision-sheet-group{break-inside:avoid;border:0!important;border-bottom:1px solid #ccc!important;border-radius:0!important;background:white!important;margin:8px 0!important;padding:5px 0!important}
+ #revision-sheet-panel .revision-sheet-group li{margin:2px 0!important;line-height:1.3!important}
+ #revision-sheet-panel .revision-sheet-group h4{margin:2px 0 4px!important}
+ #revision-sheet-panel .revision-sheet-actions,#revision-sheet-close,#revision-sheet-feedback{display:none!important}
+ #revision-sheet-panel .revision-sheet-top{margin-bottom:6px!important}
+}

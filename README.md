@@ -241,6 +241,46 @@ mastery of an unseen question.
 
 ---
 
+### Spaced repetition — Feature #3
+
+StudyAI now has a persisted flashcard scheduler. Open **Flashcards**, choose the
+current curriculum topic, a Workspace note, or saved wrong answers, then **flip
+each card** and rate your recall:
+
+| Rating | First review interval | Later behavior |
+| --- | --- | --- |
+| Again | 1 minute | Restarts the learning interval and counts a lapse |
+| Hard | 10 minutes | Grows the previous interval slowly |
+| Good | 1 day | Then 3 days, then about 2.2 times the previous interval |
+| Easy | 4 days | Grows the previous interval by about 2.8 times |
+
+This is a simple, bounded interval scheduler, **not** a calibrated FSRS or
+a scientifically measured probability of retention. The maximum interval is
+one year. Ratings are disabled until you flip the card; **Skip / Next** does
+not change its schedule. New and legacy flashcards are not automatically
+assigned review dates until you rate them.
+
+**Daily queue:** Rating saves the question/answer and its next due time into
+normal local StudyAI state and the authenticated account's existing database
+state. Choose **Due reviews** in the deck source or use **Review due cards**
+from Flashcards or Progress. Once rated in that session, a card moves out of
+the current queue until its next review date. When a deadline arrives while
+StudyAI is open, counts refresh roughly once per minute or on tab return.
+
+Reviewed curriculum, Workspace, wrong-answer, and Personal AI-generated cards
+can reappear after a restart, because their rated content is stored with the
+schedule. The saved-review catalog is capped at 500 distinct rated cards, and
+**Reset deck schedule** deletes review dates and old status for the loaded
+deck only. The existing New / Learning / Mastered status data is preserved
+until the corresponding card receives a new rating.
+
+**Privacy:** Rated Personal AI cards and Workspace cards are saved in the
+regular account-sync state along with their question/answer text. Personal AI's
+original uploaded source documents are still stored separately in the browser;
+rating a card saves only that card's text, not its full source document.
+
+---
+
 ## Personal AI — grounded notes and audio discussions
 
 Personal AI is a separate section of StudyAI. Open it using **StudyAI.bat** (which starts

@@ -153,6 +153,9 @@
 
   function topicEntries() {
     try {
+      if (Array.isArray(window.STUDYAI_CURRICULUM) && window.STUDYAI_CURRICULUM.length) {
+        return window.STUDYAI_CURRICULUM;
+      }
       return (typeof STUDY_DATA !== 'undefined' && Array.isArray(STUDY_DATA)) ? STUDY_DATA : [];
     } catch (_) { return []; }
   }
@@ -384,6 +387,8 @@
   function setupTopicMode() {
     const panel = $('#pai-topic-mode');
     if (!panel) return;
+    const count = topicEntries().length;
+    panel.dataset.topicCount = String(count);
     updateTopicPicker('init');
     $('#pai-topic-board').addEventListener('change',()=>updateTopicPicker('board'));
     $('#pai-topic-grade').addEventListener('change',()=>updateTopicPicker('grade'));

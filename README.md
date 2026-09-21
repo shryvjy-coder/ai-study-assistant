@@ -56,7 +56,7 @@ Open a terminal in this folder and run:
 ```bash
 py -m pip install -r requirements.txt
 copy .env.example .env
-py app.py
+py launcher.py
 ```
 
 Then visit `http://localhost:5000`.
@@ -223,23 +223,24 @@ Generated notes can be copied or saved to the StudyAI Workspace.
 **Set up AI generation:**
 
 1. Copy `.env.example` to `.env` in the StudyAI project folder.
-2. Add your own `OPENAI_API_KEY=...` line in `.env`. Never put the key in JavaScript,
-   HTML, a public GitHub commit or a screenshot.
-3. Run `StudyAI.bat`. Existing installations detect and install the new PDF/DOCX
+2. Create a Gemini API key in Google AI Studio and add `GEMINI_API_KEY=...` to `.env`.
+   Never put the key in JavaScript, HTML, a public GitHub commit or a screenshot.
+3. Run `StudyAI.bat`. Existing installations detect and install the PDF/DOCX
    libraries when needed. Sign in with a StudyAI account before generating AI content.
-4. In Personal AI, select your notes and choose a tool. Generating text or audio
-   uses the API account's usage/billing, and an internet connection is required.
+4. In Personal AI, select your notes and choose a tool. Text generation uses Gemini 2.5 Flash
+   by default; two-speaker audio uses Gemini 2.5 Flash Preview TTS by default.
 
-The backend defaults to `gpt-4o-mini` for text and `tts-1` for speech; override
-`STUDYAI_TEXT_MODEL` or `STUDYAI_SPEECH_MODEL` in `.env` if desired.
+Gemini's free tier is subject to model availability and rate/usage limits. Google states that
+free-tier Gemini API data may be used to improve its products, so do not upload passwords,
+private records or other sensitive material. Override `STUDYAI_GEMINI_TEXT_MODEL`,
+`STUDYAI_GEMINI_TTS_MODEL`, or `STUDYAI_GEMINI_TTS_LANGUAGE` in `.env` if needed.
 This is a StudyAI source-grounded workflow, **not** NotebookLM or an identical
 replica of its features. Model results can still be wrong; check references.
 
 **Privacy and limits:** Source text is stored in this browser, separately scoped
 for guest/account use. Personal AI source documents and generated WAV audio are
 not written to the server's database or uploaded to GitHub, and source libraries
-are not included in account sync. Selected source text is sent to the configured
-OpenAI API only when generation is requested. Saved generated notes do become
+are not included in account sync. Selected source text is sent to Google's Gemini API only when generation is requested. Saved generated notes do become
 Workspace notes and follow normal StudyAI workspace sync rules. Do not upload
 secrets or other sensitive records. There is basic per-user usage throttling,
 but a public deployment still needs robust account protection, costs/quotas,

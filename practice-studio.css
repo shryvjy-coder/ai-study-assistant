@@ -53,3 +53,25 @@ button[data-ps-mode]:focus-visible,.ps-choices button:focus-visible{outline:3px 
 @media(max-width:760px){.ps-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ps-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:490px){.ps-mode-grid,.ps-fields{grid-template-columns:minmax(0,1fr)}.ps-breakdown-row{flex-direction:column;align-items:flex-start;gap:3px}}
 @media(prefers-reduced-motion:reduce){.ps-mode-grid button{transition:none}}
+
+/* Smart Planner + exam cram */
+.ps-planner-extra{display:grid;gap:10px;min-width:0}
+.ps-planner-extra>small{font-size:.75rem;line-height:1.5;color:var(--muted)}
+.ps-planner-extra input{width:100%;min-width:0;box-sizing:border-box}
+.ps-planner-extra button{width:100%;max-width:100%}
+.ps-plan-intro{padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);font-size:.82rem;font-weight:700}
+.ps-plan-intro p{margin:7px 0 0;font-weight:400;color:var(--muted)}
+.ps-plan-day{padding:14px 0;border-bottom:1px solid var(--line);min-width:0}
+.ps-plan-day-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}
+.ps-plan-day-heading strong{font-family:var(--serif);font-size:1.15rem}
+.ps-plan-day-heading span{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.ps-plan-task{display:flex;justify-content:space-between;align-items:center;gap:12px;min-width:0;width:100%;padding:10px 11px;margin:6px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.ps-plan-task:hover{border-color:var(--teal);background:var(--teal-soft)}
+.ps-plan-task>span:first-child{min-width:0}
+.ps-plan-task strong,.ps-plan-task small{display:block;overflow-wrap:anywhere}
+.ps-plan-task strong{font-size:.83rem}
+.ps-plan-task small{margin-top:3px;color:var(--muted);font-size:.74rem}
+.ps-plan-task>span:last-child{white-space:nowrap;font-size:.75rem;font-weight:700}
+.ps-plan-more,.ps-plan-disclaimer,.ps-plan-error{font-size:.78rem;line-height:1.5;color:var(--muted)}
+.ps-plan-error{color:var(--accent-orange-dark);font-weight:700}
+@media(max-width:520px){.ps-plan-day-heading{align-items:flex-start;flex-direction:column;gap:4px}.ps-plan-task{align-items:flex-start;flex-direction:column}.ps-plan-task>span:last-child{align-self:flex-end}}

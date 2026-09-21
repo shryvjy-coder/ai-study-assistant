@@ -69,6 +69,7 @@
    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();dialog.open?dialog.close():open()}
   },true);
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+  window.StudyAICommandCenter={open};
   draw();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();

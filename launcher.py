@@ -31,6 +31,7 @@ def enhanced_index():
         + '\n<script src="personal-ai.js"></script>'
         + '\n<script src="practice-studio.js"></script>'
         + '\n<script src="smart-study-planner.js"></script>'
+        + '\n<script src="weekly-learning-report.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

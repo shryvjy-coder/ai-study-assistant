@@ -42,9 +42,13 @@
       '<article class="ps-runner" id="ps-runner" hidden aria-live="polite"></article></div></div>'
     ].join('');
     sibling.insertAdjacentElement('afterend',section);
-    const nav=$('#main-nav'),prior=nav?.querySelector('a[href="#practice"]');
-    if(nav&&prior&&!nav.querySelector('a[href="#practice-studio"]')){
-      const a=document.createElement('a');a.href='#practice-studio';a.textContent='Practice Studio';prior.insertAdjacentElement('afterend',a);
+    const practiceHeader=sibling.querySelector('.section-head');
+    if(practiceHeader&&!practiceHeader.querySelector('a[href="#practice-studio"]')){
+      const a=document.createElement('a');
+      a.className='button secondary compact ps-open-link';
+      a.href='#practice-studio';
+      a.textContent='Open Practice Studio →';
+      practiceHeader.appendChild(a);
     }
     $$('[data-ps-mode]',section).forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.psMode)));
     ['ps-section','ps-domain','ps-skill','ps-level','ps-count','ps-time'].forEach(id=>{

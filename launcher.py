@@ -29,7 +29,7 @@ def enhanced_index():
         + '\n<script src="flashcard-enhancements.js"></script>'
         + '\n<script src="sat-mock-data.js"></script>'
         + '\n<script src="sat-exam-tools.js"></script>'
-        + '\n<script src="personal-ai.js?v=topic-mode-fix-4"></script>'
+        + '\n<script src="personal-ai.js?v=topic-mode-fix-5"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

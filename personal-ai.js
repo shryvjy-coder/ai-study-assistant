@@ -827,8 +827,8 @@
       if (!confirm('Remove all Personal AI sources stored in this browser?')) return;
       sources=[];selected.clear();persist();renderSources();notify('Personal AI source library cleared.');
     });
-    $('[data-pai-mode]').forEach(button=>button.addEventListener('click',()=>runText(button.dataset.paiMode,button)));
-    $('[data-pai-topic-mode]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('[data-pai-mode]').forEach(button=>button.addEventListener('click',()=>runText(button.dataset.paiMode,button)));
+    document.querySelectorAll('[data-pai-topic-mode]').forEach(button=>button.addEventListener('click',()=>{
       const source = addSelectedTopic();
       if (!source) return;
       runText(button.dataset.paiTopicMode,button);

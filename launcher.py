@@ -17,14 +17,19 @@ def enhanced_index():
         html = html.replace(style_marker, style_enhancement)
 
     script_marker = '<script src="script.js"></script>'
+    # IMPORTANT: top-level const declarations in classic scripts do not become
+    # window properties, and a later inline script is not a reliable bridge for
+    # Personal AI. Append the bridge to script.js itself so it executes in the
+    # same script lexical environment as STUDY_DATA.
+    bridged_script = '<script src="script.js"></script>'
     script_enhancement = (
-        script_marker
-        + '\n<script>try { window.STUDYAI_CURRICULUM = STUDY_DATA; } catch (e) { window.STUDYAI_CURRICULUM = []; }</script>'
+        bridged_script
+        + '\n<script src="studyai-curriculum-bridge.js?v=1"></script>'
         + '\n<script src="ui-enhancements.js"></script>'
         + '\n<script src="flashcard-enhancements.js"></script>'
         + '\n<script src="sat-mock-data.js"></script>'
         + '\n<script src="sat-exam-tools.js"></script>'
-        + '\n<script src="personal-ai.js?v=topic-mode-fix-3"></script>'
+        + '\n<script src="personal-ai.js?v=topic-mode-fix-4"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

@@ -189,6 +189,19 @@
       <article><span>Review queue</span><strong id="metric-review">0</strong><small>topics to revisit</small></article>
     </div>
     <div class="dashboard-grid">
+      <article class="dashboard-card wide smart-review-card" id="smart-review-queue">
+        <div class="card-head smart-review-heading">
+          <div><span class="small-label">Your next study session</span><h3>Smart Review Queue</h3><p>One place for due flashcards, missed questions, and weak skills. Recommendations use your real StudyAI practice data.</p></div>
+          <button class="button primary compact" type="button" id="smart-review-start" disabled>Start next review →</button>
+        </div>
+        <div class="smart-review-summary" aria-label="Review sources">
+          <span><strong id="smart-review-due">0</strong> due cards</span>
+          <span><strong id="smart-review-mistakes">0</strong> missed questions</span>
+          <span><strong id="smart-review-weak">0</strong> developing skills/topics</span>
+        </div>
+        <div id="smart-review-list" class="smart-review-list" aria-live="polite"><p class="muted">Practice a quiz or rate a flashcard to start building your review queue.</p></div>
+        <p class="smart-review-disclaimer">Priorities are simple rules based on due dates, mistakes, and practice results—not an AI prediction or an exam score.</p>
+      </article>
       <article class="dashboard-card wide mastery-dashboard-card">
         <div class="card-head"><div><span class="small-label">Learning engine</span><h3>Mastery map</h3></div><span class="mastery-method">Based on answered practice, not completion</span></div>
         <div class="mastery-overview">

@@ -192,6 +192,191 @@ function captureMockResults(records){
 }
 window.StudyAIRecordMockResults=captureMockResults;
 
+
+function mistakeAnswerText(item,selected){
+ if(item.format==='spr')return String(selected??'');
+ const index=Number(selected);
+ return Array.isArray(item.options)&&Number.isInteger(index)&&index>=0&&index<item.options.length
+  ? String.fromCharCode(65+index)+'. '+item.options[index]
+  : 'No answer recorded';
+}
+function mistakeLabel(status){
+ return status==='recovered'?'Recovered':status==='understood'?'Understood':'To review';
+}
+function renderMistakeNotebook(){
+ const list=$('#mistake-list');
+ if(!list)return;
+ const rows=mistakeRecords();
+ const counts={open:0,recovered:0,understood:0};
+ rows.forEach(item=>{counts[item.status]===undefined?counts.open++:counts[item.status]++});
+ $('#mistake-open-count').textContent=counts.open;
+ $('#mistake-recovered-count').textContent=counts.recovered;
+ $('#mistake-understood-count').textContent=counts.understood;
+ $('[data-mistake-filter]').forEach(button=>{
+  const active=button.dataset.mistakeFilter===mistakeFilter;
+  button.classList.toggle('active',active);
+  button.setAttribute('aria-pressed',String(active));
+ });
+ const visible=rows.filter(item=>mistakeFilter==='all'||(item.status||'open')===mistakeFilter);
+ visible.sort((a,b)=>(b.lastMissed||0)-(a.lastMissed||0));
+ $('#mistake-list-count').textContent=visible.length+' question'+(visible.length===1?'':'s');
+ if(!visible.length){
+  list.innerHTML='<div class="mistake-empty">'+
+    (rows.length?'No questions in this filter. You can switch to All to view your history.':
+     'Your next incorrect curriculum or SAT answer will appear here. Existing summary scores cannot be used to recreate old questions.')+
+    '</div>';
+  return;
+ }
+ list.innerHTML=visible.map(item=>{
+  const expanded=expandedMistakeId===item.id;
+  const status=item.status||'open';
+  const context=item.kind==='curriculum'
+   ? [item.board,item.grade,item.subject,item.title].filter(Boolean).join(' · ')
+   : [item.section,item.domain,item.skill].filter(Boolean).join(' · ');
+  const day=item.lastMissed?new Date(item.lastMissed).toLocaleDateString():'Recently';
+  const buttons='<div class="mistake-actions">'+
+    '<button type="button" class="mistake-action primary" data-mistake-action="retry">Retry question</button>'+
+    '<button type="button" class="mistake-action" data-mistake-action="practice">Practice this '+(item.kind==='sat'?'skill':'topic')+'</button>'+
+    '<button type="button" class="mistake-action" data-mistake-action="explain">Explain my mistake</button>'+
+    '<button type="button" class="mistake-action" data-mistake-action="flashcard">Study as flashcard</button>'+
+    '<button type="button" class="mistake-action" data-mistake-action="'+(status==='open'?'understood':'reopen')+'">'+(status==='open'?'Mark understood':'Reopen')+'</button>'+
+    '<button type="button" class="mistake-action danger" data-mistake-action="delete">Remove</button></div>';
+  const choices=item.format==='spr'
+   ? '<div class="mistake-choices"><div class="mistake-choice chosen"><strong>Your answer:</strong> '+esc(mistakeAnswerText(item,item.chosen))+'</div><div class="mistake-choice correct"><strong>Accepted answer:</strong> '+esc(item.correctAnswer)+'</div></div>'
+   : '<div class="mistake-choices">'+(item.options||[]).map((text,i)=>
+      '<div class="mistake-choice '+(i===item.correctIndex?'correct ':'')+(i===item.chosen?'chosen':'')+'">'+
+      '<strong>'+String.fromCharCode(65+i)+'.</strong> '+esc(text)+
+      (i===item.correctIndex?'<small>Correct answer</small>':'')+
+      (i===item.chosen?'<small>Your last incorrect answer</small>':'')+'</div>'
+    ).join('')+'</div>';
+  const explanation=explanationMistakeId===item.id
+   ? '<div class="mistake-explanation"><strong>Why the answer was incorrect</strong>'+
+      '<p>You chose '+esc(mistakeAnswerText(item,item.chosen))+'. The correct answer is '+esc(item.correctAnswer)+'.</p>'+
+      esc(item.explanation||'No explanation provided.')+'</div>'
+   : '';
+  const retry=retryMistakeId===item.id
+   ? '<div class="mistake-retry"><h4>Retry this question</h4><p>This is a self-check using a previously revealed answer. It does not increase your Mastery score.</p>'+
+      (item.format==='spr'
+       ? '<label>Enter your answer <input type="text" data-mistake-spr-input autocomplete="off"></label><div class="mistake-actions"><button class="mistake-action primary" type="button" data-mistake-action="submit-spr">Check answer</button></div>'
+       : '<div class="mistake-retry-options">'+(item.options||[]).map((option,i)=>'<button type="button" data-mistake-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(option)+'</button>').join('')+'</div>')+
+     '</div>'
+   : '';
+  const detail=expanded
+   ? '<div class="mistake-detail">'+
+      (item.passage?'<div class="mistake-passage">'+esc(item.passage)+'</div>':'')+
+      '<div class="mistake-detail-meta">'+esc(item.source||'Practice')+' · Missed '+(item.missCount||1)+' time'+(item.missCount===1?'':'s')+
+      ' · '+esc(day)+(item.difficulty?' · '+esc(item.difficulty):'')+'</div>'+
+      choices+explanation+buttons+retry+'</div>'
+   : '';
+  return '<section class="mistake-entry" data-mistake-id="'+esc(item.id)+'">'+
+    '<button type="button" class="mistake-toggle" data-mistake-action="toggle" aria-expanded="'+String(expanded)+'">'+
+    '<span class="mistake-heading"><small>'+esc(context)+'</small><strong>'+esc(item.question)+'</strong></span>'+
+    '<span class="mistake-right"><span class="mistake-badge '+esc(status)+'">'+mistakeLabel(status)+'</span><small>'+esc(day)+(expanded?' ▲':' ▼')+'</small></span>'+
+    '</button>'+detail+'</section>';
+ }).join('');
+ list.onclick=event=>{
+  const target=event.target.closest('button');
+  if(!target)return;
+  const section=target.closest('[data-mistake-id]');
+  const item=section&&mistakeRecords().find(row=>row.id===section.dataset.mistakeId);
+  if(!item)return;
+  if(target.hasAttribute('data-mistake-choice')){
+   submitMistakeRetry(item,Number(target.dataset.mistakeChoice));
+   return;
+  }
+  const action=target.dataset.mistakeAction;
+  if(!action)return;
+  if(action==='toggle'){
+   expandedMistakeId=expandedMistakeId===item.id?null:item.id;
+   retryMistakeId=null;
+  }else if(action==='retry'){
+   retryMistakeId=retryMistakeId===item.id?null:item.id;
+   explanationMistakeId=null;
+  }else if(action==='explain'){
+   explanationMistakeId=explanationMistakeId===item.id?null:item.id;
+  }else if(action==='practice'){
+   practiceMistakeUnit(item);return;
+  }else if(action==='flashcard'){
+   loadMistakeDeck([item]);return;
+  }else if(action==='submit-spr'){
+   const input=section.querySelector('[data-mistake-spr-input]');
+   if(!input||!input.value.trim())return toast('Enter an answer first');
+   submitMistakeRetry(item,input.value.trim());return;
+  }else if(action==='understood'){
+   item.status='understood';item.acknowledgedAt=Date.now();save();toast('Marked understood. Mastery is unchanged.');
+  }else if(action==='reopen'){
+   item.status='open';item.recoveredAt=null;item.acknowledgedAt=null;save();toast('Moved back to your review list.');
+  }else if(action==='delete'){
+   if(!confirm('Remove this question from the Wrong Answer Notebook?'))return;
+   state.mistakes=mistakeRecords().filter(row=>row.id!==item.id);
+   expandedMistakeId=null;retryMistakeId=null;save();toast('Question removed.');
+  }
+  renderMistakeNotebook();
+ };
+}
+function submitMistakeRetry(item,answer){
+ const correct=item.format==='spr'
+  ? (item.acceptedAnswers||[item.correctAnswer]).some(expected=>{
+      const a=String(answer).trim().replace(/,/g,''),b=String(expected).trim().replace(/,/g,'');
+      return a===b||(a!==''&&b!==''&&Number.isFinite(+a)&&Number.isFinite(+b)&&Math.abs(+a-(+b))<1e-9);
+    })
+  : Number(answer)===Number(item.correctIndex);
+ item.retryCount=(item.retryCount||0)+1;
+ item.lastRetryAt=Date.now();
+ if(correct){
+  item.status='recovered';item.recoveredAt=item.lastRetryAt;
+ }else{
+  item.status='open';item.missCount=(item.missCount||0)+1;
+  item.lastMissed=item.lastRetryAt;
+  item.chosen=item.format==='spr'?String(answer):Number(answer);
+ }
+ retryMistakeId=null;
+ explanationMistakeId=item.id;
+ save();
+ renderMistakeNotebook();
+ toast(correct?'Correct self-check! Moved to Recovered.':'Not quite. Review the explanation and retry.');
+}
+function practiceMistakeUnit(item){
+ if(item.kind==='curriculum'){
+  const entry=STUDY_DATA.find(row=>row.id===item.topicId);
+  if(!entry)return toast('This curriculum topic is not available.');
+  $('#quiz-board').value=entry.board;populateQuizFilters();
+  $('#quiz-grade').value=entry.grade;populateQuizFilters();
+  $('#quiz-subject').value=entry.subject;populateQuizFilters();
+  $('#quiz-chapter').value=entry.title;
+  location.hash='#practice';toast('Topic selected. Start a quiz when you are ready.');
+  return;
+ }
+ satSection=item.section||satSection;
+ $('#sat-section-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.satSection===satSection));
+ renderSatFilters();
+ if(item.domain){$('#sat-domain').value=item.domain;renderSatFilters()}
+ if(item.skill)$('#sat-skill').value=item.skill;
+ location.hash='#sat';toast('SAT skill selected. Start practice when ready.');
+}
+function mistakeFlashcards(rows){
+ return rows.map(item=>({
+  id:'mistake-card|'+item.id,front:item.question,
+  back:'Correct answer: '+item.correctAnswer+'\n\n'+item.explanation,
+  source:'Wrong Answer Notebook'
+ }));
+}
+function loadMistakeDeck(rows){
+ if(!rows.length)return toast('No wrong answers saved yet.');
+ activeDeck=mistakeFlashcards(rows);
+ cardIndex=0;renderCard();renderFlashStats();
+ $('#deck-source').value='mistakes';
+ location.hash='#flashcards';
+ toast('Wrong-answer flashcards loaded.');
+}
+function bindMistakeNotebook(){
+ $('[data-mistake-filter]').forEach(button=>button.addEventListener('click',()=>{
+  mistakeFilter=button.dataset.mistakeFilter||'open';
+  expandedMistakeId=null;retryMistakeId=null;explanationMistakeId=null;
+  renderMistakeNotebook();
+ }));
+}
+
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function setTheme(theme){state.theme=theme;document.documentElement.dataset.theme=theme;$('#theme-label').textContent=theme==='dark'?'Light mode':'Dark mode';$('#theme-icon').textContent=theme==='dark'?'☀':'◐';save()}
 function toggleThemePremium(){
@@ -249,8 +434,8 @@ function loadDeckFromCurrent(){const e=currentEntry();if(!e)return toast('Open a
 function renderCard(){const c=activeDeck[cardIndex],card=$('#flashcard');if(!c){cardFlipped=false;card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.setAttribute('aria-label','Flip flashcard to reveal the answer');$('#card-label').textContent='No deck loaded';$('#card-front').textContent='Open a study topic and choose “Study as flashcards”.';$('#card-back').textContent='';return}cardFlipped=false;card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.setAttribute('aria-label','Flip flashcard to reveal the answer');$('#card-label').textContent=`${cardIndex+1} / ${activeDeck.length} · ${c.source}`;$('#card-front').textContent=c.front;$('#card-back').textContent=c.back;$('#favorite-card').textContent=state.favoriteCards.includes(c.id)?'★ Favorite':'☆ Favorite'}
 function renderFlashStats(){let n=0,l=0,m=0;activeDeck.forEach(c=>{const s=state.flashcardState[c.id]||'New';if(s==='New')n++;else if(s==='Learning')l++;else m++});$('#fc-new').textContent=n;$('#fc-learning').textContent=l;$('#fc-mastered').textContent=m}
 function workspaceCards(note){if(!note)return[];const parts=note.content.split(/\n+/).map(x=>x.trim()).filter(x=>x.length>20).slice(0,12);return parts.map((p,i)=>({id:`ws|${note.id}|${i}`,front:`Explain: ${p.slice(0,80)}${p.length>80?'…':''}`,back:p,source:note.title}))}
-function rebuildDeckSources(){let opts='<option value="current">Current study topic</option>';state.workspaceNotes.forEach(n=>opts+=`<option value="ws:${n.id}">${esc(n.title)}</option>`);$('#deck-source').innerHTML=opts}
-function loadDeckSource(){const v=$('#deck-source').value;if(v==='current')return loadDeckFromCurrent();if(v.startsWith('ws:')){const n=state.workspaceNotes.find(x=>x.id===v.slice(3));activeDeck=workspaceCards(n);cardIndex=0;renderCard();renderFlashStats()}}
+function rebuildDeckSources(){let opts='<option value="current">Current study topic</option><option value="mistakes">Wrong answers</option>';state.workspaceNotes.forEach(n=>opts+=`<option value="ws:${n.id}">${esc(n.title)}</option>`);$('#deck-source').innerHTML=opts}
+function loadDeckSource(){const v=$('#deck-source').value;if(v==='current')return loadDeckFromCurrent();if(v==='mistakes')return loadMistakeDeck(mistakeRecords());if(v.startsWith('ws:')){const n=state.workspaceNotes.find(x=>x.id===v.slice(3));activeDeck=workspaceCards(n);cardIndex=0;renderCard();renderFlashStats()}}
 function setCardState(s){const c=activeDeck[cardIndex];if(!c)return;state.flashcardState[c.id]=s;save();renderFlashStats();nextCard()}
 function nextCard(){if(!activeDeck.length)return;cardIndex=(cardIndex+1)%activeDeck.length;renderCard()}
 
@@ -384,5 +569,5 @@ function bind(){
  $('#timer-start').onclick=toggleTimer;$('#timer-reset').onclick=()=>{if(timerHandle)clearInterval(timerHandle);timerHandle=null;timerSeconds=25*60;renderTimer();$('#timer-start').textContent='Start'};$('#export-data').onclick=exportData;$('#import-data').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);$('#join-room').onclick=joinRoom;$('#reset-data').onclick=()=>{if(confirm('Reset all StudyAI data saved in this browser?')){localStorage.removeItem(STORAGE_KEY);location.reload()}};$('#share-current').onclick=()=>shareText(noteText()||'StudyAI');
  const d=$('#command-dialog');$('#open-command').onclick=()=>d.showModal();d.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{d.close();document.querySelector(b.dataset.jump).scrollIntoView({behavior:'smooth'})});document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();d.open?d.close():d.showModal()}})
 }
-function init(){setTheme(state.theme||'light');bind();bindAuth();initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
+function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindAuth();initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
 init();

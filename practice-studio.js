@@ -218,6 +218,42 @@
     $('#ps-again').addEventListener('click',()=>{$('#ps-runner').hidden=true;$('#ps-builder').hidden=false;session=null;updatePreview()});
     $('#ps-mistakes').addEventListener('click',()=>{location.hash='#mistake-notebook'});
   }
+  // Allow SAT plans and review actions to open genuinely configured practice.
+  window.StudyAIPracticeStudio={
+    configure(config={}){
+      if(!$('#practice-studio'))makeUI();
+      if(session&&!session.finished){
+        location.hash='#practice-studio';
+        return false;
+      }
+      const builder=$('#ps-builder'),runner=$('#ps-runner');
+      if(builder)builder.hidden=false;
+      if(runner)runner.hidden=true;
+      session=null;
+      const m=['diagnostic','adaptive','custom','sprint','mixed'].includes(config.mode)?config.mode:'custom';
+      setMode(m);
+      const section=$('#ps-section');
+      if(section&&['all','Reading & Writing','Math'].includes(config.section))section.value=config.section;
+      populateDomains();
+      const domain=$('#ps-domain');
+      if(domain&&config.domain&&[...domain.options].some(o=>o.value===config.domain))domain.value=config.domain;
+      populateSkills();
+      const skill=$('#ps-skill');
+      if(skill&&config.skill&&[...skill.options].some(o=>o.value===config.skill))skill.value=config.skill;
+      const level=$('#ps-level');
+      if(level&&config.level&&[...level.options].some(o=>o.value===config.level))level.value=config.level;
+      const count=$('#ps-count');
+      if(count&&config.count){
+        const value=String(config.count);
+        if([...count.options].some(o=>o.value===value))count.value=value;
+      }
+      const time=$('#ps-time');
+      if(time&&Number.isFinite(config.time))time.value=Math.max(0,Math.min(120,config.time));
+      updatePreview();
+      location.hash='#practice-studio';
+      return true;
+    }
+  };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',makeUI);
   else makeUI();
 })();

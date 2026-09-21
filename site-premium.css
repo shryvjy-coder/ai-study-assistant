@@ -582,6 +582,187 @@ input:focus,select:focus,textarea:focus{
   transform:translateX(2px);
 }
 
+/* ---------- Mastery engine ---------- */
+.mastery-dashboard-card{
+  position:relative;
+  overflow:hidden;
+}
+.mastery-dashboard-card::after{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:-110px;
+  top:-120px;
+  border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--teal-soft) 76%,transparent),transparent 68%);
+  pointer-events:none;
+}
+.mastery-method{
+  max-width:250px;
+  text-align:right;
+  font-size:.76rem;
+  color:var(--muted);
+}
+.mastery-overview{
+  display:grid;
+  grid-template-columns:minmax(220px,1.4fr) repeat(3,minmax(120px,.72fr));
+  gap:12px;
+  margin-top:16px;
+}
+.mastery-score-block,
+.mastery-mini-stat{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px;
+  background:color-mix(in srgb,var(--surface) 90%,var(--blue-soft));
+}
+.mastery-score-block{
+  background:
+    linear-gradient(135deg,color-mix(in srgb,var(--teal-soft) 65%,var(--surface)),var(--surface));
+}
+.mastery-score-block>span,
+.mastery-mini-stat>span{
+  display:block;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.mastery-score-block strong{
+  display:block;
+  font-family:var(--serif);
+  font-size:clamp(2.2rem,5vw,4rem);
+  line-height:.92;
+  letter-spacing:-.045em;
+}
+.mastery-score-block small,
+.mastery-mini-stat small{
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+}
+.mastery-mini-stat strong{
+  display:block;
+  font-family:var(--serif);
+  font-size:2rem;
+  line-height:1;
+}
+.mastery-section-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin:22px 0 10px;
+}
+.mastery-section-head h4{
+  margin:2px 0 0;
+  font-family:var(--serif);
+  font-size:1.2rem;
+}
+.mastery-list{
+  display:grid;
+  gap:9px;
+}
+.mastery-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(130px,.9fr) auto;
+  gap:14px;
+  align-items:center;
+  width:100%;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--ink);
+  text-align:left;
+}
+button.mastery-row{
+  cursor:pointer;
+  transition:transform .18s ease,border-color .18s ease,background-color .18s ease;
+}
+button.mastery-row:hover{
+  transform:translateY(-1px);
+  border-color:var(--teal);
+  background:color-mix(in srgb,var(--teal-soft) 42%,var(--surface));
+}
+.mastery-row-title{
+  min-width:0;
+}
+.mastery-row-title strong,
+.mastery-row-title small{
+  display:block;
+}
+.mastery-row-title strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.mastery-row-title small{
+  margin-top:3px;
+  color:var(--muted);
+}
+.mastery-track{
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--surface-2);
+}
+.mastery-track span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--accent-orange),var(--accent-gold),var(--teal));
+}
+.mastery-row-score{
+  min-width:54px;
+  text-align:right;
+}
+.mastery-row-score strong,
+.mastery-row-score small{
+  display:block;
+}
+.mastery-row-score small{
+  color:var(--muted);
+  font-size:.72rem;
+}
+.mastery-status{
+  display:inline-flex;
+  width:max-content;
+  margin-top:4px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:.69rem;
+  font-weight:700;
+}
+.mastery-status.attention{
+  background:color-mix(in srgb,var(--accent-orange) 15%,var(--surface));
+  color:var(--accent-orange-dark);
+}
+.mastery-status.developing{
+  background:color-mix(in srgb,var(--accent-gold) 22%,var(--surface));
+  color:color-mix(in srgb,var(--ink) 78%,#7f6500);
+}
+.mastery-status.secure{
+  background:color-mix(in srgb,var(--accent-mint) 18%,var(--surface));
+  color:color-mix(in srgb,var(--ink) 70%,#0d7966);
+}
+@media (max-width:820px){
+  .mastery-overview{grid-template-columns:1fr 1fr}
+  .mastery-score-block{grid-column:1/-1}
+  .mastery-method{display:none}
+}
+@media (max-width:620px){
+  .mastery-overview{grid-template-columns:1fr}
+  .mastery-score-block{grid-column:auto}
+  .mastery-row{grid-template-columns:1fr auto}
+  .mastery-track{grid-column:1/-1;grid-row:2}
+}
+
 /* ---------- Planner ---------- */
 .planner-grid{gap:14px}
 .planner-form{

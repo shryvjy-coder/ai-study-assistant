@@ -869,6 +869,18 @@ function getMockHistory() {
     const mathRoute = mockData()?.routeLabel(mathRouteKey) || '';
     const percent = Math.round((rwEstimate.correct + mathEstimate.correct) / Math.max(1, rwEstimate.total + mathEstimate.total) * 100);
     saveMockHistory(exam.testNumber, {percent, estimatedScore:totalScore});
+    // Feed only answered, scored items into the shared mastery + mistake engine.
+    // Unanswered and unscored pretest questions must not be labeled wrong.
+    try {
+      if (typeof window.StudyAIRecordMockResults === 'function') {
+        const records = allQuestions
+          .filter(q => !q.pretest && answerPresent(q))
+          .map(q => ({question:q,chosen:exam.answers[q.id],correct:answerCorrect(q)}));
+        window.StudyAIRecordMockResults(records);
+      }
+    } catch (error) {
+      console.warn('Could not save mock learning evidence:', error);
+    }
     renderMockCards();
 
     if (pane) pane.innerHTML = `

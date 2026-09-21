@@ -11,23 +11,23 @@ def enhanced_index():
         style_marker
         + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
-        + '\n  <link rel="stylesheet" href="personal-ai.css?v=topic-mode-fix-2" />'
+        + '\n  <link rel="stylesheet" href="personal-ai.css" />'
     )
     if 'site-premium.css' not in html:
         html = html.replace(style_marker, style_enhancement)
 
     script_marker = '<script src="script.js"></script>'
-    # script.js now publishes its curriculum explicitly for Personal AI.
-    # Version the core script so browsers cannot retain a pre-publication copy.
-    bridged_script = '<script src="script.js?v=curriculum-core-1"></script>'
+    # Keep the exact script tag from index.html. Flask's static route serves
+    # script.js, while query-string variants can fall through to the SPA HTML
+    # route and break JavaScript execution.
+    bridged_script = script_marker
     script_enhancement = (
         bridged_script
-        + '\n<script src="studyai-curriculum-bridge.js?v=1"></script>'
         + '\n<script src="ui-enhancements.js"></script>'
         + '\n<script src="flashcard-enhancements.js"></script>'
         + '\n<script src="sat-mock-data.js"></script>'
         + '\n<script src="sat-exam-tools.js"></script>'
-        + '\n<script src="personal-ai.js?v=topic-mode-fix-5"></script>'
+        + '\n<script src="personal-ai.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

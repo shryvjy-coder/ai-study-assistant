@@ -358,6 +358,41 @@ schema, because they use StudyAI's existing local-first state sync.
 
 ---
 
+## SAT planner, skill insights and revision sheets
+
+**Dedicated SAT plan:** The Planner page now contains an independent SAT study
+planner beneath the school-curriculum planner. Choose both sections or Reading &
+Writing / Math, 15–240 minutes per day, and an optional future SAT date. Generate
+a seven-day plan or choose the three-day cram option. The generated schedule
+stops before the exam day and stays within the requested daily minute budget.
+It prioritizes recorded weak skills and open SAT mistakes, adds uncovered skills,
+and includes original-question diagnostic / mixed / short timed practice. Click
+a task to open the relevant Practice Studio configuration or Wrong Answer
+Notebook. Saved plan and settings use the existing local/account state; the
+plan is a snapshot and must be regenerated after additional practice. Time
+allocations are suggestions, not measured completion or score predictions.
+StudyAI does not automatically schedule or administer official Bluebook tests.
+
+**SAT skill insights:** Progress now shows answered SAT practice totals,
+recorded accuracy, practiced skill counts, and section/domain breakdowns.
+Click a domain to open targeted Practice Studio filters. Counts use recorded
+answers (including any repeats), so small samples and repeated bank questions
+limit what these values can establish. No official SAT score prediction is made.
+
+**Offline formula sheet and quick revision guide:** Open a curriculum topic,
+then use **Formula sheet** or **Quick revision guide** below the note. Sheets
+are assembled from the existing StudyAI topic summary, specified formulas,
+key points, method, and common mistakes. Missing source formulas are explicitly
+noted; the tool never invents missing equations or silently repairs generic
+topic notes. Copy, download TXT, print / save as PDF, or save the text as a
+Workspace note. The generated sheet remains subject to the quality and
+completeness of the selected StudyAI notes; verify with your syllabus/textbook.
+
+All three tools run locally without a Gemini key or new database tables.
+They do not copy copyrighted questions or content from other education sites.
+
+---
+
 ## Personal AI — grounded notes and audio discussions
 
 Personal AI is a separate section of StudyAI. Open it using **StudyAI.bat** (which starts

@@ -542,7 +542,7 @@
     if (!providerReady) return notify('Personal AI needs a server-side Gemini API key. Follow the setup note below.','error');
 
     busy=true;
-    const buttons = $('[data-pai-mode],[data-pai-topic-mode]');
+    const buttons = [...document.querySelectorAll('[data-pai-mode],[data-pai-topic-mode]')];
     buttons.forEach(button=>button.disabled=true);
     const clicked=trigger || $(`[data-pai-mode="${mode}"]`) || $(`[data-pai-topic-mode="${mode}"]`);
     const oldMarkup=clicked?.innerHTML || '';

@@ -98,6 +98,137 @@ function openMasteryRecord(record){
   location.hash='#sat';
  }
 }
+// Smart Review Queue: deterministic recommendations from existing learning evidence.
+// Does not infer exam probabilities, claim calibrated retention, or change mastery scores.
+function smartReviewCandidates(now=Date.now()){
+ const due=srsDueCards(now);
+ const open=mistakeRecords().filter(item=>(item.status||'open')==='open');
+ const weak=masteryRecords().filter(item=>item.score<75);
+ const results=[];
+ if(due.length){
+  const oldest=scheduledCard(due[0])?.dueAt||now;
+  const overdueDays=Math.max(0,Math.floor((now-oldest)/SRS_DAY));
+  results.push({
+   key:'due',type:'due',priority:130+Math.min(15,overdueDays),
+   title:due.length+' due flashcard'+(due.length===1?'':'s'),
+   detail:'Scheduled recall is ready'+(overdueDays?' · earliest card '+overdueDays+' day'+(overdueDays===1?'':'s')+' overdue':'')+'.',
+   label:'Review flashcards',action:'Start flashcards',meta:'Spaced repetition'
+  });
+ }
+ const mistakeGroups=new Map();
+ open.forEach(item=>{
+  const unit=item.kind==='curriculum'?'curriculum|'+(item.topicId||item.id):
+   item.kind==='sat'?['sat',item.section||'',item.domain||'',item.skill||''].join('|'):
+   'mistake|'+item.id;
+  if(!mistakeGroups.has(unit))mistakeGroups.set(unit,[]);
+  mistakeGroups.get(unit).push(item);
+ });
+ mistakeGroups.forEach((rows,unit)=>{
+  rows.sort((a,b)=>(b.lastMissed||0)-(a.lastMissed||0));
+  const first=rows[0],misses=rows.reduce((n,item)=>n+(item.missCount||1),0);
+  const label=first.kind==='curriculum'?'Topic mistakes':'SAT skill mistakes';
+  const title=first.title||first.skill||'Practice mistakes';
+  results.push({
+   key:'mistake|'+unit,type:'mistake',priority:86+Math.min(20,misses*3)+Math.min(8,rows.length*2),
+   title,detail:rows.length+' unanswered review question'+(rows.length===1?'':'s')+
+    ' · '+misses+' recorded miss'+(misses===1?'':'es')+'.',
+   label,action:'Review mistakes',meta:first.kind==='curriculum'?[first.grade,first.subject].filter(Boolean).join(' · '):first.section,
+   mistakeId:first.id,unit
+  });
+ });
+ weak.forEach(item=>{
+  const unit=item.key||(item.kind==='curriculum'?'curriculum|'+item.topicId:
+    ['sat',item.section,item.domain,item.skill].join('|'));
+  if(mistakeGroups.has(unit))return; // One action per skill, not duplicate advice.
+  results.push({
+   key:'mastery|'+unit,type:'mastery',priority:65+Math.round((75-item.score)*.45)+Math.min(6,item.attempts||0),
+   title:item.label||'Practice unit',
+   detail:(item.score||0)+'% practiced mastery · '+item.correct+'/'+item.attempts+' correct.'+
+    ((item.attempts||0)<3?' Early evidence; more practice will improve the estimate.':''),
+   label:'Practice gap',action:'Practice skill',meta:item.kind==='curriculum'
+     ? [item.grade,item.subject].filter(Boolean).join(' · ')
+     : [item.section,item.domain].filter(Boolean).join(' · '),
+   unit
+  });
+ });
+ (Array.isArray(state.review)?state.review:[]).forEach(topicId=>{
+  const unit='curriculum|'+topicId;
+  if(mistakeGroups.has(unit)||weak.some(item=>item.key===unit))return;
+  const entry=STUDY_DATA.find(item=>item.id===topicId);
+  if(!entry)return;
+  results.push({
+   key:'flag|'+topicId,type:'flag',priority:40,title:entry.title,
+   detail:'You manually added this topic to your review list.',
+   label:'Your review list',action:'Open topic',meta:[entry.grade,entry.subject].join(' · '),
+   topicId
+  });
+ });
+ const rank={due:0,mistake:1,mastery:2,flag:3};
+ results.sort((a,b)=>b.priority-a.priority||(rank[a.type]-rank[b.type])||a.title.localeCompare(b.title));
+ return {items:results.slice(0,8),due:due.length,mistakes:open.length,weak:weak.length,total:results.length};
+}
+function runSmartReview(item){
+ if(!item)return;
+ if(item.type==='due'){loadDueReviews();return}
+ if(item.type==='mistake'){
+  mistakeFilter='open';expandedMistakeId=item.mistakeId;
+  retryMistakeId=null;explanationMistakeId=null;
+  renderMistakeNotebook();
+  document.querySelector('[data-mistake-id="'+CSS.escape(item.mistakeId)+'"]')?.scrollIntoView({behavior:'smooth',block:'center'});
+  return;
+ }
+ if(item.type==='mastery'){
+  const record=(state.mastery||{})[item.unit];
+  if(!record)return;
+  practiceMistakeUnit(record.kind==='curriculum'
+   ? {kind:'curriculum',topicId:record.topicId}
+   : {kind:'sat',section:record.section,domain:record.domain,skill:record.skill});
+  return;
+ }
+ if(item.type==='flag')jumpToEntry(item.topicId);
+}
+function renderSmartReviewQueue(){
+ const list=$('#smart-review-list');
+ if(!list)return;
+ const queue=smartReviewCandidates();
+ $('#smart-review-due').textContent=queue.due;
+ $('#smart-review-mistakes').textContent=queue.mistakes;
+ $('#smart-review-weak').textContent=queue.weak;
+ const start=$('#smart-review-start');
+ if(start){
+  start.disabled=!queue.items.length;
+  start.textContent=queue.items.length?'Start next review →':'No reviews yet';
+ }
+ if(!queue.items.length){
+  list.innerHTML='<div class="smart-review-empty">Nothing needs attention yet. Try a curriculum or SAT quiz, or rate a flashcard to start your review queue.</div>';
+  return;
+ }
+ list.innerHTML=queue.items.map((item,index)=>
+  '<button type="button" class="smart-review-item" data-smart-review-key="'+esc(item.key)+'">'+
+   '<span class="smart-review-index">'+(index+1)+'</span>'+
+   '<span class="smart-review-content"><span class="smart-review-category">'+esc(item.label)+(item.meta?' · '+esc(item.meta):'')+'</span>'+
+   '<strong>'+esc(item.title)+'</strong><small>'+esc(item.detail)+'</small></span>'+
+   '<span class="smart-review-action">'+esc(item.action)+' →</span></button>'
+ ).join('');
+ if(queue.total>queue.items.length){
+  const note=document.createElement('p');
+  note.className='smart-review-overflow';
+  note.textContent='Showing the next '+queue.items.length+' of '+queue.total+' review opportunities.';
+  list.appendChild(note);
+ }
+}
+function bindSmartReviewQueue(){
+ const list=$('#smart-review-list'),start=$('#smart-review-start');
+ if(!list||!start)return;
+ list.addEventListener('click',event=>{
+  const button=event.target.closest('[data-smart-review-key]');
+  if(!button)return;
+  const item=smartReviewCandidates().items.find(row=>row.key===button.dataset.smartReviewKey);
+  if(item)runSmartReview(item);
+ });
+ start.addEventListener('click',()=>runSmartReview(smartReviewCandidates().items[0]));
+}
+
 function renderMasteryDashboard(){
  const metric=$('#metric-mastery'),overallEl=$('#mastery-overall');
  if(!metric||!overallEl)return;
@@ -206,6 +337,7 @@ function mistakeLabel(status){
 function renderMistakeNotebook(){
  const list=$('#mistake-list');
  if(!list)return;
+ renderSmartReviewQueue();
  const rows=mistakeRecords();
  const counts={open:0,recovered:0,understood:0};
  rows.forEach(item=>{counts[item.status]===undefined?counts.open++:counts[item.status]++});
@@ -489,6 +621,7 @@ function renderSrsDashboard(){
   : 'Start with a chapter, Workspace, Personal AI or wrong-answer deck. Rate a revealed card to schedule it.';
  if($('#srs-start-due'))$('#srs-start-due').textContent='Review '+stats.due+' due card'+(stats.due===1?'':'s')+' →';
  if($('#srs-progress-open'))$('#srs-progress-open').textContent='Review '+stats.due+' due card'+(stats.due===1?'':'s')+' →';
+ renderSmartReviewQueue();
 }
 function renderSrsCardStatus(){
  const el=$('#srs-card-status'),hint=$('#srs-rating-hint'),card=activeDeck[cardIndex];
@@ -666,7 +799,7 @@ function addFolder(){const f=$('#new-folder-name').value.trim();if(f&&!state.fol
 
 function renderPlannerBoards(){fillSelect($('#planner-board'),['All',...uniq(STUDY_DATA.map(e=>e.board))],$('#planner-board').value||'All')}
 function buildPlan(){const board=$('#planner-board').value,mins=+$('#daily-time').value;let pool=[...state.review.map(id=>STUDY_DATA.find(e=>e.id===id)).filter(Boolean),...STUDY_DATA.filter(e=>!state.completed.includes(e.id))];pool=pool.filter((e,i,a)=>a.findIndex(x=>x.id===e.id)===i&&(board==='All'||e.board===board));const per=Math.max(1,Math.round(mins/35));$('#planner-heading').textContent='Seven-day revision map';$('#planner-output').innerHTML=Array.from({length:7},(_,d)=>{const items=pool.slice(d*per,(d+1)*per);return `<div class="plan-day"><strong>Day ${d+1}</strong>${items.length?items.map(e=>`<p>${state.review.includes(e.id)?'Review':'Study'} · ${esc(e.subject)} · ${esc(e.title)}</p>`).join(''):'<p>Buffer, catch-up or SAT mixed practice.</p>'}</div>`}).join('')}
-function updateDashboard(){const total=STUDY_DATA.length,done=state.completed.length,pct=Math.round(done/total*100),avg=state.quizHistory.length?Math.round(state.quizHistory.reduce((a,h)=>a+h.score/h.total,0)/state.quizHistory.length*100):0;$('#hero-percent').textContent=pct+'%';$('#hero-progress').style.width=pct+'%';$('#hero-completed').textContent=done;$('#hero-review').textContent=state.review.length;$('#hero-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-complete').textContent=pct+'%';$('#metric-total').textContent=total;$('#metric-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-review').textContent=state.review.length;$('#subject-progress').innerHTML=uniq(STUDY_DATA.map(e=>e.board)).map(b=>{const all=STUDY_DATA.filter(e=>e.board===b),d=all.filter(e=>state.completed.includes(e.id)).length,p=Math.round(d/all.length*100);return `<div class="progress-row"><div class="progress-row-top"><span>${esc(b)}</span><strong>${p}%</strong></div><div class="mastery-bar"><span style="width:${p}%"></span></div></div>`}).join('');renderMasteryDashboard();renderMistakeNotebook();renderSrsDashboard();renderLists();updateSatSummary()}
+function updateDashboard(){const total=STUDY_DATA.length,done=state.completed.length,pct=Math.round(done/total*100),avg=state.quizHistory.length?Math.round(state.quizHistory.reduce((a,h)=>a+h.score/h.total,0)/state.quizHistory.length*100):0;$('#hero-percent').textContent=pct+'%';$('#hero-progress').style.width=pct+'%';$('#hero-completed').textContent=done;$('#hero-review').textContent=state.review.length;$('#hero-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-complete').textContent=pct+'%';$('#metric-total').textContent=total;$('#metric-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-review').textContent=state.review.length;$('#subject-progress').innerHTML=uniq(STUDY_DATA.map(e=>e.board)).map(b=>{const all=STUDY_DATA.filter(e=>e.board===b),d=all.filter(e=>state.completed.includes(e.id)).length,p=Math.round(d/all.length*100);return `<div class="progress-row"><div class="progress-row-top"><span>${esc(b)}</span><strong>${p}%</strong></div><div class="mastery-bar"><span style="width:${p}%"></span></div></div>`}).join('');renderMasteryDashboard();renderMistakeNotebook();renderSrsDashboard();renderSmartReviewQueue();renderLists();updateSatSummary()}
 function renderLists(){const row=(id,arr)=>{const es=arr.map(k=>STUDY_DATA.find(e=>e.id===k)).filter(Boolean);$(id).innerHTML=es.length?es.slice(0,20).map(e=>`<button data-id="${esc(e.id)}">${esc(e.title)}<small>${esc(e.board)} · ${esc(e.grade)}</small></button>`).join(''):'<p class="muted">Nothing here yet.</p>';$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))};row('#bookmark-list',state.bookmarks);row('#review-list',state.review)}
 function jumpToEntry(id){const e=STUDY_DATA.find(x=>x.id===id);if(!e)return;current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title);location.hash='#study'}
 function tutor(){const q=$('#tutor-query').value,r=searchAll(q).slice(0,6);$('#tutor-answer').innerHTML=r.length?r.map(e=>`<div class="tutor-result"><strong>${esc(e.title)}</strong><p>${esc(e.summary)}</p><button data-id="${esc(e.id)}">Open note</button></div>`).join(''):'<p>I could not find that in the material stored locally. Try a topic name, formula keyword or concept.</p>';$('#tutor-answer').querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))}
@@ -767,5 +900,5 @@ function bind(){
  $('#timer-start').onclick=toggleTimer;$('#timer-reset').onclick=()=>{if(timerHandle)clearInterval(timerHandle);timerHandle=null;timerSeconds=25*60;renderTimer();$('#timer-start').textContent='Start'};$('#export-data').onclick=exportData;$('#import-data').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);$('#join-room').onclick=joinRoom;$('#reset-data').onclick=()=>{if(confirm('Reset all StudyAI data saved in this browser?')){localStorage.removeItem(STORAGE_KEY);location.reload()}};$('#share-current').onclick=()=>shareText(noteText()||'StudyAI');
  const d=$('#command-dialog');$('#open-command').onclick=()=>d.showModal();d.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{d.close();document.querySelector(b.dataset.jump).scrollIntoView({behavior:'smooth'})});document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();d.open?d.close():d.showModal()}})
 }
-function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
+function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
 init();

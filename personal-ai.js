@@ -202,10 +202,11 @@
     const title = $('#pai-topic-topic')?.value || '';
     if (!board || !grade || !subject || !title) return null;
 
-    syncStudyLibrary(board,grade,subject,title);
-    const summary = document.querySelector('#note-summary')?.textContent?.trim() || '';
-    const detailed = document.querySelector('#detailed-notes')?.textContent?.trim() || '';
-    const quick = document.querySelector('#quick-review')?.textContent?.trim() || '';
+    const opened = window.StudyAICurriculum?.open?.(board,grade,subject,title) || null;
+    if (!opened) syncStudyLibrary(board,grade,subject,title);
+    const summary = opened?.summary || document.querySelector('#note-summary')?.textContent?.trim() || '';
+    const detailed = opened?.detailed || document.querySelector('#detailed-notes')?.textContent?.trim() || '';
+    const quick = opened?.quick || document.querySelector('#quick-review')?.textContent?.trim() || '';
     const renderedText = [
       `Topic: ${title}`,
       `Curriculum: ${board}\nStage: ${grade}\nSubject: ${subject}`,
@@ -259,76 +260,61 @@
   }
 
   function updateTopicPicker(level = 'board') {
-    const data = topicEntries();
     const board = $('#pai-topic-board');
     const grade = $('#pai-topic-grade');
     const subject = $('#pai-topic-subject');
     const topic = $('#pai-topic-topic');
     if (!board || !grade || !subject || !topic) return;
 
-    if (data.length) {
-      const boards = paiUnique(data.map(entry => entry.board));
-      let preferredBoard = board.value;
-      try { if (level === 'init' && typeof current !== 'undefined') preferredBoard = current.board; } catch (_) {}
-      fillTopicSelect(board, boards, boards.includes(preferredBoard) ? preferredBoard : boards[0]);
+    // Primary path: use the dedicated bridge that reads StudyAI's working
+    // Study Library controls. This avoids cross-script scope problems.
+    const bridge = window.StudyAICurriculum;
+    if (bridge && typeof bridge.boards === 'function') {
+      const boards = bridge.boards();
+      const boardChoice = level === 'init'
+        ? (document.querySelector('#board-filter')?.value || boards[0])
+        : (board.value || boards[0]);
+      fillTopicSelect(board,boards,boardChoice);
 
-      const grades = paiUnique(data.filter(entry => entry.board === board.value).map(entry => entry.grade));
-      let preferredGrade = grade.value;
-      try { if (level === 'init' && typeof current !== 'undefined') preferredGrade = current.grade; } catch (_) {}
-      fillTopicSelect(grade, grades, grades.includes(preferredGrade) ? preferredGrade : grades[0]);
+      const grades = bridge.grades(board.value);
+      const gradeChoice = level === 'init'
+        ? (document.querySelector('#grade-filter')?.value || grades[0])
+        : (grade.value || grades[0]);
+      fillTopicSelect(grade,grades,gradeChoice);
 
-      const subjects = paiUnique(data.filter(entry => entry.board === board.value && entry.grade === grade.value).map(entry => entry.subject));
-      let preferredSubject = subject.value;
-      try { if (level === 'init' && typeof current !== 'undefined') preferredSubject = current.subject; } catch (_) {}
-      fillTopicSelect(subject, subjects, subjects.includes(preferredSubject) ? preferredSubject : subjects[0]);
+      const subjects = bridge.subjects(board.value,grade.value);
+      const subjectChoice = level === 'init'
+        ? (document.querySelector('#subject-filter')?.value || subjects[0])
+        : (subject.value || subjects[0]);
+      fillTopicSelect(subject,subjects,subjectChoice);
 
-      const entries = data.filter(entry => entry.board === board.value && entry.grade === grade.value && entry.subject === subject.value)
-        .sort((a,b) => (a.order || 0) - (b.order || 0));
-      const previousTopic = topic.value;
-      topic.innerHTML = '';
-      entries.forEach(entry => {
-        const option = document.createElement('option');
-        option.value = entry.id;
-        option.textContent = entry.title;
-        let currentTitle = '';
-        try { if (level === 'init' && typeof current !== 'undefined') currentTitle = current.topic || ''; } catch (_) {}
-        if ((currentTitle && entry.title === currentTitle) || entry.id === previousTopic) option.selected = true;
-        topic.appendChild(option);
-      });
+      const topicTitles = bridge.topics(board.value,grade.value,subject.value);
+      const topicChoice = topic.value || topicTitles[0];
+      fillTopicSelect(topic,topicTitles,topicChoice);
       updateTopicPreview();
       return;
     }
 
-    // Fallback: use StudyAI's visible Study Library controls as the source of truth.
+    // Emergency fallback for an unusual page load.
     const coreBoard = document.querySelector('#board-filter');
     const coreGrade = document.querySelector('#grade-filter');
     const coreSubject = document.querySelector('#subject-filter');
     if (!coreBoard || !coreGrade || !coreSubject) {
-      const preview = $('#pai-topic-preview');
-      if (preview) preview.textContent = 'StudyAI curriculum controls are still loading. Refresh the page once.';
+      $('#pai-topic-preview').textContent = 'StudyAI curriculum controls are still loading. Refresh the page once.';
       return;
     }
-
-    const boardValues = optionValues(coreBoard);
-    const desiredBoard = (level === 'init' ? coreBoard.value : board.value) || boardValues[0];
-    fillTopicSelect(board,boardValues,desiredBoard);
+    const boards = optionValues(coreBoard);
+    fillTopicSelect(board,boards,coreBoard.value || boards[0]);
     syncStudyLibrary(board.value,'','');
-
-    const gradeValues = optionValues(coreGrade);
-    const desiredGrade = (level === 'init' ? coreGrade.value : grade.value) || gradeValues[0];
-    fillTopicSelect(grade,gradeValues,desiredGrade);
+    const grades = optionValues(coreGrade);
+    fillTopicSelect(grade,grades,coreGrade.value || grades[0]);
     syncStudyLibrary(board.value,grade.value,'');
-
-    const subjectValues = optionValues(coreSubject);
-    const desiredSubject = (level === 'init' ? coreSubject.value : subject.value) || subjectValues[0];
-    fillTopicSelect(subject,subjectValues,desiredSubject);
+    const subjects = optionValues(coreSubject);
+    fillTopicSelect(subject,subjects,coreSubject.value || subjects[0]);
     syncStudyLibrary(board.value,grade.value,subject.value);
-
-    const topicTitles = [...document.querySelectorAll('#chapter-list .chapter-item')]
-      .map(item => item.dataset.topic || item.textContent.replace(/^✓\s*/,'').trim())
-      .filter(Boolean);
-    const priorTopic = topic.value;
-    fillTopicSelect(topic,topicTitles,topicTitles.includes(priorTopic) ? priorTopic : topicTitles[0]);
+    const titles = [...document.querySelectorAll('#chapter-list .chapter-item')]
+      .map(item => item.dataset.topic || item.textContent.replace(/^✓\s*/,'').trim()).filter(Boolean);
+    fillTopicSelect(topic,titles,titles[0]);
     updateTopicPreview();
   }
 

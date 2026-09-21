@@ -204,6 +204,43 @@ The current build is a strong local/full-stack MVP and portfolio base, not yet a
 
 ---
 
+## Learning Engine: Mastery Map and Wrong Answer Notebook
+
+**Mastery Engine v1:** The Progress page tracks evidence-based mastery for school
+curriculum topics and individual SAT skills. It uses the correct/incorrect results
+of practice questions, with a small smoothing prior; marking a chapter complete
+does not create false mastery. The Mastery Map spans the full Progress width on
+desktop and adapts to smaller screens.
+
+**Wrong Answer Notebook:** Incorrect answers from curriculum quizzes, regular
+SAT practice, and completed SAT mocks are automatically saved with the original
+question, choices, last incorrect answer, correct answer, explanation, topic/skill,
+difficulty, source, date and miss count. Unanswered or unscored pretest questions
+from mocks do not get mislabeled as incorrect.
+
+Open **Progress → Wrong Answer Notebook** to filter questions by To review,
+Recovered, Understood, or All. You can expand a question, reveal its original
+explanation, self-check by retrying, jump to relevant practice, turn it into a
+flashcard or mark it understood. A correct subsequent practice answer automatically
+marks the question Recovered; another mistake reopens it. Manual acknowledgement
+and self-checks do not increase the Mastery score.
+
+Select **Wrong answers** as a flashcard deck source to revisit saved notebook
+questions. The notebook is capped at the 250 most recently missed distinct
+questions to keep the existing JSON sync payload manageable.
+
+**Storage and limitations:** Mastery records and wrong-answer entries are stored
+inside normal StudyAI state: locally, and in the existing per-user database state
+when signed in. No database migration or Gemini key is needed. Old quiz averages
+do not include individual question text and cannot be retroactively turned into
+wrong-answer entries. Personal AI-generated quizzes do not currently feed this
+notebook; the integration covers regular curriculum quizzes, regular SAT practice,
+and completed SAT mocks. The built-in explanation comes from the original
+question; it does not call Gemini. Completing a self-check does not prove
+mastery of an unseen question.
+
+---
+
 ## Personal AI — grounded notes and audio discussions
 
 Personal AI is a separate section of StudyAI. Open it using **StudyAI.bat** (which starts

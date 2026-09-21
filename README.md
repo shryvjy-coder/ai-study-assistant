@@ -241,6 +241,32 @@ mastery of an unseen question.
 
 ---
 
+### Smart Review Queue — unified daily priorities
+
+Open **Progress → Smart Review Queue** to see a short, prioritized set of study
+actions compiled from **due flashcards**, **open Wrong Answer Notebook questions**,
+**curriculum topic / SAT skill mastery below 75%**, and topics already on your
+existing review list. The queue is built from saved practice evidence and
+recalculates after answers, ratings, status changes, and on due-count refresh.
+
+The queue groups wrong answers from the same skill/topic, avoids repeating a
+weak mastery recommendation when an open mistake already addresses that
+skill/topic, and shows at most eight recommendations at once. Use
+**Start next review**, **Review flashcards**, **Review mistakes**, or
+**Practice skill** to navigate to the relevant existing activity.
+Marking a question Understood or answering it correctly removes its open-mistake
+recommendation; separate weak-mastery evidence may still recommend that topic.
+
+**Prioritization is deterministic:** due flashcards first, repeated missed
+questions next, then weak practiced skills/topics, then existing review-list
+topics. The labels explain why each action appears. This is an MVP heuristic;
+it is not a calibrated retention estimate, an official exam score, or
+AI-generated advice. There is **no exam-date scheduling yet**. The queue does
+not update mastery simply because a recommendation was clicked, and
+it does not require a Gemini connection.
+
+---
+
 ### Spaced repetition — Feature #3
 
 StudyAI now has a persisted flashcard scheduler. Open **Flashcards**, choose the

@@ -119,7 +119,14 @@ def _gemini_post(model, payload, timeout=75):
     if response.status_code in (401, 403):
         raise RuntimeError("The Gemini API key is invalid, restricted, or does not have access to this model.")
     if response.status_code == 404:
-        raise RuntimeError("The configured Gemini model is unavailable. Check the model name in .env.")
+        try:
+            detail = response.json().get("error", {}).get("message", "")
+        except Exception:
+            detail = ""
+        raise RuntimeError(
+            "Gemini returned 404 for this request."
+            + (f" Google says: {detail[:300]}" if detail else " The requested model or endpoint was not found.")
+        )
     if response.status_code == 400:
         try:
             detail = response.json().get("error", {}).get("message", "")

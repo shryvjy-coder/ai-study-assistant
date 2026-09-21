@@ -788,6 +788,46 @@ button.mastery-row:hover{
 }
 
 
+
+/* ---------- Spaced repetition ---------- */
+#flashcards .srs-summary{
+ display:flex;justify-content:space-between;align-items:center;gap:18px;
+ padding:18px 20px;margin:0 0 16px;min-width:0;
+ border:1.5px solid var(--premium-card-border);border-radius:17px;
+ background:linear-gradient(115deg,color-mix(in srgb,var(--teal-soft) 65%,var(--surface)),var(--surface) 75%);
+ box-shadow:4px 5px 0 color-mix(in srgb,var(--ink) 70%,transparent);
+}
+.srs-summary strong,.srs-summary small{display:block}
+.srs-summary strong{font-family:var(--serif);font-size:clamp(1.4rem,3vw,2.2rem);line-height:1.15}
+.srs-summary small{margin-top:5px;color:var(--muted)}
+#flashcards .deck-toolbar{max-width:none;display:flex;flex-wrap:wrap;align-items:center}
+#flashcards .deck-toolbar select{flex:1 1 210px;min-width:0}
+#flashcards .flashcard-stats{flex-wrap:wrap}
+#flashcards .flashcard-stats span{min-width:76px}
+#flashcards .flashcard-stats strong{font-size:clamp(1.45rem,2.5vw,1.9rem)}
+.srs-card-status{margin:14px auto 3px;max-width:820px;text-align:center;font-weight:700;color:var(--teal)}
+.srs-rating-hint{text-align:center;font-size:.78rem;color:var(--muted);margin:5px 0 9px}
+#flashcards .srs-rating-controls{gap:9px}
+#flashcards .srs-rating-controls button{min-width:110px;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center}
+#flashcards .srs-rating-controls button small{font-size:.68rem;opacity:.82}
+#flashcards .srs-rating-controls button:disabled{opacity:.43;cursor:not-allowed;transform:none;box-shadow:none}
+#flashcards .srs-navigation{margin-top:10px}
+.srs-progress-description{margin:5px 0 0;color:var(--muted);font-size:.84rem}
+.srs-progress-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0}
+.srs-progress-stats>div{padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:var(--surface-2);min-width:0}
+.srs-progress-stats>div:first-child{background:color-mix(in srgb,var(--accent-orange) 14%,var(--surface))}
+.srs-progress-stats span,.srs-progress-stats small{display:block;color:var(--muted);font-size:.75rem}
+.srs-progress-stats strong{display:block;font-family:var(--serif);font-size:clamp(1.35rem,3vw,2rem);margin:5px 0;overflow-wrap:anywhere}
+.srs-progress-note{margin:6px 0 0;color:var(--muted);font-size:.83rem}
+@media(max-width:680px){
+ #flashcards .srs-summary{flex-direction:column;align-items:stretch}
+ #flashcards .srs-summary button{width:100%}
+ #flashcards .srs-rating-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:520px;margin-inline:auto}
+ #flashcards .srs-rating-controls button{min-width:0}
+ .srs-progress-stats{grid-template-columns:1fr}
+ .srs-progress-card .card-head{flex-direction:column;align-items:start;gap:10px}
+}
+
 /* ---------- Wrong Answer Notebook ---------- */
 #progress .mistake-notebook-card{min-width:0}
 .mistake-notebook-heading{gap:18px}

@@ -583,6 +583,29 @@ input:focus,select:focus,textarea:focus{
   transform:translateX(2px);
 }
 
+/* ---------- Progress grid sizing correction ---------- */
+/* The base dashboard uses 2fr 1fr 1fr; a .wide card was only full-width
+   inside a mobile media query. Set the span on desktop too. */
+#progress .dashboard-grid{grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr))}
+#progress .dashboard-card{min-width:0;box-sizing:border-box}
+#progress .dashboard-card.wide{grid-column:1 / -1;width:100%}
+#progress .mastery-dashboard-card{width:100%;max-width:100%;min-width:0}
+#progress .mastery-overview{grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr))}
+#progress .mastery-score-block,#progress .mastery-mini-stat{min-width:0;overflow-wrap:anywhere}
+#progress .mastery-row{grid-template-columns:minmax(0,1.45fr) minmax(0,.85fr) minmax(62px,auto)}
+#progress .mastery-row-title,#progress .mastery-row-score{min-width:0}
+@media(max-width:960px){
+ #progress .mastery-overview{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #progress .mastery-score-block{grid-column:1 / -1}
+}
+@media(max-width:620px){
+ #progress .dashboard-grid{grid-template-columns:minmax(0,1fr)}
+ #progress .mastery-overview{grid-template-columns:minmax(0,1fr)}
+ #progress .mastery-score-block{grid-column:auto}
+ #progress .mastery-row{grid-template-columns:minmax(0,1fr) auto}
+ #progress .mastery-track{grid-column:1 / -1;grid-row:2}
+}
+
 /* ---------- Mastery engine ---------- */
 .mastery-dashboard-card{
   position:relative;

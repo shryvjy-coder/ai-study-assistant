@@ -191,6 +191,27 @@
         <div class="mastery-section-head"><div><span class="small-label">Priority review</span><h4>What should you strengthen next?</h4></div></div>
         <div id="mastery-list" class="mastery-list"><p class="muted">Your weakest practiced topics and skills will appear here.</p></div>
       </article>
+      <article class="dashboard-card wide mistake-notebook-card" id="mistake-notebook">
+        <div class="card-head mistake-notebook-heading">
+          <div><span class="small-label">Learning engine · 02</span><h3>Wrong Answer Notebook</h3><p>Every missed practice question stays here until you revisit it.</p></div>
+          <span class="mistake-note-label">Saved to your StudyAI progress</span>
+        </div>
+        <div class="mistake-overview" aria-label="Wrong answer summary">
+          <div><span>To review</span><strong id="mistake-open-count">0</strong><small>questions to revisit</small></div>
+          <div><span>Recovered</span><strong id="mistake-recovered-count">0</strong><small>answered correctly later</small></div>
+          <div><span>Understood</span><strong id="mistake-understood-count">0</strong><small>marked after reviewing</small></div>
+        </div>
+        <div class="mistake-toolbar">
+          <div class="mistake-filters" role="group" aria-label="Filter wrong answers">
+            <button type="button" data-mistake-filter="open" aria-pressed="true" class="active">To review</button>
+            <button type="button" data-mistake-filter="all" aria-pressed="false">All</button>
+            <button type="button" data-mistake-filter="recovered" aria-pressed="false">Recovered</button>
+            <button type="button" data-mistake-filter="understood" aria-pressed="false">Understood</button>
+          </div>
+          <span id="mistake-list-count" class="mistake-list-count">0 questions</span>
+        </div>
+        <div id="mistake-list" class="mistake-list" aria-live="polite"><p class="muted">Your next incorrect curriculum or SAT answer will appear here.</p></div>
+      </article>
       <article class="dashboard-card wide"><div class="card-head"><div><span class="small-label">By pathway</span><h3>Completion</h3></div></div><div id="subject-progress"></div></article>
       <article class="dashboard-card"><div class="card-head"><div><span class="small-label">Bookmarks</span><h3>Saved topics</h3></div><button class="text-button" id="clear-bookmarks">Clear</button></div><div id="bookmark-list" class="compact-list"></div></article>
       <article class="dashboard-card"><div class="card-head"><div><span class="small-label">Needs attention</span><h3>Review queue</h3></div><button class="text-button" id="clear-review">Clear</button></div><div id="review-list" class="compact-list"></div></article>

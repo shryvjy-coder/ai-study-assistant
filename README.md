@@ -227,7 +227,7 @@ Generated notes can be copied or saved to the StudyAI Workspace.
    Never put the key in JavaScript, HTML, a public GitHub commit or a screenshot.
 3. Run `StudyAI.bat`. Existing installations detect and install the PDF/DOCX
    libraries when needed. Sign in with a StudyAI account before generating AI content.
-4. In Personal AI, select your notes and choose a tool. Text generation uses Gemini 2.5 Flash
+4. In Personal AI, select your notes and choose a tool. Text generation uses Gemini 3.6 Flash
    by default; two-speaker audio uses Gemini 2.5 Flash Preview TTS by default.
 
 Gemini's free tier is subject to model availability and rate/usage limits. Google states that

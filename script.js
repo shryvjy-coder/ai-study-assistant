@@ -5,7 +5,7 @@ const SAT_QUESTIONS = [{"id": "sat1", "section": "Reading & Writing", "domain": 
 const STORAGE_KEY='studyai-multicurriculum-v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
+const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
@@ -125,6 +125,73 @@ function renderMasteryDashboard(){
  }).join('');
  list.querySelectorAll('[data-mastery-key]').forEach(button=>button.onclick=()=>{const record=(state.mastery||{})[button.dataset.masteryKey];if(record)openMasteryRecord(record)});
 }
+
+// Wrong Answer Notebook v1. Records are part of the existing cloud-synced state.
+let mistakeFilter='open', expandedMistakeId=null, retryMistakeId=null, explanationMistakeId=null;
+function mistakeRecords(){
+ return Array.isArray(state.mistakes)
+  ? state.mistakes.filter(item=>item && typeof item.id==='string' && typeof item.question==='string')
+  : [];
+}
+function noteMistakeResult(q,kind,chosen,correct,source){
+ if(!q)return;
+ const entry=kind==='curriculum'?q.entry:null;
+ const key=kind==='curriculum'?(entry?'curriculum|'+entry.id:null):(q.id?'sat|'+q.id:null);
+ if(!key)return;
+ if(!Array.isArray(state.mistakes))state.mistakes=[];
+ const now=Date.now();
+ let item=state.mistakes.find(row=>row && row.id===key);
+ if(correct){
+  if(item){
+   item.status='recovered';
+   item.recoveredAt=now;
+   item.lastCorrect=now;
+  }
+  return;
+ }
+ const format=q.format==='spr'?'spr':'mcq';
+ const options=Array.isArray(q.options)?q.options.map(v=>String(v)).slice(0,6):[];
+ const correctIndex=format==='mcq'?Number(q.answer):-1;
+ const correctAnswer=format==='spr'?String(q.correctAnswer??''):(options[correctIndex]||'');
+ if(!item){
+  item={
+   id:key,kind,firstMissed:now,missCount:0,retryCount:0,status:'open',
+   topicId:entry?.id||'',board:entry?.board||'',grade:entry?.grade||'',
+   subject:entry?.subject||q.section||'',section:q.section||'',domain:q.domain||'',skill:q.skill||'',
+   title:entry?.title||q.skill||'Practice question'
+  };
+  state.mistakes.unshift(item);
+ }
+ Object.assign(item,{
+  question:String(q.stem||q.question||'').slice(0,1500),
+  passage:String(q.passage||'').slice(0,5000),
+  options,correctIndex,correctAnswer,
+  acceptedAnswers:format==='spr'?(q.acceptedAnswers||[q.correctAnswer]).map(v=>String(v)).slice(0,8):[],
+  format,chosen:format==='spr'?String(chosen):Number(chosen),
+  explanation:String(q.explanation||'No explanation available for this question.').slice(0,4000),
+  difficulty:String(q.level||''),source:source||'practice',
+  lastMissed:now,missCount:(item.missCount||0)+1,status:'open',
+  recoveredAt:null,acknowledgedAt:null
+ });
+ state.mistakes.sort((a,b)=>(b.lastMissed||0)-(a.lastMissed||0));
+ if(state.mistakes.length>250)state.mistakes=state.mistakes.slice(0,250);
+}
+function captureMockResults(records){
+ if(!Array.isArray(records))return;
+ let count=0;
+ records.forEach(record=>{
+  const q=record?.question;
+  if(!q||q.pretest||!q.id)return;
+  const correct=record.correct===true;
+  satMasteryEvidence(q,correct);
+  state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:correct?1:0});
+  noteMistakeResult(q,'sat',record.chosen,correct,'sat-mock');
+  count++;
+ });
+ if(count){save();updateDashboard();}
+}
+window.StudyAIRecordMockResults=captureMockResults;
+
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function setTheme(theme){state.theme=theme;document.documentElement.dataset.theme=theme;$('#theme-label').textContent=theme==='dark'?'Light mode':'Dark mode';$('#theme-icon').textContent=theme==='dark'?'☀':'◐';save()}
 function toggleThemePremium(){
@@ -195,7 +262,7 @@ function renderSatDomainCards(){$('#sat-domain-cards').innerHTML=Object.keys(SAT
 function updateSatSummary(){const all=state.satHistory;const overall=all.length?Math.round(all.reduce((a,b)=>a+b.correct,0)/all.length*100):0;$('#sat-overall').textContent=overall+'%';$('#hero-sat').textContent=overall+'%';$('#sat-streak').textContent=all.length?`${all.length} SAT questions answered in this browser`:'No SAT practice yet';$('#metric-sat').textContent=overall+'%'}
 function startSat(timed=false){const domain=$('#sat-domain').value,skill=$('#sat-skill').value,level=$('#sat-level').value,count=+$('#sat-count').value;let pool=SAT_QUESTIONS.filter(q=>q.section===satSection);if(!timed)pool=pool.filter(q=>q.domain===domain&&q.skill===skill&&q.level===level);if(!pool.length)pool=SAT_QUESTIONS.filter(q=>q.section===satSection&&q.domain===domain&&q.skill===skill);if(pool.length<count){const more=SAT_QUESTIONS.filter(q=>q.section===satSection&&q.domain===domain&&!pool.includes(q));pool=[...pool,...more]}satRun=shuffle([...pool]).slice(0,Math.min(count,pool.length));satIndex=0;satScore=0;if(!satRun.length)return toast('No questions match this filter yet');$('#sat-runner').classList.remove('hidden');renderSatQuestion()}
 function renderSatQuestion(){const q=satRun[satIndex];$('#sat-runner').innerHTML=`<div class="runner-top"><div><strong>${esc(q.section)}</strong><div class="runner-meta">${esc(q.domain)} · ${esc(q.skill)} · ${esc(q.level)}</div></div><span>${satIndex+1} / ${satRun.length}</span></div>${q.passage?`<div class="question-passage">${esc(q.passage)}</div>`:''}<div class="question-stem">${esc(q.stem)}</div><div class="options">${q.options.map((o,i)=>`<button class="option-btn" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}</div><div id="sat-feedback"></div>`;$('#sat-runner').querySelectorAll('.option-btn').forEach(b=>b.onclick=()=>answerSat(+b.dataset.i))}
-function answerSat(i){const q=satRun[satIndex],ok=i===q.answer;if(ok)satScore++;state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:ok?1:0});satMasteryEvidence(q,ok);save();$('#sat-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#sat-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Not quite'}</strong><p>${esc(q.explanation)}</p><div class="runner-actions"><span>Set score: ${satScore}/${satIndex+1}</span><button class="button primary compact" id="sat-next">${satIndex===satRun.length-1?'Finish':'Next'}</button></div></div>`;$('#sat-next').onclick=()=>{if(satIndex<satRun.length-1){satIndex++;renderSatQuestion()}else finishSat()};updateSatSummary();updateDashboard()}
+function answerSat(i){const q=satRun[satIndex],ok=i===q.answer;if(ok)satScore++;state.satHistory.push({date:new Date().toISOString(),section:q.section,domain:q.domain,skill:q.skill,level:q.level,correct:ok?1:0});satMasteryEvidence(q,ok);noteMistakeResult(q,'sat',i,ok,'sat-practice');save();$('#sat-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#sat-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Not quite'}</strong><p>${esc(q.explanation)}</p><div class="runner-actions"><span>Set score: ${satScore}/${satIndex+1}</span><button class="button primary compact" id="sat-next">${satIndex===satRun.length-1?'Finish':'Next'}</button></div></div>`;$('#sat-next').onclick=()=>{if(satIndex<satRun.length-1){satIndex++;renderSatQuestion()}else finishSat()};updateSatSummary();updateDashboard()}
 function finishSat(){$('#sat-runner').innerHTML=`<div class="quiz-result"><span class="small-label">SAT practice complete</span><h3>${satScore} / ${satRun.length}</h3><p>Review the domains below, then run another targeted set on the weakest one.</p><button class="button primary" id="sat-again">Practice again</button></div>`;$('#sat-again').onclick=()=>startSat(false);renderSatDomainCards()}
 
 // Curriculum quiz from note data
@@ -203,7 +270,7 @@ function populateQuizFilters(){const boards=uniq(STUDY_DATA.map(e=>e.board));fil
 function makeCurriculumQuestion(e){const others=shuffle(STUDY_DATA.filter(x=>x.subject===e.subject&&x.id!==e.id)).slice(0,3).map(x=>x.summary);const options=shuffle([e.summary,...others]);return {entry:e,stem:`Which statement best matches ${e.title}?`,options,answer:options.indexOf(e.summary),explanation:e.summary}}
 function startQuiz(){const b=$('#quiz-board').value,g=$('#quiz-grade').value,s=$('#quiz-subject').value,t=$('#quiz-chapter').value,n=+$('#quiz-length').value;let pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s&&(t==='all'||e.title===t));if(pool.length<n)pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s);activeQuiz=shuffle(pool).slice(0,Math.min(n,pool.length)).map(makeCurriculumQuestion);quizIndex=0;quizScore=0;$('#quiz-setup').classList.add('hidden');$('#quiz-result').classList.add('hidden');$('#quiz-runner').classList.remove('hidden');renderQuizQuestion()}
 function renderQuizQuestion(){const q=activeQuiz[quizIndex];$('#quiz-runner').innerHTML=`<div class="runner-top"><strong>${esc(q.entry.subject)} practice</strong><span>${quizIndex+1} / ${activeQuiz.length}</span></div><div class="question-stem">${esc(q.stem)}</div><div class="options">${q.options.map((o,i)=>`<button class="option-btn" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}</div><div id="quiz-feedback"></div>`;$('#quiz-runner').querySelectorAll('.option-btn').forEach(b=>b.onclick=()=>answerQuiz(+b.dataset.i))}
-function answerQuiz(i){const q=activeQuiz[quizIndex],ok=i===q.answer;if(ok)quizScore++;else if(!state.review.includes(q.entry.id))state.review.push(q.entry.id);curriculumMasteryEvidence(q.entry,ok);save();$('#quiz-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#quiz-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Review this topic'}</strong><p>${esc(q.explanation)}</p><button class="button primary compact" id="quiz-next">${quizIndex===activeQuiz.length-1?'Finish':'Next'}</button></div>`;$('#quiz-next').onclick=()=>{if(quizIndex<activeQuiz.length-1){quizIndex++;renderQuizQuestion()}else finishQuiz()}}
+function answerQuiz(i){const q=activeQuiz[quizIndex],ok=i===q.answer;if(ok)quizScore++;else if(!state.review.includes(q.entry.id))state.review.push(q.entry.id);curriculumMasteryEvidence(q.entry,ok);noteMistakeResult(q,'curriculum',i,ok,'curriculum-quiz');save();renderMistakeNotebook();$('#quiz-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#quiz-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Review this topic'}</strong><p>${esc(q.explanation)}</p><button class="button primary compact" id="quiz-next">${quizIndex===activeQuiz.length-1?'Finish':'Next'}</button></div>`;$('#quiz-next').onclick=()=>{if(quizIndex<activeQuiz.length-1){quizIndex++;renderQuizQuestion()}else finishQuiz()}}
 function finishQuiz(){state.quizHistory.push({date:new Date().toISOString(),score:quizScore,total:activeQuiz.length});save();$('#quiz-runner').classList.add('hidden');$('#quiz-result').classList.remove('hidden');$('#quiz-result').innerHTML=`<span class="small-label">Practice complete</span><h3>${quizScore} / ${activeQuiz.length}</h3><p>Missed topics were added to your review queue.</p><button class="button primary" id="quiz-again">Build another set</button>`;$('#quiz-again').onclick=()=>{$('#quiz-result').classList.add('hidden');$('#quiz-setup').classList.remove('hidden')};updateDashboard()}
 
 // Workspace
@@ -216,7 +283,7 @@ function addFolder(){const f=$('#new-folder-name').value.trim();if(f&&!state.fol
 
 function renderPlannerBoards(){fillSelect($('#planner-board'),['All',...uniq(STUDY_DATA.map(e=>e.board))],$('#planner-board').value||'All')}
 function buildPlan(){const board=$('#planner-board').value,mins=+$('#daily-time').value;let pool=[...state.review.map(id=>STUDY_DATA.find(e=>e.id===id)).filter(Boolean),...STUDY_DATA.filter(e=>!state.completed.includes(e.id))];pool=pool.filter((e,i,a)=>a.findIndex(x=>x.id===e.id)===i&&(board==='All'||e.board===board));const per=Math.max(1,Math.round(mins/35));$('#planner-heading').textContent='Seven-day revision map';$('#planner-output').innerHTML=Array.from({length:7},(_,d)=>{const items=pool.slice(d*per,(d+1)*per);return `<div class="plan-day"><strong>Day ${d+1}</strong>${items.length?items.map(e=>`<p>${state.review.includes(e.id)?'Review':'Study'} · ${esc(e.subject)} · ${esc(e.title)}</p>`).join(''):'<p>Buffer, catch-up or SAT mixed practice.</p>'}</div>`}).join('')}
-function updateDashboard(){const total=STUDY_DATA.length,done=state.completed.length,pct=Math.round(done/total*100),avg=state.quizHistory.length?Math.round(state.quizHistory.reduce((a,h)=>a+h.score/h.total,0)/state.quizHistory.length*100):0;$('#hero-percent').textContent=pct+'%';$('#hero-progress').style.width=pct+'%';$('#hero-completed').textContent=done;$('#hero-review').textContent=state.review.length;$('#hero-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-complete').textContent=pct+'%';$('#metric-total').textContent=total;$('#metric-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-review').textContent=state.review.length;$('#subject-progress').innerHTML=uniq(STUDY_DATA.map(e=>e.board)).map(b=>{const all=STUDY_DATA.filter(e=>e.board===b),d=all.filter(e=>state.completed.includes(e.id)).length,p=Math.round(d/all.length*100);return `<div class="progress-row"><div class="progress-row-top"><span>${esc(b)}</span><strong>${p}%</strong></div><div class="mastery-bar"><span style="width:${p}%"></span></div></div>`}).join('');renderMasteryDashboard();renderLists();updateSatSummary()}
+function updateDashboard(){const total=STUDY_DATA.length,done=state.completed.length,pct=Math.round(done/total*100),avg=state.quizHistory.length?Math.round(state.quizHistory.reduce((a,h)=>a+h.score/h.total,0)/state.quizHistory.length*100):0;$('#hero-percent').textContent=pct+'%';$('#hero-progress').style.width=pct+'%';$('#hero-completed').textContent=done;$('#hero-review').textContent=state.review.length;$('#hero-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-complete').textContent=pct+'%';$('#metric-total').textContent=total;$('#metric-average').textContent=state.quizHistory.length?avg+'%':'—';$('#metric-review').textContent=state.review.length;$('#subject-progress').innerHTML=uniq(STUDY_DATA.map(e=>e.board)).map(b=>{const all=STUDY_DATA.filter(e=>e.board===b),d=all.filter(e=>state.completed.includes(e.id)).length,p=Math.round(d/all.length*100);return `<div class="progress-row"><div class="progress-row-top"><span>${esc(b)}</span><strong>${p}%</strong></div><div class="mastery-bar"><span style="width:${p}%"></span></div></div>`}).join('');renderMasteryDashboard();renderMistakeNotebook();renderLists();updateSatSummary()}
 function renderLists(){const row=(id,arr)=>{const es=arr.map(k=>STUDY_DATA.find(e=>e.id===k)).filter(Boolean);$(id).innerHTML=es.length?es.slice(0,20).map(e=>`<button data-id="${esc(e.id)}">${esc(e.title)}<small>${esc(e.board)} · ${esc(e.grade)}</small></button>`).join(''):'<p class="muted">Nothing here yet.</p>';$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))};row('#bookmark-list',state.bookmarks);row('#review-list',state.review)}
 function jumpToEntry(id){const e=STUDY_DATA.find(x=>x.id===id);if(!e)return;current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title);location.hash='#study'}
 function tutor(){const q=$('#tutor-query').value,r=searchAll(q).slice(0,6);$('#tutor-answer').innerHTML=r.length?r.map(e=>`<div class="tutor-result"><strong>${esc(e.title)}</strong><p>${esc(e.summary)}</p><button data-id="${esc(e.id)}">Open note</button></div>`).join(''):'<p>I could not find that in the material stored locally. Try a topic name, formula keyword or concept.</p>';$('#tutor-answer').querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))}

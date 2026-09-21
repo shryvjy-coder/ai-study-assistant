@@ -17,11 +17,9 @@ def enhanced_index():
         html = html.replace(style_marker, style_enhancement)
 
     script_marker = '<script src="script.js"></script>'
-    # IMPORTANT: top-level const declarations in classic scripts do not become
-    # window properties, and a later inline script is not a reliable bridge for
-    # Personal AI. Append the bridge to script.js itself so it executes in the
-    # same script lexical environment as STUDY_DATA.
-    bridged_script = '<script src="script.js"></script>'
+    # script.js now publishes its curriculum explicitly for Personal AI.
+    # Version the core script so browsers cannot retain a pre-publication copy.
+    bridged_script = '<script src="script.js?v=curriculum-core-1"></script>'
     script_enhancement = (
         bridged_script
         + '\n<script src="studyai-curriculum-bridge.js?v=1"></script>'

@@ -9,6 +9,8 @@
   let selected = new Set();
   let scope = 'guest';
   let currentScript = null;
+  let currentQuiz = null;
+  let generatedCards = [];
   let currentAudioUrl = null;
   let busy = false;
   let providerReady = false;
@@ -65,10 +67,10 @@
       throw new Error('Your selected sources would exceed 52,000 characters. Uncheck another source first.');
   }
 
-  function addSource(title, text, origin) {
+  function addSource(title, text, origin, meta = {}) {
     text = String(text || '').trim();
     checkRoom(text);
-    const item = {id:id(),title:String(title || 'Untitled note').trim().slice(0,100),text,origin:origin || 'pasted'};
+    const item = {id:id(),title:String(title || 'Untitled note').trim().slice(0,100),text,origin:origin || 'pasted',...meta};
     sources.unshift(item);
     selected.add(item.id);
     persist();
@@ -123,6 +125,7 @@
       refs.appendChild(chip);
     });
     $('#pai-podcast').classList.add('hidden');
+    $('#pai-structured')?.classList.add('hidden');
     if (currentAudioUrl) {
       URL.revokeObjectURL(currentAudioUrl);
       currentAudioUrl = null;
@@ -146,6 +149,260 @@
     const response = await fetch('/api/personal-ai/extract',{method:'POST',body:form});
     const data = await readResponse(response);
     addSource(data.title,data.text,'Uploaded document');
+  }
+
+  function topicEntries() {
+    try {
+      return (typeof STUDY_DATA !== 'undefined' && Array.isArray(STUDY_DATA)) ? STUDY_DATA : [];
+    } catch (_) { return []; }
+  }
+
+  function paiUnique(values) {
+    return [...new Set(values)];
+  }
+
+  function fillTopicSelect(select, values, chosen) {
+    if (!select) return;
+    select.innerHTML = '';
+    values.forEach(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      if (value === chosen) option.selected = true;
+      select.appendChild(option);
+    });
+  }
+
+  function topicSourceText(entry) {
+    const sections = [
+      `Topic: ${entry.title}`,
+      `Curriculum: ${entry.board}\nStage: ${entry.grade}\nSubject: ${entry.subject}`,
+      entry.summary ? `Big picture:\n${entry.summary}` : '',
+      entry.lens ? `Topic lens:\n${entry.lens}` : '',
+      (entry.keyPoints || []).length ? `Core ideas:\n${entry.keyPoints.map(x => '- ' + x).join('\n')}` : '',
+      (entry.formulas || []).length ? `Key relationships / formulas:\n${entry.formulas.map(x => '- ' + x).join('\n')}` : '',
+      (entry.method || []).length ? `Problem-solving method:\n${entry.method.map((x,i) => `${i+1}. ${x}`).join('\n')}` : '',
+      (entry.mistakes || []).length ? `Common mistakes:\n${entry.mistakes.map(x => '- ' + x).join('\n')}` : ''
+    ];
+    return sections.filter(Boolean).join('\n\n');
+  }
+
+  function selectedTopicEntry() {
+    const value = $('#pai-topic-topic')?.value;
+    return topicEntries().find(entry => entry.id === value) || null;
+  }
+
+  function updateTopicPicker(level = 'board') {
+    const data = topicEntries();
+    const board = $('#pai-topic-board');
+    const grade = $('#pai-topic-grade');
+    const subject = $('#pai-topic-subject');
+    const topic = $('#pai-topic-topic');
+    if (!data.length || !board || !grade || !subject || !topic) return;
+
+    const boards = paiUnique(data.map(entry => entry.board));
+    const preferredBoard = level === 'init' && typeof current !== 'undefined' ? current.board : board.value;
+    fillTopicSelect(board, boards, boards.includes(preferredBoard) ? preferredBoard : boards[0]);
+
+    const grades = paiUnique(data.filter(entry => entry.board === board.value).map(entry => entry.grade));
+    const preferredGrade = level === 'init' && typeof current !== 'undefined' ? current.grade : grade.value;
+    fillTopicSelect(grade, grades, grades.includes(preferredGrade) ? preferredGrade : grades[0]);
+
+    const subjects = paiUnique(data.filter(entry => entry.board === board.value && entry.grade === grade.value).map(entry => entry.subject));
+    const preferredSubject = level === 'init' && typeof current !== 'undefined' ? current.subject : subject.value;
+    fillTopicSelect(subject, subjects, subjects.includes(preferredSubject) ? preferredSubject : subjects[0]);
+
+    const entries = data.filter(entry => entry.board === board.value && entry.grade === grade.value && entry.subject === subject.value)
+      .sort((a,b) => (a.order || 0) - (b.order || 0));
+    const previousTopic = topic.value;
+    topic.innerHTML = '';
+    entries.forEach(entry => {
+      const option = document.createElement('option');
+      option.value = entry.id;
+      option.textContent = entry.title;
+      if ((level === 'init' && typeof current !== 'undefined' && entry.title === current.topic) || entry.id === previousTopic) option.selected = true;
+      topic.appendChild(option);
+    });
+    updateTopicPreview();
+  }
+
+  function updateTopicPreview() {
+    const entry = selectedTopicEntry();
+    const preview = $('#pai-topic-preview');
+    if (!entry || !preview) return;
+    preview.innerHTML = '';
+    const strong = document.createElement('strong');
+    strong.textContent = entry.title;
+    const p = document.createElement('p');
+    p.textContent = entry.summary || 'This StudyAI topic can be used as a Personal AI source.';
+    preview.append(strong,p);
+  }
+
+  function addSelectedTopic() {
+    const entry = selectedTopicEntry();
+    if (!entry) {
+      notify('Choose a StudyAI topic first.','error');
+      return null;
+    }
+    const existing = sources.find(item => item.studyaiId === entry.id);
+    if (existing) {
+      selected.add(existing.id);
+      renderSources();
+      notify(`${entry.title} is selected as a source.`,'success');
+      return existing;
+    }
+    try {
+      addSource(
+        entry.title,
+        topicSourceText(entry),
+        `StudyAI topic · ${entry.board} · ${entry.grade} · ${entry.subject}`,
+        {studyaiId: entry.id}
+      );
+      return sources.find(item => item.studyaiId === entry.id) || null;
+    } catch (error) {
+      notify(error.message,'error');
+      return null;
+    }
+  }
+
+  function setupTopicMode() {
+    const data = topicEntries();
+    const panel = $('#pai-topic-mode');
+    if (!panel) return;
+    if (!data.length) {
+      panel.classList.add('is-unavailable');
+      $('#pai-topic-preview').textContent = 'StudyAI curriculum data is not available. Restart through StudyAI.bat.';
+      return;
+    }
+    updateTopicPicker('init');
+    $('#pai-topic-board').addEventListener('change',()=>updateTopicPicker('board'));
+    $('#pai-topic-grade').addEventListener('change',()=>updateTopicPicker('grade'));
+    $('#pai-topic-subject').addEventListener('change',()=>updateTopicPicker('subject'));
+    $('#pai-topic-topic').addEventListener('change',updateTopicPreview);
+    $('#pai-use-topic').addEventListener('click',addSelectedTopic);
+  }
+
+  function setOutputSources(citations = []) {
+    const refs = $('#pai-output-sources');
+    refs.innerHTML = '';
+    citations.forEach(item => {
+      const chip = document.createElement('span');
+      chip.textContent = `[${item.ref}] ${item.title}`;
+      refs.appendChild(chip);
+    });
+  }
+
+  function showStructured(title, citations = []) {
+    $('#pai-output-title').textContent = title;
+    $('#pai-output-empty').classList.add('hidden');
+    $('#pai-output-text').classList.add('hidden');
+    $('#pai-output-actions').classList.add('hidden');
+    $('#pai-podcast').classList.add('hidden');
+    const box = $('#pai-structured');
+    box.classList.remove('hidden');
+    box.innerHTML = '';
+    setOutputSources(citations);
+    if (currentAudioUrl) {
+      URL.revokeObjectURL(currentAudioUrl);
+      currentAudioUrl = null;
+    }
+  }
+
+  function renderQuiz(questions, refs = []) {
+    currentQuiz = Array.isArray(questions) ? questions : [];
+    generatedCards = [];
+    showStructured('AI quiz', refs);
+    const box = $('#pai-structured');
+    const header = document.createElement('div');
+    header.className = 'pai-quiz-head';
+    header.innerHTML = '<strong>Topic check</strong><span id="pai-quiz-score">0 answered · 0 correct</span>';
+    box.appendChild(header);
+    let answered = 0, correct = 0;
+
+    currentQuiz.forEach((item, index) => {
+      const card = document.createElement('section');
+      card.className = 'pai-quiz-card';
+      const q = document.createElement('h4');
+      q.textContent = `${index + 1}. ${item.question}`;
+      const options = document.createElement('div');
+      options.className = 'pai-quiz-options';
+      const feedback = document.createElement('div');
+      feedback.className = 'pai-quiz-feedback hidden';
+
+      item.options.forEach((optionText, optionIndex) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = `${String.fromCharCode(65 + optionIndex)}. ${optionText}`;
+        button.addEventListener('click', () => {
+          if (card.dataset.answered) return;
+          card.dataset.answered = '1';
+          answered += 1;
+          if (optionIndex === item.answerIndex) correct += 1;
+          [...options.querySelectorAll('button')].forEach((choice, choiceIndex) => {
+            choice.disabled = true;
+            if (choiceIndex === item.answerIndex) choice.classList.add('is-correct');
+            else if (choiceIndex === optionIndex) choice.classList.add('is-wrong');
+          });
+          feedback.textContent = `${optionIndex === item.answerIndex ? 'Correct. ' : 'Not quite. '}${item.explanation}${item.references ? ' ' + item.references : ''}`;
+          feedback.classList.remove('hidden');
+          $('#pai-quiz-score').textContent = `${answered} answered · ${correct} correct`;
+        });
+        options.appendChild(button);
+      });
+      card.append(q,options,feedback);
+      box.appendChild(card);
+    });
+  }
+
+  function renderFlashcards(cards, refs = []) {
+    currentQuiz = null;
+    generatedCards = Array.isArray(cards) ? cards : [];
+    showStructured('AI flashcards', refs);
+    const box = $('#pai-structured');
+    const intro = document.createElement('div');
+    intro.className = 'pai-cardset-head';
+    intro.innerHTML = `<div><strong>${generatedCards.length} active-recall cards</strong><span>Click a card to reveal its answer.</span></div><button type="button" class="button primary compact" id="pai-load-generated-cards">Study these flashcards →</button>`;
+    box.appendChild(intro);
+
+    generatedCards.forEach((item, index) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'pai-generated-card';
+      const front = document.createElement('span');
+      front.className = 'pai-generated-front';
+      front.textContent = `${index + 1}. ${item.front}`;
+      const back = document.createElement('span');
+      back.className = 'pai-generated-back';
+      back.textContent = `${item.back}${item.references ? ' ' + item.references : ''}`;
+      back.hidden = true;
+      card.append(front,back);
+      card.addEventListener('click',()=>{
+        const showing = !back.hidden;
+        back.hidden = showing;
+        front.hidden = !showing;
+        card.classList.toggle('is-flipped',!showing);
+      });
+      box.appendChild(card);
+    });
+
+    $('#pai-load-generated-cards')?.addEventListener('click',()=>{
+      if (!generatedCards.length) return;
+      try {
+        activeDeck = generatedCards.map((item,index)=>({
+          id:`pai|${Date.now()}|${index}`,
+          front:item.front,
+          back:item.back,
+          source:'Personal AI'
+        }));
+        cardIndex = 0;
+        if (typeof renderCard === 'function') renderCard();
+        if (typeof renderFlashStats === 'function') renderFlashStats();
+        location.hash = '#flashcards';
+        notify('AI flashcards loaded into your StudyAI deck.','success');
+      } catch (_) {
+        notify('Could not open the StudyAI flashcard deck. You can still use the cards here.','error');
+      }
+    });
   }
 
   function refreshWorkspaceChoices() {
@@ -192,20 +449,24 @@
     } catch(e){notify(e.message,'error');}
   }
 
-  async function runText(mode) {
+  async function runText(mode, trigger = null) {
     if (busy) return;
     const chosen = selectedSources();
     if (!chosen.length) return notify('Select at least one source first.','error');
     const total = chosen.reduce((n,item)=>n+item.text.length,0);
     if (total > MAX_TOTAL) return notify('Select fewer notes: the limit is 52,000 characters.','error');
-    const question = $('#pai-question').value.trim();
+    let question = mode === 'ask' ? $('#pai-question').value.trim() : '';
     if (mode === 'ask' && !question) return notify('Type a question about your notes.','error');
+    if (mode === 'explain' || mode === 'teach') {
+      const depth = $('#pai-depth')?.value || 'Standard';
+      question = `Requested explanation depth: ${depth}.`;
+    }
     if (!providerReady) return notify('Personal AI needs a server-side Gemini API key. Follow the setup note below.','error');
 
     busy=true;
-    const buttons = $$('[data-pai-mode]');
+    const buttons = $('[data-pai-mode],[data-pai-topic-mode]');
     buttons.forEach(button=>button.disabled=true);
-    const clicked=$(`[data-pai-mode="${mode}"]`);
+    const clicked=trigger || $(`[data-pai-mode="${mode}"]`) || $(`[data-pai-topic-mode="${mode}"]`);
     const oldLabel=clicked?.textContent || '';
     if (clicked) clicked.textContent = mode==='podcast'?'Writing discussion…':'Generating…';
     notify(mode==='podcast'?'Creating a grounded two-voice discussion…':'Reading the selected notes…');
@@ -222,11 +483,31 @@
       const data=await readResponse(response);
       if (mode === 'podcast') {
         currentScript=data.script;
+        currentQuiz=null;
+        generatedCards=[];
         renderPodcast(data.script,data.sources);
         notify('Discussion script ready. Review or edit it, then generate the audio.','success');
+      } else if (mode === 'quiz') {
+        currentScript=null;
+        renderQuiz(data.quiz?.questions || [],data.sources||[]);
+        notify('Quiz ready. Answer each question and check the grounded explanations.','success');
+      } else if (mode === 'flashcards') {
+        currentScript=null;
+        renderFlashcards(data.flashcards?.cards || [],data.sources||[]);
+        notify('Flashcards ready. You can study them here or load them into the StudyAI deck.','success');
       } else {
         currentScript=null;
-        const titles={summary:'Source summary',notes:'Generated study notes',improve:'Improved notes',ask:'Answer from your notes'};
+        currentQuiz=null;
+        generatedCards=[];
+        const titles={
+          summary:'Source summary',
+          notes:'Generated study notes',
+          improve:'Improved notes',
+          ask:'Answer from your notes',
+          explain:'Topic explanation',
+          revision:'Revision notes',
+          teach:'Teach me'
+        };
         showOutput(titles[mode] || 'Personal AI',data.text,data.sources||[]);
         notify('Ready. Check the source references before using the result.','success');
       }
@@ -359,6 +640,33 @@
           <div class="pai-availability"><span class="pai-status-dot"></span><strong id="pai-provider-status">Checking Gemini setup…</strong><small>Gemini-powered · server-side key</small></div>
         </header>
         <div class="pai-privacy"><strong>Before you start</strong><p>Only upload notes you have permission to share. Selected text is sent to Google's Gemini API when you generate; documents stay in this browser and are not added to account sync. This is not a private on-device AI. Google states free-tier Gemini API data may be used to improve its products, so avoid passwords, personal records or other sensitive information.</p></div>
+
+        <section class="pai-topic-mode" id="pai-topic-mode">
+          <div class="pai-topic-heading">
+            <div><span class="small-label">00 · Topic Mode</span><h3>Start with a StudyAI topic</h3><p>No notes yet? Pick a curriculum topic, then explain it, revise it, quiz yourself, make flashcards, or turn it into an audio lesson.</p></div>
+            <div class="pai-depth-wrap"><label for="pai-depth">Explanation depth</label><select id="pai-depth"><option>Quick</option><option selected>Standard</option><option>Deep</option></select></div>
+          </div>
+          <div class="pai-topic-selectors">
+            <label>Curriculum<select id="pai-topic-board"></select></label>
+            <label>Class / stage<select id="pai-topic-grade"></select></label>
+            <label>Subject<select id="pai-topic-subject"></select></label>
+            <label>Topic<select id="pai-topic-topic"></select></label>
+          </div>
+          <div class="pai-topic-preview" id="pai-topic-preview"></div>
+          <div class="pai-topic-actions">
+            <button type="button" class="button secondary compact" id="pai-use-topic">＋ Use this topic as a source</button>
+            <span>Keep your uploaded notes selected too to combine school material with StudyAI.</span>
+          </div>
+          <div class="pai-topic-tools">
+            <button type="button" data-pai-topic-mode="explain"><strong>Explain topic</strong><small>At your chosen depth</small></button>
+            <button type="button" data-pai-topic-mode="revision"><strong>Revision notes</strong><small>Fast exam-focused review</small></button>
+            <button type="button" data-pai-topic-mode="teach"><strong>Teach me</strong><small>Lesson + recall checkpoints</small></button>
+            <button type="button" data-pai-topic-mode="quiz"><strong>Quiz me</strong><small>6 grounded MCQs</small></button>
+            <button type="button" data-pai-topic-mode="flashcards"><strong>Make flashcards</strong><small>10 active-recall cards</small></button>
+            <button type="button" data-pai-topic-mode="podcast"><strong>Audio lesson</strong><small>Two-voice discussion</small></button>
+          </div>
+        </section>
+
         <div class="pai-layout">
           <aside class="pai-library">
             <div class="pai-card-head"><div><span class="small-label">01 · Source library</span><h3>Bring your material</h3></div><span class="pai-count" id="pai-library-count">0</span></div>
@@ -399,6 +707,7 @@
             <div id="pai-output-empty" class="pai-output-empty"><span aria-hidden="true">✧</span><strong>Ready when you are</strong><p>Select a source and choose a tool. Your personalized notes or discussion will appear here.</p></div>
             <pre id="pai-output-text" class="pai-output-text hidden"></pre>
             <div id="pai-output-sources" class="pai-output-sources"></div>
+            <div id="pai-structured" class="pai-structured hidden"></div>
             <div id="pai-podcast" class="pai-podcast hidden">
               <h4 id="pai-podcast-title">Audio discussion</h4>
               <p>Edit the two-speaker script before creating audio.</p>
@@ -440,7 +749,12 @@
       if (!confirm('Remove all Personal AI sources stored in this browser?')) return;
       sources=[];selected.clear();persist();renderSources();notify('Personal AI source library cleared.');
     });
-    $$('[data-pai-mode]').forEach(button=>button.addEventListener('click',()=>runText(button.dataset.paiMode)));
+    $('[data-pai-mode]').forEach(button=>button.addEventListener('click',()=>runText(button.dataset.paiMode,button)));
+    $('[data-pai-topic-mode]').forEach(button=>button.addEventListener('click',()=>{
+      const source = addSelectedTopic();
+      if (!source) return;
+      runText(button.dataset.paiTopicMode,button);
+    }));
     $('#pai-generate-audio').addEventListener('click',makeAudio);
     $('#pai-copy').addEventListener('click',()=>{
       const output=$('#pai-output-text').textContent;
@@ -449,6 +763,7 @@
     });
     $('#pai-save-workspace').addEventListener('click',saveToWorkspace);
     refreshWorkspaceChoices();
+    setupTopicMode();
   }
 
   async function init() {

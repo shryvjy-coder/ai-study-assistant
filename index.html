@@ -173,12 +173,24 @@
   <div class="shell">
     <header class="section-head"><p class="kicker">Progress</p><h2>Your work, made visible.</h2></header>
     <div class="metric-grid">
+      <article><span>Learning mastery</span><strong id="metric-mastery">—</strong><small id="metric-mastery-note">practice evidence</small></article>
       <article><span>Topics complete</span><strong id="metric-complete">0</strong><small id="metric-total">of 0</small></article>
       <article><span>Quiz average</span><strong id="metric-average">—</strong><small>curriculum quizzes</small></article>
       <article><span>SAT mastery</span><strong id="metric-sat">0%</strong><small>across practiced skills</small></article>
       <article><span>Review queue</span><strong id="metric-review">0</strong><small>topics to revisit</small></article>
     </div>
     <div class="dashboard-grid">
+      <article class="dashboard-card wide mastery-dashboard-card">
+        <div class="card-head"><div><span class="small-label">Learning engine</span><h3>Mastery map</h3></div><span class="mastery-method">Based on answered practice, not completion</span></div>
+        <div class="mastery-overview">
+          <div class="mastery-score-block"><span>Overall practiced mastery</span><strong id="mastery-overall">—</strong><small id="mastery-evidence">Answer practice questions to begin.</small></div>
+          <div class="mastery-mini-stat"><span>Practiced</span><strong id="mastery-practiced">0</strong><small>mastery units</small></div>
+          <div class="mastery-mini-stat"><span>Secure</span><strong id="mastery-secure">0</strong><small>75%+ with evidence</small></div>
+          <div class="mastery-mini-stat"><span>Needs attention</span><strong id="mastery-attention">0</strong><small>below 55%</small></div>
+        </div>
+        <div class="mastery-section-head"><div><span class="small-label">Priority review</span><h4>What should you strengthen next?</h4></div></div>
+        <div id="mastery-list" class="mastery-list"><p class="muted">Your weakest practiced topics and skills will appear here.</p></div>
+      </article>
       <article class="dashboard-card wide"><div class="card-head"><div><span class="small-label">By pathway</span><h3>Completion</h3></div></div><div id="subject-progress"></div></article>
       <article class="dashboard-card"><div class="card-head"><div><span class="small-label">Bookmarks</span><h3>Saved topics</h3></div><button class="text-button" id="clear-bookmarks">Clear</button></div><div id="bookmark-list" class="compact-list"></div></article>
       <article class="dashboard-card"><div class="card-head"><div><span class="small-label">Needs attention</span><h3>Review queue</h3></div><button class="text-button" id="clear-review">Clear</button></div><div id="review-list" class="compact-list"></div></article>

@@ -46,6 +46,18 @@ function toggleThemePremium(){
 function uniq(a){return [...new Set(a)]}
 function byBoard(){return STUDY_DATA.filter(e=>e.board===current.board)}
 function fillSelect(sel,values,chosen){sel.innerHTML=values.map(v=>`<option ${v===chosen?'selected':''}>${esc(v)}</option>`).join('')}
+function publishCurriculum(){
+ window.STUDYAI_CURRICULUM=STUDY_DATA;
+ window.StudyAICurriculumData={
+  all:()=>STUDY_DATA,
+  boards:()=>uniq(STUDY_DATA.map(e=>e.board)),
+  grades:b=>uniq(STUDY_DATA.filter(e=>e.board===b).map(e=>e.grade)),
+  subjects:(b,g)=>uniq(STUDY_DATA.filter(e=>e.board===b&&e.grade===g).map(e=>e.subject)),
+  topics:(b,g,s)=>STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s).sort((a,c)=>a.order-c.order)
+ };
+ window.dispatchEvent(new CustomEvent('studyai:curriculum-ready',{detail:{count:STUDY_DATA.length}}));
+}
+publishCurriculum();
 function renderFilters(){
  const boards=uniq(STUDY_DATA.map(e=>e.board)); if(!boards.includes(current.board))current.board=boards[0]; fillSelect($('#board-filter'),boards,current.board);
  const grades=uniq(STUDY_DATA.filter(e=>e.board===current.board).map(e=>e.grade));if(!grades.includes(current.grade))current.grade=grades[0];fillSelect($('#grade-filter'),grades,current.grade);

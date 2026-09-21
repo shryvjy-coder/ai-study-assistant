@@ -541,6 +541,7 @@ input:focus,select:focus,textarea:focus{
 
 /* ---------- Progress ---------- */
 .metric-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:12px;
 }
 .metric-grid article{
@@ -958,6 +959,9 @@ html[data-theme="dark"] .footer{
 }
 
 /* ---------- Responsive ---------- */
+@media(max-width:1180px){
+  .metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 @media(max-width:1120px){
   .main-nav{border:0;background:transparent;padding:0}
   .main-nav a{padding-inline:7px}
@@ -1243,6 +1247,7 @@ body{
 .metric-grid article:nth-child(2)::before{background:var(--accent-gold)}
 .metric-grid article:nth-child(3)::before{background:var(--teal)}
 .metric-grid article:nth-child(4)::before{background:var(--accent-violet)}
+.metric-grid article:nth-child(5)::before{background:var(--accent-mint)}
 
 /* Tool cards get alternating accent bars. */
 .tool-card:nth-child(4n+1)::before{background:var(--accent-orange)}

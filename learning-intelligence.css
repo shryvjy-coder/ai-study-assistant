@@ -1,0 +1,57 @@
+/* StudyAI Learning Intelligence */
+.li-hint-panel{
+  margin:14px 0 4px;
+  padding:12px 14px;
+  border:1px solid var(--line, rgba(24,24,24,.14));
+  border-radius:16px;
+  background:var(--paper-2, rgba(255,255,255,.5));
+}
+.li-hint-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.li-hint-actions span{font-weight:700;margin-right:4px}
+.li-hint-actions button{
+  border:1px solid var(--line, rgba(24,24,24,.16));
+  border-radius:999px;
+  padding:7px 10px;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+  font:inherit;
+}
+.li-hint-actions button:hover,.li-hint-actions button:focus-visible{transform:translateY(-1px)}
+.li-hint-text{margin:10px 0 0;line-height:1.55}
+.li-tutor-panel{
+  margin-top:14px;
+  display:grid;
+  gap:12px;
+}
+.li-foundation,.li-ai{
+  padding:14px;
+  border:1px solid var(--line, rgba(24,24,24,.14));
+  border-radius:16px;
+  background:var(--paper, rgba(255,255,255,.62));
+}
+.li-foundation strong{display:block;margin:4px 0 6px}
+.li-foundation p,.li-ai p{margin:5px 0 10px}
+.li-ai-row{display:flex;gap:8px;align-items:center}
+.li-ai-row input{
+  min-width:0;
+  flex:1;
+  border:1px solid var(--line, rgba(24,24,24,.16));
+  border-radius:12px;
+  padding:10px 12px;
+  background:var(--paper, #fff);
+  color:inherit;
+  font:inherit;
+}
+.li-ai-answer{
+  margin-top:10px;
+  padding:12px;
+  border-radius:12px;
+  background:var(--paper-2, rgba(0,0,0,.04));
+  white-space:pre-wrap;
+  line-height:1.55;
+}
+@media (max-width:720px){
+  .li-ai-row{align-items:stretch;flex-direction:column}
+  .li-ai-row .button{width:100%}
+}

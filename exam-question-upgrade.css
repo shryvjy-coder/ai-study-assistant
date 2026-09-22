@@ -21,3 +21,9 @@
   .exam-typed-form{align-items:stretch;flex-direction:column}
   .exam-typed-form .button{width:100%}
 }
+.exam-format-note{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:.88rem;
+  line-height:1.5;
+}

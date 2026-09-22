@@ -170,7 +170,7 @@ function getMockHistory() {
         </article>`;
     }).join('');
 
-    $$$('[data-start-mock]', grid).forEach(button => button.addEventListener('click', () => openMockSetup(Number(button.dataset.startMock))));
+    $$('[data-start-mock]', grid).forEach(button => button.addEventListener('click', () => openMockSetup(Number(button.dataset.startMock))));
   }
 
   function addExamLab() {
@@ -257,7 +257,7 @@ function getMockHistory() {
     $('#mock-setup-close', dialog)?.addEventListener('click', close);
     $('#mock-setup-cancel', dialog)?.addEventListener('click', close);
     dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
-    $$$('input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
+    $$('input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
     $('#mock-setup-form', dialog)?.addEventListener('submit', event => {
       event.preventDefault();
       mockPreferences = {
@@ -606,7 +606,7 @@ function getMockHistory() {
         </div>
       </section>`;
 
-    $$$('[data-review-question]', pane).forEach(button => button.addEventListener('click', () => {
+    $$('[data-review-question]', pane).forEach(button => button.addEventListener('click', () => {
       exam.currentIndex = Number(button.dataset.reviewQuestion);
       renderCurrentQuestion();
     }));
@@ -743,7 +743,7 @@ function getMockHistory() {
         <button class="button primary" id="mock-next" type="button">${exam.currentIndex===questions.length-1?'Review module →':'Next →'}</button>
       </div>`;
 
-    $$$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
+    $$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
       exam.answers[q.id] = Number(btn.dataset.answer);
       renderCurrentQuestion();
     }));
@@ -766,7 +766,7 @@ function getMockHistory() {
         renderReviewPage();
       }
     });
-    $$$('[data-jump-q]', pane).forEach(btn => btn.addEventListener('click', () => {
+    $$('[data-jump-q]', pane).forEach(btn => btn.addEventListener('click', () => {
       exam.currentIndex=Number(btn.dataset.jumpQ);
       renderCurrentQuestion();
     }));
@@ -1178,11 +1178,11 @@ function getMockHistory() {
     panel.style.bottom = '28px';
     $('#scientific-close')?.addEventListener('click', () => panel.classList.add('hidden'));
     makeGenericDraggable(panel, $('#scientific-drag-handle'));
-    $$$('.scientific-mode-row button', panel).forEach(btn => btn.addEventListener('click', () => {
+    $$('.scientific-mode-row button', panel).forEach(btn => btn.addEventListener('click', () => {
       calcAngleMode = btn.dataset.angle;
-      $$$('.scientific-mode-row button', panel).forEach(b => b.classList.toggle('active', b === btn));
+      $$('.scientific-mode-row button', panel).forEach(b => b.classList.toggle('active', b === btn));
     }));
-    $$$('.scientific-keys button', panel).forEach(btn => btn.addEventListener('click', () => handleScientificKey(btn)));
+    $$('.scientific-keys button', panel).forEach(btn => btn.addEventListener('click', () => handleScientificKey(btn)));
     $('#scientific-expression')?.addEventListener('keydown', event => {
       if (event.key === 'Enter') { event.preventDefault(); evaluateScientific(); }
     });

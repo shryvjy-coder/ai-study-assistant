@@ -10,12 +10,19 @@ import jwt
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, request, send_from_directory, session, url_for
+from flask_compress import Compress
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / '.env')
 
 app = Flask(__name__, static_folder=None)
+app.config.update(
+    COMPRESS_MIN_SIZE=1024,
+    COMPRESS_LEVEL=6,
+    COMPRESS_ALGORITHM=['gzip'],
+)
+Compress(app)
 app.secret_key = os.getenv('SECRET_KEY') or 'dev-change-this-secret-key'
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,

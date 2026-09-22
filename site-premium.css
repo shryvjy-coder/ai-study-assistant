@@ -1581,3 +1581,11 @@ html[data-theme="dark"] .practice-hub-note>span{
   border-color:#70695f;
   background:color-mix(in srgb,var(--accent-gold) 16%,var(--surface));
 }
+
+/* ---------- Rendering performance ---------- */
+@supports (content-visibility:auto){
+  main > section:not(.hero){
+    content-visibility:auto;
+    contain-intrinsic-size:auto 760px;
+  }
+}

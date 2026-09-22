@@ -50,7 +50,7 @@
       a.textContent='Open Practice Studio →';
       practiceHeader.appendChild(a);
     }
-    $$('[data-ps-mode]',section).forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.psMode)));
+    $$$('[data-ps-mode]',section).forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.psMode)));
     ['ps-section','ps-domain','ps-skill','ps-level','ps-count','ps-time'].forEach(id=>{
       $('#'+id).addEventListener('change',()=>{if(id==='ps-section')populateDomains();else if(id==='ps-domain')populateSkills();updatePreview()});
     });
@@ -59,7 +59,7 @@
   }
   function mode(){return $('[data-ps-mode][aria-pressed="true"]')?.dataset.psMode||'diagnostic'}
   function setMode(value){
-    $$('[data-ps-mode]').forEach(b=>{let on=b.dataset.psMode===value;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
+    $$$('[data-ps-mode]').forEach(b=>{let on=b.dataset.psMode===value;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
     $('.ps-builder')?.classList.toggle('ps-custom',value==='custom');
     if(value==='sprint'){$('#ps-count').value='10';$('#ps-time').value='10'}
     else if(value==='diagnostic'){$('#ps-count').value='12';$('#ps-time').value='0'}

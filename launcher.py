@@ -11,12 +11,7 @@ def enhanced_index():
         style_marker
         + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
-        + '\n  <link rel="stylesheet" href="practice-studio.css" />'
         + '\n  <link rel="stylesheet" href="command-center.css" />'
-        + '\n  <link rel="stylesheet" href="personal-ai.css" />'
-        + '\n  <link rel="stylesheet" href="learning-intelligence.css" />'
-        + '\n  <link rel="stylesheet" href="exam-question-upgrade.css" />'
-        + '\n  <link rel="stylesheet" href="help-center.css" />'
     )
     if 'site-premium.css' not in html:
         html = html.replace(style_marker, style_enhancement)
@@ -25,24 +20,20 @@ def enhanced_index():
     # Keep the exact script tag from index.html. Flask's static route serves
     # script.js, while query-string variants can fall through to the SPA HTML
     # route and break JavaScript execution.
-    bridged_script = script_marker
+    bridged_script = '<script defer src="script.js"></script>'
     script_enhancement = (
         bridged_script
-        + '\n<script src="ui-enhancements.js"></script>'
-        + '\n<script src="flashcard-enhancements.js"></script>'
-        + '\n<script src="sat-mock-data.js"></script>'
-        + '\n<script src="sat-exam-tools.js"></script>'
-        + '\n<script src="exam-question-upgrade.js"></script>'
-        + '\n<script src="personal-ai.js"></script>'
-        + '\n<script src="practice-studio.js"></script>'
-        + '\n<script src="command-center.js"></script>'
-        + '\n<script src="smart-study-planner.js"></script>'
-        + '\n<script src="weekly-learning-report.js"></script>'
-        + '\n<script src="sat-study-planner.js"></script>'
-        + '\n<script src="revision-sheets.js"></script>'
-        + '\n<script src="learning-planner.js"></script>'
-        + '\n<script src="learning-intelligence.js"></script>'
-        + '\n<script src="help-center.js"></script>'
+        + '\n<script defer src="ui-enhancements.js"></script>'
+        + '\n<script defer src="flashcard-enhancements.js"></script>'
+        + '\n<script defer src="sat-mock-data.js"></script>'
+        + '\n<script defer src="sat-exam-tools.js"></script>'
+        + '\n<script defer src="performance-loader.js"></script>'
+        + '\n<script defer src="command-center.js"></script>'
+        + '\n<script defer src="smart-study-planner.js"></script>'
+        + '\n<script defer src="weekly-learning-report.js"></script>'
+        + '\n<script defer src="sat-study-planner.js"></script>'
+        + '\n<script defer src="revision-sheets.js"></script>'
+        + '\n<script defer src="learning-planner.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

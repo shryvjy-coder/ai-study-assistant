@@ -165,7 +165,7 @@
         add({id:'lin2',type:'mcq',difficulty:'Challenge',stem:'A line passes through (2, 7) and (8, 25). Which equation represents the line?',options:['y = 3x + 1','y = 2x + 3','y = 3x - 1','y = 4x - 1'],answer:0,explanation:'The slope is (25 - 7)/(8 - 2) = 3. Using (2,7), 7 = 6 + b, so b = 1.'});
       }
       if(topicHas(entry,/polynomial/i)){
-        add({id:'poly1',type:'mcq',difficulty:'Exam standard',stem:'If x - 3 is a factor of p(x) = x³ - 4x² + kx + 6, what is k?',options:['-1','-3','1','3'],answer:1,explanation:'By the factor theorem, p(3)=0: 27 - 36 + 3k + 6 = 0, so -3 + 3k = 0 and k = 1.',overrideAnswer:2});
+        add({id:'poly1',type:'mcq',difficulty:'Exam standard',stem:'If x - 3 is a factor of p(x) = x³ - 4x² + kx + 6, what is k?',options:['-1','-3','1','3'],answer:2,explanation:'By the factor theorem, p(3)=0: 27 - 36 + 3k + 6 = 0, so -3 + 3k = 0 and k = 1.'});
         add({id:'poly2',type:'numeric',difficulty:'Challenge',stem:'The polynomial x² - 9x + c has roots that differ by 3. Enter the value of c.',correctAnswer:'18',acceptedAnswers:['18','18.0'],explanation:'If the roots are r and r+3, then 2r+3=9, so r=3 and the roots are 3 and 6. Their product is c=18.'});
       }
       if(topicHas(entry,/coordinate geometry|three dimensional geometry/i)){

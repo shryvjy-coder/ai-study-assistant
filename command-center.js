@@ -5,25 +5,34 @@
  if(!bridge)return;
  const $=(s,r=document)=>r.querySelector(s);
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- let dialog,input,results,active=0,items=[];
+ let dialog,input,results,active=0,items=[],drawFrame=0;
+ const curriculumIndex=bridge.getCurriculum().map(e=>({type:'Topic',title:e.title,detail:[e.board,e.grade,e.subject].join(' · '),keywords:[e.title,e.board,e.grade,e.subject,e.summary].join(' ').toLowerCase(),run:()=>bridge.openTopic(e.id)}));
  const sections=[
   ['Study library','#study'],['SAT practice','#sat'],['Practice Studio','#practice-studio'],
   ['Flashcards','#flashcards'],['Progress','#progress'],['Planner','#planner'],
   ['Workspace','#workspace'],['Personal AI','#personal-ai'],['Tools','#tools'],['Help & tutorial','#help']
  ];
+ async function go(hash){
+  let feature=null;
+  if(hash==='#personal-ai')feature='personalAI';
+  else if(hash==='#help'||hash.startsWith('#help-'))feature='help';
+  else if(hash==='#practice-studio'||hash==='#practice'||hash==='#sat')feature='practice';
+  if(feature&&window.StudyAIPerformance?.loadFeature)await window.StudyAIPerformance.loadFeature(feature);
+  location.hash=hash;
+  requestAnimationFrame(()=>document.querySelector(hash)?.scrollIntoView({block:'start'}));
+ }
  function index(){
-  const curriculum=bridge.getCurriculum().map(e=>({type:'Topic',title:e.title,detail:[e.board,e.grade,e.subject].join(' · '),keywords:[e.title,e.board,e.grade,e.subject,e.summary].join(' ').toLowerCase(),run:()=>bridge.openTopic(e.id)}));
   const notes=(bridge.exportState().workspaceNotes||[]).map(n=>({type:'Workspace',title:n.title||'Untitled note',detail:n.folder||'General',keywords:[n.title,n.folder,n.source,n.content].join(' ').toLowerCase(),run:()=>{location.hash='#workspace';setTimeout(()=>document.querySelector('[data-note-id="'+CSS.escape(n.id)+'"]')?.click(),80)}}));
-  const nav=sections.filter(([,hash])=>$(hash)).map(([title,hash])=>({type:'Go to',title,detail:hash.slice(1),keywords:(title+' '+hash).toLowerCase(),run:()=>{location.hash=hash}}));
+  const nav=sections.map(([title,hash])=>({type:'Go to',title,detail:hash.slice(1),keywords:(title+' '+hash).toLowerCase(),run:()=>go(hash)}));
   const actions=[
    {type:'Action',title:'Review due flashcards',detail:'Spaced repetition',keywords:'due cards flashcards spaced repetition review',run:()=>bridge.openDue()},
    {type:'Action',title:'Review wrong answers',detail:'Wrong Answer Notebook',keywords:'mistakes wrong answers notebook review',run:()=>bridge.openMistakes()},
    {type:'Action',title:'Build SAT plan',detail:'Planner',keywords:'sat planner exam study plan',run:()=>{location.hash='#sat-study-planner'}},
    {type:'Action',title:'Open Smart Review Queue',detail:'Progress',keywords:'smart review queue weak mastery',run:()=>{location.hash='#smart-review-queue'}},
-   {type:'Action',title:'Start diagnostic practice',detail:'Practice Studio',keywords:'diagnostic assessment practice',run:()=>{window.StudyAIPracticeStudio?.configure?.({mode:'diagnostic',section:'all',count:12})|| (location.hash='#practice-studio')}},
-   {type:'Action',title:'Adaptive SAT practice',detail:'Practice Studio',keywords:'adaptive sat practice weak skill',run:()=>{window.StudyAIPracticeStudio?.configure?.({mode:'adaptive',section:'all',count:10})|| (location.hash='#practice-studio')}}
+   {type:'Action',title:'Start diagnostic practice',detail:'Practice Studio',keywords:'diagnostic assessment practice',run:async()=>{await window.StudyAIPerformance?.loadFeature?.('practice');window.StudyAIPracticeStudio?.configure?.({mode:'diagnostic',section:'all',count:12})|| (location.hash='#practice-studio')}},
+   {type:'Action',title:'Adaptive SAT practice',detail:'Practice Studio',keywords:'adaptive sat practice weak skill',run:async()=>{await window.StudyAIPerformance?.loadFeature?.('practice');window.StudyAIPracticeStudio?.configure?.({mode:'adaptive',section:'all',count:10})|| (location.hash='#practice-studio')}}
   ];
-  return [...actions,...nav,...curriculum,...notes];
+  return [...actions,...nav,...curriculumIndex,...notes];
  }
  function search(query){
   const q=query.trim().toLowerCase(),tokens=q.split(/\s+/).filter(Boolean);
@@ -58,7 +67,7 @@
   document.body.appendChild(dialog);input=$('#cc-input');results=$('#cc-results');
   const button=document.createElement('button');button.type='button';button.className='cc-launch';button.innerHTML='<span>⌕</span><span>Search StudyAI</span><kbd>Ctrl K</kbd>';button.addEventListener('click',open);
   document.body.appendChild(button);
-  input.addEventListener('input',()=>{active=0;draw()});
+  input.addEventListener('input',()=>{active=0;if(drawFrame)cancelAnimationFrame(drawFrame);drawFrame=requestAnimationFrame(()=>{drawFrame=0;draw()})});
   input.addEventListener('keydown',e=>{
    if(e.key==='ArrowDown'){e.preventDefault();active=Math.min(items.length-1,active+1);draw()}
    else if(e.key==='ArrowUp'){e.preventDefault();active=Math.max(0,active-1);draw()}

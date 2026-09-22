@@ -13,7 +13,7 @@ def enhanced_index():
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
         + '\n  <link rel="stylesheet" href="practice-studio.css" />'
         + '\n  <link rel="stylesheet" href="command-center.css" />'
-        + '\n  <link rel="stylesheet" href="personal-ai.css" />'
+        + '\n  <link rel="stylesheet" href="personal-ai.css" />'\n        + '\n  <link rel="stylesheet" href="learning-intelligence.css" />'
     )
     if 'site-premium.css' not in html:
         html = html.replace(style_marker, style_enhancement)
@@ -36,7 +36,7 @@ def enhanced_index():
         + '\n<script src="weekly-learning-report.js"></script>'
         + '\n<script src="sat-study-planner.js"></script>'
         + '\n<script src="revision-sheets.js"></script>'
-        + '\n<script src="learning-planner.js"></script>'
+        + '\n<script src="learning-planner.js"></script>'\n        + '\n<script src="learning-intelligence.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

@@ -37,7 +37,7 @@
       '</div><p class="ps-help" id="ps-time-help">Use 0 for untimed practice. The number of available original questions depends on your filters.</p>',
       '<p class="ps-preview" id="ps-preview" role="status"></p>',
       '<button type="button" class="button primary" id="ps-start">Start practice →</button>',
-      '<p class="ps-disclaimer">Practice results are learning signals, not an official SAT diagnostic or score prediction. The current bank contains 50 original items (12 Reading &amp; Writing and 38 Math). Repeated practice can make scores less representative.</p>',
+      '<p class="ps-disclaimer">Practice results are learning signals, not an official SAT diagnostic or score prediction. The current bank contains '+bank.length+' original multiple-choice items available to Practice Studio. Repeated practice can make scores less representative.</p>',
       '</div>',
       '<article class="ps-runner" id="ps-runner" hidden aria-live="polite"></article></div></div>'
     ].join('');

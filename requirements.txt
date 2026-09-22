@@ -5,3 +5,4 @@ PyJWT[crypto]>=2.8,<3
 requests>=2.32,<3
 pypdf>=5.0,<7
 python-docx>=1.2,<2
+Flask-Compress>=1.25,<2

@@ -62,7 +62,6 @@
 .help-tour-progress span{height:4px;flex:1;border-radius:999px;background:var(--line)}
 .help-tour-progress span.active{background:var(--accent,#ff6b4a)}
 .help-tour-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
-.help-nav-link{font-weight:700}
 @media(max-width:900px){
   .help-layout{grid-template-columns:1fr}.help-index{position:static;display:flex;overflow:auto}
   .help-quickstart{grid-template-columns:1fr}.help-quick-actions{justify-content:flex-start}

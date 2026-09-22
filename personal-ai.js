@@ -91,12 +91,12 @@
           </label>
           <button class="pai-remove" type="button" data-pai-remove="${safe(item.id)}" aria-label="Remove ${safe(item.title)}" title="Remove source">×</button>
         </div>`).join('');
-      $$$('[data-pai-select]',list).forEach(check=>check.addEventListener('change',()=>{
+      $$('[data-pai-select]',list).forEach(check=>check.addEventListener('change',()=>{
         if (check.checked) selected.add(check.dataset.paiSelect);
         else selected.delete(check.dataset.paiSelect);
         renderSources();
       }));
-      $$$('[data-pai-remove]',list).forEach(button=>button.addEventListener('click',()=>{
+      $$('[data-pai-remove]',list).forEach(button=>button.addEventListener('click',()=>{
         sources = sources.filter(item=>item.id!==button.dataset.paiRemove);
         selected.delete(button.dataset.paiRemove);
         persist();

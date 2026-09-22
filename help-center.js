@@ -96,13 +96,6 @@
 
     main.appendChild(section);
 
-    const nav=$('#main-nav');
-    if(nav&&!nav.querySelector('a[href="#help"]')){
-      const link=document.createElement('a');
-      link.href='#help';link.textContent='Help';link.className='help-nav-link';
-      nav.appendChild(link);
-    }
-
     const command=$('#command-dialog form');
     if(command&&!command.querySelector('[data-jump="#help"]')){
       const button=document.createElement('button');

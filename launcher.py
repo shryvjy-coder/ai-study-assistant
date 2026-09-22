@@ -9,7 +9,6 @@ def enhanced_index():
     style_marker = '<link rel="stylesheet" href="cobalt-theme.css" />'
     style_enhancement = (
         style_marker
-        + '\n  <link rel="stylesheet" href="sat-exam-tools.css" />'
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
         + '\n  <link rel="stylesheet" href="command-center.css" />'
     )
@@ -25,8 +24,6 @@ def enhanced_index():
         bridged_script
         + '\n<script defer src="ui-enhancements.js"></script>'
         + '\n<script defer src="flashcard-enhancements.js"></script>'
-        + '\n<script defer src="sat-mock-data.js"></script>'
-        + '\n<script defer src="sat-exam-tools.js"></script>'
         + '\n<script defer src="performance-loader.js"></script>'
         + '\n<script defer src="command-center.js"></script>'
         + '\n<script defer src="smart-study-planner.js"></script>'

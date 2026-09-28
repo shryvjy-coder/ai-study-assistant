@@ -34,6 +34,8 @@
     ['circumscribe','limit the scope of',['prove beyond doubt','restate more simply','make more surprising']]
   ];
 
+  const VERB_WORDS=[WORDS[0],WORDS[1],WORDS[2],WORDS[3],WORDS[4],WORDS[10],WORDS[11],WORDS[13],WORDS[14],WORDS[15]];
+
   function hash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
   function rng(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
   function int(r,a,b){return a+Math.floor(r()*(b-a+1))}
@@ -49,10 +51,10 @@
   function craft(q,k,test,module,r){
     const c=ctx(test,module,k,r), level=q.level, v=k%8;
     if(v===0){
-      const [word,meaning,wrong]=WORDS[(test*5+module*3+k)%WORDS.length];
+      const [word,meaning,wrong]=VERB_WORDS[(test*5+module*3+k)%VERB_WORDS.length];
       const passage=level==='Advanced'
-        ? `The researchers describe their interpretation of the ${c.topic} results as ${word}. Although it accounts for the observed pattern, they stress that an unmeasured factor could alter the conclusion once additional sites are considered.`
-        : `The team's explanation of the ${c.topic} pattern was ${word}: it fit the current evidence, but the researchers expected to revise it if later measurements pointed elsewhere.`;
+        ? `The researchers sought to ${word} their interpretation of the ${c.topic} results by comparing it with evidence from several independent sites. Even so, they stressed that an unmeasured factor could alter the conclusion once additional environments were considered.`
+        : `The researchers sought to ${word} their explanation of the ${c.topic} pattern by comparing it with a second set of measurements.`;
       return make(q,passage,`As used in the text, what does “${word}” most nearly mean?`,meaning,wrong,`In context, “${word}” means ${meaning}.`,r,'Words in Context');
     }
     if(v===1){
@@ -109,9 +111,10 @@
         'To establish that only the larger study should be considered'
       ],'The passage presents averages and exceptions as complementary evidence.',r,'Text Structure and Purpose');
     }
-    const [word,meaning,wrong]=WORDS[(test*9+module*7+k)%WORDS.length];
-    const p=`The review does not dismiss the proposed explanation for ${c.topic}; instead, it seeks to ${word} the claim by identifying the conditions under which the explanation is most likely to hold.`;
-    return make(q,p,'Which choice most logically and precisely completes the text?',word,wrong.map(x=>x.split(' ')[0]),`The context requires a word meaning “${meaning}.”`,r,'Words in Context');
+    const [word,meaning]=VERB_WORDS[(test*9+module*7+k)%VERB_WORDS.length];
+    const other=VERB_WORDS.filter(x=>x[0]!==word).slice((test+module+k)%5,(test+module+k)%5+3).map(x=>x[0]);
+    const p=`The review does not dismiss the proposed explanation for ${c.topic}; instead, it seeks to _____ the claim by identifying the conditions under which the explanation is most likely to hold.`;
+    return make(q,p,'Which choice most logically and precisely completes the text?',word,other,`The context requires a verb meaning “${meaning}.”`,r,'Words in Context');
   }
 
   function info(q,k,test,module,r){

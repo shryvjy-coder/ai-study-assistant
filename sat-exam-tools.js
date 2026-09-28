@@ -31,7 +31,7 @@
   let desmosCalculator = null;
   let desmosLoading = null;
   let calcAngleMode = 'deg';
-  let mockPreferences = {timingMode:'normal', breakMode:'normal'};
+  let mockPreferences = {sectionMode:'both', timingMode:'normal', breakMode:'normal'};
   let selectedMockTest = 1;
   const MOCK_HISTORY_KEY = 'studyai-sat-mock-history-v1';
 
@@ -226,9 +226,18 @@ function getMockHistory() {
     dialog.innerHTML = `
       <form method="dialog" class="mock-setup-shell" id="mock-setup-form">
         <div class="mock-setup-head">
-          <div><span class="small-label">Before you begin</span><h3 id="mock-setup-title">Mock test settings</h3><p>Choose the timing and break setup you want for this attempt.</p></div>
+          <div><span class="small-label">Before you begin</span><h3 id="mock-setup-title">Mock test settings</h3><p>Choose which SAT section(s) you want to take, then set timing and breaks.</p></div>
           <button class="quiet-button" id="mock-setup-close" type="button">Close</button>
         </div>
+
+        <fieldset class="mock-setting-group mock-section-setting">
+          <legend>Sections</legend>
+          <div class="mock-section-choice-grid">
+            <label class="mock-setting-choice"><input type="radio" name="mock-section" value="both" checked><span><strong>Both</strong><small>Reading & Writing, then Math · full 4-module mock</small></span></label>
+            <label class="mock-setting-choice"><input type="radio" name="mock-section" value="rw"><span><strong>Reading & Writing only</strong><small>2 adaptive modules · section score estimate</small></span></label>
+            <label class="mock-setting-choice"><input type="radio" name="mock-section" value="math"><span><strong>Math only</strong><small>2 adaptive modules · section score estimate</small></span></label>
+          </div>
+        </fieldset>
 
         <fieldset class="mock-setting-group">
           <legend>Timing</legend>
@@ -257,10 +266,11 @@ function getMockHistory() {
     $('#mock-setup-close', dialog)?.addEventListener('click', close);
     $('#mock-setup-cancel', dialog)?.addEventListener('click', close);
     dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
-    $$('input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
+    $('input[name="mock-section"], input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
     $('#mock-setup-form', dialog)?.addEventListener('submit', event => {
       event.preventDefault();
       mockPreferences = {
+        sectionMode: $('input[name="mock-section"]:checked', dialog)?.value || 'both',
         timingMode: $('input[name="mock-time"]:checked', dialog)?.value || 'normal',
         breakMode: $('input[name="mock-break"]:checked', dialog)?.value || 'normal'
       };
@@ -275,6 +285,7 @@ function getMockHistory() {
     const dialog = $('#mock-setup-dialog');
     const note = $('#mock-setup-summary', dialog);
     if (!dialog || !note) return;
+    const section = $('input[name="mock-section"]:checked', dialog)?.value || 'both';
     const time = $('input[name="mock-time"]:checked', dialog)?.value || 'normal';
     const breaks = $('input[name="mock-break"]:checked', dialog)?.value || 'normal';
     const t = time === 'normal' ? 'Standard module timing'
@@ -283,7 +294,10 @@ function getMockHistory() {
     const b = breaks === 'normal' ? 'normal scheduled breaks'
       : breaks === 'extended' ? 'extended scheduled breaks'
       : 'pause whenever needed with questions hidden';
-    note.textContent = `${t} · ${b}.`;
+    const s = section === 'rw' ? 'Reading & Writing only'
+      : section === 'math' ? 'Math only'
+      : 'Both sections';
+    note.textContent = `${s} · ${t} · ${b}.`;
   }
 
   function openMockSetup(testNumber = 1) {
@@ -292,8 +306,10 @@ function getMockHistory() {
     const meta = mockData()?.getTestMeta(selectedMockTest);
     const title = $('#mock-setup-title', dialog);
     if (title) title.textContent = meta ? `${meta.title} settings` : 'Mock test settings';
+    const section = $(`input[name="mock-section"][value="${mockPreferences.sectionMode || 'both'}"]`, dialog);
     const time = $(`input[name="mock-time"][value="${mockPreferences.timingMode}"]`, dialog);
     const breaks = $(`input[name="mock-break"][value="${mockPreferences.breakMode}"]`, dialog);
+    if (section) section.checked = true;
     if (time) time.checked = true;
     if (breaks) breaks.checked = true;
     updateMockSetupSummary();
@@ -326,27 +342,37 @@ function getMockHistory() {
     const data = mockData();
     if (!data) return null;
     const testNumber = selectedMockTest;
-    const rw1 = data.getModule(testNumber, 'Reading & Writing', 1, 'mixed');
-    const math1 = data.getModule(testNumber, 'Math', 1, 'mixed');
-    if (rw1.length !== 27 || math1.length !== 22) return null;
+    const sectionMode = mockPreferences.sectionMode || 'both';
+    const wantsRW = sectionMode === 'both' || sectionMode === 'rw';
+    const wantsMath = sectionMode === 'both' || sectionMode === 'math';
+    const rw1 = wantsRW ? data.getModule(testNumber, 'Reading & Writing', 1, 'mixed') : [];
+    const math1 = wantsMath ? data.getModule(testNumber, 'Math', 1, 'mixed') : [];
+    if ((wantsRW && rw1.length !== 27) || (wantsMath && math1.length !== 22)) return null;
+
+    const phases = [];
+    if (wantsRW) phases.push(
+      {section:'Reading & Writing',module:1},
+      {section:'Reading & Writing',module:2}
+    );
+    if (wantsMath) phases.push(
+      {section:'Math',module:1},
+      {section:'Math',module:2}
+    );
+
+    const modules = {};
+    if (wantsRW) modules['Reading & Writing:1'] = rw1;
+    if (wantsMath) modules['Math:1'] = math1;
 
     return {
       testNumber,
       meta:data.getTestMeta(testNumber),
+      sectionMode,
       timingMode:mockPreferences.timingMode || 'normal',
       breakMode:mockPreferences.breakMode || 'normal',
-      modules:{
-        'Reading & Writing:1':rw1,
-        'Math:1':math1
-      },
+      modules,
       routes:{},
       phase:0,
-      phases:[
-        {section:'Reading & Writing',module:1},
-        {section:'Reading & Writing',module:2},
-        {section:'Math',module:1},
-        {section:'Math',module:2}
-      ],
+      phases,
       currentIndex:0,
       answers:{},
       flagged:new Set(),
@@ -452,7 +478,7 @@ function getMockHistory() {
   function startMockExam() {
     exam = buildInitialExam();
     if (!exam) {
-      showStudyToast('The full mock-test data could not load. Restart StudyAI and try again.');
+      showStudyToast('The selected mock-test data could not load. Restart StudyAI and try again.');
       return;
     }
     ensureExamShell();

@@ -190,7 +190,7 @@ function getMockHistory() {
         </div>
         <span class="small-label">StudyAI exam lab</span>
         <h2>Practice Tests</h2>
-        <p>Four full-length adaptive SAT simulations, built to feel focused and exam-like without copying Bluebook's interface.</p>
+        <p>Four adaptive SAT simulations. Before each attempt, choose Reading & Writing only, Math only, or both sections.</p>
       </div>
 
       <div class="mock-score-outlook" id="mock-score-outlook"></div>
@@ -291,7 +291,8 @@ function getMockHistory() {
     const t = time === 'normal' ? 'Standard module timing'
       : time === 'extra50' ? '50% extra module time'
       : '100% extra module time';
-    const b = breaks === 'normal' ? 'normal scheduled breaks'
+    const b = breaks === 'normal'
+      ? (section === 'both' ? '10-minute break between sections' : 'no scheduled break between the two modules')
       : breaks === 'extended' ? 'extended scheduled breaks'
       : 'pause whenever needed with questions hidden';
     const s = section === 'rw' ? 'Reading & Writing only'

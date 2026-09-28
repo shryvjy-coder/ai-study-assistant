@@ -168,14 +168,16 @@
     if(section!=='Math') return qs;
     const r=rng(hash(`math-ref-v4-${test}-${module}-${route}`));
     const counts={};
+    const sprSlots=new Set([2,6,10,15,20]);
     return qs.map((q,i)=>{
-      const d=q.domain;
+      const working={...q,format:sprSlots.has(i)?'spr':'mcq'};
+      const d=working.domain;
       const k=counts[d]||0; counts[d]=k+1;
-      if(d==='Algebra') return algebra(q,k+(module-1)*3+Number(test),q.level,r);
-      if(d==='Advanced Math') return advanced(q,k+(module-1)*2+Number(test),q.level,r);
-      if(d==='Problem-Solving and Data Analysis') return psda(q,k+Number(test)+module,q.level,r);
-      if(d==='Geometry and Trigonometry') return geo(q,k+Number(test)+module,q.level,r);
-      return q;
+      if(d==='Algebra') return algebra(working,k+(module-1)*3+Number(test),working.level,r);
+      if(d==='Advanced Math') return advanced(working,k+(module-1)*2+Number(test),working.level,r);
+      if(d==='Problem-Solving and Data Analysis') return psda(working,k+Number(test)+module,working.level,r);
+      if(d==='Geometry and Trigonometry') return geo(working,k+Number(test)+module,working.level,r);
+      return working;
     });
   };
   bank.version=4;

@@ -18,9 +18,19 @@
       return {...q,id:q.id+'-ref4',skill,passage:'',stem,options:[],answer:null,correctAnswer:String(correct),acceptedAnswers:[String(correct)],explanation};
     }
     const vals=[String(correct),...wrong.map(String)].filter((v,i,a)=>a.indexOf(v)===i);
-    let bump=1; while(vals.length<4) vals.push(String(Number(correct)+bump++));
+    let bump=1;
+    while(vals.length<4){
+      let candidate;
+      const numeric=Number(correct);
+      const parts=String(correct).split('/');
+      if(Number.isFinite(numeric)) candidate=String(numeric+bump);
+      else if(parts.length===2 && Number.isFinite(Number(parts[0])) && Number.isFinite(Number(parts[1]))) candidate=String(Number(parts[0])+bump)+'/'+parts[1];
+      else candidate='The information is insufficient to determine a unique value ('+bump+').';
+      if(!vals.includes(candidate)) vals.push(candidate);
+      bump++;
+    }
     const options=shuf(r,vals.slice(0,4));
-    return {...q,id:q.id+'-ref4',skill,passage:'',stem,options,answer:options.indexOf(String(correct)),explanation};
+    return {...q,id:q.id+'-ref4',skill,passage:'',stem,options,answer:options.indexOf(String(correct)),correctAnswer:null,acceptedAnswers:[],explanation,format:'mcq'};
   }
 
   function algebra(q,k,level,r){

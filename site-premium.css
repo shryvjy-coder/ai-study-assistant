@@ -1584,7 +1584,9 @@ html[data-theme="dark"] .practice-hub-note>span{
 
 /* ---------- Rendering performance ---------- */
 @supports (content-visibility:auto){
-  main > section:not(.hero){
+  /* Keep #sat out of layout/paint containment: the SAT mock places a fixed
+     fullscreen exam shell inside that section, and containment can clip it. */
+  main > section:not(.hero):not(#sat){
     content-visibility:auto;
     contain-intrinsic-size:auto 760px;
   }

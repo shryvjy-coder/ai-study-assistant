@@ -8,7 +8,7 @@
   const FEATURES={
     practice:{
       css:['sat-exam-tools.css','practice-studio.css','learning-intelligence.css','exam-question-upgrade.css'],
-      scripts:['sat-mock-data.js','sat-mock-quality-v2.js','sat-exam-tools.js','exam-question-upgrade.js','practice-studio.js','learning-intelligence.js']
+      scripts:['sat-mock-data.js','sat-mock-quality-v2.js','sat-mock-difficulty-v3.js','sat-exam-tools.js','exam-question-upgrade.js','practice-studio.js','learning-intelligence.js']
     },
     personalAI:{
       css:['personal-ai.css'],

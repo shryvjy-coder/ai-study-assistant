@@ -266,7 +266,7 @@ function getMockHistory() {
     $('#mock-setup-close', dialog)?.addEventListener('click', close);
     $('#mock-setup-cancel', dialog)?.addEventListener('click', close);
     dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
-    $('input[name="mock-section"], input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
+    $$('input[name="mock-section"], input[name="mock-time"], input[name="mock-break"]', dialog).forEach(input => input.addEventListener('change', updateMockSetupSummary));
     $('#mock-setup-form', dialog)?.addEventListener('submit', event => {
       event.preventDefault();
       mockPreferences = {
@@ -799,7 +799,7 @@ function getMockHistory() {
         <button class="button primary" id="mock-next" type="button">${exam.currentIndex===questions.length-1?'Review module →':'Next →'}</button>
       </div>`;
 
-    $('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
+    $$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
       const index = Number(btn.dataset.answer);
       const choices = eliminatedChoices(q.id);
       if (choices.has(index)) {
@@ -809,7 +809,7 @@ function getMockHistory() {
       exam.answers[q.id] = index;
       renderCurrentQuestion();
     }));
-    $('[data-eliminate]', pane).forEach(btn => btn.addEventListener('click', event => {
+    $$('[data-eliminate]', pane).forEach(btn => btn.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       toggleEliminatedChoice(q.id, Number(btn.dataset.eliminate));

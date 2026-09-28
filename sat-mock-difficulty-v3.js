@@ -23,7 +23,7 @@
     return {...q,id:q.id+'-v3',skill,stem,options:[],answer:null,correctAnswer:String(correct),acceptedAnswers:[String(correct),...accepted.map(String)],explanation,passage:'',format:'spr'};
   }
 
-  function harderMath(q,index,r){
+  function harderMath(q,index,r,test,module){
     if(q.level!=='Advanced')return q;
     const isSpr=q.format==='spr';
 
@@ -101,7 +101,7 @@
           return isSpr?spr(q,stem,correct,exp,[],'Nonlinear Functions'):mcq(q,stem,correct,[gx,a*x-b,correct+b],exp,r,'Nonlinear Functions');
         }
         default:{
-          const a=int(r,2,5), b=2*a*int(r,2,6), correct=b*b/(4*a);
+          const a=int(r,2,5)+(module===2?1:0), b=2*a*(int(r,2,6)+(module===2?1:0)), correct=b*b/(4*a);
           const stem=`For what value of k does ${a}x²+${b}x+k=0 have exactly one real solution?`;
           const exp=`Exactly one real solution requires b²-4ak=0, so k=${correct}.`;
           return isSpr?spr(q,stem,correct,exp,[],'Nonlinear Equations in One Variable'):mcq(q,stem,correct,[correct/2,correct*2,b/a],exp,r,'Nonlinear Equations in One Variable');
@@ -172,7 +172,7 @@
     return q;
   }
 
-  function harderRW(q,index,r){
+  function harderRW(q,index,r,test,module){
     if(q.level!=='Advanced')return q;
 
     if(q.domain==='Information and Ideas' && index%3===0){
@@ -191,8 +191,9 @@
     }
 
     if(q.domain==='Expression of Ideas' && index%2===0){
-      const passage='A student wants to emphasize a contrast between two findings.\n• In dry conditions, the intervention increased output by 18%.\n• In humid conditions, the intervention changed output by only 2%.\n• The same measurement procedure was used in both conditions.';
-      const correct='Although the intervention increased output by 18% in dry conditions, it changed output by only 2% in humid conditions.';
+      const dry=16+test+module, humid=2+((test+module)%3);
+      const passage=`A student wants to emphasize a contrast between two findings.\n• In dry conditions, the intervention increased output by ${dry}%.\n• In humid conditions, the intervention changed output by only ${humid}%.\n• The same measurement procedure was used in both conditions.`;
+      const correct=`Although the intervention increased output by ${dry}% in dry conditions, it changed output by only ${humid}% in humid conditions.`;
       const options=shuf(r,[correct,'The same measurement procedure was used in dry and humid conditions.','Researchers tested an intervention under two environmental conditions.','The intervention was measured using percentages in both conditions.']);
       return {...q,id:q.id+'-v3',passage,stem:'Which choice most effectively uses information from the notes to accomplish the student’s goal?',options,answer:options.indexOf(correct),skill:'Rhetorical Synthesis',explanation:'The correct choice directly foregrounds the contrast in effect size.'};
     }
@@ -204,8 +205,8 @@
     const qs=previous(test,section,module,route);
     const r=rng(hash(`mock-difficulty-v3-${test}-${section}-${module}-${route}`));
     return section==='Math'
-      ? qs.map((q,i)=>harderMath(q,i,r))
-      : qs.map((q,i)=>harderRW(q,i,r));
+      ? qs.map((q,i)=>harderMath(q,i,r,test,module))
+      : qs.map((q,i)=>harderRW(q,i,r,test,module));
   };
   bank.version=3;
 })();

@@ -58,7 +58,7 @@
       return make(q,passage,`As used in the text, what does “${word}” most nearly mean?`,meaning,wrong,`In context, “${word}” means ${meaning}.`,r,'Words in Context');
     }
     if(v===1){
-      const passage=`Researchers studying ${c.topic} initially expected the strongest effect at the most heavily modified sites. The largest change, however, appeared at moderately modified sites. The researchers then proposed that extreme modification may remove a condition needed for the effect to occur.`;
+      const passage=`Researchers studying ${c.topic} initially expected the strongest effect at the most heavily modified sites. To make sites more comparable, the team used the same measurement schedule and excluded locations with incomplete baseline records. The largest change, however, appeared at moderately modified sites, while several heavily modified sites changed little. The researchers then proposed that extreme modification may remove a condition needed for the effect to occur.`;
       const correct='It introduces a result that leads the researchers to revise their initial expectation.';
       return make(q,passage,'Which choice best describes the function of the second sentence in the text as a whole?',correct,[
         'It defines a technical term required to understand the first sentence.',
@@ -85,7 +85,7 @@
       ],'Text 2 challenges the strength of the inference rather than denying the possible rise in participation.',r,'Cross-Text Connections');
     }
     if(v===4){
-      const p=`For decades, explanations of ${c.topic} emphasized a single dominant cause. Recent work has not discarded that explanation; instead, it has shown that the cause interacts with local conditions in ways earlier models did not represent.`;
+      const p=`For decades, explanations of ${c.topic} emphasized a single dominant cause, an account supported by broad regional trends. Yet that account left several local exceptions unexplained. Recent work has not discarded the original explanation; instead, it has shown that the cause interacts with local conditions in ways earlier models did not represent, allowing the newer framework to explain both the broad trend and many of the exceptions.`;
       const correct='It reframes an older explanation by adding a qualification rather than rejecting it.';
       return make(q,p,'Which choice best describes the overall structure of the text?',correct,[
         'It replaces an older explanation with an unrelated one.',
@@ -94,7 +94,7 @@
       ],'The newer work narrows and qualifies the older account.',r,'Text Structure and Purpose');
     }
     if(v===5){
-      const p=`The archive on ${c.topic} is extensive, but surviving records are unevenly distributed across decades. A historian therefore treats apparent changes in activity cautiously: a decade with fewer surviving documents may reflect preservation rather than a real decline.`;
+      const p=`The archive on ${c.topic} is extensive, but surviving records are unevenly distributed across decades. Documents from some periods were stored in institutions with unusually strong preservation practices, whereas records from other periods were dispersed among smaller collections. A historian therefore treats apparent changes in activity cautiously: a decade with fewer surviving documents may reflect preservation rather than a real decline in the activity being studied.`;
       const correct='It explains why an apparent archival pattern may not correspond to an actual historical change.';
       return make(q,p,'What is the main function of the second sentence?',correct,[
         'It identifies the decade in which activity was greatest.',
@@ -103,7 +103,7 @@
       ],'The sentence identifies a limitation that complicates interpretation of the archive.',r,'Text Structure and Purpose');
     }
     if(v===6){
-      const p=`One group investigating ${c.topic} emphasizes average outcomes across many sites. Another focuses on rare sites where the intervention failed entirely. Taken together, the studies suggest that a typical effect and the conditions under which that effect breaks down are both informative.`;
+      const p=`One group investigating ${c.topic} emphasizes average outcomes across many sites, arguing that a broad sample provides the best estimate of the intervention's typical effect. Another group focuses on the smaller number of sites where the intervention failed entirely and identifies conditions those sites share. The two approaches answer different questions: one estimates what usually happens, while the other examines when the usual pattern may not apply. Taken together, the studies suggest that averages and exceptions are both informative.`;
       const correct='To argue that average outcomes and unusual failures can provide complementary information.';
       return make(q,p,'Which choice best states the purpose of the text?',correct,[
         'To show that the groups used identical experimental methods',
@@ -120,7 +120,7 @@
   function info(q,k,test,module,r){
     const c=ctx(test,module,k,r), v=k%7;
     if(v===0){
-      const p=`A team studying ${c.topic} compared sites before and after a policy change. Average response increased at most sites, but the largest increases occurred where baseline values had been lowest. Because sites were not randomly assigned to receive the policy, the researchers avoided claiming that the policy alone caused the change.`;
+      const p=`A team studying ${c.topic} compared sites before and after a policy change. Average response increased at most sites, but the largest increases occurred where baseline values had been lowest. Those low-baseline sites also differed from the other sites in funding and staffing, two factors that could independently affect the measured response. Because sites were not randomly assigned to receive the policy, the researchers avoided claiming that the policy alone caused the change, even though the pattern was consistent with a beneficial effect.`;
       const correct='The policy was associated with improvement, especially at low-baseline sites, but the design does not establish that the policy was the sole cause.';
       return make(q,p,'Which choice best states the main idea of the text?',correct,[
         'The policy had no measurable association with the response.',
@@ -129,7 +129,7 @@
       ],'The text reports an association while explicitly limiting causal interpretation.',r,'Central Ideas and Details');
     }
     if(v===1){
-      const p=`Researchers predicted that a feature of ${c.topic} would improve performance. Sites with the feature averaged ${c.b} units, while matched sites without it averaged ${c.a} units. The feature was also more common at newer sites, which differed from older sites in several other ways.`;
+      const p=`Researchers predicted that a feature of ${c.topic} would improve performance. Sites with the feature averaged ${c.b} units, while matched sites without it averaged ${c.a} units. The matching procedure accounted for site size and region but not for site age. The feature was more common at newer sites, and those newer sites also differed from older sites in equipment and staffing. Thus, the observed gap is consistent with the prediction but may not be attributable to the feature alone.`;
       const correct='The results are consistent with the prediction, but differences associated with site age could partly explain the observed gap.';
       return make(q,p,'Which conclusion is most strongly supported by the text?',correct,[
         'The feature must reduce performance at newer sites.',
@@ -175,7 +175,7 @@
         'The no-training group improved more than Group A.'
       ],'The relevant comparison is the amount of change, not merely the final score.',r,'Command of Evidence: Quantitative');
     }
-    const p=`A literary critic notes that a novel about ${c.topic} repeatedly shifts from broad descriptions of a city to brief observations by a single character. The critic argues that these shifts place large social changes beside their immediate effects on individual lives.`;
+    const p=`A literary critic notes that a novel about ${c.topic} repeatedly shifts from broad descriptions of a city to brief observations by a single character. The city passages describe changes in institutions, work, and public space, while the character's observations register small disruptions in routine and relationships. According to the critic, neither scale simply illustrates the other. Instead, the repeated movement between them places large social changes beside their immediate effects on individual lives.`;
     const correct='The changes in narrative scale help connect social conditions with personal experience.';
     return make(q,p,'Which choice best states the critic’s main point?',correct,[
       'The novel avoids discussing social change directly.',

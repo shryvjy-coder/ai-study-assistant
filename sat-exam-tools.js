@@ -376,6 +376,7 @@ function getMockHistory() {
       phases,
       currentIndex:0,
       answers:{},
+      eliminated:{},
       flagged:new Set(),
       completed:[],
       remaining:0,
@@ -735,6 +736,23 @@ function getMockHistory() {
     return Number(value) === Number(q.answer);
   }
 
+  function eliminatedChoices(questionId) {
+    if (!exam) return new Set();
+    const values = exam.eliminated?.[questionId];
+    return new Set(Array.isArray(values) ? values.map(Number) : []);
+  }
+
+  function toggleEliminatedChoice(questionId, index) {
+    if (!exam) return;
+    const choices = eliminatedChoices(questionId);
+    if (choices.has(index)) choices.delete(index);
+    else {
+      choices.add(index);
+      if (Number(exam.answers?.[questionId]) === Number(index)) delete exam.answers[questionId];
+    }
+    exam.eliminated[questionId] = [...choices];
+  }
+
   function renderCurrentQuestion() {
     if (!exam) return;
     closeFormulaSheet();
@@ -743,10 +761,21 @@ function getMockHistory() {
     const pane = $('#mock-question-pane');
     if (!pane || !q) return;
     const answer = exam.answers[q.id];
+    const eliminated = eliminatedChoices(q.id);
     const flagged = exam.flagged.has(q.id);
     const response = q.format === 'spr'
       ? `<div class="mock-spr-wrap"><label for="mock-spr-answer">Your answer</label><input id="mock-spr-answer" class="mock-spr-answer" inputmode="decimal" autocomplete="off" value="${escapeHtml(answer ?? '')}" placeholder="Enter answer"><small>Student-produced response</small></div>`
-      : `<div class="mock-options">${q.options.map((option,index)=>`<button type="button" class="mock-option ${Number(answer)===index?'selected':''}" data-answer="${index}"><span>${String.fromCharCode(65+index)}</span><strong>${escapeHtml(option)}</strong></button>`).join('')}</div>`;
+      : `<div class="mock-options">${q.options.map((option,index)=>{
+          const struck = eliminated.has(index);
+          return `<div class="mock-option-row ${struck?'eliminated':''}">
+            <button type="button" class="mock-option ${Number(answer)===index?'selected':''} ${struck?'struck':''}" data-answer="${index}" aria-disabled="${struck?'true':'false'}">
+              <span>${String.fromCharCode(65+index)}</span><strong>${escapeHtml(option)}</strong>
+            </button>
+            <button type="button" class="mock-eliminate ${struck?'active':''}" data-eliminate="${index}" aria-pressed="${struck?'true':'false'}" aria-label="${struck?'Restore':'Strike out'} option ${String.fromCharCode(65+index)}" title="${struck?'Restore option':'Strike out option'}">
+              <span aria-hidden="true">${struck?'↶':'S̶'}</span><small>${struck?'Restore':'Strike out'}</small>
+            </button>
+          </div>`;
+        }).join('')}</div>`;
 
     pane.innerHTML = `
       <div class="mock-progress-row">
@@ -770,8 +799,20 @@ function getMockHistory() {
         <button class="button primary" id="mock-next" type="button">${exam.currentIndex===questions.length-1?'Review module →':'Next →'}</button>
       </div>`;
 
-    $$('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
-      exam.answers[q.id] = Number(btn.dataset.answer);
+    $('.mock-option', pane).forEach(btn => btn.addEventListener('click', () => {
+      const index = Number(btn.dataset.answer);
+      const choices = eliminatedChoices(q.id);
+      if (choices.has(index)) {
+        choices.delete(index);
+        exam.eliminated[q.id] = [...choices];
+      }
+      exam.answers[q.id] = index;
+      renderCurrentQuestion();
+    }));
+    $('[data-eliminate]', pane).forEach(btn => btn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleEliminatedChoice(q.id, Number(btn.dataset.eliminate));
       renderCurrentQuestion();
     }));
     $('#mock-spr-answer', pane)?.addEventListener('input', event => {

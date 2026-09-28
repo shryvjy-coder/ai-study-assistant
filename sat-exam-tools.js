@@ -882,19 +882,26 @@ function getMockHistory() {
     const allQuestions = exam.phases.flatMap(phase => exam.modules[`${phase.section}:${phase.module}`] || []);
     const rwQuestions = allQuestions.filter(q => q.section === 'Reading & Writing');
     const mathQuestions = allQuestions.filter(q => q.section === 'Math');
-    const rwRouteKey = exam.routes['Reading & Writing'] || 'medium';
-    const mathRouteKey = exam.routes['Math'] || 'medium';
-    const rwEstimate = estimateSectionScore(rwQuestions, 'Reading & Writing', rwRouteKey);
-    const mathEstimate = estimateSectionScore(mathQuestions, 'Math', mathRouteKey);
-    const totalScore = rwEstimate.score + mathEstimate.score;
-    const totalLow = rwEstimate.low + mathEstimate.low;
-    const totalHigh = rwEstimate.high + mathEstimate.high;
+    const hasRW = rwQuestions.length > 0;
+    const hasMath = mathQuestions.length > 0;
+    const isFullMock = hasRW && hasMath;
+    const rwRouteKey = hasRW ? (exam.routes['Reading & Writing'] || 'medium') : null;
+    const mathRouteKey = hasMath ? (exam.routes['Math'] || 'medium') : null;
+    const rwEstimate = hasRW ? estimateSectionScore(rwQuestions, 'Reading & Writing', rwRouteKey) : null;
+    const mathEstimate = hasMath ? estimateSectionScore(mathQuestions, 'Math', mathRouteKey) : null;
+    const selectedEstimate = hasRW && !hasMath ? rwEstimate : mathEstimate;
+    const displayScore = isFullMock ? rwEstimate.score + mathEstimate.score : selectedEstimate.score;
+    const displayLow = isFullMock ? rwEstimate.low + mathEstimate.low : selectedEstimate.low;
+    const displayHigh = isFullMock ? rwEstimate.high + mathEstimate.high : selectedEstimate.high;
     const overallAnswered = allQuestions.filter(answerPresent).length;
+    const pretestCount = allQuestions.filter(q => q.pretest).length;
+    const operationalTotal = (rwEstimate?.total || 0) + (mathEstimate?.total || 0);
+    const correctTotal = (rwEstimate?.correct || 0) + (mathEstimate?.correct || 0);
 
-    const rwRoute = mockData()?.routeLabel(rwRouteKey) || '';
-    const mathRoute = mockData()?.routeLabel(mathRouteKey) || '';
-    const percent = Math.round((rwEstimate.correct + mathEstimate.correct) / Math.max(1, rwEstimate.total + mathEstimate.total) * 100);
-    saveMockHistory(exam.testNumber, {percent, estimatedScore:totalScore});
+    const rwRoute = hasRW ? (mockData()?.routeLabel(rwRouteKey) || '') : '';
+    const mathRoute = hasMath ? (mockData()?.routeLabel(mathRouteKey) || '') : '';
+    const percent = Math.round(correctTotal / Math.max(1, operationalTotal) * 100);
+    if (isFullMock) saveMockHistory(exam.testNumber, {percent, estimatedScore:displayScore});
     // Feed only answered, scored items into the shared mastery + mistake engine.
     // Unanswered and unscored pretest questions must not be labeled wrong.
     try {
@@ -909,50 +916,70 @@ function getMockHistory() {
     }
     renderMockCards();
 
+    const scopeLabel = isFullMock ? 'SAT' : hasRW ? 'Reading & Writing section' : 'Math section';
+    const sectionCards = [
+      hasRW ? `
+        <article>
+          <span>Reading & Writing</span>
+          <strong>${rwEstimate.score}</strong>
+          <small>Range ${rwEstimate.low}–${rwEstimate.high} · ${escapeHtml(rwRoute)}</small>
+          <p>${rwEstimate.correct}/${rwEstimate.total} operational questions correct</p>
+        </article>` : '',
+      hasMath ? `
+        <article>
+          <span>Math</span>
+          <strong>${mathEstimate.score}</strong>
+          <small>Range ${mathEstimate.low}–${mathEstimate.high} · ${escapeHtml(mathRoute)}</small>
+          <p>${mathEstimate.correct}/${mathEstimate.total} operational questions correct</p>
+        </article>` : ''
+    ].join('');
+
+    const methodRows = [
+      hasRW ? `<p><strong>Reading & Writing:</strong> ${escapeHtml(scoreExplanation(rwEstimate))}.</p>` : '',
+      hasMath ? `<p><strong>Math:</strong> ${escapeHtml(scoreExplanation(mathEstimate))}.</p>` : ''
+    ].join('');
+    const routeSummary = [
+      hasRW ? `R&W ${rwRouteKey.toUpperCase()}` : '',
+      hasMath ? `Math ${mathRouteKey.toUpperCase()}` : ''
+    ].filter(Boolean).join(' · ');
+
     if (pane) pane.innerHTML = `
       <div class="mock-results sat-score-report">
-        <span class="small-label">${escapeHtml(exam.meta?.title || 'Mock test')} complete</span>
+        <span class="small-label">${escapeHtml(exam.meta?.title || 'Mock test')} · ${escapeHtml(scopeLabel)} complete</span>
         <div class="estimated-score-hero">
           <div>
-            <small>StudyAI estimated SAT score</small>
-            <strong>${totalScore}</strong>
-            <span>Estimated range ${totalLow}–${totalHigh}</span>
+            <small>StudyAI estimated ${isFullMock ? 'SAT score' : scopeLabel + ' score'}</small>
+            <strong>${displayScore}</strong>
+            <span>Estimated range ${displayLow}–${displayHigh}</span>
           </div>
-          <p>This is an evidence-based practice estimate, not an official College Board score. College Board uses calibrated Item Response Theory parameters that are not publicly available.</p>
+          <p>${isFullMock
+            ? 'This is an evidence-based practice estimate, not an official College Board score. College Board uses calibrated Item Response Theory parameters that are not publicly available.'
+            : 'This is a section-only 200–800 practice estimate. It is not converted into a 400–1600 total because the other SAT section was not taken.'}</p>
         </div>
 
-        <div class="score-section-grid">
-          <article>
-            <span>Reading & Writing</span>
-            <strong>${rwEstimate.score}</strong>
-            <small>Range ${rwEstimate.low}–${rwEstimate.high} · ${escapeHtml(rwRoute)}</small>
-            <p>${rwEstimate.correct}/${rwEstimate.total} operational questions correct</p>
-          </article>
-          <article>
-            <span>Math</span>
-            <strong>${mathEstimate.score}</strong>
-            <small>Range ${mathEstimate.low}–${mathEstimate.high} · ${escapeHtml(mathRoute)}</small>
-            <p>${mathEstimate.correct}/${mathEstimate.total} operational questions correct</p>
-          </article>
+        <div class="score-section-grid ${isFullMock ? '' : 'single'}">
+          ${sectionCards}
         </div>
 
         <div class="score-method-card">
           <h4>Why this estimate landed here</h4>
-          <p><strong>Reading & Writing:</strong> ${escapeHtml(scoreExplanation(rwEstimate))}.</p>
-          <p><strong>Math:</strong> ${escapeHtml(scoreExplanation(mathEstimate))}.</p>
-          <p>The estimator excludes all 8 pretest questions, treats blanks as incorrect, models Foundation, Medium, and Advanced items at different difficulty levels, and uses the adaptive Module 2 route as a small difficulty adjustment. The resulting ability estimate is converted to the SAT's 200–800 section scale and rounded to the nearest 10 points.</p>
+          ${methodRows}
+          <p>The estimator excludes ${pretestCount} pretest question${pretestCount===1?'':'s'}, treats blanks as incorrect, models Foundation, Medium, and Advanced items at different difficulty levels, and uses the adaptive Module 2 route as a small difficulty adjustment. Each completed section is converted to the SAT's 200–800 section scale and rounded to the nearest 10 points.</p>
         </div>
 
         <div class="mock-result-grid">
-          <div><span>Operational accuracy</span><strong>${percent}%</strong><small>${rwEstimate.correct + mathEstimate.correct}/${rwEstimate.total + mathEstimate.total} scored items</small></div>
-          <div><span>Questions answered</span><strong>${overallAnswered}/98</strong><small>8 pretest items were unscored</small></div>
-          <div><span>Adaptive routes</span><strong>${rwRouteKey.toUpperCase()} / ${mathRouteKey.toUpperCase()}</strong><small>R&W / Math</small></div>
+          <div><span>Operational accuracy</span><strong>${percent}%</strong><small>${correctTotal}/${operationalTotal} scored items</small></div>
+          <div><span>Questions answered</span><strong>${overallAnswered}/${allQuestions.length}</strong><small>${pretestCount} pretest item${pretestCount===1?' was':'s were'} unscored</small></div>
+          <div><span>Adaptive route${isFullMock?'s':''}</span><strong>${escapeHtml(routeSummary)}</strong><small>${isFullMock?'Both sections':'Selected section only'}</small></div>
         </div>
+
+        ${!isFullMock ? '<p class="mock-section-only-note">Section-only attempts still update your StudyAI mastery and Wrong Answer Notebook, but they do not count as a completed full mock in your full-test score outlook.</p>' : ''}
 
         <div class="button-row"><button class="button primary" id="mock-again" type="button">Retake this test</button><button class="button secondary" id="mock-done" type="button">Choose another test</button></div>
       </div>`;
     $('#mock-timer').textContent = 'Done';
     $('#mock-pause')?.classList.add('hidden');
+    $('#mock-formula-btn')?.classList.add('hidden');
     $('#mock-desmos-btn')?.classList.add('hidden');
     $('#mock-again')?.addEventListener('click', () => {
       const n = exam.testNumber;

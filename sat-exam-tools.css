@@ -102,6 +102,15 @@ html[data-theme="dark"] .desmos-mount{background:#fff}
   font-weight:850;
   color:var(--ink);
 }
+.mock-section-choice-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+.mock-section-choice-grid .mock-setting-choice{
+  height:100%;
+}
+
 .mock-setting-choice{
   display:grid;
   grid-template-columns:auto 1fr;
@@ -943,4 +952,18 @@ html[data-theme="dark"] .mock-test-card-v2:hover{
   .mock-test-card-v2{
     box-shadow:5px 6px 0 color-mix(in srgb,var(--ink) 82%,transparent);
   }
+}
+
+.score-section-grid.single{grid-template-columns:1fr}
+.mock-section-only-note{
+  margin:14px 0 0;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--blue-soft);
+  color:var(--muted);
+  line-height:1.55;
+}
+@media(max-width:720px){
+  .mock-section-choice-grid{grid-template-columns:1fr}
 }

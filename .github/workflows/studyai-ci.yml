@@ -26,7 +26,7 @@ jobs:
           for file in *.js; do
             node --check "$file"
           done
-          node --check tests/learning-integration.cjs
+          node --check tests/learning-integration.cjs\n          node --check tests/product-experience.cjs
 
   browser:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
       - run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
-      - run: node tests/learning-integration.cjs
+      - run: node tests/learning-integration.cjs\n      - run: node tests/product-experience.cjs

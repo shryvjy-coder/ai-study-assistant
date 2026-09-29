@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: "22"
       - run: pip install -r requirements.txt
-      - run: python -m py_compile app.py launcher.py personal_ai.py
+      - run: python -m py_compile app.py launcher.py personal_ai.py production_preflight.py
       - name: JavaScript syntax
         shell: bash
         run: |
@@ -26,7 +26,8 @@ jobs:
           for file in *.js; do
             node --check "$file"
           done
-          node --check tests/learning-integration.cjs\n          node --check tests/product-experience.cjs
+          node --check tests/learning-integration.cjs
+          node --check tests/product-experience.cjs
 
   browser:
     runs-on: ubuntu-latest
@@ -47,4 +48,5 @@ jobs:
       - run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
-      - run: node tests/learning-integration.cjs\n      - run: node tests/product-experience.cjs
+      - run: node tests/learning-integration.cjs
+      - run: node tests/product-experience.cjs

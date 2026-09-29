@@ -1,4 +1,5 @@
 import json
+import hmac
 import os
 import re
 import sqlite3
@@ -260,7 +261,12 @@ def auth_me():
         'microsoft': oauth_available('microsoft'),
         'apple': oauth_available('apple'),
     }
-    return jsonify({'ok': True, 'user': public_user(user) if user else None, 'providers': providers})
+    return jsonify({
+        'ok': True,
+        'user': public_user(user) if user else None,
+        'providers': providers,
+        'registration_mode': 'invite' if os.getenv('BETA_ACCESS_CODE', '').strip() else 'open',
+    })
 
 
 @app.post('/api/auth/register')
@@ -268,6 +274,10 @@ def register():
     if not _allow_rate('register', 8, 600):
         return jsonify({'ok': False, 'error': 'Too many account attempts. Try again later.'}), 429
     data = request.get_json(silent=True) or {}
+    beta_code = os.getenv('BETA_ACCESS_CODE', '').strip()
+    supplied_code = str(data.get('access_code', '')).strip()
+    if beta_code and not hmac.compare_digest(supplied_code, beta_code):
+        return jsonify({'ok': False, 'error': 'A valid private-beta access code is required.'}), 403
     email = str(data.get('email', '')).strip().lower()
     password = str(data.get('password', ''))
     name = str(data.get('name', '')).strip()[:80]

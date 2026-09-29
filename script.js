@@ -1002,7 +1002,13 @@ function initMotion(){
  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('motion-in');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -40px'});targets.forEach(el=>obs.observe(el));
 }
 function bind(){
- $('#theme-toggle').onclick=toggleThemePremium;$('#mobile-nav-btn').onclick=()=>$('#main-nav').classList.toggle('open');
+ $('#theme-toggle').onclick=toggleThemePremium;
+ const mobileNavButton=$('#mobile-nav-btn'),mainNav=$('#main-nav');
+ const setMobileNav=open=>{mainNav.classList.toggle('open',!!open);mobileNavButton.setAttribute('aria-expanded',String(!!open))};
+ mobileNavButton.onclick=()=>setMobileNav(!mainNav.classList.contains('open'));
+ $('a',mainNav).forEach(link=>link.addEventListener('click',()=>setMobileNav(false)));
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mainNav.classList.contains('open')){setMobileNav(false);mobileNavButton.focus()}});
+ window.addEventListener('resize',()=>{if(innerWidth>1000)setMobileNav(false)});
  $('#board-filter').onchange=e=>{current.board=e.target.value;current.topic=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.topic=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.topic=null;renderFilters()};
  $('#collapse-chapters').onclick=()=>$('#chapter-list').classList.toggle('hidden');$('#search-btn').onclick=showSearch;$('#global-search').onkeydown=e=>{if(e.key==='Enter')showSearch()};
  $('#complete-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.completed,e.id);updateTopicActions();renderTopicList();updateDashboard()}};$('#bookmark-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.bookmarks,e.id);updateTopicActions();updateDashboard()}};$('#weak-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.review,e.id);updateTopicActions();renderTopicList();updateDashboard()}};

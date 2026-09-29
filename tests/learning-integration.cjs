@@ -17,8 +17,12 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install();
- await page.goto(url);await page.waitForSelector('#learning-goals');
+ await page.goto(url);await page.waitForSelector('#learning-goals');await page.waitForSelector('#today-dashboard');
+ if(await page.locator('#studyai-onboarding[open]').count())await page.locator('[data-onboarding-skip]').click();
  check(await page.locator('#learning-goals').count()===1,'Flask injects planning after existing assets');
+ check(await page.locator('#today-dashboard').count()===1,'Today dashboard loads');
+ check(await page.evaluate(()=>StudyAIProduct.confidence(2).label==='Limited evidence'&&StudyAIProduct.confidence(10).label==='Developing evidence'&&StudyAIProduct.confidence(25).label==='Strong evidence'),'evidence confidence reflects answer count');
+ check(await page.evaluate(()=>{const steps=StudyAIProduct.buildSession(20);return steps.length>0&&steps.every(x=>x.minutes>=3)}),'guided session builds from current evidence or a safe fallback');
  check(await page.evaluate(()=>smartReviewCandidates().total===0),'empty review queue');
  const setup=async id=>page.evaluate(id=>{activeDeck=[{id,front:'Question',back:'Answer',source:'Test'}];cardIndex=0;dueReviewSession=false;renderCard();renderFlashStats()},id);
  await setup('srs-hidden');
@@ -88,6 +92,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
  await ap.goto(url);await ap.waitForSelector('#pai-provider-status');
+ if(await ap.locator('#studyai-onboarding[open]').count())await ap.locator('[data-onboarding-skip]').click();
  await ap.waitForFunction(()=>document.querySelector('#pai-provider-status').textContent.includes('ready'));
  await ap.locator('[data-pai-topic-mode="flashcards"]').click();
  await ap.locator('#pai-load-generated-cards').click();
@@ -118,6 +123,13 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  check(noOverload,'15-minute school plans contain usable sessions');
  await ap.evaluate(()=>{const api=StudyAIPlanning;for(let i=0;i<40;i++)api.addGoal({title:'Goal '+i,date:'2099-01-01',pathway:'SAT',type:'exam'});window.__capResult=api.addGoal({title:'Overflow',date:'2099-01-01',pathway:'SAT'})});
  check(await ap.evaluate(()=>state.learningGoals.length===40&&!!window.__capResult.error),'goal storage cap is enforced');
+ const report=await account.request.post(url+'/api/question-reports',{data:{source:'test',category:'format',question_text:'Fixture question for quality reporting',details:'Integration test'}});
+ check(report.ok(),'question quality report API accepts a bounded report');
+ const health=await account.request.get(url+'/api/health');
+ check(health.ok()&&(await health.json()).database==='ready','deployment health endpoint checks the database');
+ const exported=await account.request.get(url+'/api/account/export');
+ const exportedJson=await exported.json();
+ check(exported.ok()&&exportedJson.user.email==='integration@example.test'&&exportedJson.state,'account export returns user data without requiring direct database access');
  await ap.evaluate(()=>{state.learningGoals=[];save()});
  for(const theme of ['light','dark']){
   await ap.setViewportSize({width:390,height:844});await ap.evaluate(theme=>setTheme(theme),theme);
@@ -125,6 +137,8 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   if(process.env.TEST_SCREENSHOTS)await ap.screenshot({path:path.join(process.env.TEST_SCREENSHOTS,'studyai-goals-'+theme+'.png')});
   check(await ap.evaluate(()=>{const el=document.querySelector('#learning-goals');return el.scrollWidth<=el.clientWidth+1}),'goal controls have no internal overflow in '+theme+' mode');
  }
+ const deleted=await account.request.delete(url+'/api/account',{data:{confirm:'DELETE'}});
+ check(deleted.ok(),'account deletion removes the temporary integration account');
  await account.close();
  check(errors.length===0,'no browser JavaScript errors: '+errors.join('; '));
  console.log('TOTAL',checks,'checks passed');

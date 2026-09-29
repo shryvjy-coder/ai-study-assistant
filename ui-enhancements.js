@@ -109,6 +109,7 @@
     const dialog = document.createElement('dialog');
     dialog.id = 'studyai-settings-dialog';
     dialog.className = 'studyai-settings-dialog';
+    dialog.setAttribute('aria-label', 'StudyAI customization settings');
     dialog.innerHTML = `
       <div class="settings-shell">
         <div class="settings-top"><div><span class="small-label">Settings</span><h3>Customization</h3></div><button class="quiet-button" id="settings-close" type="button">Close</button></div>

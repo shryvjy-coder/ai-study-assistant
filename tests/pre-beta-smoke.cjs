@@ -19,6 +19,7 @@ const server=spawn(process.env.PYTHON||'python',['launcher.py'],{
     FLASK_DEBUG:'0',
     COOKIE_SECURE:'0',
     DATABASE_PATH:path.join(dir,'test.sqlite'),
+    BETA_ACCESS_CODE:'beta-browser-code',
     GEMINI_API_KEY:''
   },
   stdio:['ignore','ignore','pipe']
@@ -48,6 +49,12 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   check(await page.locator('#main-content').count()===1,'main content has a keyboard skip target');
   check(await page.locator('.skip-link[href="#main-content"]').count()===1,'skip-to-content link is present');
   check(await page.locator('#main-nav[aria-label="Primary navigation"]').count()===1,'primary navigation is labelled');
+
+  await page.locator('#account-button').click();
+  await page.locator('#auth-register-tab').click();
+  check(await page.locator('#auth-beta-field:not(.hidden)').count()===1&&await page.locator('#auth-beta-code').getAttribute('required')!==null,
+    'invite-only registration UI requires a private beta access code');
+  await page.locator('#auth-close').click();
 
   const duplicateIds=await page.evaluate(()=>{
     const counts={};

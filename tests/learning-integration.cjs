@@ -17,7 +17,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install();
- await page.goto(url);await page.waitForSelector('#learning-goals');await page.waitForSelector('#today-dashboard');
+ await page.goto(url);await page.waitForSelector('#learning-goals');await page.waitForSelector('#today-dashboard');await page.waitForTimeout(600);
  if(await page.locator('#studyai-onboarding[open]').count())await page.locator('[data-onboarding-skip]').click();
  check(await page.locator('#learning-goals').count()===1,'Flask injects planning after existing assets');
  check(await page.locator('#today-dashboard').count()===1,'Today dashboard loads');
@@ -91,7 +91,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  check(auth.ok(),'temporary Flask email/password account works');
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
- await ap.goto(url);await ap.waitForSelector('#pai-provider-status');
+ await ap.goto(url);await ap.waitForSelector('#pai-provider-status');await ap.waitForTimeout(600);
  if(await ap.locator('#studyai-onboarding[open]').count())await ap.locator('[data-onboarding-skip]').click();
  await ap.waitForFunction(()=>document.querySelector('#pai-provider-status').textContent.includes('ready'));
  await ap.locator('[data-pai-topic-mode="flashcards"]').click();

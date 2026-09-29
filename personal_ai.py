@@ -26,6 +26,7 @@ MAX_SOURCES = 8
 MAX_SCRIPT_TURNS = 10
 WINDOW_SECONDS = 300
 _LIMITS = defaultdict(deque)
+_DAILY_LIMITS = {}
 _LIMIT_LOCK = threading.Lock()
 
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -103,6 +104,41 @@ def _throttle(actor, kind, max_calls):
             return False
         times.append(now)
         return True
+
+
+def _daily_allow(actor, kind, max_calls):
+    if max_calls <= 0:
+        return True
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    key = (actor, kind)
+    with _LIMIT_LOCK:
+        row = _DAILY_LIMITS.get(key)
+        if not row or row["day"] != day:
+            row = {"day": day, "count": 0}
+            _DAILY_LIMITS[key] = row
+        if row["count"] >= max_calls:
+            return False
+        row["count"] += 1
+        return True
+
+
+def _daily_remaining(actor, kind, max_calls):
+    if max_calls <= 0:
+        return None
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    with _LIMIT_LOCK:
+        row = _DAILY_LIMITS.get((actor, kind))
+        used = row["count"] if row and row["day"] == day else 0
+    return max(0, max_calls - used)
+
+
+def _daily_limit(kind):
+    name = "STUDYAI_AI_DAILY_AUDIO_LIMIT" if kind == "audio" else "STUDYAI_AI_DAILY_TEXT_LIMIT"
+    fallback = 10 if kind == "audio" else 60
+    try:
+        return max(0, min(1000, int(os.getenv(name, str(fallback)))))
+    except ValueError:
+        return fallback
 
 
 def _error(message, status=400):
@@ -431,10 +467,18 @@ def register_personal_ai(app, current_user):
         actor = f"{user['id']}:{request.remote_addr}"
         if not _throttle(actor, kind, max_calls):
             return _error("Too many requests. Wait a few minutes before trying again.", 429)
+        daily_actor = f"user:{user['id']}"
+        daily_limit = _daily_limit(kind)
+        if not _daily_allow(daily_actor, kind, daily_limit):
+            return _error("Your Personal AI daily limit has been reached. Try again tomorrow.", 429)
         return None
 
     @app.get("/api/personal-ai/status")
     def personal_ai_status():
+        user = current_user()
+        text_limit = _daily_limit("text")
+        audio_limit = _daily_limit("audio")
+        actor = f"user:{user['id']}" if user else None
         return jsonify({
             "ok": True,
             "configured": _provider_ready(),
@@ -443,6 +487,11 @@ def register_personal_ai(app, current_user):
             "tts_model": os.getenv("STUDYAI_GEMINI_TTS_MODEL", "gemini-2.5-flash-preview-tts"),
             "formats": [".txt", ".md", ".pdf", ".docx"],
             "requires_sign_in": True,
+            "daily_limits": {"text": text_limit, "audio": audio_limit},
+            "daily_remaining": ({
+                "text": _daily_remaining(actor, "text", text_limit),
+                "audio": _daily_remaining(actor, "audio", audio_limit),
+            } if actor else None),
         })
 
     @app.post("/api/personal-ai/extract")

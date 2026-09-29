@@ -144,3 +144,6 @@ html[data-theme="dark"] .today-session-builder{border-color:#46526a;box-shadow:5
   .session-custom label{flex:1;justify-content:space-between}
   .session-custom input{width:92px}
 }
+
+.onboarding-custom-time{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.onboarding-custom-time input{width:100px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}

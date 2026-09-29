@@ -36,6 +36,18 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
           "invite-only registration mode is advertised")
     check("noindex" in me.headers.get("X-Robots-Tag", ""),
           "invite-only beta sends noindex response header")
+    check(me.headers.get("X-Content-Type-Options") == "nosniff"
+          and me.headers.get("X-Frame-Options") == "SAMEORIGIN"
+          and me.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin",
+          "core security response headers are present")
+    check("geolocation=()" in me.headers.get("Permissions-Policy", "")
+          and "camera=()" in me.headers.get("Permissions-Policy", "")
+          and "microphone=()" in me.headers.get("Permissions-Policy", ""),
+          "browser permissions policy disables unused sensitive capabilities")
+
+    privacy = client.get("/privacy")
+    check(privacy.status_code == 200 and b"Privacy" in privacy.data,
+          "Privacy and Data page is available before sign-in")
 
     missing = client.post("/api/auth/register", json={
         "email": "beta@example.test",

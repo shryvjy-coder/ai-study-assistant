@@ -48,7 +48,8 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
     radio.dispatchEvent(new Event('change',{bubbles:true}));
   });
   check(await page.locator('[name="dailyMinutes"]').inputValue()==='60','onboarding preset updates custom study time without browser errors');
-  await page.locator('[data-onboarding-next]').click();
+  await page.evaluate(()=>document.querySelector('[data-onboarding-next]')?.click());
+  await page.waitForFunction(()=>document.querySelector('.onboarding-summary')?.textContent.includes('60 min/day'));
   check(await page.evaluate(()=>StudyAIProduct.prefs().dailyMinutes===60),'onboarding persists selected study time');
   await page.evaluate(()=>document.querySelector('[data-onboarding-finish]')?.click());
   await page.waitForFunction(()=>!document.querySelector('#studyai-onboarding')?.open);

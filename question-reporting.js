@@ -31,6 +31,7 @@
     if(dialog)return dialog;
     dialog=document.createElement('dialog');
     dialog.id='question-report-dialog';
+    dialog.setAttribute('aria-label','Report a StudyAI question issue');
     dialog.className='question-report-dialog';
     dialog.innerHTML=`
       <form id="question-report-form">

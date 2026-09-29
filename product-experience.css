@@ -118,3 +118,11 @@ html[data-theme="dark"] .today-session-builder{border-color:#46526a;box-shadow:5
  .question-report-head{flex-direction:column}
  .mock-question-heading .mock-report-question{margin-left:0}
 }
+
+/* Signed-in account data controls */
+.studyai-data-controls{display:grid;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.studyai-data-controls>div:first-child{display:grid;gap:3px}
+.studyai-data-controls strong{font-size:.95rem}
+.studyai-data-controls p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.5}
+.studyai-data-actions{display:flex;gap:8px;flex-wrap:wrap}
+.studyai-data-actions .danger{color:var(--accent-orange-dark);border-color:var(--line)}

@@ -3,6 +3,8 @@ import os
 import re
 import sqlite3
 import time
+import threading
+from collections import defaultdict, deque
 from functools import wraps
 from pathlib import Path
 
@@ -72,6 +74,21 @@ def init_db():
                 state_json TEXT NOT NULL,
                 updated_at INTEGER NOT NULL,
                 FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS question_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                source TEXT NOT NULL,
+                question_ref TEXT NOT NULL DEFAULT '',
+                category TEXT NOT NULL,
+                details TEXT NOT NULL DEFAULT '',
+                question_text TEXT NOT NULL,
+                passage TEXT NOT NULL DEFAULT '',
+                context TEXT NOT NULL DEFAULT '',
+                page TEXT NOT NULL DEFAULT '',
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
             );
             '''
         )
@@ -226,6 +243,8 @@ def auth_me():
 
 @app.post('/api/auth/register')
 def register():
+    if not _allow_rate('register', 8, 600):
+        return jsonify({'ok': False, 'error': 'Too many account attempts. Try again later.'}), 429
     data = request.get_json(silent=True) or {}
     email = str(data.get('email', '')).strip().lower()
     password = str(data.get('password', ''))
@@ -243,13 +262,15 @@ def register():
             )
             user_id = cur.lastrowid
     except sqlite3.IntegrityError:
-        return jsonify({'ok': False, 'error': 'An account already exists for this email.'}), 409
+        return jsonify({'ok': False, 'error': 'Could not create an account with those details.'}), 409
     set_login(user_id)
     return jsonify({'ok': True, 'user': {'id': user_id, 'email': email, 'name': name}})
 
 
 @app.post('/api/auth/login')
 def login():
+    if not _allow_rate('login', 20, 600):
+        return jsonify({'ok': False, 'error': 'Too many sign-in attempts. Try again later.'}), 429
     data = request.get_json(silent=True) or {}
     email = str(data.get('email', '')).strip().lower()
     password = str(data.get('password', ''))
@@ -300,6 +321,90 @@ def put_state():
             (session['user_id'], raw, now),
         )
     return jsonify({'ok': True, 'updated_at': now})
+
+
+@app.get('/api/health')
+def health():
+    try:
+        with db() as conn:
+            conn.execute('SELECT 1').fetchone()
+        return jsonify({'ok': True, 'database': 'ready'})
+    except sqlite3.Error:
+        return jsonify({'ok': False, 'database': 'unavailable'}), 503
+
+
+@app.post('/api/question-reports')
+def question_report():
+    if not _allow_rate('question-report', 15, 600):
+        return jsonify({'ok': False, 'error': 'Too many reports. Try again later.'}), 429
+    data = request.get_json(silent=True) or {}
+    categories = {'answer', 'explanation', 'easy', 'hard', 'duplicate', 'format', 'other'}
+    category = str(data.get('category', '')).strip().lower()
+    question_text = str(data.get('question_text', '')).strip()[:1800]
+    if category not in categories or not question_text:
+        return jsonify({'ok': False, 'error': 'Invalid question report.'}), 400
+    source = str(data.get('source', 'practice')).strip()[:80]
+    question_ref = str(data.get('question_ref', '')).strip()[:160]
+    details = str(data.get('details', '')).strip()[:1000]
+    passage = str(data.get('passage', '')).strip()[:4000]
+    context = str(data.get('context', '')).strip()[:500]
+    page = str(data.get('page', '')).strip()[:160]
+    now = int(time.time())
+    user_id = session.get('user_id')
+    with db() as conn:
+        cur = conn.execute(
+            '''INSERT INTO question_reports(
+                   user_id,source,question_ref,category,details,question_text,passage,context,page,created_at
+               ) VALUES(?,?,?,?,?,?,?,?,?,?)''',
+            (user_id, source, question_ref, category, details, question_text, passage, context, page, now),
+        )
+        report_id = cur.lastrowid
+    return jsonify({'ok': True, 'report_id': report_id})
+
+
+@app.get('/api/account/export')
+@login_required
+def export_account():
+    uid = session['user_id']
+    with db() as conn:
+        user = conn.execute(
+            'SELECT id,email,name,created_at,last_login FROM users WHERE id=?',
+            (uid,),
+        ).fetchone()
+        state_row = conn.execute(
+            'SELECT state_json,updated_at FROM user_state WHERE user_id=?',
+            (uid,),
+        ).fetchone()
+        identities = conn.execute(
+            'SELECT provider,created_at FROM oauth_identities WHERE user_id=? ORDER BY created_at',
+            (uid,),
+        ).fetchall()
+    try:
+        saved_state = json.loads(state_row['state_json']) if state_row else None
+    except json.JSONDecodeError:
+        saved_state = None
+    return jsonify({
+        'ok': True,
+        'exported_at': int(time.time()),
+        'user': dict(user) if user else None,
+        'providers': [dict(row) for row in identities],
+        'state': saved_state,
+        'state_updated_at': state_row['updated_at'] if state_row else None,
+    })
+
+
+@app.delete('/api/account')
+@login_required
+def delete_account():
+    data = request.get_json(silent=True) or {}
+    if str(data.get('confirm', '')).strip().upper() != 'DELETE':
+        return jsonify({'ok': False, 'error': 'Type DELETE to confirm account deletion.'}), 400
+    uid = session['user_id']
+    with db() as conn:
+        conn.execute('DELETE FROM question_reports WHERE user_id=?', (uid,))
+        conn.execute('DELETE FROM users WHERE id=?', (uid,))
+    session.clear()
+    return jsonify({'ok': True})
 
 
 @app.get('/auth/<provider>')

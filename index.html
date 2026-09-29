@@ -8,27 +8,34 @@
   <title>StudyAI | Multi-curriculum study workspace</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%231b675f%22/><text x=%2250%22 y=%2267%22 font-family=%22Georgia%22 font-size=%2255%22 text-anchor=%22middle%22 fill=%22white%22>S</text></svg>">
   <link rel="stylesheet" href="style.css" />
+  <script>
+    try {
+      const savedTheme = JSON.parse(localStorage.getItem('studyai-multicurriculum-v1') || '{}').theme;
+      if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme;
+    } catch (_) {}
+  </script>
   <link rel="stylesheet" href="cobalt-theme.css" />
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <header class="topbar">
   <div class="shell topbar-inner">
     <a class="brand" href="#home"><span class="brand-mark">S</span><span>StudyAI</span></a>
-    <button class="mobile-nav-btn" id="mobile-nav-btn" type="button">Menu</button>
-    <nav class="main-nav" id="main-nav">
+    <button class="mobile-nav-btn" id="mobile-nav-btn" type="button" aria-controls="main-nav" aria-expanded="false">Menu</button>
+    <nav class="main-nav" id="main-nav" aria-label="Primary navigation">
       <a href="#today">Today</a><a href="#study">Study</a><a href="#sat">SAT</a><a href="#workspace">Workspace</a>
       <a href="#flashcards">Flashcards</a><a href="#practice">Practice</a>
       <a href="#progress">Progress</a><a href="#planner">Planner</a><a href="#tutor">Tutor</a>
     </nav>
     <div class="top-actions">
-      <button class="quiet-button" id="open-command" type="button">⌘K</button>
+      <button class="quiet-button" id="open-command" type="button" aria-label="Open StudyAI search and quick actions" title="Search StudyAI">⌘K</button>
       <button class="account-button" id="account-button" type="button" aria-haspopup="dialog"><span class="account-avatar" id="account-avatar">S</span><span id="account-label">Sign in</span></button>
       <button class="theme-button" id="theme-toggle" type="button"><span id="theme-icon">◐</span><span id="theme-label">Dark mode</span></button>
     </div>
   </div>
 </header>
 
-<main>
+<main id="main-content" tabindex="-1">
 <section class="hero" id="home">
   <div class="shell hero-grid">
     <div class="hero-copy">
@@ -281,9 +288,9 @@
   <div><strong>Data</strong><button class="text-button" id="share-current">Share current note</button><a href="/privacy">Privacy &amp; data</a></div>
 </div></footer>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<dialog id="auth-dialog" class="auth-dialog">
+<dialog id="auth-dialog" class="auth-dialog" aria-label="StudyAI account">
   <div class="auth-shell">
     <button class="auth-close quiet-button" id="auth-close" type="button" aria-label="Close account dialog">Close</button>
     <div class="auth-brand"><span class="brand-mark">S</span><div><strong>StudyAI</strong><span id="auth-subtitle">Your study data, wherever you sign in.</span></div></div>
@@ -338,7 +345,7 @@
   </div>
 </dialog>
 
-<dialog id="command-dialog" class="command-dialog"><form method="dialog"><div class="command-head"><strong>Quick actions</strong><button class="quiet-button">Close</button></div><button data-jump="#study">Study library <span>S</span></button><button data-jump="#sat">SAT practice <span>A</span></button><button data-jump="#workspace">Workspace <span>W</span></button><button data-jump="#flashcards">Flashcards <span>F</span></button><button data-jump="#progress">Progress <span>P</span></button></form></dialog>
+<dialog id="command-dialog" class="command-dialog" aria-label="StudyAI quick actions"><form method="dialog"><div class="command-head"><strong>Quick actions</strong><button class="quiet-button">Close</button></div><button data-jump="#study">Study library <span>S</span></button><button data-jump="#sat">SAT practice <span>A</span></button><button data-jump="#workspace">Workspace <span>W</span></button><button data-jump="#flashcards">Flashcards <span>F</span></button><button data-jump="#progress">Progress <span>P</span></button></form></dialog>
 <script src="script.js"></script>
 </body>
 </html>

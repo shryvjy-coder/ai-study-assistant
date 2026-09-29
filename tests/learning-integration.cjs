@@ -31,14 +31,14 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  check(await page.evaluate(()=>!state.flashcardSchedule['srs-hidden']),'hidden card cannot be rated');
  check(await page.locator('[data-srs-rating]:disabled').count()===4,'all ratings disabled until reveal');
  for(const [rating,minutes] of [['again',1],['hard',10],['good',1440],['easy',5760]]){
-  await setup('srs-'+rating);await page.locator('#flashcard').click();await page.locator('[data-srs-rating="'+rating+'"]').click();
+  await setup('srs-'+rating);await page.evaluate(rating=>{document.querySelector('#flashcard').click();const button=document.querySelector('[data-srs-rating="'+rating+'"]');if(button.disabled)throw new Error('rating stayed disabled after reveal');button.click()},rating);
   check(await page.evaluate(({rating,minutes})=>{const r=state.flashcardSchedule['srs-'+rating];return r.intervalMinutes===minutes&&Math.abs(r.dueAt-r.lastReviewedAt-minutes*60000)<10},{rating,minutes}),rating+' schedules expected first interval');
  }
  check(await page.evaluate(()=>nextSrsInterval({intervalMinutes:1440},'good')>1440&&nextSrsInterval({intervalMinutes:1440},'hard')>1440&&nextSrsInterval({intervalMinutes:1440},'easy')>1440),'later Good, Hard, Easy extend intervals');
  await page.evaluate(()=>{state.flashcardState['untouched-legacy']='Mastered';state.flashcardSchedule['srs-again'].dueAt=Date.now()-1;save()});
  await page.reload();await page.waitForSelector('#learning-goals');
  check(await page.evaluate(()=>srsDueCards().some(c=>c.id==='srs-again')&&state.flashcardState['untouched-legacy']==='Mastered'),'catalog and legacy progress survive reload');
- await page.locator('#srs-progress-open').click();await page.locator('#flashcard').click();await page.locator('[data-srs-rating="good"]').click();
+ await page.locator('#srs-progress-open').click();await page.evaluate(()=>{document.querySelector('#flashcard').click();const button=document.querySelector('[data-srs-rating="good"]');if(button.disabled)throw new Error('due-review rating stayed disabled after reveal');button.click()});
  check(await page.evaluate(()=>activeDeck.length===0&&srsSummary().due===0),'due review reschedules and advances');
  await setup('other-deck');await page.evaluate(()=>{cardFlipped=true;rateFlashcard('good')});
  await setup('srs-hard');page.once('dialog',d=>d.accept());await page.locator('#reset-deck').click();

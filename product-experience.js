@@ -488,7 +488,8 @@
       `<span class="small-label">2 of 4 · Date</span><h2>Is there an exam date?</h2><p>Optional. A date helps StudyAI prioritize deadlines without pretending to predict your score.</p>
         <label>Exam date<input name="examDate" type="date" value="${safe(p.examDate)}"></label>`,
       `<span class="small-label">3 of 4 · Time</span><h2>How much time can you usually study?</h2><p>This becomes the default size of a guided Study Session. You can change it anytime.</p>
-        <div class="onboarding-time-grid">${[20,40,60,90].map(n=>'<label><input type="radio" name="dailyMinutes" value="'+n+'" '+(Number(p.dailyMinutes)===n?'checked':'')+'><span><strong>'+n+'</strong> min/day</span></label>').join('')}</div>`,
+        <div class="onboarding-time-grid">${[20,40,60,90].map(n=>'<label><input type="radio" name="dailyMinutesPreset" value="'+n+'" '+(Number(p.dailyMinutes)===n?'checked':'')+'><span><strong>'+n+'</strong> min/day</span></label>').join('')}</div>
+        <label class="onboarding-custom-time">Custom minutes per day<input name="dailyMinutes" type="number" min="10" max="180" step="5" value="${Number(p.dailyMinutes)||40}"></label>`,
       `<span class="small-label">4 of 4 · Starting point</span><h2>You’re ready.</h2><p>${p.pathway==='SAT'?'A short diagnostic can give StudyAI its first real evidence.':'Start with Today, then learn and answer questions to build real mastery evidence.'}</p>
         ${p.pathway==='SAT'?'<label class="onboarding-check"><input id="onboarding-diagnostic" type="checkbox" checked><span><strong>Take a 12-question SAT diagnostic</strong><small>Results create initial mastery evidence. It is not an official SAT score.</small></span></label>':''}
         <div class="onboarding-summary"><span>${safe([p.pathway,p.grade,p.subject].filter(Boolean).join(' · ')||'Pathway')}</span><span>${p.examDate?safe(p.examDate):'No exam date'}</span><span>${p.dailyMinutes||40} min/day</span></div>`
@@ -514,6 +515,15 @@
       grade?.addEventListener('change',()=>{
         const subjects=subjectOptions(pathway?.value||'',grade?.value||'');
         subject.innerHTML=subjects.map(x=>'<option>'+safe(x)+'</option>').join('');
+      });
+    }
+    if(onboardingStep===2){
+      const custom=$('#onboarding-form [name="dailyMinutes"]');
+      $('[name="dailyMinutesPreset"]',$('#onboarding-form')).forEach(radio=>radio.addEventListener('change',()=>{
+        if(radio.checked&&custom)custom.value=radio.value;
+      }));
+      custom?.addEventListener('input',()=>{
+        $('[name="dailyMinutesPreset"]',$('#onboarding-form')).forEach(radio=>radio.checked=Number(radio.value)===Number(custom.value));
       });
     }
   }

@@ -17,31 +17,40 @@
     try{return {...fallback,...JSON.parse(localStorage.getItem(key)||'{}')}}
     catch(_){return {...fallback}}
   }
+  const defaultPrefs=()=>({pathway:'',grade:'',subject:'',examDate:'',dailyMinutes:40,onboardingComplete:false,createdAt:0});
   function prefs(){
-    return readJSON(PREFS_KEY,{pathway:'',examDate:'',dailyMinutes:40,onboardingComplete:false,createdAt:0});
+    const synced=bridge.getProductPrefs?.();
+    if(synced&&typeof synced==='object')return {...defaultPrefs(),...synced};
+    return readJSON(PREFS_KEY,defaultPrefs());
   }
   function savePrefs(next){
+    const minutes=Math.max(10,Math.min(180,Math.round(Number(next.dailyMinutes)||40)));
     const clean={
       pathway:String(next.pathway||'').slice(0,80),
+      grade:String(next.grade||'').slice(0,80),
+      subject:String(next.subject||'').slice(0,80),
       examDate:/^\d{4}-\d{2}-\d{2}$/.test(next.examDate||'')?next.examDate:'',
-      dailyMinutes:[20,40,60,90].includes(Number(next.dailyMinutes))?Number(next.dailyMinutes):40,
+      dailyMinutes:minutes,
       onboardingComplete:!!next.onboardingComplete,
       createdAt:Number(next.createdAt)||Date.now()
     };
     localStorage.setItem(PREFS_KEY,JSON.stringify(clean));
+    bridge.saveProductPrefs?.(clean);
     renderToday();
     return clean;
   }
   function activeSession(){
-    try{
-      const data=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
-      if(!data||!Array.isArray(data.steps)||Date.now()-Number(data.createdAt||0)>DAY)return null;
-      return data;
-    }catch(_){return null}
+    let data=bridge.getActiveStudySession?.()||null;
+    if(!data){
+      try{data=JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(_){data=null}
+    }
+    if(!data||!Array.isArray(data.steps)||Date.now()-Number(data.createdAt||0)>DAY)return null;
+    return data;
   }
   function saveSession(session){
     if(session)localStorage.setItem(SESSION_KEY,JSON.stringify(session));
     else localStorage.removeItem(SESSION_KEY);
+    bridge.saveActiveStudySession?.(session||null);
     renderToday();
   }
 
@@ -66,9 +75,36 @@
     return Math.round((target-now)/DAY);
   }
 
+  function relevantCurriculumEntry(item){
+    const unit=String(item?.unit||'');
+    if(unit.startsWith('curriculum|')){
+      const id=unit.slice('curriculum|'.length);
+      return (bridge.getCurriculum?.()||[]).find(x=>x.id===id)||null;
+    }
+    if(item?.topicId)return (bridge.getCurriculum?.()||[]).find(x=>x.id===item.topicId)||null;
+    return null;
+  }
+  function itemMatchesPathway(item,p=prefs()){
+    if(!item)return false;
+    if(item.type==='due')return true;
+    const unit=String(item.unit||'');
+    const sat=item.kind==='sat'||unit.startsWith('sat|')||String(item.meta||'').startsWith('SAT');
+    const school=item.kind==='school'||unit.startsWith('curriculum|');
+    if(p.pathway==='SAT')return !school;
+    if(p.pathway&&p.pathway!=='StudyAI'){
+      if(sat)return false;
+      const entry=relevantCurriculumEntry(item);
+      if(entry&&entry.board!==p.pathway)return false;
+      if(entry&&p.grade&&entry.grade!==p.grade)return false;
+      if(entry&&p.subject&&entry.subject!==p.subject)return false;
+    }
+    return true;
+  }
   function queue(){
     const result=bridge.getReviewQueue?.(100);
-    return result&&Array.isArray(result.items)?result:{items:[],due:0,mistakes:0,weak:0,total:0};
+    if(!result||!Array.isArray(result.items))return {items:[],due:0,mistakes:0,weak:0,total:0};
+    const items=result.items.filter(item=>itemMatchesPathway(item));
+    return {...result,items,total:items.length};
   }
   function masteryStats(){
     const rows=Object.values(bridge.getMastery?.()||{}).filter(x=>x&&Number(x.attempts)>0);
@@ -114,16 +150,30 @@
       if(used>=minutes-5)break;
     }
 
+    const p=prefs();
     if(!selected.length){
+      if(p.pathway==='SAT'){
+        selected.push({
+          key:'fallback|adaptive',type:'adaptive',title:'Adaptive SAT practice',
+          label:'Practice Studio',detail:'Build a short adaptive set and use the result as new learning evidence.',
+          action:'Start adaptive practice',minutes:Math.min(minutes,20),section:'all'
+        });
+      }else{
+        const candidates=(bridge.getCurriculum?.()||[]).filter(entry=>
+          (!p.pathway||p.pathway==='StudyAI'||entry.board===p.pathway)&&
+          (!p.grade||entry.grade===p.grade)&&(!p.subject||entry.subject===p.subject));
+        const entry=candidates[0]||(bridge.getCurriculum?.()||[])[0];
+        selected.push({
+          key:'fallback|curriculum',type:'curriculum-start',topicId:entry?.id||'',
+          title:entry?.title||'Choose a school topic',label:'Study Library',
+          detail:entry?'Start with one relevant topic, then answer practice questions to create real mastery evidence.':'Open the Study Library and choose a topic to begin.',
+          action:'Open topic',minutes:Math.min(minutes,20)
+        });
+      }
+      used=selected[0].minutes;
+    } else if(p.pathway==='SAT'&&used<minutes-8&&!selected.some(x=>x.type==='mastery'||x.type==='adaptive')){
       selected.push({
         key:'fallback|adaptive',type:'adaptive',title:'Adaptive SAT practice',
-        label:'Practice Studio',detail:'Build a short adaptive set and use the result as new learning evidence.',
-        action:'Start adaptive practice',minutes:Math.min(minutes,20),section:'all'
-      });
-      used=selected[0].minutes;
-    } else if(used<minutes-8 && !selected.some(x=>x.type==='mastery'||x.type==='adaptive')){
-      selected.push({
-        key:'fallback|adaptive',type:'adaptive',title:'Adaptive practice',
         label:'Practice Studio',detail:'Use remaining time on unseen questions, prioritizing weaker recorded skills.',
         action:'Start adaptive practice',minutes:Math.min(15,minutes-used),section:'all'
       });
@@ -146,7 +196,7 @@
     if(item.type==='due'){bridge.openDue?.();return}
     if(item.type==='mistake'){bridge.openMistakes?.();return}
     if(item.type==='planned'||item.type==='goal'){window.StudyAIPlanning?.open?.(item);return}
-    if(item.type==='flag'&&item.topicId){bridge.openTopic?.(item.topicId);return}
+    if((item.type==='flag'||item.type==='curriculum-start')&&item.topicId){bridge.openTopic?.(item.topicId);return}
     if(item.type==='mastery'){
       const record=(bridge.getMastery?.()||{})[item.unit];
       if(record?.kind==='curriculum'&&record.topicId){bridge.openTopic?.(record.topicId);return}
@@ -166,17 +216,56 @@
     return {...step};
   }
 
+  function evidenceSnapshot(step){
+    const s=state(),q=queue(),mastery=bridge.getMastery?.()||{};
+    if(step.type==='due')return {due:q.due||0};
+    if(step.type==='mistake'){
+      const row=(bridge.getMistakes?.()||[]).find(x=>x.id===step.mistakeId);
+      return {status:row?.status||'missing',missCount:row?.missCount||0};
+    }
+    if(step.type==='mastery')return {attempts:Number(mastery[step.unit]?.attempts)||0};
+    if(step.type==='adaptive')return {practiceTests:Array.isArray(s.practiceStudioHistory)?s.practiceStudioHistory.length:0,answers:Array.isArray(s.masteryHistory)?s.masteryHistory.length:0};
+    if(step.type==='planned'||step.type==='goal')return {present:q.items.some(x=>x.key===step.key)};
+    if(step.type==='curriculum-start')return {answers:Array.isArray(s.masteryHistory)?s.masteryHistory.length:0};
+    return {};
+  }
+  function evidenceCompleted(step){
+    const before=step.baseline||{},now=evidenceSnapshot(step);
+    if(step.type==='due')return Number(now.due)<Number(before.due);
+    if(step.type==='mistake')return before.status==='open'&&now.status!=='open';
+    if(step.type==='mastery')return Number(now.attempts)>Number(before.attempts);
+    if(step.type==='adaptive')return Number(now.practiceTests)>Number(before.practiceTests)||Number(now.answers)>Number(before.answers);
+    if(step.type==='planned'||step.type==='goal')return before.present===true&&now.present===false;
+    if(step.type==='curriculum-start')return Number(now.answers)>Number(before.answers);
+    return false;
+  }
   function startSession(minutes){
-    const session={
-      id:'session-'+Date.now(),createdAt:Date.now(),minutes:Number(minutes)||40,
-      steps:chooseSessionSteps(Number(minutes)||40)
-    };
+    const requested=Math.max(10,Math.min(180,Math.round(Number(minutes)||40)));
+    const steps=chooseSessionSteps(requested);
+    steps.forEach(step=>step.baseline=evidenceSnapshot(step));
+    const session={id:'session-'+Date.now(),createdAt:Date.now(),minutes:requested,steps,completedAt:null};
+    bridge.recordBetaSignal?.('session-started',{minutes:requested});
     saveSession(session);
     openSessionDialog();
   }
+  function reconcileSession(){
+    const session=activeSession();if(!session)return null;
+    let changed=false;
+    session.steps=session.steps.map(step=>{
+      if(step.done||!evidenceCompleted(step))return step;
+      changed=true;return {...step,done:true,verified:true,completedAt:Date.now()};
+    });
+    if(session.steps.length&&session.steps.every(x=>x.done)&&!session.completedAt){
+      session.completedAt=Date.now();changed=true;
+      bridge.recordBetaSignal?.('session-completed',{minutes:session.minutes});
+    }
+    if(changed)saveSession(session);
+    return session;
+  }
   function toggleStep(id){
     const session=activeSession();if(!session)return;
-    session.steps=session.steps.map(step=>step.id===id?{...step,done:!step.done}:step);
+    session.steps=session.steps.map(step=>step.id===id?{...step,done:!step.done,verified:false,completedAt:step.done?null:Date.now()}:step);
+    if(!session.steps.every(x=>x.done))session.completedAt=null;
     saveSession(session);renderSessionDialog(session);
   }
   function clearSession(){saveSession(null);$('#study-session-dialog')?.close()}
@@ -184,10 +273,11 @@
   function sessionMarkup(session){
     const done=session.steps.filter(x=>x.done).length;
     const totalMinutes=session.steps.reduce((n,x)=>n+x.minutes,0);
+    const verified=session.steps.filter(x=>x.done&&x.verified).length;
     return `
       <div class="session-dialog-head">
         <div><span class="small-label">Guided study session</span><h2>${session.minutes}-minute plan</h2>
-        <p>${done} of ${session.steps.length} steps marked complete · about ${totalMinutes} planned minutes</p></div>
+        <p>${done} of ${session.steps.length} steps complete · ${verified} verified by learning evidence · about ${totalMinutes} planned minutes</p></div>
         <button type="button" class="quiet-button" data-session-close>Close</button>
       </div>
       <div class="session-progress"><span style="width:${session.steps.length?100*done/session.steps.length:0}%"></span></div>
@@ -195,7 +285,7 @@
         ${session.steps.map((step,i)=>`
           <article class="session-step ${step.done?'done':''}" data-session-step="${safe(step.id)}">
             <div class="session-step-num">${step.done?'✓':i+1}</div>
-            <div class="session-step-copy"><small>${safe(step.label)} · ${step.minutes} min</small><strong>${safe(step.title)}</strong><p>${safe(step.detail||itemWhy(step))}</p></div>
+            <div class="session-step-copy"><small>${safe(step.label)} · ${step.minutes} min${step.verified?' · verified':''}</small><strong>${safe(step.title)}</strong><p>${safe(step.detail||itemWhy(step))}</p></div>
             <div class="session-step-actions">
               <button type="button" class="button secondary compact" data-session-open="${safe(step.id)}">${safe(step.action||'Open')} →</button>
               <button type="button" class="quiet-button" data-session-toggle="${safe(step.id)}">${step.done?'Reopen':'Mark done'}</button>
@@ -203,7 +293,7 @@
           </article>`).join('')}
       </div>
       <div class="session-dialog-foot">
-        <p>Marking a session step complete does <strong>not</strong> raise mastery. Only answered practice changes mastery evidence.</p>
+        <p>${session.completedAt?'<strong>Session complete.</strong> StudyAI verified the steps it could from actual practice/review changes. ':''}Marking a step complete does <strong>not</strong> raise mastery. Only answered practice changes mastery evidence.</p>
         <button type="button" class="button secondary" data-session-clear>End session</button>
       </div>`;
   }
@@ -238,7 +328,8 @@
 
   function renderToday(){
     const root=$('#today-dashboard');if(!root)return;
-    const p=prefs(),q=queue(),m=masteryStats(),session=activeSession();
+    const reconciled=reconcileSession();
+    const p=prefs(),q=queue(),m=masteryStats(),session=reconciled||activeSession();
     const top=q.items.slice(0,4);
     const examDays=daysUntil(p.examDate);
     const examText=examDays===null?'No exam date saved':examDays<0?'Exam date passed':examDays===0?'Exam today':examDays===1?'Exam tomorrow':examDays+' days to exam';
@@ -282,6 +373,7 @@
             <button type="button" data-session-minutes="40" class="recommended"><strong>40</strong><span>minutes</span></button>
             <button type="button" data-session-minutes="60"><strong>60</strong><span>minutes</span></button>
           </div>
+          <div class="session-custom"><label>Custom <input id="today-custom-minutes" type="number" min="10" max="180" step="5" value="${p.dailyMinutes||40}" aria-label="Custom study session minutes"></label><button type="button" class="quiet-button" id="today-custom-start">Start →</button></div>
           <p class="today-trust">Recommendations are deterministic and explainable. StudyAI does not treat clicks or “Mark done” as proof of mastery.</p>
         </aside>
       </div>`;
@@ -291,6 +383,7 @@
     }));
     $$('[data-session-minutes]',root).forEach(button=>button.addEventListener('click',()=>startSession(Number(button.dataset.sessionMinutes))));
     $('#today-resume-session')?.addEventListener('click',openSessionDialog);
+    $('#today-custom-start')?.addEventListener('click',()=>startSession(Number($('#today-custom-minutes')?.value)||p.dailyMinutes||40));
     $('#today-edit-goals')?.addEventListener('click',()=>openOnboarding(true));
     $('#today-start-diagnostic')?.addEventListener('click',async()=>{
       await window.StudyAIPerformance?.loadFeature?.('practice');
@@ -331,6 +424,12 @@
   function boardOptions(){
     return ['SAT',...[...new Set((bridge.getCurriculum?.()||[]).map(x=>x.board).filter(Boolean))]];
   }
+  function gradeOptions(pathway){
+    return [...new Set((bridge.getCurriculum?.()||[]).filter(x=>x.board===pathway).map(x=>x.grade).filter(Boolean))];
+  }
+  function subjectOptions(pathway,grade){
+    return [...new Set((bridge.getCurriculum?.()||[]).filter(x=>x.board===pathway&&(!grade||x.grade===grade)).map(x=>x.subject).filter(Boolean))];
+  }
   function ensureOnboarding(){
     let dialog=$('#studyai-onboarding');if(dialog)return dialog;
     dialog=document.createElement('dialog');dialog.id='studyai-onboarding';dialog.className='studyai-onboarding';
@@ -348,7 +447,9 @@
         if(onboardingStep===0){
           const pathway=form?.elements.pathway?.value;
           if(!pathway){$('#onboarding-status').textContent='Choose what you are studying first.';return}
-          savePrefs({...prefs(),pathway});
+          const grade=pathway==='SAT'?'':String(form?.elements.grade?.value||'');
+          const subject=pathway==='SAT'?'':String(form?.elements.subject?.value||'');
+          savePrefs({...prefs(),pathway,grade,subject});
         }
         if(onboardingStep===1){
           const date=form?.elements.examDate?.value||'';
@@ -380,15 +481,17 @@
     const box=$('#studyai-onboarding-content');if(!box)return;
     const p=prefs(),options=boardOptions();
     const steps=[
-      `<span class="small-label">1 of 4 · Goal</span><h2>What are you studying?</h2><p>StudyAI will use this only to shape your starting workflow.</p>
-        <label>Pathway<select name="pathway"><option value="">Choose one</option>${options.map(x=>'<option '+(p.pathway===x?'selected':'')+'>'+safe(x)+'</option>').join('')}</select></label>`,
+      `<span class="small-label">1 of 4 · Goal</span><h2>What are you studying?</h2><p>StudyAI uses this to keep Today and guided sessions relevant.</p>
+        <label>Pathway<select name="pathway" id="onboarding-pathway"><option value="">Choose one</option>${options.map(x=>'<option '+(p.pathway===x?'selected':'')+'>'+safe(x)+'</option>').join('')}</select></label>
+        <label id="onboarding-grade-wrap" ${p.pathway==='SAT'||!p.pathway?'hidden':''}>Grade / stage<select name="grade" id="onboarding-grade">${gradeOptions(p.pathway).map(x=>'<option '+(p.grade===x?'selected':'')+'>'+safe(x)+'</option>').join('')}</select></label>
+        <label id="onboarding-subject-wrap" ${p.pathway==='SAT'||!p.pathway?'hidden':''}>Subject<select name="subject" id="onboarding-subject">${subjectOptions(p.pathway,p.grade).map(x=>'<option '+(p.subject===x?'selected':'')+'>'+safe(x)+'</option>').join('')}</select></label>`,
       `<span class="small-label">2 of 4 · Date</span><h2>Is there an exam date?</h2><p>Optional. A date helps StudyAI prioritize deadlines without pretending to predict your score.</p>
         <label>Exam date<input name="examDate" type="date" value="${safe(p.examDate)}"></label>`,
       `<span class="small-label">3 of 4 · Time</span><h2>How much time can you usually study?</h2><p>This becomes the default size of a guided Study Session. You can change it anytime.</p>
         <div class="onboarding-time-grid">${[20,40,60,90].map(n=>'<label><input type="radio" name="dailyMinutes" value="'+n+'" '+(Number(p.dailyMinutes)===n?'checked':'')+'><span><strong>'+n+'</strong> min/day</span></label>').join('')}</div>`,
       `<span class="small-label">4 of 4 · Starting point</span><h2>You’re ready.</h2><p>${p.pathway==='SAT'?'A short diagnostic can give StudyAI its first real evidence.':'Start with Today, then learn and answer questions to build real mastery evidence.'}</p>
         ${p.pathway==='SAT'?'<label class="onboarding-check"><input id="onboarding-diagnostic" type="checkbox" checked><span><strong>Take a 12-question SAT diagnostic</strong><small>Results create initial mastery evidence. It is not an official SAT score.</small></span></label>':''}
-        <div class="onboarding-summary"><span>${safe(p.pathway||'Pathway')}</span><span>${p.examDate?safe(p.examDate):'No exam date'}</span><span>${p.dailyMinutes||40} min/day</span></div>`
+        <div class="onboarding-summary"><span>${safe([p.pathway,p.grade,p.subject].filter(Boolean).join(' · ')||'Pathway')}</span><span>${p.examDate?safe(p.examDate):'No exam date'}</span><span>${p.dailyMinutes||40} min/day</span></div>`
     ];
     box.innerHTML=`<form id="onboarding-form"><div class="onboarding-progress"><span style="width:${25*(onboardingStep+1)}%"></span></div>${steps[onboardingStep]}<p id="onboarding-status" role="status"></p>
       <div class="onboarding-actions">
@@ -396,6 +499,23 @@
         <div>${onboardingStep?'<button type="button" class="button secondary" data-onboarding-prev>Back</button>':''}
         ${onboardingStep<3?'<button type="button" class="button primary" data-onboarding-next>Continue →</button>':'<button type="button" class="button primary" data-onboarding-finish>Go to Today →</button>'}</div>
       </div></form>`;
+    if(onboardingStep===0){
+      const pathway=$('#onboarding-pathway'),grade=$('#onboarding-grade'),subject=$('#onboarding-subject');
+      const refresh=()=>{
+        const value=pathway?.value||'',school=value&&value!=='SAT';
+        $('#onboarding-grade-wrap').hidden=!school;$('#onboarding-subject-wrap').hidden=!school;
+        if(!school)return;
+        const grades=gradeOptions(value),selected=grades.includes(grade?.value)?grade.value:(grades[0]||'');
+        grade.innerHTML=grades.map(x=>'<option '+(x===selected?'selected':'')+'>'+safe(x)+'</option>').join('');
+        const subjects=subjectOptions(value,selected);
+        subject.innerHTML=subjects.map(x=>'<option>'+safe(x)+'</option>').join('');
+      };
+      pathway?.addEventListener('change',refresh);
+      grade?.addEventListener('change',()=>{
+        const subjects=subjectOptions(pathway?.value||'',grade?.value||'');
+        subject.innerHTML=subjects.map(x=>'<option>'+safe(x)+'</option>').join('');
+      });
+    }
   }
   function openOnboarding(edit=false){
     const dialog=ensureOnboarding();onboardingStep=edit?0:0;renderOnboarding();dialog.showModal();
@@ -459,13 +579,21 @@
   }
 
   function mount(){
+    if(!bridge.getProductPrefs?.()){
+      const legacy=readJSON(PREFS_KEY,defaultPrefs());
+      if(legacy.pathway||legacy.onboardingComplete)bridge.saveProductPrefs?.(legacy);
+    }
+    if(!bridge.getActiveStudySession?.()){
+      try{const legacySession=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');if(legacySession?.steps)bridge.saveActiveStudySession?.(legacySession)}catch(_){}
+    }
     ensureToday();
     ensureSessionDialog();
     ensureAccountControls();
+    bridge.recordBetaSignal?.('app-open');
     renderToday();
     autoOnboarding();
 
-    window.addEventListener('studyai:state-changed',()=>queueMicrotask(()=>{renderToday();enhanceMasteryRows()}));
+    window.addEventListener('studyai:state-changed',()=>queueMicrotask(()=>{reconcileSession();renderToday();enhanceMasteryRows()}));
     window.addEventListener('hashchange',()=>{if(location.hash==='#today'||location.hash==='#progress'){renderToday();setTimeout(enhanceMasteryRows,50)}});
     window.addEventListener('studyai:feature-loaded',()=>{renderToday();ensureAccountControls()});
     const observer=new MutationObserver(()=>enhanceMasteryRows());

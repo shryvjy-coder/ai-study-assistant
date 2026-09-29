@@ -894,6 +894,15 @@
       providerReady=!!status.configured;
       scope=me.user?.id ? 'account-'+String(me.user.id) : 'guest';
       $('#pai-provider-status').textContent=providerReady ? 'Gemini connection ready' : 'Gemini key not configured';
+      const quotaNote=$('.pai-availability small');
+      if(quotaNote){
+        const remaining=status.daily_remaining;
+        const limits=status.daily_limits||{};
+        quotaNote.textContent=providerReady
+          ? (remaining ? 'Daily AI remaining · '+remaining.text+' text · '+remaining.audio+' audio' : 'Gemini-powered · sign in to use daily AI quota')
+          : 'Gemini-powered · server-side key';
+        quotaNote.title=limits.text!=null ? 'Daily limits: '+limits.text+' text generations and '+limits.audio+' audio generations per signed-in account.' : '';
+      }
       $('.pai-availability')?.classList.toggle('ready',providerReady);
       if (providerReady && !me.user) notify('Sign in to generate AI notes and audio. You can add sources first.');
       else if (!providerReady) notify('Your source library is ready. AI generation needs GEMINI_API_KEY in the server .env file.');

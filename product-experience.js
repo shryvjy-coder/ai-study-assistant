@@ -519,11 +519,11 @@
     }
     if(onboardingStep===2){
       const custom=$('#onboarding-form [name="dailyMinutes"]');
-      $('[name="dailyMinutesPreset"]',$('#onboarding-form')).forEach(radio=>radio.addEventListener('change',()=>{
+      $$('[name="dailyMinutesPreset"]',$('#onboarding-form')).forEach(radio=>radio.addEventListener('change',()=>{
         if(radio.checked&&custom)custom.value=radio.value;
       }));
       custom?.addEventListener('input',()=>{
-        $('[name="dailyMinutesPreset"]',$('#onboarding-form')).forEach(radio=>radio.checked=Number(radio.value)===Number(custom.value));
+        $$('[name="dailyMinutesPreset"]',$('#onboarding-form')).forEach(radio=>radio.checked=Number(radio.value)===Number(custom.value));
       });
     }
   }

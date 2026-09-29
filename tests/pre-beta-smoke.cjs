@@ -165,7 +165,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.waitForFunction(()=>document.querySelector('#pai-provider-status')?.textContent.includes('Gemini key not configured'));
   check(true,'Personal AI clearly reports an unconfigured Gemini provider');
 
-  await page.locator('#pai-paste summary').click();
+  await page.locator('.pai-paste summary').click();
   await page.locator('#pai-paste-title').fill('Smoke source');
   await page.locator('#pai-paste-text').fill('A short source used to verify the Personal AI error state.');
   await page.locator('#pai-add-paste').click();

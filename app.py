@@ -214,6 +214,8 @@ def social_login(provider, email, sub, name=''):
             user_id = user['id']
             conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name="" THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
         else:
+            if os.getenv('BETA_ACCESS_CODE', '').strip():
+                raise ValueError('Private beta account creation requires an invite code. Create the account with email/password first.')
             cur = conn.execute(
                 'INSERT INTO users(email,name,password_hash,created_at,last_login) VALUES(?,?,?,?,?)',
                 (email, name or '', None, now, now),

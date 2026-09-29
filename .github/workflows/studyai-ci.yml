@@ -18,7 +18,8 @@ jobs:
         with:
           node-version: "22"
       - run: pip install -r requirements.txt
-      - run: python -m py_compile app.py launcher.py personal_ai.py production_preflight.py
+      - run: python -m py_compile app.py launcher.py personal_ai.py production_preflight.py tests/pre-beta-server.py
+      - run: python tests/pre-beta-server.py
       - name: JavaScript syntax
         shell: bash
         run: |
@@ -28,6 +29,7 @@ jobs:
           done
           node --check tests/learning-integration.cjs
           node --check tests/product-experience.cjs
+          node --check tests/pre-beta-smoke.cjs
 
   browser:
     runs-on: ubuntu-latest
@@ -50,3 +52,4 @@ jobs:
           npx playwright install --with-deps chromium
       - run: node tests/learning-integration.cjs
       - run: node tests/product-experience.cjs
+      - run: node tests/pre-beta-smoke.cjs

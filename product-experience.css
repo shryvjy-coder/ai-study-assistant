@@ -126,3 +126,21 @@ html[data-theme="dark"] .today-session-builder{border-color:#46526a;box-shadow:5
 .studyai-data-controls p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.5}
 .studyai-data-actions{display:flex;gap:8px;flex-wrap:wrap}
 .studyai-data-actions .danger{color:var(--accent-orange-dark);border-color:var(--line)}
+
+
+/* Product-experience v2: custom sessions, verified steps, richer onboarding */
+.session-custom{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.session-custom label{display:flex;align-items:center;gap:8px;font-size:.76rem;font-weight:800;color:var(--muted)}
+.session-custom input{width:76px;padding:8px 9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}
+.session-step.done .session-step-copy small{color:var(--teal-dark)}
+.session-step.done .session-step-num{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--teal) 55%,transparent)}
+.onboarding-summary span:first-child{max-width:280px;white-space:normal}
+#onboarding-grade-wrap[hidden],#onboarding-subject-wrap[hidden]{display:none!important}
+.today-priority details{margin-top:7px}
+.today-priority details summary{cursor:pointer;font-size:.75rem;font-weight:850;color:var(--teal-dark)}
+.today-priority details p{margin:.35rem 0 0;font-size:.74rem;line-height:1.45}
+@media(max-width:640px){
+  .session-custom{align-items:flex-end}
+  .session-custom label{flex:1;justify-content:space-between}
+  .session-custom input{width:92px}
+}

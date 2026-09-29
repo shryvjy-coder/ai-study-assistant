@@ -101,6 +101,26 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.waitForSelector('#mock-exam-shell:not(.hidden)');
   check((await page.locator('#mock-section-label').textContent()).includes('Math'),'Math-only SAT mock starts in Math');
   check(await page.locator('#mock-question-pane h3').count()===1,'SAT mock renders an active question');
+  check(await page.locator('#mock-formula-btn:not(.hidden)').count()===1,'Math mock exposes the formula sheet');
+  await page.locator('#mock-formula-btn').click();
+  check(await page.locator('#mock-formula-overlay:not(.hidden)').count()===1,'Math formula sheet opens');
+  await page.locator('#mock-formula-close').click();
+
+  let strikeoutFound=false;
+  for(let i=0;i<22&&!strikeoutFound;i++){
+    if(await page.locator('[data-eliminate]').count()){
+      strikeoutFound=true;
+      const eliminate=page.locator('[data-eliminate]').first();
+      await eliminate.click();
+      check(await eliminate.getAttribute('aria-pressed')==='true','SAT mock strikeout marks an option eliminated');
+      const struck=page.locator('.mock-option.struck').first();
+      check(await struck.getAttribute('aria-disabled')==='true','struck SAT option is exposed as unavailable');
+      await page.locator('[data-eliminate].active').first().click();
+    }else if(i<21){
+      await page.locator('#mock-next').click();
+    }
+  }
+  check(strikeoutFound,'Math mock contains a multiple-choice question with strikeout controls');
 
   await page.waitForSelector('#mock-question-pane [data-report-question="mock"]');
   await page.locator('#mock-question-pane [data-report-question="mock"]').click();
@@ -109,7 +129,27 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.locator('#question-report-form [type="submit"]').click();
   await page.waitForFunction(()=>document.querySelector('#question-report-status')?.textContent.includes('Thanks'));
   check(true,'question-reporting UI submits from a live SAT mock');
+  await page.waitForFunction(()=>!document.querySelector('#question-report-dialog')?.open);
 
+  await page.locator('#question-review-page').click();
+  await page.waitForSelector('#review-submit');
+  await page.locator('#review-submit').click();
+  await page.waitForSelector('.module-transition');
+  await page.locator('#continue-mock').click();
+  await page.waitForFunction(()=>document.querySelector('#mock-module-label')?.textContent.includes('Module 2'));
+  check((await page.locator('#mock-module-label').textContent()).includes('22 questions'),
+    'adaptive Math Module 2 loads with the expected question count');
+
+  await page.locator('#mock-exit').click();
+  await page.waitForFunction(()=>document.querySelector('#mock-exam-shell')?.classList.contains('hidden'));
+
+  await page.locator('[data-start-mock="2"]').click();
+  await page.waitForSelector('#mock-setup-dialog[open]');
+  await page.locator('input[name="mock-section"][value="both"] + span').click();
+  await page.locator('#mock-setup-begin').click();
+  await page.waitForSelector('#mock-exam-shell:not(.hidden)');
+  check((await page.locator('#mock-section-label').textContent()).includes('Reading & Writing'),
+    'full SAT mock starts with Reading & Writing Module 1');
   await page.locator('#mock-exit').click();
   await page.waitForFunction(()=>document.querySelector('#mock-exam-shell')?.classList.contains('hidden'));
 

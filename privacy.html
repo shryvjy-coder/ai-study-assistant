@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Privacy & Data · StudyAI</title>
+  <script>
+    try {
+      const savedTheme = JSON.parse(localStorage.getItem('studyai-multicurriculum-v1') || '{}').theme;
+      if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme;
+    } catch (_) {}
+  </script>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="cobalt-theme.css">
   <link rel="stylesheet" href="site-premium.css">
@@ -51,6 +57,17 @@
           <p>Passwords are not stored as plain text.</p>
         </section>
         <section class="privacy-card">
+          <h2>Private-beta product signals</h2>
+          <p>To understand whether StudyAI is useful during the controlled beta, the synced study state can include a small set of product signals: distinct active days, first recorded practice time, guided sessions started and completed, and last-active time.</p>
+          <p>These signals are used to evaluate whether students return and complete learning actions. StudyAI does not need a school name, phone number, street address, precise location, or date of birth for these beta signals.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>External services and sign-in</h2>
+          <p>StudyAI can load the College Board testing versions of the Desmos graphing and scientific calculators inside the SAT tools. Loading those embedded Desmos pages creates a direct browser connection to Desmos and is subject to Desmos's applicable privacy practices.</p>
+          <p>If a social sign-in provider is configured, StudyAI can use Google, Microsoft, or Apple authentication. The provider handles its own sign-in screen and returns the account information needed to link the StudyAI identity. Providers that are not configured remain unavailable.</p>
+          <p>StudyAI is an independent project and is not affiliated with Desmos, College Board, Google, Microsoft, or Apple.</p>
+        </section>
+        <section class="privacy-card">
           <h2>Personal AI</h2>
           <p>Personal AI source documents are intentionally kept in browser storage rather than added to normal account-state sync. When you choose an AI action, the selected source text and your request are sent from the StudyAI server to Google's Gemini API so the requested output can be generated.</p>
           <p class="privacy-note">Avoid uploading passwords, medical records, financial records, private identifiers, or other sensitive material. External AI processing is governed by the provider's applicable API terms and policies.</p>
@@ -82,7 +99,7 @@
         </section>
         <section class="privacy-card">
           <h2>Project status</h2>
-          <p>StudyAI is still being prepared for a public beta. This page should be reviewed again before a wider public launch, especially if hosting, analytics, authentication, or third-party services change.</p>
+          <p>StudyAI is being prepared for a controlled private beta. This page should be reviewed again before any wider public launch, especially if hosting, analytics, authentication, or third-party services change.</p>
         </section>
       </div>
     </div>

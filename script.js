@@ -1006,7 +1006,7 @@ function bind(){
  const mobileNavButton=$('#mobile-nav-btn'),mainNav=$('#main-nav');
  const setMobileNav=open=>{mainNav.classList.toggle('open',!!open);mobileNavButton.setAttribute('aria-expanded',String(!!open))};
  mobileNavButton.onclick=()=>setMobileNav(!mainNav.classList.contains('open'));
- $('a',mainNav).forEach(link=>link.addEventListener('click',()=>setMobileNav(false)));
+ mainNav.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMobileNav(false)));
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mainNav.classList.contains('open')){setMobileNav(false);mobileNavButton.focus()}});
  window.addEventListener('resize',()=>{if(innerWidth>1000)setMobileNav(false)});
  $('#board-filter').onchange=e=>{current.board=e.target.value;current.topic=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.topic=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.topic=null;renderFilters()};

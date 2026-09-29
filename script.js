@@ -7,7 +7,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null,productPrefs:null,activeStudySession:null,betaMetrics:{version:1,firstSeen:Date.now(),activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:Date.now()}});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
-let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
+let cloudUser=null,cloudProviders={},cloudRegistrationMode='open',cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
 let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
 function save(){
@@ -935,7 +935,7 @@ function renderAuth(){
  $$('.social-auth').forEach(b=>{const ok=!!cloudProviders[b.dataset.provider];b.classList.toggle('unavailable',!ok);b.querySelector('small').textContent=ok?'':'Setup required';b.setAttribute('aria-disabled',String(!ok))})
 }
 function setAuthMode(mode){
- authMode=mode;const reg=mode==='register';$('#auth-login-tab').classList.toggle('active',!reg);$('#auth-register-tab').classList.toggle('active',reg);$('#auth-name-field').classList.toggle('hidden',!reg);$('#auth-submit').textContent=reg?'Create account':'Sign in';$('#auth-password').autocomplete=reg?'new-password':'current-password';setPasswordVisible(false,{animate:false});$('#auth-error').classList.add('hidden');
+ authMode=mode;const reg=mode==='register';$('#auth-login-tab').classList.toggle('active',!reg);$('#auth-register-tab').classList.toggle('active',reg);$('#auth-name-field').classList.toggle('hidden',!reg);$('#auth-beta-field')?.classList.toggle('hidden',!(reg&&cloudRegistrationMode==='invite'));$('#auth-beta-code').required=reg&&cloudRegistrationMode==='invite';$('#auth-submit').textContent=reg?'Create account':'Sign in';$('#auth-password').autocomplete=reg?'new-password':'current-password';setPasswordVisible(false,{animate:false});$('#auth-error').classList.add('hidden');
 }
 function showAuthError(message){const e=$('#auth-error');e.textContent=message;e.classList.remove('hidden')}
 async function hydrateCloudState(){
@@ -953,7 +953,7 @@ async function hydrateCloudState(){
 }
 async function initAuth(){
  try{
-  const data=await fetchJSON('/api/auth/me');cloudUser=data.user;cloudProviders=data.providers||{};renderAuth();
+  const data=await fetchJSON('/api/auth/me');cloudUser=data.user;cloudProviders=data.providers||{};cloudRegistrationMode=data.registration_mode||'open';renderAuth();
   const params=new URLSearchParams(location.search);
   if(params.get('auth_error')){showAuthError(params.get('auth_error')==='provider_not_configured'?'That sign-in provider still needs developer credentials.':'Social sign-in could not be completed.');$('#auth-dialog').showModal()}
   if(cloudUser)await hydrateCloudState();
@@ -983,7 +983,7 @@ function togglePasswordVisibility(){setPasswordVisible($('#auth-password').type=
 function bindAuth(){
  const dialog=$('#auth-dialog');$('#account-button').onclick=()=>dialog.showModal();$('#auth-close').onclick=()=>dialog.close();$('#auth-login-tab').onclick=()=>setAuthMode('login');$('#auth-register-tab').onclick=()=>setAuthMode('register');$('#password-toggle').onclick=togglePasswordVisibility;
  $('#auth-form').onsubmit=async e=>{e.preventDefault();const btn=$('#auth-submit');btn.disabled=true;btn.textContent=authMode==='register'?'Creating account…':'Signing in…';$('#auth-error').classList.add('hidden');try{
-  const payload={email:$('#auth-email').value.trim(),password:$('#auth-password').value,name:$('#auth-name').value.trim()};
+  const payload={email:$('#auth-email').value.trim(),password:$('#auth-password').value,name:$('#auth-name').value.trim(),access_code:authMode==='register'?($('#auth-beta-code')?.value.trim()||''):''};
   const data=await fetchJSON(authMode==='register'?'/api/auth/register':'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});cloudUser=data.user;renderAuth();await hydrateCloudState();dialog.close();toast(authMode==='register'?'Account created · progress synced':'Welcome back');
  }catch(err){showAuthError(err.message)}finally{btn.disabled=false;btn.textContent=authMode==='register'?'Create account':'Sign in'}};
  $$('.social-auth').forEach(b=>b.onclick=()=>{const p=b.dataset.provider;if(!cloudProviders[p])return showAuthError(`${p[0].toUpperCase()+p.slice(1)} sign-in needs its developer credentials configured first.`);location.href=`/auth/${p}`});

@@ -5,7 +5,7 @@ const SAT_QUESTIONS = [{"id": "sat1", "section": "Reading & Writing", "domain": 
 const STORAGE_KEY='studyai-multicurriculum-v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null});
+const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null,productPrefs:null,activeStudySession:null,betaMetrics:{version:1,firstSeen:Date.now(),activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:Date.now()}});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 let cloudUser=null,cloudProviders={},cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
@@ -348,6 +348,7 @@ window.StudyAIPracticeBridge={
  getReviewSummary:()=>srsSummary(),
  recordAttempt:(q,chosen,correct,mode='custom-test')=>{
   if(!q||typeof correct!=='boolean')return;
+  if(!state.betaMetrics?.firstPracticeAt){state.betaMetrics=state.betaMetrics||{version:1,firstSeen:Date.now(),activeDays:[]};state.betaMetrics.firstPracticeAt=Date.now();}
   if(q.entry){
    curriculumMasteryEvidence(q.entry,correct,mode);
    if(!correct&&!state.review.includes(q.entry.id))state.review.push(q.entry.id);
@@ -394,6 +395,33 @@ window.StudyAIPracticeBridge={
  openDue:()=>loadDueReviews(),
  openMistakes:()=>{mistakeFilter='open';renderMistakeNotebook();location.hash='#mistake-notebook'},
  exportState:()=>state,
+ getProductPrefs:()=>state.productPrefs||null,
+ saveProductPrefs:prefs=>{
+  if(!prefs||typeof prefs!=='object')return;
+  state.productPrefs={...prefs};
+  save();
+ },
+ getActiveStudySession:()=>state.activeStudySession||null,
+ saveActiveStudySession:session=>{
+  state.activeStudySession=session&&typeof session==='object'?session:null;
+  save();
+ },
+ recordBetaSignal:(name,payload={})=>{
+  const now=Date.now(),day=new Date(now).toISOString().slice(0,10);
+  const metrics=state.betaMetrics&&typeof state.betaMetrics==='object'?state.betaMetrics:{version:1,firstSeen:now,activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:now};
+  metrics.activeDays=Array.isArray(metrics.activeDays)?metrics.activeDays:[];
+  if(!metrics.activeDays.includes(day))metrics.activeDays.push(day);
+  if(metrics.activeDays.length>90)metrics.activeDays=metrics.activeDays.slice(-90);
+  metrics.lastActiveAt=now;
+  if(name==='session-started')metrics.sessionsStarted=(metrics.sessionsStarted||0)+1;
+  if(name==='session-completed')metrics.sessionsCompleted=(metrics.sessionsCompleted||0)+1;
+  if(name==='first-practice'&&!metrics.firstPracticeAt)metrics.firstPracticeAt=now;
+  metrics.lastSignal=String(name||'').slice(0,60);
+  metrics.lastSignalAt=now;
+  if(payload&&Number.isFinite(payload.minutes))metrics.lastSessionMinutes=Math.max(0,Math.min(300,Math.round(payload.minutes)));
+  state.betaMetrics=metrics;save();
+ },
+ getBetaMetrics:()=>state.betaMetrics||null,
  setWeeklyGoal:value=>{state.weeklyPracticeGoal=Math.max(0,Math.min(500,Math.round(Number(value)||0)));save()}
 };
 

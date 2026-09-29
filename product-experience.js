@@ -602,7 +602,8 @@
 
   window.StudyAIProduct={
     prefs,savePrefs,confidence,startSession,openSession:openSessionDialog,openOnboarding,
-    buildSession:chooseSessionSteps,renderToday
+    buildSession:chooseSessionSteps,renderToday,reconcileSession,getQueue:queue,
+    getActiveSession:activeSession
   };
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);

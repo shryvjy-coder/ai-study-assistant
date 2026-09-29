@@ -443,6 +443,7 @@ def delete_account():
     uid = session['user_id']
     with db() as conn:
         conn.execute('DELETE FROM question_reports WHERE user_id=?', (uid,))
+        conn.execute('DELETE FROM client_errors WHERE user_id=?', (uid,))
         conn.execute('DELETE FROM users WHERE id=?', (uid,))
     session.clear()
     return jsonify({'ok': True})

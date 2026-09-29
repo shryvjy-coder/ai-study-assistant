@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     os.environ["BETA_ACCESS_CODE"] = "beta-test-code"
     os.environ["DATABASE_PATH"] = str(Path(temp_dir) / "studyai.sqlite")
 
-    from app import app  # noqa: E402
+    from app import app, social_login  # noqa: E402
 
     client = app.test_client()
     checks = 0
@@ -52,6 +52,13 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     })
     check(wrong.status_code == 403, "registration rejects an incorrect beta access code")
 
+    oauth_blocked = False
+    try:
+        social_login("google", "new-oauth@example.test", "new-oauth-sub", "New OAuth")
+    except ValueError:
+        oauth_blocked = True
+    check(oauth_blocked, "invite mode blocks brand-new OAuth account creation")
+
     created = client.post("/api/auth/register", json={
         "email": "beta@example.test",
         "password": "local-test-only-42",
@@ -60,6 +67,10 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     })
     check(created.status_code == 200 and created.get_json()["user"]["email"] == "beta@example.test",
           "registration accepts the correct beta access code")
+
+    linked_user = social_login("google", "beta@example.test", "existing-beta-google-sub", "Beta Tester")
+    check(isinstance(linked_user, int) and linked_user > 0,
+          "existing beta account may link a configured OAuth identity")
 
     empty_state = client.get("/api/state").get_json()
     check(empty_state["has_state"] is False, "new beta account starts without cloud state")

@@ -67,6 +67,8 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  check(await page.evaluate(()=>JSON.stringify(state.mastery))===masteryBefore,'planner completion never awards mastery');
  await page.reload();await page.waitForSelector('#learning-goals');
  check(await page.locator('[data-school-check][aria-pressed="true"]').count()===1,'school completion survives restart');
+ await page.evaluate(async()=>{await StudyAIPerformance.loadFeature('practice')});
+ await page.waitForFunction(()=>!!window.StudyAIPracticeStudio);
  await page.evaluate(()=>{StudyAIPracticeStudio.configure({mode:'custom',section:'Math',domain:'Algebra',skill:'Linear equations in one variable',level:'Advanced',time:10});StudyAIPracticeStudio.configure({mode:'diagnostic',section:'all'})});
  check(await page.evaluate(()=>['ps-domain','ps-skill','ps-level'].every(id=>document.getElementById(id).value==='all')&&document.getElementById('ps-time').value==='0'),'new diagnostic clears stale skill, level and timer filters');
  await page.locator('#ps-start').click();
@@ -91,7 +93,8 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  check(auth.ok(),'temporary Flask email/password account works');
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
- await ap.goto(url);await ap.waitForSelector('#pai-provider-status');await ap.waitForTimeout(600);
+ await ap.goto(url);await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});
+ await ap.waitForSelector('#pai-provider-status');await ap.waitForTimeout(600);
  if(await ap.locator('#studyai-onboarding[open]').count())await ap.locator('[data-onboarding-skip]').click();
  await ap.waitForFunction(()=>document.querySelector('#pai-provider-status').textContent.includes('ready'));
  await ap.locator('[data-pai-topic-mode="flashcards"]').click();

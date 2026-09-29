@@ -13,6 +13,7 @@ from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, request, send_from_directory, session, url_for
 from flask_compress import Compress
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,7 +26,12 @@ app.config.update(
     COMPRESS_ALGORITHM=['gzip'],
 )
 Compress(app)
-app.secret_key = os.getenv('SECRET_KEY') or 'dev-change-this-secret-key'
+_secret_key = os.getenv('SECRET_KEY', '').strip()
+if not _secret_key and os.getenv('FLASK_DEBUG', '1') == '0':
+    raise RuntimeError('SECRET_KEY must be configured when FLASK_DEBUG=0.')
+app.secret_key = _secret_key or 'dev-change-this-secret-key'
+if os.getenv('TRUST_PROXY', '0') == '1':
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',

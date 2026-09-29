@@ -570,6 +570,8 @@ def security_headers(response):
     response.headers.setdefault('Permissions-Policy', 'geolocation=(), camera=(), microphone=()')
     if request.is_secure:
         response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+    if os.getenv('BETA_ACCESS_CODE', '').strip():
+        response.headers.setdefault('X-Robots-Tag', 'noindex, nofollow, noarchive')
     return response
 
 

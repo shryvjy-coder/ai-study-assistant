@@ -43,7 +43,7 @@ app.config.update(
 DB_PATH = Path(os.getenv('DATABASE_PATH', BASE_DIR / 'studyai.db'))
 oauth = OAuth(app)
 
-EMAIL_RE = re.compile(r'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
 def db():
     conn = sqlite3.connect(DB_PATH)

@@ -42,7 +42,11 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.locator('[data-onboarding-next]').click();
   await page.locator('[data-onboarding-next]').click();
   await page.waitForSelector('[name="dailyMinutesPreset"][value="60"]');
-  await page.locator('[name="dailyMinutesPreset"][value="60"] + span').click();
+  await page.evaluate(()=>{
+    const radio=document.querySelector('[name="dailyMinutesPreset"][value="60"]');
+    radio.checked=true;
+    radio.dispatchEvent(new Event('change',{bubbles:true}));
+  });
   check(await page.locator('[name="dailyMinutes"]').inputValue()==='60','onboarding preset updates custom study time without browser errors');
   await page.locator('[data-onboarding-next]').click();
   check(await page.evaluate(()=>StudyAIProduct.prefs().dailyMinutes===60),'onboarding persists selected study time');

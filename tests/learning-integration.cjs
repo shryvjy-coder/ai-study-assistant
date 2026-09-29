@@ -8,7 +8,8 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 const dir=mkdtempSync(path.join(tmpdir(),'studyai-test-'));
 const port=process.env.TEST_PORT||'5099',url='http://127.0.0.1:'+port;
-const server=spawn(process.env.PYTHON||'python',['launcher.py'],{cwd:path.join(__dirname,'..'),env:{...process.env,PORT:port,FLASK_DEBUG:'0',DATABASE_PATH:path.join(dir,'test.sqlite')},stdio:'ignore'});
+const server=spawn(process.env.PYTHON||'python',['launcher.py'],{cwd:path.join(__dirname,'..'),env:{...process.env,PORT:port,FLASK_DEBUG:'0',DATABASE_PATH:path.join(dir,'test.sqlite')},stdio:['ignore','ignore','pipe']});
+let serverErrors='';server.stderr.on('data',chunk=>{serverErrors=(serverErrors+String(chunk)).slice(-12000)});
 let browser,checks=0;
 const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PASS',message)};
 (async()=>{
@@ -90,7 +91,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  const account=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
  const ap=await account.newPage();ap.on('pageerror',e=>errors.push(e.message));
  const auth=await account.request.post(url+'/api/auth/register',{headers:{Origin:url},data:{email:'integration@example.test',password:'local-test-only-42',name:'Integration'}});
- const authBody=await auth.text();check(auth.ok(),'temporary Flask email/password account works · HTTP '+auth.status()+' · '+authBody.slice(0,240));
+ const authBody=await auth.text();check(auth.ok(),'temporary Flask email/password account works · HTTP '+auth.status()+' · '+authBody.slice(0,240)+' · server '+serverErrors.slice(-1800));
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
  await ap.goto(url);await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});

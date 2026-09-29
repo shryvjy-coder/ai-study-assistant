@@ -50,6 +50,12 @@ jobs:
       - run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
-      - run: node tests/learning-integration.cjs
-      - run: node tests/product-experience.cjs
-      - run: node tests/pre-beta-smoke.cjs
+      - name: Learning integration
+        if: ${{ !cancelled() }}
+        run: node tests/learning-integration.cjs
+      - name: Product experience
+        if: ${{ !cancelled() }}
+        run: node tests/product-experience.cjs
+      - name: Pre-beta browser smoke
+        if: ${{ !cancelled() }}
+        run: node tests/pre-beta-smoke.cjs

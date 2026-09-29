@@ -90,6 +90,18 @@ def init_db():
                 created_at INTEGER NOT NULL,
                 FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
             );
+
+            CREATE TABLE IF NOT EXISTS client_errors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                message TEXT NOT NULL,
+                source TEXT NOT NULL DEFAULT '',
+                line INTEGER NOT NULL DEFAULT 0,
+                column_no INTEGER NOT NULL DEFAULT 0,
+                page TEXT NOT NULL DEFAULT '',
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
+            );
             '''
         )
 
@@ -365,6 +377,30 @@ def question_report():
         )
         report_id = cur.lastrowid
     return jsonify({'ok': True, 'report_id': report_id})
+
+
+@app.post('/api/client-errors')
+def client_error():
+    if not _allow_rate('client-error', 20, 600):
+        return jsonify({'ok': False, 'error': 'Too many error reports.'}), 429
+    data = request.get_json(silent=True) or {}
+    message = str(data.get('message', '')).strip()[:500]
+    if not message:
+        return jsonify({'ok': False, 'error': 'Invalid error report.'}), 400
+    source = str(data.get('source', '')).strip()[:240]
+    page = str(data.get('page', '')).strip()[:160]
+    try:
+        line = max(0, min(10_000_000, int(data.get('line') or 0)))
+        column = max(0, min(10_000_000, int(data.get('column') or 0)))
+    except (TypeError, ValueError):
+        line = column = 0
+    with db() as conn:
+        conn.execute(
+            '''INSERT INTO client_errors(user_id,message,source,line,column_no,page,created_at)
+               VALUES(?,?,?,?,?,?,?)''',
+            (session.get('user_id'), message, source, line, column, page, int(time.time())),
+        )
+    return jsonify({'ok': True})
 
 
 @app.get('/api/account/export')

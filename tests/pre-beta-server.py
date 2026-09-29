@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import os
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -125,5 +127,37 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     health = client.get("/api/health")
     check(health.status_code == 200 and health.get_json()["database"] == "ready",
           "health endpoint confirms database readiness")
+
+    repo_root = Path(__file__).resolve().parents[1]
+    blueprint = (repo_root / "render-private-beta.yaml").read_text(encoding="utf-8")
+    procfile = (repo_root / "Procfile").read_text(encoding="utf-8")
+    check("numInstances: 1" in blueprint and "--workers 1" in blueprint,
+          "Render beta keeps one service instance and one Gunicorn worker")
+    check("DATABASE_PATH" in blueprint and "/var/data/studyai.db" in blueprint and "disk:" in blueprint,
+          "Render beta stores SQLite on the persistent /var/data disk")
+    check("--workers 1" in procfile, "Procfile keeps a single SQLite-writing Gunicorn worker")
+
+    preflight_env = os.environ.copy()
+    preflight_env.update({
+        "SECRET_KEY": "0123456789012345678901234567890123456789",
+        "FLASK_DEBUG": "0",
+        "COOKIE_SECURE": "1",
+        "TRUST_PROXY": "1",
+        "DATABASE_PATH": "/var/data/studyai.db",
+        "BETA_ACCESS_CODE": "beta-test-code",
+        "GEMINI_API_KEY": "ci-placeholder",
+        "STUDYAI_AI_DAILY_TEXT_LIMIT": "60",
+        "STUDYAI_AI_DAILY_AUDIO_LIMIT": "10",
+    })
+    preflight = subprocess.run(
+        [sys.executable, str(repo_root / "production_preflight.py")],
+        cwd=repo_root,
+        env=preflight_env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    check(preflight.returncode == 0 and "READY:" in preflight.stdout,
+          "production preflight accepts the intended private-beta environment")
 
     print("TOTAL", checks, "pre-beta server checks passed")

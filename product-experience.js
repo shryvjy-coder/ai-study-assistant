@@ -401,6 +401,53 @@
     const dialog=ensureOnboarding();onboardingStep=edit?0:0;renderOnboarding();dialog.showModal();
   }
 
+  async function downloadAccountData(){
+    try{
+      const response=await fetch('/api/account/export');
+      if(!response.ok)throw new Error('Sign in to export account data.');
+      const data=await response.json();
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='studyai-account-export.json';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),500);
+    }catch(error){
+      alert(error.message||'Could not export account data.');
+    }
+  }
+
+  async function deleteAccount(){
+    const confirmation=prompt('Type DELETE to permanently delete your StudyAI account and synced data.');
+    if(confirmation!=='DELETE')return;
+    try{
+      const response=await fetch('/api/account',{
+        method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:'DELETE'})
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||'Could not delete account.');
+      localStorage.removeItem('studyai-multicurriculum-v1');
+      localStorage.removeItem(PREFS_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem('studyai-question-reports-v1');
+      location.reload();
+    }catch(error){
+      alert(error.message||'Could not delete account.');
+    }
+  }
+
+  function ensureAccountControls(){
+    const panel=$('#auth-signed-in .account-panel');
+    if(!panel||$('#studyai-data-controls'))return;
+    const section=document.createElement('section');
+    section.id='studyai-data-controls';section.className='studyai-data-controls';
+    section.innerHTML='<div><span class="small-label">Privacy & data</span><strong>Your StudyAI account data</strong><p>Download a copy of your saved account state or permanently delete the account.</p></div>'+
+      '<div class="studyai-data-actions"><button type="button" class="quiet-button" id="studyai-export-account">Download my data</button>'+
+      '<button type="button" class="quiet-button danger" id="studyai-delete-account">Delete account</button></div>';
+    panel.appendChild(section);
+    $('#studyai-export-account').addEventListener('click',downloadAccountData);
+    $('#studyai-delete-account').addEventListener('click',deleteAccount);
+  }
+
   function autoOnboarding(){
     const p=prefs();
     if(p.onboardingComplete)return;
@@ -414,12 +461,13 @@
   function mount(){
     ensureToday();
     ensureSessionDialog();
+    ensureAccountControls();
     renderToday();
     autoOnboarding();
 
     window.addEventListener('studyai:state-changed',()=>queueMicrotask(()=>{renderToday();enhanceMasteryRows()}));
     window.addEventListener('hashchange',()=>{if(location.hash==='#today'||location.hash==='#progress'){renderToday();setTimeout(enhanceMasteryRows,50)}});
-    window.addEventListener('studyai:feature-loaded',()=>renderToday());
+    window.addEventListener('studyai:feature-loaded',()=>{renderToday();ensureAccountControls()});
     const observer=new MutationObserver(()=>enhanceMasteryRows());
     const progress=$('#progress');if(progress)observer.observe(progress,{subtree:true,childList:true});
   }

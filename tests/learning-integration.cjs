@@ -90,7 +90,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  const account=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
  const ap=await account.newPage();ap.on('pageerror',e=>errors.push(e.message));
  const auth=await account.request.post(url+'/api/auth/register',{headers:{Origin:url},data:{email:'integration@example.test',password:'local-test-only-42',name:'Integration'}});
- check(auth.ok(),'temporary Flask email/password account works');
+ const authBody=await auth.text();check(auth.ok(),'temporary Flask email/password account works · HTTP '+auth.status()+' · '+authBody.slice(0,240));
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
  await ap.goto(url);await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});

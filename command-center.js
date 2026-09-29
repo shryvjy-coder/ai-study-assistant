@@ -8,7 +8,7 @@
  let dialog,input,results,active=0,items=[],drawFrame=0;
  const curriculumIndex=bridge.getCurriculum().map(e=>({type:'Topic',title:e.title,detail:[e.board,e.grade,e.subject].join(' · '),keywords:[e.title,e.board,e.grade,e.subject,e.summary].join(' ').toLowerCase(),run:()=>bridge.openTopic(e.id)}));
  const sections=[
-  ['Study library','#study'],['SAT practice','#sat'],['Practice Studio','#practice-studio'],
+  ['Today','#today'],['Study library','#study'],['SAT practice','#sat'],['Practice Studio','#practice-studio'],
   ['Flashcards','#flashcards'],['Progress','#progress'],['Planner','#planner'],
   ['Workspace','#workspace'],['Personal AI','#personal-ai'],['Tools','#tools'],['Help & tutorial','#help']
  ];

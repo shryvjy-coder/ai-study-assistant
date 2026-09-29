@@ -119,6 +119,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  await ap.reload();await ap.waitForSelector('#learning-goals');
  check(await ap.evaluate(id=>!!state.flashcardSchedule[id],aiId),'signed-in reload retains rated AI card');
  await ap.clock.install();
+ await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('practice')});
  await ap.evaluate(()=>StudyAIPracticeStudio.configure({mode:'custom',section:'Math',count:5,time:1}));
  await ap.locator('#ps-start').click();
  await ap.clock.fastForward(61000);

@@ -300,7 +300,7 @@
   function ensureSessionDialog(){
     let dialog=$('#study-session-dialog');
     if(dialog)return dialog;
-    dialog=document.createElement('dialog');dialog.id='study-session-dialog';dialog.className='study-session-dialog';
+    dialog=document.createElement('dialog');dialog.id='study-session-dialog';dialog.className='study-session-dialog';dialog.setAttribute('aria-label','Guided study session');
     dialog.innerHTML='<div id="study-session-dialog-content"></div>';
     document.body.appendChild(dialog);
     dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
@@ -432,7 +432,7 @@
   }
   function ensureOnboarding(){
     let dialog=$('#studyai-onboarding');if(dialog)return dialog;
-    dialog=document.createElement('dialog');dialog.id='studyai-onboarding';dialog.className='studyai-onboarding';
+    dialog=document.createElement('dialog');dialog.id='studyai-onboarding';dialog.className='studyai-onboarding';dialog.setAttribute('aria-label','Study preferences and onboarding');
     dialog.innerHTML='<div id="studyai-onboarding-content"></div>';
     document.body.appendChild(dialog);
     dialog.addEventListener('click',event=>{if(event.target===dialog&&prefs().onboardingComplete)dialog.close()});

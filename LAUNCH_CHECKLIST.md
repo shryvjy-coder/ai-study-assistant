@@ -2,6 +2,24 @@
 
 StudyAI is now much closer to a beta-ready product, but public deployment should not treat the current local-development defaults as production defaults.
 
+## Product experience now implemented
+
+The current beta build now includes:
+- a first-class **Today** destination in primary navigation and the command center;
+- pathway-aware recommendations using the existing Smart Review evidence rather than a second competing recommendation engine;
+- onboarding for SAT or a school board, with school grade/stage and subject preferences;
+- 20 / 40 / 60 minute and custom guided Study Sessions;
+- guided-session steps that can be automatically verified when real practice/review evidence changes;
+- signed-in sync for Today preferences and the current guided session;
+- evidence-confidence labels based on the amount of answered practice;
+- privacy-light beta signals: distinct active days, first practice, sessions started/completed, and last-active time;
+- question-quality reporting;
+- an optional private-beta invite code for new account creation.
+
+When `BETA_ACCESS_CODE` is configured, email/password registration requires the code. New social-OAuth accounts are also blocked from bypassing the invite gate; an existing beta account can still use a configured linked identity.
+
+The focused `tests/product-experience.cjs` suite covers the new Today/session behavior in addition to the broader learning integration suite.
+
 ## 1. Run the automated checks
 
 GitHub Actions should be green on `main`.
@@ -14,9 +32,19 @@ The CI workflow checks:
 Local equivalent:
 
 ```bash
-python -m py_compile app.py launcher.py personal_ai.py
+python -m py_compile app.py launcher.py personal_ai.py production_preflight.py
 node tests/learning-integration.cjs
+node tests/product-experience.cjs
 ```
+
+## Controlled Render beta option
+
+The repository includes:
+- `render-private-beta.yaml`, a reviewed Blueprint for one Singapore web-service instance with a persistent SQLite disk;
+- `production_preflight.py`, which checks critical production environment settings without printing secret values;
+- `DEPLOY_RENDER_BETA.md`, the step-by-step private-beta deployment guide.
+
+The Blueprint intentionally uses a paid persistent disk. Review the price shown by Render before creating any resource. Do not switch this SQLite setup to multiple instances.
 
 ## 2. Production environment
 

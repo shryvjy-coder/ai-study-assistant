@@ -4,6 +4,30 @@ StudyAI is a student-built study platform covering CBSE, Cambridge IGCSE, Cambri
 
 ## What changed in this build
 
+## Pre-launch product layer
+
+StudyAI now has a product-level **Today** experience instead of relying on users to discover every tool independently.
+
+- **Today dashboard:** explained priorities from due flashcards, open mistakes, weak practiced mastery, saved plans, and deadlines.
+- **Guided Study Sessions:** build a focused 20, 40, or 60 minute session from existing learning evidence. Marking a session step done never awards mastery by itself.
+- **First-run onboarding:** pathway, optional exam date, usual daily study time, and optional SAT diagnostic.
+- **Evidence confidence:** Limited / Developing / Strong evidence labels based on the amount of answered practice behind mastery.
+- **Question reporting:** Practice Studio and SAT mocks can report wrong answers, unclear explanations, bad difficulty, duplicates, or formatting problems. Reports are stored server-side when available and fall back to browser storage if needed.
+- **Privacy controls:** signed-in users can download their account data and permanently delete their account.
+- **Privacy page:** `/privacy` documents the current local, account-sync, Personal AI, cookie, and question-report behavior.
+- **Public-beta API hardening:** same-origin checks on state-changing API requests, login/registration throttling, security headers, request-size limits, and a database health endpoint.
+- **Personal AI abuse protection:** existing short-window throttling plus configurable daily text/audio generation limits per signed-in account.
+- **Automated CI:** Python/JavaScript syntax checks plus the Chromium integration suite run on pushes and pull requests.
+
+The intended product loop is now:
+
+```text
+Today → Learn / Practice → detect mistakes → update evidence → schedule review → plan the next session → retest
+```
+
+StudyAI deliberately keeps recommendation logic explainable. Reading a page, clicking “done,” or completing a planner item is never treated as proof of mastery.
+
+
 ### Connected deadlines and planner follow-through
 
 - Add up to 40 exam, topic, or revision goals under Planner → Goals and deadlines.
@@ -17,7 +41,7 @@ Spaced repetition was already present before this batch. This update fixes an em
 
 Practice Studio now resets filters when opened from another tool, measures time against a wall-clock deadline, reports unanswered questions separately, explains adaptive selection, and keeps diagnostic provenance in mastery history. Mock-result ingestion defensively excludes blanks and pretests. A cloud-save race is fixed so edits made during an upload schedule a follow-up upload.
 
-**Verification:** 41 automated Chromium integration checks against Flask with a temporary SQLite database, plus syntax checks for all 14 JavaScript files. Coverage includes all four flashcard sources, hidden-card protection, intervals, minute/visibility refresh, local and signed-in reloads, per-deck reset, goal validation/caps, planner budgeting/completion, practice filters/timing, and mobile light/dark layouts. Personal AI responses are fixtures in these tests; live Gemini generation is not tested.
+**Verification:** the Chromium integration suite runs against Flask with a temporary SQLite database, and GitHub Actions also performs Python/JavaScript syntax checks on every push and pull request. The exact check count grows as product flows are added. Coverage includes all four flashcard sources, hidden-card protection, intervals, minute/visibility refresh, local and signed-in reloads, per-deck reset, goal validation/caps, planner budgeting/completion, practice filters/timing, and mobile light/dark layouts. Personal AI responses are fixtures in these tests; live Gemini generation is not tested.
 
 Run the browser regression suite after installing the Python requirements and Playwright (`npm install --no-save playwright` and `npx playwright install chromium`):
 
@@ -200,6 +224,7 @@ Tables:
 - `users`
 - `oauth_identities`
 - `user_state`
+- `question_reports`
 
 `user_state` stores each account's StudyAI state as JSON, including progress, bookmarks, review topics, personal notes, quiz history, SAT mastery, flashcard states, workspace notes and folders.
 
@@ -207,20 +232,31 @@ SQLite is ideal for a local student project. A later deployment can move this to
 
 ---
 
-# Important production upgrades later
+# Production / public-beta status
 
-Before opening public account creation to real users, add:
-- Email verification
-- Password reset emails
-- Rate limiting
-- CSRF hardening for production forms/API actions
-- PostgreSQL
-- HTTPS-only secure cookies
-- Privacy policy and account deletion flow
-- Database backups
-- Real server-side collaboration
+Already implemented:
+- hashed passwords and HTTP-only sessions
+- SameSite session cookies and a secure-cookie production switch
+- login and registration throttling
+- same-origin checks for state-changing API requests
+- security response headers
+- account data export and deletion
+- Privacy & Data page
+- Personal AI burst throttling and configurable daily account limits
+- bounded question-quality reports
+- database health endpoint
+- Gunicorn production dependency / Procfile
+- automated GitHub Actions regression checks
 
-The current build is a strong local/full-stack MVP and portfolio base, not yet a production identity service.
+Still required before treating the identity layer as broadly production-ready:
+- verified email ownership
+- password-reset email flow
+- PostgreSQL for a broader/multi-instance deployment, or a genuinely persistent backed-up SQLite volume for a small private beta
+- persistent/distributed rate limiting if multiple application instances are used
+- final HTTPS OAuth callback configuration
+- operational database backups and monitoring
+
+See `LAUNCH_CHECKLIST.md` before deploying. The current build is suitable for a carefully controlled private beta once persistent database storage is configured; it is not yet a finished large-scale identity service.
 
 ## Interaction fixes in this build
 

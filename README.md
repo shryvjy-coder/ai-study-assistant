@@ -2,6 +2,24 @@
 
 StudyAI is a student-built study platform covering CBSE, Cambridge IGCSE, Cambridge AS/A Level and original Digital SAT practice. This build adds a real account/database layer while preserving the detailed notes, flashcards, quizzes, planner, progress dashboard, personal workspace and local-first behavior.
 
+## Current product direction: from feature collection to guided study system
+
+StudyAI now treats **Today** as a primary product destination. The goal is to connect the tools that already exist into one explainable loop:
+
+**Choose a goal → do the most useful next work → answer questions → review mistakes/due cards → update evidence → plan the next session.**
+
+Current product-experience work includes:
+- pathway-aware Today recommendations from the same Smart Review evidence used on Progress;
+- guided 20 / 40 / 60 minute or custom-length Study Sessions;
+- evidence-verified session steps when real practice/review state changes;
+- SAT vs school-pathway separation, including board / grade / subject onboarding for school users;
+- signed-in syncing of Today preferences and an active Study Session;
+- evidence-confidence labels based on answered-practice volume;
+- privacy-light beta success signals rather than invasive profile analytics;
+- a private-beta invite-code option for controlled real-user testing.
+
+For the first hosted beta, see `DEPLOY_RENDER_BETA.md`, `render-private-beta.yaml`, and `production_preflight.py`.
+
 ## What changed in this build
 
 ## Pre-launch product layer
@@ -208,7 +226,11 @@ For a real HTTPS deployment:
 ```env
 COOKIE_SECURE=1
 FLASK_DEBUG=0
+TRUST_PROXY=1
+BETA_ACCESS_CODE=<private beta invite code>
 ```
+
+For the SQLite-backed private beta, use one application instance and a genuinely persistent disk. The included Render blueprint is intentionally configured this way. For broader scaling, migrate to PostgreSQL first.
 
 Never commit the real `.env`, OAuth secrets, or Apple private key to GitHub.
 

@@ -89,7 +89,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  // and wall-clock deadline checks. No Gemini request or credential is used.
  const account=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
  const ap=await account.newPage();ap.on('pageerror',e=>errors.push(e.message));
- const auth=await account.request.post(url+'/api/auth/register',{data:{email:'integration@example.test',password:'local-test-only-42',name:'Integration'}});
+ const auth=await account.request.post(url+'/api/auth/register',{headers:{Origin:url},data:{email:'integration@example.test',password:'local-test-only-42',name:'Integration'}});
  check(auth.ok(),'temporary Flask email/password account works');
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
@@ -126,7 +126,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  check(noOverload,'15-minute school plans contain usable sessions');
  await ap.evaluate(()=>{const api=StudyAIPlanning;for(let i=0;i<40;i++)api.addGoal({title:'Goal '+i,date:'2099-01-01',pathway:'SAT',type:'exam'});window.__capResult=api.addGoal({title:'Overflow',date:'2099-01-01',pathway:'SAT'})});
  check(await ap.evaluate(()=>state.learningGoals.length===40&&!!window.__capResult.error),'goal storage cap is enforced');
- const report=await account.request.post(url+'/api/question-reports',{data:{source:'test',category:'format',question_text:'Fixture question for quality reporting',details:'Integration test'}});
+ const report=await account.request.post(url+'/api/question-reports',{headers:{Origin:url},data:{source:'test',category:'format',question_text:'Fixture question for quality reporting',details:'Integration test'}});
  check(report.ok(),'question quality report API accepts a bounded report');
  const health=await account.request.get(url+'/api/health');
  check(health.ok()&&(await health.json()).database==='ready','deployment health endpoint checks the database');
@@ -140,7 +140,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   if(process.env.TEST_SCREENSHOTS)await ap.screenshot({path:path.join(process.env.TEST_SCREENSHOTS,'studyai-goals-'+theme+'.png')});
   check(await ap.evaluate(()=>{const el=document.querySelector('#learning-goals');return el.scrollWidth<=el.clientWidth+1}),'goal controls have no internal overflow in '+theme+' mode');
  }
- const deleted=await account.request.delete(url+'/api/account',{data:{confirm:'DELETE'}});
+ const deleted=await account.request.delete(url+'/api/account',{headers:{Origin:url},data:{confirm:'DELETE'}});
  check(deleted.ok(),'account deletion removes the temporary integration account');
  await account.close();
  check(errors.length===0,'no browser JavaScript errors: '+errors.join('; '));

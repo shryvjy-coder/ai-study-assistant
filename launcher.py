@@ -11,6 +11,7 @@ def enhanced_index():
         style_marker
         + '\n  <link rel="stylesheet" href="site-premium.css" />'
         + '\n  <link rel="stylesheet" href="command-center.css" />'
+        + '\n  <link rel="stylesheet" href="product-experience.css" />'
     )
     if 'site-premium.css' not in html:
         html = html.replace(style_marker, style_enhancement)
@@ -31,6 +32,8 @@ def enhanced_index():
         + '\n<script defer src="sat-study-planner.js"></script>'
         + '\n<script defer src="revision-sheets.js"></script>'
         + '\n<script defer src="learning-planner.js"></script>'
+        + '\n<script defer src="product-experience.js"></script>'
+        + '\n<script defer src="question-reporting.js"></script>'
     )
     if 'sat-exam-tools.js' not in html:
         html = html.replace(script_marker, script_enhancement)

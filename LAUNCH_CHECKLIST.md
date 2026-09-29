@@ -24,10 +24,19 @@ The focused `tests/product-experience.cjs` suite covers the new Today/session be
 
 GitHub Actions should be green on `main`.
 
-The CI workflow checks:
-- Python syntax for Flask/launcher/Personal AI
-- JavaScript syntax
-- the Chromium integration suite using a temporary database and test account
+The CI workflow now checks:
+- Python syntax for Flask, launcher, Personal AI, deployment preflight, and beta server tests
+- JavaScript syntax for every root script and all browser test suites
+- invite-only registration behavior, login/logout, cloud state sync, question reporting, account export/deletion, cross-origin blocking, noindex beta headers, and database health
+- Render/Procfile SQLite safety: one service instance, one Gunicorn worker, persistent `/var/data` database path
+- the production preflight against the intended private-beta environment
+- the full learning integration suite
+- Today/onboarding/guided-session product experience
+- signed-in cloud hydration stability, including legacy-state reload-loop regression coverage
+- 390px mobile overflow, mobile-menu state, skip navigation, duplicate IDs, and primary-navigation targets
+- SAT mock startup, College Board Desmos graphing/scientific URLs, live question-reporting UI
+- Personal AI unavailable-key behavior and user-facing error state
+- browser JavaScript error collection across the smoke paths
 
 Local equivalent:
 
@@ -35,6 +44,8 @@ Local equivalent:
 python -m py_compile app.py launcher.py personal_ai.py production_preflight.py
 node tests/learning-integration.cjs
 node tests/product-experience.cjs
+node tests/pre-beta-smoke.cjs
+python tests/pre-beta-server.py
 ```
 
 ## Controlled Render beta option
@@ -187,7 +198,17 @@ These are more useful than raw page views.
 
 ## 11. Final smoke test
 
-On desktop and mobile-sized screens:
+Most structural flows below are now automated in CI. Before inviting real students, still perform one local smoke pass because CI cannot prove your real Windows browser, local audio stack, external Desmos frame, or real Gemini account works.
+
+Use the normal local workflow first:
+
+1. GitHub Desktop → Fetch origin
+2. Pull origin
+3. Close the existing StudyAI browser window and terminal
+4. Run `StudyAI.bat`
+5. Press `Ctrl + Shift + R`
+
+Then test on desktop and a mobile-sized browser window:
 - new user onboarding
 - Today recommendations
 - 20/40/60-minute Study Session

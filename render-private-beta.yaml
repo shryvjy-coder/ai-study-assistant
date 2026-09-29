@@ -1,0 +1,38 @@
+# StudyAI private-beta Render Blueprint.
+# This intentionally uses a PAID web service + persistent disk because SQLite
+# must not live on Render's ephemeral filesystem. For a broader launch, migrate
+# to PostgreSQL before scaling beyond one service instance.
+services:
+  - type: web
+    name: studyai-beta
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    branch: main
+    numInstances: 1
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn launcher:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /api/health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATABASE_PATH
+        value: /var/data/studyai.db
+      - key: BETA_ACCESS_CODE
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: STUDYAI_AI_DAILY_TEXT_LIMIT
+        value: "60"
+      - key: STUDYAI_AI_DAILY_AUDIO_LIMIT
+        value: "10"
+    disk:
+      name: studyai-data
+      mountPath: /var/data
+      sizeGB: 5

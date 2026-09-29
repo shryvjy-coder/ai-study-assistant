@@ -28,8 +28,7 @@
   };
 
   let exam = null;
-  let desmosCalculator = null;
-  let desmosLoading = null;
+  let desmosMode = 'graphing';
   let calcAngleMode = 'deg';
   let mockPreferences = {sectionMode:'both', timingMode:'normal', breakMode:'normal'};
   let selectedMockTest = 1;
@@ -144,7 +143,7 @@ function getMockHistory() {
               <span>98 questions</span>
               <span>4 modules</span>
               <span>Adaptive Module 2</span>
-              <span>Desmos + formula sheet</span>
+              <span>College Board Desmos + formula sheet</span>
             </div>
 
             <div class="mock-test-footer">
@@ -200,7 +199,7 @@ function getMockHistory() {
           <strong>Choose a full-length test</strong>
           <span>Each test is unique and uses its own question bank.</span>
         </div>
-        <button class="button secondary compact" id="open-desmos" type="button">Open Desmos</button>
+        <button class="button secondary compact" id="open-desmos" type="button">Open SAT Desmos</button>
       </div>
 
       <div class="mock-test-grid" id="mock-test-grid"></div>
@@ -1043,6 +1042,11 @@ function getMockHistory() {
     leaveMockFullscreen();
   }
 
+  const COLLEGE_BOARD_DESMOS = {
+    graphing:'https://www.desmos.com/testing/collegeboard/graphing',
+    scientific:'https://www.desmos.com/testing/collegeboard/scientific'
+  };
+
   function ensureDesmosPanel() {
     let panel = $('#desmos-panel');
     if (panel) return panel;
@@ -1051,40 +1055,60 @@ function getMockHistory() {
     panel.className = 'desmos-panel hidden desmos-floating';
     panel.innerHTML = `
       <header class="calc-window-header" id="desmos-drag-handle">
-        <div><span class="calc-dot"></span><strong>Desmos</strong><small>Graphing Calculator</small></div>
+        <div><span class="calc-dot"></span><strong>SAT Calculator</strong><small>Desmos · College Board testing version</small></div>
         <div class="calc-window-actions">
           <button type="button" id="desmos-split">Split</button>
           <button type="button" id="desmos-float">Float</button>
           <button type="button" id="desmos-close" aria-label="Close calculator">×</button>
         </div>
       </header>
-      <div class="desmos-mount" id="desmos-mount"><div class="calc-loading">Loading Desmos…</div></div>
-      <footer class="calc-attribution">StudyAI practice tool · Desmos calculator</footer>
+      <div class="desmos-mode-tabs" role="tablist" aria-label="SAT calculator type">
+        <button type="button" role="tab" data-desmos-mode="graphing" aria-selected="true" class="active">Graphing</button>
+        <button type="button" role="tab" data-desmos-mode="scientific" aria-selected="false">Scientific</button>
+      </div>
+      <div class="desmos-mount" id="desmos-mount">
+        <iframe
+          id="desmos-testing-frame"
+          title="Desmos Graphing Calculator College Board Version"
+          src="${COLLEGE_BOARD_DESMOS.graphing}"
+          loading="eager"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="clipboard-read; clipboard-write"
+        ></iframe>
+      </div>
+      <footer class="calc-attribution">
+        Desmos College Board testing configuration · StudyAI is not affiliated with College Board or Desmos
+      </footer>
     `;
     document.body.appendChild(panel);
-    $('#desmos-close')?.addEventListener('click', closeDesmos);
-    $('#desmos-float')?.addEventListener('click', () => openDesmos('floating'));
-    $('#desmos-split')?.addEventListener('click', () => openDesmos('split'));
-    makeDraggable(panel, $('#desmos-drag-handle'));
-    if ('ResizeObserver' in window) new ResizeObserver(() => desmosCalculator?.resize?.()).observe(panel);
+    $('#desmos-close', panel)?.addEventListener('click', closeDesmos);
+    $('#desmos-float', panel)?.addEventListener('click', () => openDesmos('floating'));
+    $('#desmos-split', panel)?.addEventListener('click', () => openDesmos('split'));
+    $$('[data-desmos-mode]', panel).forEach(button => button.addEventListener('click', () => setDesmosMode(button.dataset.desmosMode)));
+    makeDraggable(panel, $('#desmos-drag-handle', panel));
     return panel;
   }
 
-  function loadDesmos() {
-    if (window.Desmos) return Promise.resolve(window.Desmos);
-    if (desmosLoading) return desmosLoading;
-    desmosLoading = new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://www.desmos.com/api/v1.12/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6';
-      script.async = true;
-      script.onload = () => resolve(window.Desmos);
-      script.onerror = reject;
-      document.head.appendChild(script);
+  function setDesmosMode(mode = 'graphing') {
+    if (!COLLEGE_BOARD_DESMOS[mode]) mode = 'graphing';
+    desmosMode = mode;
+    const panel = ensureDesmosPanel();
+    $$('[data-desmos-mode]', panel).forEach(button => {
+      const active = button.dataset.desmosMode === mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
     });
-    return desmosLoading;
+    const frame = $('#desmos-testing-frame', panel);
+    if (frame) {
+      const target = COLLEGE_BOARD_DESMOS[mode];
+      if (frame.getAttribute('src') !== target) frame.setAttribute('src', target);
+      frame.title = mode === 'graphing'
+        ? 'Desmos Graphing Calculator College Board Version'
+        : 'Desmos Scientific Calculator College Board Version';
+    }
   }
 
-  async function openDesmos(mode = 'floating') {
+  function openDesmos(mode = 'floating') {
     const panel = ensureDesmosPanel();
     panel.classList.remove('hidden');
     if (mode === 'split' && exam && $('#mock-calc-slot')) {
@@ -1100,34 +1124,15 @@ function getMockHistory() {
       panel.classList.remove('desmos-split');
       panel.classList.add('desmos-floating');
       if (!panel.style.width) {
-        panel.style.width = '440px';
-        panel.style.height = '560px';
+        panel.style.width = '460px';
+        panel.style.height = '610px';
         panel.style.right = '24px';
         panel.style.bottom = '24px';
       }
       $('#mock-calc-slot')?.classList.add('hidden');
       $('#mock-splitter')?.classList.add('hidden');
     }
-
-    try {
-      const DesmosLib = await loadDesmos();
-      const mount = $('#desmos-mount');
-      if (!desmosCalculator && mount && DesmosLib) {
-        mount.innerHTML = '';
-        desmosCalculator = DesmosLib.GraphingCalculator(mount, {
-          expressions: true,
-          settingsMenu: true,
-          keypad: true,
-          graphpaper: true,
-          expressionsTopbar: true
-        });
-      } else {
-        desmosCalculator?.resize?.();
-      }
-    } catch (_) {
-      const mount = $('#desmos-mount');
-      if (mount) mount.innerHTML = '<div class="calc-loading">Desmos could not load. Check your internet connection and try again.</div>';
-    }
+    setDesmosMode(desmosMode);
   }
 
   function closeDesmos() {
@@ -1139,7 +1144,6 @@ function getMockHistory() {
     document.body.appendChild(panel);
     $('#mock-calc-slot')?.classList.add('hidden');
     $('#mock-splitter')?.classList.add('hidden');
-    desmosCalculator?.resize?.();
   }
 
   function makeDraggable(panel, handle) {
@@ -1200,7 +1204,6 @@ function getMockHistory() {
       const rect = layout.getBoundingClientRect();
       const calcWidth = clamp(rect.right - event.clientX, 300, Math.max(320, rect.width * 0.68));
       slot.style.flexBasis = `${calcWidth}px`;
-      desmosCalculator?.resize?.();
     });
     const end = () => active = false;
     splitter.addEventListener('pointerup', end);
@@ -1389,7 +1392,7 @@ function getMockHistory() {
     button.className = 'button ghost full';
     button.id = 'sat-calculator-shortcut';
     button.type = 'button';
-    button.textContent = 'Open Desmos calculator';
+    button.textContent = 'Open SAT Desmos calculator';
     button.addEventListener('click', () => openDesmos('floating'));
     modes.appendChild(button);
   }

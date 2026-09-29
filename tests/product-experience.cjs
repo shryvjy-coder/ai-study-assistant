@@ -36,6 +36,19 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   check(await page.evaluate(()=>StudyAIProduct.confidence(2).label==='Limited evidence'&&StudyAIProduct.confidence(10).label==='Developing evidence'&&StudyAIProduct.confidence(25).label==='Strong evidence'),'evidence confidence bands are stable');
 
   await page.evaluate(()=>{
+    StudyAIProduct.savePrefs({pathway:'CBSE',grade:'Class 9',subject:'Mathematics',dailyMinutes:35,onboardingComplete:true,createdAt:Date.now()});
+    StudyAIProduct.openOnboarding(true);
+  });
+  await page.locator('[data-onboarding-next]').click();
+  await page.locator('[data-onboarding-next]').click();
+  await page.waitForSelector('[name="dailyMinutesPreset"][value="60"]');
+  await page.locator('[name="dailyMinutesPreset"][value="60"]').check();
+  check(await page.locator('[name="dailyMinutes"]').inputValue()==='60','onboarding preset updates custom study time without browser errors');
+  await page.locator('[data-onboarding-next]').click();
+  check(await page.evaluate(()=>StudyAIProduct.prefs().dailyMinutes===60),'onboarding persists selected study time');
+  await page.locator('[data-onboarding-finish]').click();
+
+  await page.evaluate(()=>{
     state.mastery={};state.masteryHistory=[];state.mistakes=[];state.review=[];
     state.flashcardSchedule={};state.reviewCardCatalog={};state.learningGoals=[];
     state.smartPlannerPlan=null;state.satPlannerPlan=null;

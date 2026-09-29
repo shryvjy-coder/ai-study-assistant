@@ -62,7 +62,7 @@
  }
  function mount(){
   if($('#studyai-command-center'))return;
-  dialog=document.createElement('dialog');dialog.id='studyai-command-center';dialog.className='cc-dialog';
+  dialog=document.createElement('dialog');dialog.id='studyai-command-center';dialog.className='cc-dialog';dialog.setAttribute('aria-label','Search StudyAI and open quick actions');
   dialog.innerHTML='<div class="cc-shell"><div class="cc-search-row"><span aria-hidden="true">⌕</span><input id="cc-input" type="search" autocomplete="off" placeholder="Search topics, notes, tools or actions…" aria-label="Search StudyAI"><kbd>Esc</kbd></div><div id="cc-results" class="cc-results" role="listbox"></div><footer><span><kbd>↑</kbd><kbd>↓</kbd> navigate · <kbd>Enter</kbd> open</span><span>Search stays in your browser.</span></footer></div>';
   document.body.appendChild(dialog);input=$('#cc-input');results=$('#cc-results');
   const button=document.createElement('button');button.type='button';button.className='cc-launch';button.innerHTML='<span>⌕</span><span>Search StudyAI</span><kbd>Ctrl K</kbd>';button.addEventListener('click',open);

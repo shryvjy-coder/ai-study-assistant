@@ -145,6 +145,27 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  const deleted=await account.request.delete(url+'/api/account',{headers:{Origin:url},data:{confirm:'DELETE'}});
  check(deleted.ok(),'account deletion removes the temporary integration account');
  await account.close();
+
+ // Regression: legacy cloud state with missing newer fields must settle after at most one restore.
+ // Startup enhancements may update local state before auth finishes, so hydration compares against
+ // the state that existed at page boot rather than those in-flight startup mutations.
+ const loop=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
+ const loopAuth=await loop.request.post(url+'/api/auth/register',{headers:{Origin:url},data:{email:'hydration-loop@example.test',password:'local-test-only-42',name:'Hydration Loop'}});
+ check(loopAuth.ok(),'hydration-loop fixture account registers');
+ const legacyPut=await loop.request.put(url+'/api/state',{headers:{Origin:url},data:{state:{theme:'dark'}}});
+ check(legacyPut.ok(),'legacy cloud state fixture saves');
+ const lp=await loop.newPage();lp.on('pageerror',e=>errors.push(e.message));
+ let navigations=0;lp.on('framenavigated',frame=>{if(frame===lp.mainFrame())navigations++});
+ await lp.goto(url);
+ await lp.waitForFunction(()=>document.documentElement.dataset.theme==='dark',{},{timeout:8000});
+ await lp.waitForTimeout(1800);
+ check(navigations<=2,'legacy cloud hydration settles without a reload loop');
+ await lp.waitForFunction(()=>!cloudSyncing&&!cloudSaveTimer,{},{timeout:8000});
+ const hydratedSaved=await (await loop.request.get(url+'/api/state')).json();
+ check(Number(hydratedSaved.state?.betaMetrics?.firstSeen)>0&&Array.isArray(hydratedSaved.state?.betaMetrics?.activeDays)&&hydratedSaved.state.betaMetrics.activeDays.length>0,'post-hydration app-open metrics persist after startup stabilizes');
+ const loopDeleted=await loop.request.delete(url+'/api/account',{headers:{Origin:url},data:{confirm:'DELETE'}});
+ check(loopDeleted.ok(),'hydration-loop fixture account is deleted');
+ await loop.close();
  check(errors.length===0,'no browser JavaScript errors: '+errors.join('; '));
  console.log('TOTAL',checks,'checks passed');
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{if(browser)await browser.close();server.kill();rmSync(dir,{recursive:true,force:true})});

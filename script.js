@@ -5,8 +5,9 @@ const SAT_QUESTIONS = [{"id": "sat1", "section": "Reading & Writing", "domain": 
 const STORAGE_KEY='studyai-multicurriculum-v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null,productPrefs:null,activeStudySession:null,betaMetrics:{version:1,firstSeen:Date.now(),activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:Date.now()}});
+const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalNotes:{},quizHistory:[],satHistory:[],satMastery:{},mastery:{},masteryHistory:[],masteryVersion:1,mistakes:[],mistakeVersion:1,flashcardSchedule:{},reviewCardCatalog:{},srsVersion:1,flashcardState:{},favoriteCards:[],workspaceNotes:[],folders:['General'],lastTopic:null,productPrefs:null,activeStudySession:null,betaMetrics:{version:1,firstSeen:0,activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:0}});
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
+const bootStateJSON=JSON.stringify(state);
 let cloudUser=null,cloudProviders={},cloudRegistrationMode='open',cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
 let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
 let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
@@ -410,6 +411,7 @@ window.StudyAIPracticeBridge={
   const now=Date.now(),day=new Date(now).toISOString().slice(0,10);
   const metrics=state.betaMetrics&&typeof state.betaMetrics==='object'?state.betaMetrics:{version:1,firstSeen:now,activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:0};
   metrics.activeDays=Array.isArray(metrics.activeDays)?metrics.activeDays:[];
+  if(!Number(metrics.firstSeen))metrics.firstSeen=now;
   const isNewDay=!metrics.activeDays.includes(day);
   if(name==='app-open'&&!isNewDay)return;
   if(isNewDay)metrics.activeDays.push(day);
@@ -946,10 +948,12 @@ async function hydrateCloudState(){
   const data=await fetchJSON('/api/state');
   if(data.has_state&&data.state){
    const remote={...defaults(),...data.state};
-   if(JSON.stringify(remote)!==JSON.stringify(state)){
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(remote));setSyncUI('saved','Restoring your account…');location.reload();return;
+   const remoteJSON=JSON.stringify(remote);
+   if(remoteJSON!==bootStateJSON){
+    localStorage.setItem(STORAGE_KEY,remoteJSON);setSyncUI('saved','Restoring your account…');location.reload();return;
    }
    setSyncUI('saved','Up to date · saved to your account');
+   if(JSON.stringify(state)!==bootStateJSON)scheduleCloudSave();
   }else{await saveCloudState(false)}
  }catch{setSyncUI('error','Could not load cloud data. Your local copy is safe.')}
 }

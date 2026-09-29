@@ -426,6 +426,16 @@ def export_account():
             'SELECT provider,created_at FROM oauth_identities WHERE user_id=? ORDER BY created_at',
             (uid,),
         ).fetchall()
+        reports = conn.execute(
+            '''SELECT source,question_ref,category,details,question_text,passage,context,page,created_at
+               FROM question_reports WHERE user_id=? ORDER BY created_at DESC''',
+            (uid,),
+        ).fetchall()
+        diagnostics = conn.execute(
+            '''SELECT message,source,line,column_no,page,created_at
+               FROM client_errors WHERE user_id=? ORDER BY created_at DESC''',
+            (uid,),
+        ).fetchall()
     try:
         saved_state = json.loads(state_row['state_json']) if state_row else None
     except json.JSONDecodeError:
@@ -437,6 +447,8 @@ def export_account():
         'providers': [dict(row) for row in identities],
         'state': saved_state,
         'state_updated_at': state_row['updated_at'] if state_row else None,
+        'question_reports': [dict(row) for row in reports],
+        'client_errors': [dict(row) for row in diagnostics],
     })
 
 

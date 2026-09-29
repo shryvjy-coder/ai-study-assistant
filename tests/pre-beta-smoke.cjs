@@ -43,7 +43,11 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
 
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#today-dashboard');
-  if(await page.locator('#studyai-onboarding[open]').count())await page.locator('[data-onboarding-skip]').click();
+  await page.waitForTimeout(700);
+  if(await page.locator('#studyai-onboarding[open]').count()){
+    await page.evaluate(()=>document.querySelector('[data-onboarding-skip]')?.click());
+    await page.waitForFunction(()=>!document.querySelector('#studyai-onboarding')?.open);
+  }
 
   check(await page.locator('html[lang="en"]').count()===1,'document language is declared');
   check(await page.locator('#main-content').count()===1,'main content has a keyboard skip target');

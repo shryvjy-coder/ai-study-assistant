@@ -1,4 +1,4 @@
-# StudyAI Public Beta Launch Checklist
+# StudyAI Private Beta Launch Checklist
 
 StudyAI is now much closer to a beta-ready product, but public deployment should not treat the current local-development defaults as production defaults.
 
@@ -54,6 +54,9 @@ Set production values in the host's environment, never in GitHub:
 SECRET_KEY=<long random secret>
 COOKIE_SECURE=1
 FLASK_DEBUG=0
+TRUST_PROXY=1
+DATABASE_PATH=/var/data/studyai.db
+BETA_ACCESS_CODE=<private invite code, at least 8 characters>
 GEMINI_API_KEY=<server-side key>
 STUDYAI_AI_DAILY_TEXT_LIMIT=60
 STUDYAI_AI_DAILY_AUDIO_LIMIT=10
@@ -62,10 +65,12 @@ STUDYAI_AI_DAILY_AUDIO_LIMIT=10
 Use the production WSGI entrypoint:
 
 ```bash
-gunicorn launcher:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+gunicorn launcher:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
 ```
 
 Use `launcher:app`, not `app:app`, because launcher injects StudyAI's enhancement assets.
+
+For the Render private beta, `DATABASE_PATH` must match the mounted persistent disk. Keep one Gunicorn worker and one service instance while SQLite is the shared account database.
 
 ## 3. Database persistence is mandatory
 

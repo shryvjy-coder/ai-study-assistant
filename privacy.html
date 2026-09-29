@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Privacy & Data · StudyAI</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="cobalt-theme.css">
+  <link rel="stylesheet" href="site-premium.css">
+  <style>
+    .privacy-page{min-height:100vh;padding:42px 0 80px}
+    .privacy-shell{width:min(860px,calc(100% - 32px));margin:auto}
+    .privacy-back{display:inline-flex;margin-bottom:24px}
+    .privacy-hero,.privacy-card{border:1.5px solid var(--premium-card-border);border-radius:18px;background:var(--surface);box-shadow:4px 5px 0 color-mix(in srgb,var(--ink) 72%,transparent)}
+    .privacy-hero{padding:28px;margin-bottom:16px}
+    .privacy-hero h1{margin:.25rem 0 .55rem;font-size:clamp(2.3rem,6vw,4rem);letter-spacing:-.05em}
+    .privacy-hero p{max-width:720px;color:var(--muted);line-height:1.65}
+    .privacy-grid{display:grid;gap:14px}
+    .privacy-card{padding:21px}
+    .privacy-card h2{margin:0 0 8px;font-size:1.3rem}
+    .privacy-card p,.privacy-card li{color:var(--muted);line-height:1.65}
+    .privacy-card ul{margin-bottom:0}
+    .privacy-note{padding:13px;border-radius:11px;background:var(--surface-2);font-size:.86rem}
+  </style>
+</head>
+<body>
+  <main class="privacy-page">
+    <div class="privacy-shell">
+      <a class="button secondary compact privacy-back" href="/">← Back to StudyAI</a>
+      <header class="privacy-hero">
+        <span class="small-label">StudyAI · Privacy & Data</span>
+        <h1>Collect less. Explain what is saved.</h1>
+        <p>StudyAI is an independent student-built learning project. This page describes the data behavior implemented in the current application so students can understand what stays in their browser, what can be synced to an account, and what is sent to external AI services.</p>
+      </header>
+      <div class="privacy-grid">
+        <section class="privacy-card">
+          <h2>Browser-local study data</h2>
+          <p>StudyAI is local-first. When you use the site, supported learning state can be stored in your browser, including progress, mastery evidence, wrong answers, flashcard schedules, plans, bookmarks, Workspace notes, and study preferences.</p>
+          <p>Clearing browser storage can remove local-only data. When you are signed in, supported StudyAI state can also sync to your account database.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>Account data</h2>
+          <p>If you create an account, StudyAI stores the minimum account information needed for the current sign-in system:</p>
+          <ul>
+            <li>name, if supplied;</li>
+            <li>email address;</li>
+            <li>a securely hashed password for email/password accounts;</li>
+            <li>provider identifiers for any configured social sign-in provider;</li>
+            <li>your synced StudyAI learning state.</li>
+          </ul>
+          <p>Passwords are not stored as plain text.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>Personal AI</h2>
+          <p>Personal AI source documents are intentionally kept in browser storage rather than added to normal account-state sync. When you choose an AI action, the selected source text and your request are sent from the StudyAI server to Google's Gemini API so the requested output can be generated.</p>
+          <p class="privacy-note">Avoid uploading passwords, medical records, financial records, private identifiers, or other sensitive material. External AI processing is governed by the provider's applicable API terms and policies.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>Question-quality reports</h2>
+          <p>If you use “Report question,” StudyAI may save the question text, surrounding context, the category you selected, optional comments, the page/feature where the report came from, and your account ID if you were signed in. These reports are used to improve question quality.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>Session cookies and security</h2>
+          <p>Signed-in sessions use an HTTP-only session cookie. The application is configured for SameSite=Lax cookies and supports secure-only cookies for HTTPS production deployments. Security headers and same-origin checks are applied by the server.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>Your controls</h2>
+          <p>When signed in, open the account panel to:</p>
+          <ul>
+            <li><strong>Download my data</strong> to export your current account information and synced StudyAI state as JSON.</li>
+            <li><strong>Delete account</strong> to permanently remove the account and its synced state from StudyAI's database.</li>
+          </ul>
+          <p>Signing out does not delete the server-side account. Account deletion is a separate action and requires an explicit confirmation.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>What StudyAI does not need</h2>
+          <p>The current product does not require your phone number, street address, precise location, school name, or date of birth to use its core study features.</p>
+        </section>
+        <section class="privacy-card">
+          <h2>Project status</h2>
+          <p>StudyAI is still being prepared for a public beta. This page should be reviewed again before a wider public launch, especially if hosting, analytics, authentication, or third-party services change.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

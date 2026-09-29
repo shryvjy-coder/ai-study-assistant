@@ -7,6 +7,10 @@ import sys
 import tempfile
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     os.environ["SECRET_KEY"] = "ci-private-beta-secret-key-0123456789abcdef"
     os.environ["FLASK_DEBUG"] = "0"
@@ -128,7 +132,7 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     check(health.status_code == 200 and health.get_json()["database"] == "ready",
           "health endpoint confirms database readiness")
 
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = REPO_ROOT
     blueprint = (repo_root / "render-private-beta.yaml").read_text(encoding="utf-8")
     procfile = (repo_root / "Procfile").read_text(encoding="utf-8")
     check("numInstances: 1" in blueprint and "--workers 1" in blueprint,

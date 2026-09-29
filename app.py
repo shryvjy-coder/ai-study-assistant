@@ -213,6 +213,11 @@ def index():
     return send_from_directory(BASE_DIR, 'index.html')
 
 
+@app.get('/privacy')
+def privacy():
+    return send_from_directory(BASE_DIR, 'privacy.html')
+
+
 @app.get('/<path:path>')
 def static_files(path):
     # API and auth routes are defined before this catch-all route by Flask's routing table.

@@ -408,9 +408,11 @@ window.StudyAIPracticeBridge={
  },
  recordBetaSignal:(name,payload={})=>{
   const now=Date.now(),day=new Date(now).toISOString().slice(0,10);
-  const metrics=state.betaMetrics&&typeof state.betaMetrics==='object'?state.betaMetrics:{version:1,firstSeen:now,activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:now};
+  const metrics=state.betaMetrics&&typeof state.betaMetrics==='object'?state.betaMetrics:{version:1,firstSeen:now,activeDays:[],sessionsStarted:0,sessionsCompleted:0,firstPracticeAt:null,lastActiveAt:0};
   metrics.activeDays=Array.isArray(metrics.activeDays)?metrics.activeDays:[];
-  if(!metrics.activeDays.includes(day))metrics.activeDays.push(day);
+  const isNewDay=!metrics.activeDays.includes(day);
+  if(name==='app-open'&&!isNewDay)return;
+  if(isNewDay)metrics.activeDays.push(day);
   if(metrics.activeDays.length>90)metrics.activeDays=metrics.activeDays.slice(-90);
   metrics.lastActiveAt=now;
   if(name==='session-started')metrics.sessionsStarted=(metrics.sessionsStarted||0)+1;

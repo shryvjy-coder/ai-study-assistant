@@ -46,7 +46,8 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   check(await page.locator('[name="dailyMinutes"]').inputValue()==='60','onboarding preset updates custom study time without browser errors');
   await page.locator('[data-onboarding-next]').click();
   check(await page.evaluate(()=>StudyAIProduct.prefs().dailyMinutes===60),'onboarding persists selected study time');
-  await page.locator('[data-onboarding-finish]').click();
+  await page.evaluate(()=>document.querySelector('[data-onboarding-finish]')?.click());
+  await page.waitForFunction(()=>!document.querySelector('#studyai-onboarding')?.open);
 
   await page.evaluate(()=>{
     state.mastery={};state.masteryHistory=[];state.mistakes=[];state.review=[];

@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: "22"
       - run: pip install -r requirements.txt
-      - run: python -m py_compile app.py launcher.py personal_ai.py production_preflight.py tests/pre-beta-server.py
+      - run: python -m py_compile app.py launcher.py personal_ai.py database.py production_preflight.py migrate_sqlite_to_postgres.py tests/pre-beta-server.py tests/postgres-migration.py
       - run: python tests/pre-beta-server.py
       - name: JavaScript syntax
         shell: bash
@@ -59,3 +59,38 @@ jobs:
       - name: Pre-beta browser smoke
         if: ${{ !cancelled() }}
         run: node tests/pre-beta-smoke.cjs
+
+
+  postgres:
+    runs-on: ubuntu-latest
+    needs: static
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: studyai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d studyai_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/studyai_test
+      SECRET_KEY: postgres-ci-placeholder-key-0123456789abcdef
+      FLASK_DEBUG: "0"
+      COOKIE_SECURE: "0"
+      TRUST_PROXY: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: PostgreSQL server smoke
+        run: python tests/pre-beta-server.py
+      - name: SQLite to PostgreSQL migration
+        run: python tests/postgres-migration.py

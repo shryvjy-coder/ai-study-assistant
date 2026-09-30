@@ -85,8 +85,8 @@ The existing SAT diagnostic, adaptive practice, custom tests, reports, and searc
 - Email + password account creation
 - Email + password sign-in
 - Passwords are stored as secure password hashes, never as plain text
-- SQLite database persistence
-- Per-user StudyAI state in the database
+- PostgreSQL persistence when `DATABASE_URL` is configured, with SQLite retained as a local-development fallback
+- Per-user StudyAI state in PostgreSQL or local SQLite
 - Local-first saving for immediate responsiveness
 - Automatic cloud/database sync while signed in
 - Signing out clears the account data from the current browser view but keeps it in the database
@@ -115,7 +115,7 @@ The account/database version must be run through the Python server. **Do not use
 
 `http://localhost:5000`
 
-The database file `studyai.db` is created automatically in the project folder.
+When `DATABASE_URL` is blank, the local SQLite file `studyai.db` is created automatically in the project folder. When `DATABASE_URL` is set, StudyAI uses PostgreSQL instead.
 
 ## Manual method
 
@@ -142,7 +142,7 @@ You do not need Google/Apple/Microsoft credentials to test real accounts.
 5. Complete some topics, add personal notes or do SAT practice.
 6. Click your account and choose **Sign out**.
 7. Sign back in with the same email/password.
-8. Your account state is restored from SQLite.
+8. Your account state is restored from the configured database.
 
 The site also keeps a local copy while you are signed in so interactions remain fast.
 
@@ -230,7 +230,7 @@ TRUST_PROXY=1
 BETA_ACCESS_CODE=<private beta invite code>
 ```
 
-For the SQLite-backed private beta, use one application instance and a genuinely persistent disk. The included Render blueprint is intentionally configured this way. For broader scaling, migrate to PostgreSQL first.
+For hosted beta/production, set `DATABASE_URL` to the Neon PostgreSQL connection string. Keep one application instance during the first private beta because rate limiting is still process-local, not because of a database limitation.
 
 Never commit the real `.env`, OAuth secrets, or Apple private key to GitHub.
 
@@ -238,21 +238,36 @@ Never commit the real `.env`, OAuth secrets, or Apple private key to GitHub.
 
 # Database
 
-Development uses SQLite:
+StudyAI now supports two database modes.
+
+Local development defaults to SQLite:
 
 `studyai.db`
 
-Tables:
+Hosted beta/production should use PostgreSQL by setting:
+
+```env
+DATABASE_URL=postgresql://...
+```
+
+Neon PostgreSQL is the intended hosted database. The same Flask routes and tables are used on both backends:
+
 - `users`
 - `oauth_identities`
 - `user_state`
 - `question_reports`
+- `client_errors`
 
 `user_state` stores each account's StudyAI state as JSON, including progress, bookmarks, review topics, personal notes, quiz history, SAT mastery, flashcard states, workspace notes and folders.
 
-SQLite is ideal for a local student project. A later deployment can move this to PostgreSQL for higher concurrency and production hosting.
+To copy an existing local database into an empty PostgreSQL database:
 
----
+```bash
+python migrate_sqlite_to_postgres.py --source studyai.db
+python migrate_sqlite_to_postgres.py --source studyai.db --verify-only
+```
+
+The migration tool preserves IDs, verifies row counts, and refuses to overwrite a non-empty PostgreSQL target.
 
 # Production / public-beta status
 
@@ -273,12 +288,12 @@ Already implemented:
 Still required before treating the identity layer as broadly production-ready:
 - verified email ownership
 - password-reset email flow
-- PostgreSQL for a broader/multi-instance deployment, or a genuinely persistent backed-up SQLite volume for a small private beta
+- Neon PostgreSQL configured through `DATABASE_URL` for hosted beta/production
 - persistent/distributed rate limiting if multiple application instances are used
 - final HTTPS OAuth callback configuration
 - operational database backups and monitoring
 
-See `LAUNCH_CHECKLIST.md` before deploying. The current build is suitable for a carefully controlled private beta once persistent database storage is configured; it is not yet a finished large-scale identity service.
+See `LAUNCH_CHECKLIST.md` before deploying. The current build is suitable for a carefully controlled private beta once the Neon PostgreSQL connection is configured and migrated; it is not yet a finished large-scale identity service.
 
 ## Interaction fixes in this build
 

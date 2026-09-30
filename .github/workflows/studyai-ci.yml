@@ -80,6 +80,7 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/studyai_test
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5432/studyai_test
       SECRET_KEY: postgres-ci-placeholder-key-0123456789abcdef
       FLASK_DEBUG: "0"
       COOKIE_SECURE: "0"

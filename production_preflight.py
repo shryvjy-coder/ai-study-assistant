@@ -8,7 +8,7 @@ The script never prints secret values.
 from __future__ import annotations
 
 import os
-from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 
 def truth(name: str) -> str:
@@ -33,14 +33,20 @@ require(truth("COOKIE_SECURE") == "1",
 require(truth("TRUST_PROXY") == "1",
         "TRUST_PROXY=1 when running behind Render's trusted proxy.")
 
-database = truth("DATABASE_PATH")
-require(bool(database), "DATABASE_PATH is configured.")
-if database:
-    path = Path(database)
-    require(path.is_absolute(),
-            "DATABASE_PATH is absolute so persistence is unambiguous.")
-    if str(path).startswith("/var/data/"):
-        checks.append((True, "DATABASE_PATH targets the planned persistent Render disk."))
+database_url = truth("DATABASE_URL")
+require(bool(database_url), "DATABASE_URL is configured for PostgreSQL.")
+if database_url:
+    parsed = urlparse(database_url)
+    require(parsed.scheme in {"postgres", "postgresql"} and bool(parsed.hostname) and bool(parsed.path.strip("/")),
+            "DATABASE_URL is a valid PostgreSQL connection URL.")
+    if parsed.hostname and parsed.hostname.endswith(".neon.tech"):
+        params = parse_qs(parsed.query)
+        require(params.get("sslmode", [""])[0] in {"require", "verify-ca", "verify-full"},
+                "Neon DATABASE_URL requires TLS.")
+        if "-pooler." in parsed.hostname:
+            checks.append((True, "Neon pooled connection endpoint is configured."))
+        else:
+            checks.append((True, "Neon direct connection is configured; pooled is recommended for the hosted web app."))
 
 beta = truth("BETA_ACCESS_CODE")
 require(len(beta) >= 8,

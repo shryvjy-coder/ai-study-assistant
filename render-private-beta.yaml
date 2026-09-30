@@ -1,7 +1,7 @@
 # StudyAI private-beta Render Blueprint.
-# This intentionally uses a PAID web service + persistent disk because SQLite
-# must not live on Render's ephemeral filesystem. For a broader launch, migrate
-# to PostgreSQL before scaling beyond one service instance.
+# The web app uses PostgreSQL through DATABASE_URL (Neon recommended).
+# Keep one service instance / one Gunicorn worker during the first beta because
+# rate limiting is still process-local, even though PostgreSQL itself can scale.
 services:
   - type: web
     name: studyai-beta
@@ -22,8 +22,8 @@ services:
         value: "0"
       - key: TRUST_PROXY
         value: "1"
-      - key: DATABASE_PATH
-        value: /var/data/studyai.db
+      - key: DATABASE_URL
+        sync: false
       - key: BETA_ACCESS_CODE
         sync: false
       - key: GEMINI_API_KEY
@@ -32,7 +32,3 @@ services:
         value: "60"
       - key: STUDYAI_AI_DAILY_AUDIO_LIMIT
         value: "10"
-    disk:
-      name: studyai-data
-      mountPath: /var/data
-      sizeGB: 5

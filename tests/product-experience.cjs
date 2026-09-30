@@ -39,8 +39,10 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
     StudyAIProduct.savePrefs({pathway:'CBSE',grade:'Class 9',subject:'Mathematics',dailyMinutes:35,onboardingComplete:true,createdAt:Date.now()});
     StudyAIProduct.openOnboarding(true);
   });
-  await page.locator('[data-onboarding-next]').click();
-  await page.locator('[data-onboarding-next]').click();
+  await page.waitForSelector('#studyai-onboarding[open]');
+  await page.evaluate(()=>document.querySelector('[data-onboarding-next]')?.click());
+  await page.waitForFunction(()=>document.querySelector('#studyai-onboarding-content')?.textContent.includes('2 of 4'));
+  await page.evaluate(()=>document.querySelector('[data-onboarding-next]')?.click());
   await page.waitForSelector('[name="dailyMinutesPreset"][value="60"]');
   await page.evaluate(()=>{
     const radio=document.querySelector('[name="dailyMinutesPreset"][value="60"]');

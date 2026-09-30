@@ -18,6 +18,11 @@ import os
 import sqlite3
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+
 TABLES = {
     "users": ["id", "email", "name", "password_hash", "created_at", "last_login"],
     "oauth_identities": ["id", "user_id", "provider", "provider_sub", "created_at"],

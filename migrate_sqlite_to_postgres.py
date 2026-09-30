@@ -60,14 +60,22 @@ def main() -> int:
     if not source_path.is_file():
         raise SystemExit(f"SQLite source not found: {source_path}")
 
-    if not os.getenv("DATABASE_URL", "").strip():
-        raise SystemExit("DATABASE_URL is required. Use the Neon PostgreSQL connection string.")
+    pooled = os.getenv("DATABASE_URL", "").strip()
+    direct = os.getenv("DATABASE_URL_UNPOOLED", "").strip()
+    if not (direct or pooled):
+        raise SystemExit(
+            "DATABASE_URL_UNPOOLED (preferred) or DATABASE_URL is required. "
+            "Use the Neon direct PostgreSQL connection for migrations."
+        )
+    if direct:
+        os.environ["DATABASE_URL"] = direct
 
-    # Import only after checking environment so database.py selects PostgreSQL.
+    # Import only after selecting the migration connection so database.py
+    # uses the direct Neon endpoint when DATABASE_URL_UNPOOLED is available.
     from database import db, init_db, is_postgres
 
     if not is_postgres():
-        raise SystemExit("DATABASE_URL did not select PostgreSQL.")
+        raise SystemExit("The configured migration URL did not select PostgreSQL.")
 
     source = sqlite3.connect(source_path)
     source.row_factory = sqlite3.Row

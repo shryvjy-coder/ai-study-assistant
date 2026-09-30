@@ -17,7 +17,11 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     os.environ["COOKIE_SECURE"] = "0"
     os.environ["TRUST_PROXY"] = "0"
     os.environ["BETA_ACCESS_CODE"] = "beta-test-code"
-    os.environ["DATABASE_PATH"] = str(Path(temp_dir) / "studyai.sqlite")
+    using_postgres = bool(os.environ.get("DATABASE_URL", "").strip())
+    if using_postgres:
+        os.environ.pop("DATABASE_PATH", None)
+    else:
+        os.environ["DATABASE_PATH"] = str(Path(temp_dir) / "studyai.sqlite")
 
     from app import app, social_login  # noqa: E402
 
@@ -152,17 +156,20 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
     check(after_delete.status_code == 401, "deleted account can no longer sign in")
 
     health = client.get("/api/health")
-    check(health.status_code == 200 and health.get_json()["database"] == "ready",
-          "health endpoint confirms database readiness")
+    health_json = health.get_json()
+    expected_backend = "postgresql" if using_postgres else "sqlite"
+    check(health.status_code == 200 and health_json["database"] == "ready"
+          and health_json["backend"] == expected_backend,
+          f"health endpoint confirms {expected_backend} database readiness")
 
     repo_root = REPO_ROOT
     blueprint = (repo_root / "render-private-beta.yaml").read_text(encoding="utf-8")
     procfile = (repo_root / "Procfile").read_text(encoding="utf-8")
     check("numInstances: 1" in blueprint and "--workers 1" in blueprint,
-          "Render beta keeps one service instance and one Gunicorn worker")
-    check("DATABASE_PATH" in blueprint and "/var/data/studyai.db" in blueprint and "disk:" in blueprint,
-          "Render beta stores SQLite on the persistent /var/data disk")
-    check("--workers 1" in procfile, "Procfile keeps a single SQLite-writing Gunicorn worker")
+          "Render beta keeps one service instance and one Gunicorn worker during the first beta")
+    check("DATABASE_URL" in blueprint and "DATABASE_PATH" not in blueprint and "\n    disk:" not in blueprint,
+          "Render beta uses PostgreSQL DATABASE_URL without a SQLite disk")
+    check("--workers 1" in procfile, "Procfile keeps one worker while rate limiting is process-local")
 
     preflight_env = os.environ.copy()
     preflight_env.update({
@@ -170,7 +177,7 @@ with tempfile.TemporaryDirectory(prefix="studyai-prebeta-") as temp_dir:
         "FLASK_DEBUG": "0",
         "COOKIE_SECURE": "1",
         "TRUST_PROXY": "1",
-        "DATABASE_PATH": "/var/data/studyai.db",
+        "DATABASE_URL": "postgresql://user:password@ep-studyai-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
         "BETA_ACCESS_CODE": "beta-test-code",
         "GEMINI_API_KEY": "ci-placeholder",
         "STUDYAI_AI_DAILY_TEXT_LIMIT": "60",

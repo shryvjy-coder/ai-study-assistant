@@ -8,6 +8,12 @@ venv/
 
 # Secret passwords and API keys
 .env
+.env.local
+.env.*
+!.env.example
+
+# Neon CLI workspace link (contains project/branch metadata)
+.neon
 
 # Local user databases
 *.db

@@ -73,12 +73,45 @@ with tempfile.TemporaryDirectory(prefix="studyai-migration-test-") as temp_dir:
         identity = conn.execute("SELECT provider,provider_sub FROM oauth_identities WHERE id=?", (12,)).fetchone()
         report = conn.execute("SELECT category,question_text FROM question_reports WHERE id=?", (8,)).fetchone()
         error = conn.execute("SELECT message,line,column_no FROM client_errors WHERE id=?", (9,)).fetchone()
+        fk_rows = conn.execute(
+            """SELECT conrelid::regclass::text AS table_name, COUNT(*) AS foreign_keys
+               FROM pg_constraint
+               WHERE contype='f'
+                 AND connamespace='public'::regnamespace
+                 AND conrelid::regclass::text IN (
+                     'oauth_identities','user_state','question_reports','client_errors'
+                 )
+               GROUP BY conrelid
+               ORDER BY table_name"""
+        ).fetchall()
+        identity_rows = conn.execute(
+            """SELECT table_name, column_name, is_identity
+               FROM information_schema.columns
+               WHERE table_schema='public'
+                 AND table_name IN ('users','oauth_identities','question_reports','client_errors')
+                 AND column_name='id'
+               ORDER BY table_name"""
+        ).fetchall()
 
     check(user and user["email"] == "migration@example.test", "migrated account preserves ID and profile")
     check(state and json.loads(state["state_json"])["theme"] == "dark", "migrated StudyAI state is intact")
     check(identity and identity["provider_sub"] == "fixture-sub", "migrated OAuth identity is intact")
     check(report and report["category"] == "format", "migrated question report is intact")
     check(error and error["line"] == 10 and error["column_no"] == 20, "migrated client diagnostic is intact")
+    check(
+        {row["table_name"]: int(row["foreign_keys"]) for row in fk_rows}
+        == {
+            "client_errors": 1,
+            "oauth_identities": 1,
+            "question_reports": 1,
+            "user_state": 1,
+        },
+        "PostgreSQL schema has exactly one intended foreign key per relationship table",
+    )
+    check(
+        len(identity_rows) == 4 and all(row["is_identity"] == "YES" for row in identity_rows),
+        "PostgreSQL generated ID columns remain identity columns",
+    )
 
     verify = subprocess.run(
         [
@@ -94,6 +127,6 @@ with tempfile.TemporaryDirectory(prefix="studyai-migration-test-") as temp_dir:
         text=True,
         check=False,
     )
-    check(verify.returncode == 0, "migration verify-only mode confirms all table counts")
+    check(verify.returncode == 0, "migration verify-only mode confirms exact table contents")
 
 print("PostgreSQL migration test passed.")

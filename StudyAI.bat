@@ -25,8 +25,8 @@ if not exist ".venv\Scripts\python.exe" (
     if errorlevel 1 goto :error
 )
 
-rem Existing installations may need new Personal AI PDF/DOCX dependencies.
-".venv\Scripts\python.exe" -c "import pypdf, docx, flask_compress" >nul 2>&1
+rem Existing installations may need newly added runtime dependencies.
+".venv\Scripts\python.exe" -c "import pypdf, docx, flask_compress, psycopg" >nul 2>&1
 if errorlevel 1 (
     echo Installing new StudyAI features...
     ".venv\Scripts\python.exe" -m pip install -r requirements.txt

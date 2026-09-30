@@ -28,7 +28,7 @@ The CI workflow now checks:
 - Python syntax for Flask, launcher, Personal AI, deployment preflight, and beta server tests
 - JavaScript syntax for every root script and all browser test suites
 - invite-only registration behavior, login/logout, cloud state sync, question reporting, account export/deletion, cross-origin blocking, noindex beta headers, and database health
-- Render/Procfile SQLite safety: one service instance, one Gunicorn worker, persistent `/var/data` database path
+- PostgreSQL server smoke checks, Neon-style production preflight, and Render database configuration
 - the production preflight against the intended private-beta environment
 - the full learning integration suite
 - Today/onboarding/guided-session product experience
@@ -48,14 +48,15 @@ node tests/pre-beta-smoke.cjs
 python tests/pre-beta-server.py
 ```
 
-## Controlled Render beta option
+## Controlled Render + Neon beta option
 
 The repository includes:
-- `render-private-beta.yaml`, a reviewed Blueprint for one Singapore web-service instance with a persistent SQLite disk;
+- `render-private-beta.yaml`, a reviewed Blueprint for one Singapore web-service instance using PostgreSQL through `DATABASE_URL`;
 - `production_preflight.py`, which checks critical production environment settings without printing secret values;
-- `DEPLOY_RENDER_BETA.md`, the step-by-step private-beta deployment guide.
+- `migrate_sqlite_to_postgres.py`, the one-time SQLite to PostgreSQL migration/verification tool;
+- `DEPLOY_RENDER_BETA.md`, the step-by-step Neon + Render private-beta deployment guide.
 
-The Blueprint intentionally uses a paid persistent disk. Review the price shown by Render before creating any resource. Do not switch this SQLite setup to multiple instances.
+No Render database disk is required. Keep one app instance during the first beta because rate limiting is still process-local.
 
 ## 2. Production environment
 
@@ -66,7 +67,7 @@ SECRET_KEY=<long random secret>
 COOKIE_SECURE=1
 FLASK_DEBUG=0
 TRUST_PROXY=1
-DATABASE_PATH=/var/data/studyai.db
+DATABASE_URL=<Neon pooled PostgreSQL URL>
 BETA_ACCESS_CODE=<private invite code, at least 8 characters>
 GEMINI_API_KEY=<server-side key>
 STUDYAI_AI_DAILY_TEXT_LIMIT=60
@@ -81,20 +82,22 @@ gunicorn launcher:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
 
 Use `launcher:app`, not `app:app`, because launcher injects StudyAI's enhancement assets.
 
-For the Render private beta, `DATABASE_PATH` must match the mounted persistent disk. Keep one Gunicorn worker and one service instance while SQLite is the shared account database.
+For the first private beta, keep one Gunicorn worker and one service instance because rate limiting is still process-local. PostgreSQL removes the old single-file database restriction.
 
-## 3. Database persistence is mandatory
+## 3. PostgreSQL persistence is mandatory
 
-The local default is SQLite at `studyai.db`.
+Local development may still use SQLite when `DATABASE_URL` is blank.
 
-Do **not** put that database on an ephemeral cloud filesystem. A service restart or redeploy could erase account data.
+Hosted beta/production should use Neon PostgreSQL through `DATABASE_URL`. Before launch:
 
-For a small private beta, SQLite is acceptable only when:
-- `DATABASE_PATH` points to a real persistent disk/volume;
-- the disk is included in backups;
-- only one application instance writes to that SQLite database.
+1. create an empty Neon project;
+2. copy the pooled TLS connection string;
+3. keep a backup of `studyai.db`;
+4. run `python migrate_sqlite_to_postgres.py --source studyai.db`;
+5. run the same command with `--verify-only`;
+6. confirm `GET /api/health` reports `backend: postgresql`.
 
-For a broader public launch, migrate accounts/state/question reports to PostgreSQL before scaling to multiple instances.
+Do not commit the connection string. Keep the old SQLite file only as a temporary offline backup until the Neon-backed deployment is verified.
 
 ## 4. Authentication before public registration
 

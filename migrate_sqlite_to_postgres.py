@@ -14,9 +14,12 @@ The script:
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
 import sqlite3
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
 
@@ -45,18 +48,90 @@ def parse_args():
     parser.add_argument(
         "--verify-only",
         action="store_true",
-        help="Only compare source/target table counts. Do not write anything.",
+        help="Only compare source/target counts and content digests. Do not write anything.",
     )
     return parser.parse_args()
 
 
+def order_column(table: str) -> str:
+    return "user_id" if table == "user_state" else "id"
+
+
 def source_rows(conn: sqlite3.Connection, table: str, columns: list[str]):
     names = ",".join(columns)
-    return conn.execute(f"SELECT {names} FROM {table} ORDER BY rowid").fetchall()
+    return conn.execute(
+        f"SELECT {names} FROM {table} ORDER BY {order_column(table)}"
+    ).fetchall()
+
+
+def target_rows(conn, table: str, columns: list[str]):
+    names = ",".join(columns)
+    return conn.execute(
+        f"SELECT {names} FROM {table} ORDER BY {order_column(table)}"
+    ).fetchall()
 
 
 def target_count(conn, table: str) -> int:
     return int(conn.execute(f"SELECT COUNT(*) AS count FROM {table}").fetchone()["count"])
+
+
+def digest_rows(rows, columns: list[str]) -> str:
+    digest = hashlib.sha256()
+    for row in rows:
+        payload = [row[column] for column in columns]
+        digest.update(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=str).encode("utf-8")
+        )
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def source_snapshot(conn: sqlite3.Connection) -> dict[str, tuple[int, str]]:
+    result = {}
+    for table, columns in TABLES.items():
+        rows = source_rows(conn, table, columns)
+        result[table] = (len(rows), digest_rows(rows, columns))
+    return result
+
+
+def target_snapshot(conn) -> dict[str, tuple[int, str]]:
+    result = {}
+    for table, columns in TABLES.items():
+        rows = target_rows(conn, table, columns)
+        result[table] = (len(rows), digest_rows(rows, columns))
+    return result
+
+
+def validate_neon_urls(pooled: str, direct: str) -> None:
+    for name, value, expect_pooler in (
+        ("DATABASE_URL", pooled, True),
+        ("DATABASE_URL_UNPOOLED", direct, False),
+    ):
+        if not value:
+            continue
+        parsed = urlparse(value)
+        if parsed.scheme not in {"postgres", "postgresql"} or not parsed.hostname or not parsed.path.strip("/"):
+            raise SystemExit(f"{name} is not a valid PostgreSQL URL.")
+        if parsed.hostname.endswith(".neon.tech"):
+            sslmode = parse_qs(parsed.query).get("sslmode", [""])[0]
+            if sslmode not in {"require", "verify-ca", "verify-full"}:
+                raise SystemExit(f"{name} must use TLS for Neon.")
+            if expect_pooler and "-pooler." not in parsed.hostname:
+                raise SystemExit("DATABASE_URL must use the Neon pooled endpoint (-pooler hostname).")
+            if not expect_pooler and "-pooler." in parsed.hostname:
+                raise SystemExit("DATABASE_URL_UNPOOLED must use the Neon direct endpoint (no -pooler hostname).")
+
+
+def snapshots_match(source: dict[str, tuple[int, str]], target: dict[str, tuple[int, str]]) -> bool:
+    return all(source[table] == target[table] for table in TABLES)
+
+
+def print_snapshot_comparison(source, target) -> None:
+    for table in TABLES:
+        source_count, source_digest = source[table]
+        target_count_value, target_digest = target[table]
+        status = "MATCH" if (source_count, source_digest) == (target_count_value, target_digest) else "DIFF"
+        print(f"{table}: SQLite={source_count} PostgreSQL={target_count_value} {status}")
 
 
 def main() -> int:
@@ -72,6 +147,7 @@ def main() -> int:
             "DATABASE_URL_UNPOOLED (preferred) or DATABASE_URL is required. "
             "Use the Neon direct PostgreSQL connection for migrations."
         )
+    validate_neon_urls(pooled, direct)
     if direct:
         os.environ["DATABASE_URL"] = direct
 
@@ -87,35 +163,30 @@ def main() -> int:
     source.execute("PRAGMA foreign_keys = ON")
 
     try:
-        source_counts = {
-            table: int(source.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
-            for table in TABLES
-        }
+        source_state = source_snapshot(source)
 
         init_db()
 
         with db() as target:
-            target_counts = {table: target_count(target, table) for table in TABLES}
+            target_state = target_snapshot(target)
 
             if args.verify_only:
-                mismatches = [
-                    table for table in TABLES
-                    if source_counts[table] != target_counts[table]
-                ]
-                for table in TABLES:
-                    print(f"{table}: SQLite={source_counts[table]} PostgreSQL={target_counts[table]}")
-                if mismatches:
-                    print("VERIFY FAILED:", ", ".join(mismatches))
+                print_snapshot_comparison(source_state, target_state)
+                if not snapshots_match(source_state, target_state):
+                    print("VERIFY FAILED: one or more table contents differ.")
                     return 1
-                print("VERIFY OK: all StudyAI table counts match.")
+                print("VERIFY OK: every StudyAI table matches exactly.")
                 return 0
 
-            nonempty = {table: count for table, count in target_counts.items() if count}
+            nonempty = {table: target_state[table][0] for table in TABLES if target_state[table][0]}
             if nonempty:
+                if snapshots_match(source_state, target_state):
+                    print("MIGRATION ALREADY COMPLETE: PostgreSQL matches the SQLite source exactly.")
+                    return 0
                 detail = ", ".join(f"{name}={count}" for name, count in nonempty.items())
                 raise SystemExit(
-                    "Refusing migration because PostgreSQL is not empty: "
-                    f"{detail}. Use a new/empty Neon database."
+                    "Refusing migration because PostgreSQL already contains different data: "
+                    f"{detail}. Use a new/empty Neon database or investigate before retrying."
                 )
 
             for table, columns in TABLES.items():
@@ -142,19 +213,14 @@ def main() -> int:
                 )
 
         with db() as target:
-            final_counts = {table: target_count(target, table) for table in TABLES}
+            final_state = target_snapshot(target)
 
-        mismatches = [
-            table for table in TABLES
-            if source_counts[table] != final_counts[table]
-        ]
-        for table in TABLES:
-            print(f"{table}: SQLite={source_counts[table]} PostgreSQL={final_counts[table]}")
-        if mismatches:
-            print("MIGRATION FAILED VERIFICATION:", ", ".join(mismatches))
+        print_snapshot_comparison(source_state, final_state)
+        if not snapshots_match(source_state, final_state):
+            print("MIGRATION FAILED VERIFICATION: one or more table contents differ.")
             return 1
 
-        print("MIGRATION OK: StudyAI SQLite data is now copied to PostgreSQL.")
+        print("MIGRATION OK: every StudyAI row matches exactly in PostgreSQL.")
         print("Keep the SQLite file as a temporary backup until the Neon-backed app is fully verified.")
         return 0
     finally:

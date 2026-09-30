@@ -61,18 +61,18 @@ if errorlevel 1 (
 if not exist "backups" mkdir "backups"
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "STAMP=%%i"
 set "BACKUP=backups\studyai-before-neon-%STAMP%.db"
-copy /Y "studyai.db" "%BACKUP%" >nul
+".venv\Scripts\python.exe" -c "import sqlite3; src=sqlite3.connect(r'studyai.db'); dst=sqlite3.connect(r'%BACKUP%'); src.backup(dst); dst.close(); src.close()"
 if errorlevel 1 goto :error
-echo Backup created: %BACKUP%
+echo Consistent SQLite snapshot created: %BACKUP%
 echo.
 
-echo Migrating StudyAI data to Neon...
-".venv\Scripts\python.exe" migrate_sqlite_to_postgres.py --source studyai.db
+echo Migrating StudyAI data to Neon from the snapshot...
+".venv\Scripts\python.exe" migrate_sqlite_to_postgres.py --source "%BACKUP%"
 if errorlevel 1 goto :error
 
 echo.
-echo Verifying migration counts...
-".venv\Scripts\python.exe" migrate_sqlite_to_postgres.py --source studyai.db --verify-only
+echo Verifying exact migrated data...
+".venv\Scripts\python.exe" migrate_sqlite_to_postgres.py --source "%BACKUP%" --verify-only
 if errorlevel 1 goto :error
 
 echo.

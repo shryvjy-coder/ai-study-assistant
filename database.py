@@ -53,16 +53,12 @@ class DatabaseConnection:
                     "DATABASE_URL is configured but Psycopg is not installed. "
                     "Run pip install -r requirements.txt."
                 )
-            connect_kwargs = {
-                "row_factory": dict_row,
-                "connect_timeout": 10,
-                "application_name": "studyai",
-            }
-            # Neon pooled endpoints use PgBouncer transaction pooling. Disable
-            # automatic server-side prepared statements for maximum compatibility.
-            if "-pooler." in DATABASE_URL:
-                connect_kwargs["prepare_threshold"] = None
-            self.raw = psycopg.connect(DATABASE_URL, **connect_kwargs)
+            self.raw = psycopg.connect(
+                DATABASE_URL,
+                row_factory=dict_row,
+                connect_timeout=10,
+                application_name="studyai",
+            )
         else:
             self.raw = sqlite3.connect(DB_PATH)
             self.raw.row_factory = sqlite3.Row

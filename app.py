@@ -2,7 +2,6 @@ import json
 import hmac
 import os
 import re
-import sqlite3
 import time
 import threading
 from collections import defaultdict, deque
@@ -16,6 +15,8 @@ from flask import Flask, jsonify, redirect, request, send_from_directory, sessio
 from flask_compress import Compress
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from database import DATABASE_ERRORS, INTEGRITY_ERRORS, backend_name, db, init_db, insert_and_get_id
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / '.env')
@@ -40,77 +41,9 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 30,
 )
 
-DB_PATH = Path(os.getenv('DATABASE_PATH', BASE_DIR / 'studyai.db'))
 oauth = OAuth(app)
 
 EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
-
-def db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA foreign_keys = ON')
-    return conn
-
-
-def init_db():
-    with db() as conn:
-        conn.executescript(
-            '''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                name TEXT NOT NULL DEFAULT '',
-                password_hash TEXT,
-                created_at INTEGER NOT NULL,
-                last_login INTEGER NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS oauth_identities (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                provider TEXT NOT NULL,
-                provider_sub TEXT NOT NULL,
-                created_at INTEGER NOT NULL,
-                UNIQUE(provider, provider_sub),
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-
-            CREATE TABLE IF NOT EXISTS user_state (
-                user_id INTEGER PRIMARY KEY,
-                state_json TEXT NOT NULL,
-                updated_at INTEGER NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-
-            CREATE TABLE IF NOT EXISTS question_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                source TEXT NOT NULL,
-                question_ref TEXT NOT NULL DEFAULT '',
-                category TEXT NOT NULL,
-                details TEXT NOT NULL DEFAULT '',
-                question_text TEXT NOT NULL,
-                passage TEXT NOT NULL DEFAULT '',
-                context TEXT NOT NULL DEFAULT '',
-                page TEXT NOT NULL DEFAULT '',
-                created_at INTEGER NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS client_errors (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                message TEXT NOT NULL,
-                source TEXT NOT NULL DEFAULT '',
-                line INTEGER NOT NULL DEFAULT 0,
-                column_no INTEGER NOT NULL DEFAULT 0,
-                page TEXT NOT NULL DEFAULT '',
-                created_at INTEGER NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
-            );
-            '''
-        )
-
 
 def configure_oauth():
     if os.getenv('GOOGLE_CLIENT_ID') and os.getenv('GOOGLE_CLIENT_SECRET'):
@@ -206,23 +139,24 @@ def social_login(provider, email, sub, name=''):
         ).fetchone()
         if identity:
             user_id = identity['user_id']
-            conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name="" THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
+            conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name='' THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
             return user_id
 
-        user = conn.execute('SELECT id FROM users WHERE email=? COLLATE NOCASE', (email,)).fetchone()
+        user = conn.execute('SELECT id FROM users WHERE email=?', (email,)).fetchone()
         if user:
             user_id = user['id']
-            conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name="" THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
+            conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name='' THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
         else:
             if os.getenv('BETA_ACCESS_CODE', '').strip():
                 raise ValueError('Private beta account creation requires an invite code. Create the account with email/password first.')
-            cur = conn.execute(
+            user_id = insert_and_get_id(
+                conn,
                 'INSERT INTO users(email,name,password_hash,created_at,last_login) VALUES(?,?,?,?,?)',
                 (email, name or '', None, now, now),
             )
-            user_id = cur.lastrowid
         conn.execute(
-            'INSERT OR IGNORE INTO oauth_identities(user_id,provider,provider_sub,created_at) VALUES(?,?,?,?)',
+            '''INSERT INTO oauth_identities(user_id,provider,provider_sub,created_at) VALUES(?,?,?,?)
+               ON CONFLICT(provider,provider_sub) DO NOTHING''',
             (user_id, provider, sub, now),
         )
         return user_id
@@ -290,12 +224,12 @@ def register():
     now = int(time.time())
     try:
         with db() as conn:
-            cur = conn.execute(
+            user_id = insert_and_get_id(
+                conn,
                 'INSERT INTO users(email,name,password_hash,created_at,last_login) VALUES(?,?,?,?,?)',
                 (email, name, generate_password_hash(password), now, now),
             )
-            user_id = cur.lastrowid
-    except sqlite3.IntegrityError:
+    except INTEGRITY_ERRORS:
         return jsonify({'ok': False, 'error': 'Could not create an account with those details.'}), 409
     set_login(user_id)
     return jsonify({'ok': True, 'user': {'id': user_id, 'email': email, 'name': name}})
@@ -309,7 +243,7 @@ def login():
     email = str(data.get('email', '')).strip().lower()
     password = str(data.get('password', ''))
     with db() as conn:
-        user = conn.execute('SELECT * FROM users WHERE email=? COLLATE NOCASE', (email,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE email=?', (email,)).fetchone()
         if not user or not user['password_hash'] or not check_password_hash(user['password_hash'], password):
             return jsonify({'ok': False, 'error': 'Incorrect email or password.'}), 401
         conn.execute('UPDATE users SET last_login=? WHERE id=?', (int(time.time()), user['id']))
@@ -362,9 +296,9 @@ def health():
     try:
         with db() as conn:
             conn.execute('SELECT 1').fetchone()
-        return jsonify({'ok': True, 'database': 'ready'})
-    except sqlite3.Error:
-        return jsonify({'ok': False, 'database': 'unavailable'}), 503
+        return jsonify({'ok': True, 'database': 'ready', 'backend': backend_name()})
+    except DATABASE_ERRORS:
+        return jsonify({'ok': False, 'database': 'unavailable', 'backend': backend_name()}), 503
 
 
 @app.post('/api/question-reports')
@@ -386,13 +320,13 @@ def question_report():
     now = int(time.time())
     user_id = session.get('user_id')
     with db() as conn:
-        cur = conn.execute(
+        report_id = insert_and_get_id(
+            conn,
             '''INSERT INTO question_reports(
                    user_id,source,question_ref,category,details,question_text,passage,context,page,created_at
                ) VALUES(?,?,?,?,?,?,?,?,?,?)''',
             (user_id, source, question_ref, category, details, question_text, passage, context, page, now),
         )
-        report_id = cur.lastrowid
     return jsonify({'ok': True, 'report_id': report_id})
 
 

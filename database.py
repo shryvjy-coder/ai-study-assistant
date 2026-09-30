@@ -11,6 +11,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+DATABASE_URL_UNPOOLED = os.getenv("DATABASE_URL_UNPOOLED", "").strip()
 DB_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "studyai.db"))
 
 try:
@@ -52,11 +53,16 @@ class DatabaseConnection:
                     "DATABASE_URL is configured but Psycopg is not installed. "
                     "Run pip install -r requirements.txt."
                 )
-            self.raw = psycopg.connect(
-                DATABASE_URL,
-                row_factory=dict_row,
-                connect_timeout=10,
-            )
+            connect_kwargs = {
+                "row_factory": dict_row,
+                "connect_timeout": 10,
+                "application_name": "studyai",
+            }
+            # Neon pooled endpoints use PgBouncer transaction pooling. Disable
+            # automatic server-side prepared statements for maximum compatibility.
+            if "-pooler." in DATABASE_URL:
+                connect_kwargs["prepare_threshold"] = None
+            self.raw = psycopg.connect(DATABASE_URL, **connect_kwargs)
         else:
             self.raw = sqlite3.connect(DB_PATH)
             self.raw.row_factory = sqlite3.Row
@@ -72,7 +78,13 @@ class DatabaseConnection:
         return self
 
     def __exit__(self, exc_type, exc, tb):
-        return self.raw.__exit__(exc_type, exc, tb)
+        try:
+            return self.raw.__exit__(exc_type, exc, tb)
+        finally:
+            try:
+                self.raw.close()
+            except Exception:
+                pass
 
     def close(self):
         self.raw.close()

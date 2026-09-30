@@ -16,10 +16,10 @@ from flask_compress import Compress
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from database import DATABASE_ERRORS, INTEGRITY_ERRORS, backend_name, db, init_db, insert_and_get_id
-
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / '.env')
+
+from database import DATABASE_ERRORS, INTEGRITY_ERRORS, backend_name, db, init_db, insert_and_get_id
 
 app = Flask(__name__, static_folder=None)
 app.config.update(

@@ -139,13 +139,13 @@ def social_login(provider, email, sub, name=''):
         ).fetchone()
         if identity:
             user_id = identity['user_id']
-            conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name='' THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
+            conn.execute("UPDATE users SET last_login=?, name=CASE WHEN name='' THEN ? ELSE name END WHERE id=?", (now, name or '', user_id))
             return user_id
 
         user = conn.execute('SELECT id FROM users WHERE email=?', (email,)).fetchone()
         if user:
             user_id = user['id']
-            conn.execute('UPDATE users SET last_login=?, name=CASE WHEN name='' THEN ? ELSE name END WHERE id=?', (now, name or '', user_id))
+            conn.execute("UPDATE users SET last_login=?, name=CASE WHEN name='' THEN ? ELSE name END WHERE id=?", (now, name or '', user_id))
         else:
             if os.getenv('BETA_ACCESS_CODE', '').strip():
                 raise ValueError('Private beta account creation requires an invite code. Create the account with email/password first.')

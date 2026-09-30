@@ -43,10 +43,8 @@ if database_url:
         params = parse_qs(parsed.query)
         require(params.get("sslmode", [""])[0] in {"require", "verify-ca", "verify-full"},
                 "Neon DATABASE_URL requires TLS.")
-        if "-pooler." in parsed.hostname:
-            checks.append((True, "Neon pooled connection endpoint is configured."))
-        else:
-            checks.append((True, "Neon direct connection is configured; pooled is recommended for the hosted web app."))
+        require("-pooler." in parsed.hostname,
+                "Hosted StudyAI uses Neon's pooled connection endpoint (-pooler hostname).")
 
 beta = truth("BETA_ACCESS_CODE")
 require(len(beta) >= 8,

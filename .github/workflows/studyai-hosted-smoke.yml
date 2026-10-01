@@ -44,7 +44,7 @@ jobs:
                       with urllib.request.urlopen(req, timeout=45) as response:
                           status = response.status
                           body = response.read()
-                          response_headers = dict(response.headers.items())
+                          response_headers = {k.lower(): v for k, v in response.headers.items()}
                   except urllib.error.HTTPError as exc:
                       status = exc.code
                       body = exc.read()
@@ -76,11 +76,11 @@ jobs:
           status, body, headers = request("/api/auth/me", expected=(200,))
           me = json.loads(body)
           assert me.get("registration_mode") == "invite", me
-          assert "noindex" in headers.get("X-Robots-Tag", ""), headers
-          assert headers.get("X-Content-Type-Options") == "nosniff", headers
-          assert headers.get("X-Frame-Options") == "SAMEORIGIN", headers
-          assert headers.get("Referrer-Policy") == "strict-origin-when-cross-origin", headers
-          permissions = headers.get("Permissions-Policy", "")
+          assert "noindex" in headers.get("x-robots-tag", ""), headers
+          assert headers.get("x-content-type-options") == "nosniff", headers
+          assert headers.get("x-frame-options") == "SAMEORIGIN", headers
+          assert headers.get("referrer-policy") == "strict-origin-when-cross-origin", headers
+          permissions = headers.get("permissions-policy", "")
           assert "geolocation=()" in permissions, permissions
           assert "camera=()" in permissions, permissions
           assert "microphone=()" in permissions, permissions

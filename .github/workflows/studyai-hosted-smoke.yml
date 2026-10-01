@@ -1,0 +1,129 @@
+name: StudyAI Hosted Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  hosted-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify hosted private beta
+        env:
+          BASE_URL: https://studyai-beta.onrender.com
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          base = os.environ["BASE_URL"].rstrip("/")
+
+          def request(path, *, method="GET", payload=None, expected=(200,), attempts=8):
+              data = None
+              headers = {"User-Agent": "StudyAI-Hosted-Smoke/1.0"}
+              if payload is not None:
+                  data = json.dumps(payload).encode("utf-8")
+                  headers["Content-Type"] = "application/json"
+
+              last_error = None
+              for attempt in range(1, attempts + 1):
+                  req = urllib.request.Request(
+                      base + path,
+                      data=data,
+                      headers=headers,
+                      method=method,
+                  )
+                  try:
+                      with urllib.request.urlopen(req, timeout=45) as response:
+                          status = response.status
+                          body = response.read()
+                          response_headers = dict(response.headers.items())
+                  except urllib.error.HTTPError as exc:
+                      status = exc.code
+                      body = exc.read()
+                      response_headers = dict(exc.headers.items())
+                  except Exception as exc:
+                      last_error = exc
+                      if attempt == attempts:
+                          raise
+                      time.sleep(min(5 * attempt, 20))
+                      continue
+
+                  if status in expected:
+                      return status, body, response_headers
+
+                  if status >= 500 and attempt < attempts:
+                      time.sleep(min(5 * attempt, 20))
+                      continue
+
+                  raise AssertionError(
+                      f"{method} {path}: expected {expected}, got {status}. "
+                      f"Body: {body[:500]!r}"
+                  )
+
+              raise AssertionError(f"{method} {path} failed: {last_error}")
+
+          status, _, _ = request("/", expected=(200,))
+          print("PASS homepage responds", status)
+
+          status, body, headers = request("/api/auth/me", expected=(200,))
+          me = json.loads(body)
+          assert me.get("registration_mode") == "invite", me
+          assert "noindex" in headers.get("X-Robots-Tag", ""), headers
+          assert headers.get("X-Content-Type-Options") == "nosniff", headers
+          assert headers.get("X-Frame-Options") == "SAMEORIGIN", headers
+          assert headers.get("Referrer-Policy") == "strict-origin-when-cross-origin", headers
+          permissions = headers.get("Permissions-Policy", "")
+          assert "geolocation=()" in permissions, permissions
+          assert "camera=()" in permissions, permissions
+          assert "microphone=()" in permissions, permissions
+          print("PASS invite mode and security headers")
+
+          status, body, _ = request("/privacy", expected=(200,))
+          assert b"Privacy" in body, body[:500]
+          print("PASS privacy page")
+
+          status, _, _ = request(
+              "/api/auth/register",
+              method="POST",
+              payload={
+                  "email": "hosted-smoke@example.test",
+                  "password": "hosted-smoke-only-42",
+                  "name": "Hosted Smoke",
+              },
+              expected=(403,),
+          )
+          print("PASS missing beta code rejected", status)
+
+          status, _, _ = request(
+              "/api/auth/register",
+              method="POST",
+              payload={
+                  "email": "hosted-smoke@example.test",
+                  "password": "hosted-smoke-only-42",
+                  "name": "Hosted Smoke",
+                  "access_code": "definitely-not-the-real-code",
+              },
+              expected=(403,),
+          )
+          print("PASS incorrect beta code rejected", status)
+
+          status, _, _ = request("/api/state", expected=(401,))
+          print("PASS unauthenticated cloud state rejected", status)
+
+          status, body, _ = request("/api/health", expected=(200,))
+          health = json.loads(body)
+          assert health.get("ok") is True, health
+          assert health.get("database") == "ready", health
+          assert health.get("backend") == "postgresql", health
+          print("PASS PostgreSQL health endpoint", health)
+
+          print("HOSTED SMOKE OK")
+          PY

@@ -599,6 +599,7 @@
     ensureToday();
     ensureSessionDialog();
     ensureAccountControls();
+    window.StudyAIPerformance?.loadFeature?.('help');
     bridge.recordBetaSignal?.('app-open');
     renderToday();
     autoOnboarding();

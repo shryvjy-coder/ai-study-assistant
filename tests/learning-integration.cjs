@@ -12,6 +12,14 @@ const server=spawn(process.env.PYTHON||'python',['launcher.py'],{cwd:path.join(_
 let serverErrors='';server.stderr.on('data',chunk=>{serverErrors=(serverErrors+String(chunk)).slice(-12000)});
 let browser,checks=0;
 const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PASS',message)};
+const dismissFirstRunTour=async page=>{
+  await page.waitForSelector('#help-guided-tour:not(.hidden)',{timeout:3000}).catch(()=>{});
+  if(await page.locator('#help-guided-tour:not(.hidden)').count()){
+    await page.locator('[data-tour-skip]').click();
+    await page.locator('[data-tour-skip-confirm]').click();
+    await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
+  }
+};
 (async()=>{
  for(let i=0;i<80;i++){try{if((await fetch(url+'/api/auth/me')).ok)break}catch{}await new Promise(r=>setTimeout(r,100))}
  browser=await chromium.launch({headless:true,...(process.env.TEST_CHROMIUM?{executablePath:process.env.TEST_CHROMIUM,args:['--no-sandbox','--disable-gpu']}:{})});
@@ -20,6 +28,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  await page.clock.install();
  await page.goto(url);await page.waitForSelector('#learning-goals');await page.waitForSelector('#today-dashboard');await page.waitForTimeout(600);
  if(await page.locator('#studyai-onboarding[open]').count())await page.locator('[data-onboarding-skip]').click();
+ await dismissFirstRunTour(page);
  check(await page.locator('#learning-goals').count()===1,'Flask injects planning after existing assets');
  check(await page.locator('#today-dashboard').count()===1,'Today dashboard loads');
  check(await page.evaluate(()=>StudyAIProduct.confidence(2).label==='Limited evidence'&&StudyAIProduct.confidence(10).label==='Developing evidence'&&StudyAIProduct.confidence(25).label==='Strong evidence'),'evidence confidence reflects answer count');
@@ -97,6 +106,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
  await ap.goto(url);await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});
  await ap.waitForSelector('#pai-provider-status');await ap.waitForTimeout(600);
  if(await ap.locator('#studyai-onboarding[open]').count())await ap.locator('[data-onboarding-skip]').click();
+ await dismissFirstRunTour(ap);
  await ap.waitForFunction(()=>document.querySelector('#pai-provider-status').textContent.includes('ready'));
  await ap.locator('[data-pai-topic-mode="flashcards"]').click();
  await ap.locator('#pai-load-generated-cards').click();

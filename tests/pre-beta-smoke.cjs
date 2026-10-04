@@ -49,6 +49,28 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
     await page.waitForFunction(()=>!document.querySelector('#studyai-onboarding')?.open);
   }
 
+  await page.waitForSelector('#help-guided-tour:not(.hidden)',{timeout:5000});
+  check(await page.locator('#help-guided-tour .help-tour-mask').count()===4,
+    'first-run tutorial uses four blur masks to isolate the current target');
+  check(await page.locator('#help-guided-tour .help-tour-focus-ring').count()===1
+    &&await page.locator('#help-tour-title').textContent()!=='',
+    'first-run tutorial renders a focused spotlight and explanation');
+  await page.locator('[data-tour-skip]').click();
+  check(await page.locator('#help-tour-skip-warning:not([hidden])').count()===1
+    &&(await page.locator('#help-tour-skip-warning').innerText()).includes('full StudyAI experience'),
+    'skipping the tutorial warns that important features may be missed');
+  await page.locator('[data-tour-skip-confirm]').click();
+  await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
+  check(await page.locator('#help-start-tour').count()===1,
+    'Help keeps a replay control for the full tutorial');
+  await page.locator('#help-start-tour').click();
+  await page.waitForSelector('#help-guided-tour:not(.hidden)');
+  check((await page.locator('#help-tour-step').textContent())?.startsWith('1 of '),
+    'Help replay restarts the tutorial from the beginning');
+  await page.locator('[data-tour-skip]').click();
+  await page.locator('[data-tour-skip-confirm]').click();
+  await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
+
   check(await page.locator('html[lang="en"]').count()===1,'document language is declared');
   check(await page.locator('#main-content').count()===1,'main content has a keyboard skip target');
   check(await page.locator('.skip-link[href="#main-content"]').count()===1,'skip-to-content link is present');

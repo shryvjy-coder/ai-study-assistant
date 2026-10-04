@@ -71,6 +71,26 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.locator('[data-tour-skip-confirm]').click();
   await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
 
+  const currentCbseNine=await page.evaluate(()=>{
+    const rows=STUDY_DATA.filter(x=>x.board==='CBSE'&&x.grade==='Class 9');
+    return {
+      maths:rows.filter(x=>x.subject==='Mathematics').map(x=>x.title),
+      science:rows.filter(x=>x.subject==='Science').map(x=>x.title),
+      detailed:rows.every(x=>Array.isArray(x.keyPoints)&&x.keyPoints.length>=4&&Array.isArray(x.method)&&x.method.length>=4)
+    };
+  });
+  check(currentCbseNine.maths.length===14
+    &&currentCbseNine.maths[0]==='Orienting Yourself: The Use of Coordinates'
+    &&currentCbseNine.maths.includes('The World of Algorithms')
+    &&currentCbseNine.maths.at(-1)==='Math of Space: Surface Area and Volume',
+    'CBSE Class 9 Mathematics uses the 2026-27 Ganita Manjari chapter structure');
+  check(currentCbseNine.science.length===13
+    &&currentCbseNine.science[0]==='Exploration: Entering the World of Secondary Science'
+    &&currentCbseNine.science.includes('Journey Inside the Atom')
+    &&currentCbseNine.science.at(-1)==='Earth as a System: Energy, Matter, and Life',
+    'CBSE Class 9 Science uses the 2026-27 Exploration chapter structure');
+  check(currentCbseNine.detailed,'updated CBSE Class 9 chapters include chapter-specific StudyAI notes');
+
   check(await page.locator('html[lang="en"]').count()===1,'document language is declared');
   check(await page.locator('#main-content').count()===1,'main content has a keyboard skip target');
   check(await page.locator('.skip-link[href="#main-content"]').count()===1,'skip-to-content link is present');

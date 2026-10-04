@@ -31,17 +31,26 @@
   ];
 
   const tour=[
-    {title:'1. Learn',text:'Start in Study Library for curriculum topics, or SAT for exam-specific skills.',hash:'#study'},
-    {title:'2. Practice',text:'Practice Studio gives you diagnostic, adaptive, mixed, custom and timed sessions.',hash:'#practice-studio'},
-    {title:'3. Review mistakes',text:'Wrong Answer Notebook and Smart Review turn misses into specific follow-up actions.',hash:'#mistake-notebook'},
-    {title:'4. Remember',text:'Flashcards use spaced repetition. Reveal first, then rate your recall.',hash:'#flashcards'},
-    {title:'5. Plan',text:'Planner, SAT Planner and deadlines turn your priorities into manageable sessions.',hash:'#planner'},
-    {title:'6. Track',text:'Progress shows mastery from actual practice evidence, not from opening a chapter.',hash:'#progress'},
-    {title:'7. Use Personal AI',text:'Add selected sources and use grounded AI for explanations, revision notes, quizzes and flashcards.',hash:'#personal-ai'},
-    {title:'8. Find anything fast',text:'Use the Command Center when you already know the topic or action you want.',command:true}
+    {title:'Welcome to StudyAI',text:'StudyAI works best as a loop: decide what matters today, learn, practice, review mistakes, then use the evidence to choose what comes next.',selector:'#today .today-head',hash:'#today'},
+    {title:'Today: start here',text:'Today is your home base. It combines due reviews, mistakes, weak areas and deadlines so you are not guessing what to study first.',selector:'#today .today-layout',hash:'#today'},
+    {title:'Study Library: learn the topic',text:'Choose your board, grade and subject, then open a topic. Reading helps you learn, but mastery only changes when you answer real practice questions.',selector:'#study .section-head',hash:'#study'},
+    {title:'Practice: turn learning into evidence',text:'Use quizzes and practice after learning. Explanations and wrong answers are important because StudyAI uses answered practice, not clicks, as evidence.',selector:'#practice .section-head',hash:'#practice'},
+    {title:'SAT: practice by skill',text:'For SAT prep, choose Reading & Writing or Math, then narrow to a domain, skill and difficulty. Use Bluebook separately for official full-length tests.',selector:'#sat .section-head',hash:'#sat'},
+    {title:'Workspace: bring your own material',text:'Workspace is for your class notes and revision material. Save notes into folders, then reuse them for flashcards or other StudyAI tools.',selector:'#workspace .section-head',hash:'#workspace'},
+    {title:'Flashcards: remember what you learned',text:'Reveal the answer before rating your recall. Again, Hard, Good and Easy control when StudyAI schedules the card for review.',selector:'#flashcards .section-head',hash:'#flashcards'},
+    {title:'Progress: read the evidence',text:'Progress shows strengths, developing areas and mastery evidence. Use it to find what needs practice instead of trying to chase a percentage.',selector:'#progress .section-head',hash:'#progress'},
+    {title:'Planner: turn goals into sessions',text:'Add deadlines and study goals here. StudyAI can use them with your learning evidence to build more useful next steps.',selector:'#planner .section-head',hash:'#planner'},
+    {title:'Search StudyAI instantly',text:'Use the command button when you already know where you want to go. It is the fastest way to jump between major tools.',selector:'#open-command'},
+    {title:'Your account keeps progress synced',text:'Your account menu shows your sign-in and sync status. When signed in, supported StudyAI progress can follow your account instead of staying only in this browser.',selector:'#account-button'},
+    {title:'Replay this tutorial any time',text:'If you forget where something is, open Help & Tutorial. This full guided tour can always be replayed from here.',selector:'#help-start-tour',hash:'#help'}
   ];
 
+  const TOUR_STORAGE_KEY='studyai-guided-tour-v2';
   let tourIndex=0;
+  let tourActive=false;
+  let tourLayoutFrame=0;
+  let tourReadyTimer=null;
+  let tourLastFocus=null;
 
   function cardMarkup(g){
     return '<article class="help-card" data-help-search="'+safe((g.title+' '+g.summary+' '+g.when+' '+g.keywords).toLowerCase())+'">'+
@@ -63,7 +72,7 @@
     section.innerHTML=
       '<div class="shell">'+
         '<header class="section-head help-head"><div><p class="kicker">Help · Tutorial</p><h2>Learn StudyAI without guessing.</h2><p>Start with a workflow, search for a feature, or take the guided tour. You do not need to use every tool.</p></div>'+
-        '<button type="button" class="button primary" id="help-start-tour">Start guided tour →</button></header>'+
+        '<button type="button" class="button primary" id="help-start-tour">Replay full tutorial →</button></header>'+
         '<div class="help-quickstart">'+
           '<div><span class="small-label">If you are new</span><h3>Use this simple loop first</h3><p>Learn → Practice → Review mistakes → Review due cards → Plan the next session.</p></div>'+
           '<div class="help-quick-actions"><a class="button secondary compact" href="#study">Learn a topic</a><a class="button secondary compact" href="#practice-studio">Start practice</a><a class="button secondary compact" href="#smart-review-queue">What should I do next?</a></div>'+
@@ -132,40 +141,207 @@
     if(guide.hash) location.hash=guide.hash;
   }
 
-  function ensureTourDialog(){
-    let dialog=$('#help-tour-dialog');
-    if(dialog) return dialog;
-    dialog=document.createElement('dialog');
-    dialog.id='help-tour-dialog';
-    dialog.className='help-tour-dialog';
-    dialog.innerHTML='<div class="help-tour-card"><div class="help-tour-progress" id="help-tour-progress"></div><span class="small-label" id="help-tour-label">Guided tour</span><h3 id="help-tour-title"></h3><p id="help-tour-text"></p><div class="help-tour-actions"><button type="button" class="button ghost" id="help-tour-close">Close</button><button type="button" class="button secondary" id="help-tour-open">Open feature</button><button type="button" class="button primary" id="help-tour-next">Next →</button></div></div>';
-    document.body.appendChild(dialog);
-    $('#help-tour-close',dialog).addEventListener('click',()=>dialog.close());
-    $('#help-tour-next',dialog).addEventListener('click',()=>{tourIndex++;if(tourIndex>=tour.length){dialog.close();return}renderTour()});
-    $('#help-tour-open',dialog).addEventListener('click',()=>{
-      const step=tour[tourIndex];
-      if(step.command) window.StudyAICommandCenter?.open?.();
-      else if(step.hash) location.hash=step.hash;
+  function ensureTourOverlay(){
+    let overlay=$('#help-guided-tour');
+    if(overlay)return overlay;
+    overlay=document.createElement('div');
+    overlay.id='help-guided-tour';
+    overlay.className='help-guided-tour hidden';
+    overlay.setAttribute('aria-hidden','true');
+    overlay.innerHTML=
+      '<div class="help-tour-mask" data-tour-mask="top"></div>'+
+      '<div class="help-tour-mask" data-tour-mask="left"></div>'+
+      '<div class="help-tour-mask" data-tour-mask="right"></div>'+
+      '<div class="help-tour-mask" data-tour-mask="bottom"></div>'+
+      '<div class="help-tour-focus-ring" aria-hidden="true"></div>'+
+      '<div class="help-tour-target-shield" aria-hidden="true"></div>'+
+      '<section class="help-tour-popover" id="help-tour-popover" role="dialog" aria-modal="true" aria-labelledby="help-tour-title" aria-describedby="help-tour-text">'+
+        '<div class="help-tour-step-row"><span class="small-label" id="help-tour-step"></span><button type="button" class="help-tour-skip-link" data-tour-skip>Skip tutorial</button></div>'+
+        '<div class="help-tour-progress" id="help-tour-progress"></div>'+
+        '<h3 id="help-tour-title"></h3><p id="help-tour-text"></p>'+
+        '<div class="help-tour-actions"><button type="button" class="button secondary" data-tour-prev>Back</button><button type="button" class="button primary" data-tour-next>Next →</button></div>'+
+      '</section>'+
+      '<section class="help-tour-skip-warning" id="help-tour-skip-warning" role="alertdialog" aria-modal="true" aria-labelledby="help-tour-skip-title" hidden>'+
+        '<span class="help-tour-warning-mark" aria-hidden="true">!</span><span class="small-label">Before you skip</span>'+
+        '<h3 id="help-tour-skip-title">You may miss important parts of StudyAI.</h3>'+
+        '<p>You can still use the website without the tutorial, but you may miss features and workflows that help you get the full StudyAI experience. You can replay the tutorial later from Help & Tutorial.</p>'+
+        '<div class="help-tour-actions"><button type="button" class="button secondary" data-tour-skip-cancel>Continue tutorial</button><button type="button" class="button ghost" data-tour-skip-confirm>Skip anyway</button></div>'+
+      '</section>';
+    document.body.appendChild(overlay);
+
+    $('[data-tour-next]',overlay).addEventListener('click',async()=>{
+      if(tourIndex>=tour.length-1){endTour('complete');return}
+      tourIndex++;await renderTour();
     });
-    return dialog;
+    $('[data-tour-prev]',overlay).addEventListener('click',async()=>{
+      if(!tourIndex)return;
+      tourIndex--;await renderTour();
+    });
+    $('[data-tour-skip]',overlay).addEventListener('click',showSkipWarning);
+    $('[data-tour-skip-cancel]',overlay).addEventListener('click',hideSkipWarning);
+    $('[data-tour-skip-confirm]',overlay).addEventListener('click',()=>endTour('skipped'));
+    overlay.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();showSkipWarning()}
+      if(event.key==='ArrowRight'&&!$('#help-tour-skip-warning')?.hidden){return}
+      if(event.key==='ArrowRight'){event.preventDefault();$('[data-tour-next]',overlay)?.click()}
+      if(event.key==='ArrowLeft'&&tourIndex){event.preventDefault();$('[data-tour-prev]',overlay)?.click()}
+    });
+    return overlay;
   }
 
-  function startTour(){
-    tourIndex=0;
-    const dialog=ensureTourDialog();
-    renderTour();
-    if(typeof dialog.showModal==='function') dialog.showModal();
+  function tourSeen(){
+    try{return !!localStorage.getItem(TOUR_STORAGE_KEY)}catch(_){return false}
   }
 
-  function renderTour(){
-    const dialog=ensureTourDialog(),step=tour[tourIndex];
-    $('#help-tour-title',dialog).textContent=step.title;
-    $('#help-tour-text',dialog).textContent=step.text;
-    $('#help-tour-progress',dialog).innerHTML=tour.map((_,i)=>'<span class="'+(i<=tourIndex?'active':'')+'"></span>').join('');
-    $('#help-tour-next',dialog).textContent=tourIndex===tour.length-1?'Finish':'Next →';
-    $('#help-tour-open',dialog).textContent=step.command?'Open Command Center':'Open feature';
+  function saveTourStatus(status){
+    try{localStorage.setItem(TOUR_STORAGE_KEY,JSON.stringify({status,version:2,at:Date.now()}))}catch(_){}
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',makeHelp);
-  else makeHelp();
+  function showSkipWarning(){
+    const overlay=ensureTourOverlay();
+    $('#help-tour-popover',overlay).hidden=true;
+    const warning=$('#help-tour-skip-warning',overlay);
+    warning.hidden=false;
+    $('[data-tour-skip-cancel]',warning)?.focus();
+  }
+
+  function hideSkipWarning(){
+    const overlay=ensureTourOverlay();
+    $('#help-tour-skip-warning',overlay).hidden=true;
+    $('#help-tour-popover',overlay).hidden=false;
+    scheduleTourLayout();
+    $('[data-tour-next]',overlay)?.focus();
+  }
+
+  function setBox(el,{top,left,width,height}){
+    if(!el)return;
+    el.style.top=Math.max(0,top)+'px';
+    el.style.left=Math.max(0,left)+'px';
+    el.style.width=Math.max(0,width)+'px';
+    el.style.height=Math.max(0,height)+'px';
+  }
+
+  function positionTour(){
+    if(!tourActive)return;
+    const overlay=ensureTourOverlay(),step=tour[tourIndex];
+    const target=$(step.selector)||$('.topbar');
+    if(!target)return;
+    const rect=target.getBoundingClientRect();
+    const pad=10;
+    const left=Math.max(8,rect.left-pad);
+    const top=Math.max(8,rect.top-pad);
+    const right=Math.min(innerWidth-8,rect.right+pad);
+    const bottom=Math.min(innerHeight-8,rect.bottom+pad);
+    const width=Math.max(1,right-left),height=Math.max(1,bottom-top);
+
+    setBox($('[data-tour-mask="top"]',overlay),{top:0,left:0,width:innerWidth,height:top});
+    setBox($('[data-tour-mask="bottom"]',overlay),{top:bottom,left:0,width:innerWidth,height:innerHeight-bottom});
+    setBox($('[data-tour-mask="left"]',overlay),{top,left:0,width:left,height});
+    setBox($('[data-tour-mask="right"]',overlay),{top,left:right,width:innerWidth-right,height});
+    setBox($('.help-tour-focus-ring',overlay),{top,left,width,height});
+    setBox($('.help-tour-target-shield',overlay),{top,left,width,height});
+
+    const pop=$('#help-tour-popover',overlay);
+    if(pop.hidden)return;
+    pop.style.visibility='hidden';
+    pop.style.left='16px';
+    pop.style.top='16px';
+    const popRect=pop.getBoundingClientRect();
+    const gap=22;
+    const roomBelow=innerHeight-bottom;
+    const placement=roomBelow>=popRect.height+gap+12?'below':'above';
+    let popTop=placement==='below'?bottom+gap:top-popRect.height-gap;
+    popTop=Math.max(12,Math.min(innerHeight-popRect.height-12,popTop));
+    let popLeft=(left+right)/2-popRect.width/2;
+    popLeft=Math.max(12,Math.min(innerWidth-popRect.width-12,popLeft));
+    const arrowX=Math.max(28,Math.min(popRect.width-28,(left+right)/2-popLeft));
+    pop.dataset.placement=placement;
+    pop.style.setProperty('--tour-arrow-x',arrowX+'px');
+    pop.style.left=popLeft+'px';
+    pop.style.top=popTop+'px';
+    pop.style.visibility='visible';
+  }
+
+  function scheduleTourLayout(){
+    if(!tourActive||tourLayoutFrame)return;
+    tourLayoutFrame=requestAnimationFrame(()=>{tourLayoutFrame=0;positionTour()});
+  }
+
+  async function renderTour(){
+    const overlay=ensureTourOverlay(),step=tour[tourIndex];
+    $('#help-tour-skip-warning',overlay).hidden=true;
+    const pop=$('#help-tour-popover',overlay);pop.hidden=false;
+    $('#help-tour-step',overlay).textContent=(tourIndex+1)+' of '+tour.length;
+    $('#help-tour-title',overlay).textContent=step.title;
+    $('#help-tour-text',overlay).textContent=step.text;
+    $('#help-tour-progress',overlay).innerHTML=tour.map((_,i)=>'<span class="'+(i<=tourIndex?'active':'')+'"></span>').join('');
+    $('[data-tour-prev]',overlay).hidden=tourIndex===0;
+    $('[data-tour-next]',overlay).textContent=tourIndex===tour.length-1?'Finish tutorial':'Next →';
+
+    if(step.hash&&location.hash!==step.hash)location.hash=step.hash;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const target=$(step.selector)||$('.topbar');
+    if(target){
+      const r=target.getBoundingClientRect();
+      if(r.top<80||r.bottom>innerHeight-80){
+        target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center',inline:'nearest'});
+        await new Promise(resolve=>setTimeout(resolve,matchMedia('(prefers-reduced-motion: reduce)').matches?40:320));
+      }
+    }
+    positionTour();
+    $('[data-tour-next]',overlay)?.focus();
+  }
+
+  async function startTour(options={}){
+    const auto=!!options.auto;
+    if(tourActive||(auto&&tourSeen()))return;
+    if(auto&&document.querySelector('dialog[open]'))return;
+    tourIndex=0;tourActive=true;tourLastFocus=document.activeElement;
+    const overlay=ensureTourOverlay();
+    overlay.classList.remove('hidden');overlay.setAttribute('aria-hidden','false');
+    document.body.classList.add('help-tour-active');
+    await renderTour();
+  }
+
+  function endTour(status){
+    if(status)saveTourStatus(status);
+    tourActive=false;
+    const overlay=$('#help-guided-tour');
+    if(overlay){overlay.classList.add('hidden');overlay.setAttribute('aria-hidden','true')}
+    document.body.classList.remove('help-tour-active');
+    if(tourLastFocus&&typeof tourLastFocus.focus==='function')tourLastFocus.focus();
+  }
+
+  function armFirstRunTutorial(){
+    if(tourSeen())return;
+    clearInterval(tourReadyTimer);
+    const tryStart=()=>{
+      if(tourSeen()){clearInterval(tourReadyTimer);return}
+      const product=window.StudyAIProduct;
+      const ready=!!product?.prefs?.().onboardingComplete;
+      const modalOpen=!!document.querySelector('dialog[open]');
+      if(!ready||modalOpen)return;
+      clearInterval(tourReadyTimer);
+      setTimeout(()=>startTour({auto:true}),350);
+    };
+    tourReadyTimer=setInterval(tryStart,600);
+    tryStart();
+  }
+
+  window.addEventListener('resize',scheduleTourLayout);
+  window.addEventListener('scroll',scheduleTourLayout,{passive:true});
+
+  window.StudyAIHelp={
+    startTour:()=>startTour({auto:false}),
+    replayTour:()=>startTour({auto:false}),
+    isTourActive:()=>tourActive
+  };
+
+  function mountHelp(){
+    makeHelp();
+    armFirstRunTutorial();
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountHelp);
+  else mountHelp();
 })();

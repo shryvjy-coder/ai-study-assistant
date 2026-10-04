@@ -150,12 +150,8 @@
       C('Human Health and Disease','pathogens and immunity|AIDS and cancer|allergy|public-health prevention'),
       C('Microbes in Human Welfare','food and industry|sewage treatment|biogas|biocontrol and biofertilisers'),
       C('Biotechnology: Principles and Processes','genetic engineering tools|recombinant DNA workflow|PCR|bioreactors'),
-      C('Biotechnology and its Applications','medicine|agriculture|transgenic organisms|biosafety and ethics'),
-      C('Organisms and Populations','adaptation|population attributes|population growth|species interactions'),
-      C('Ecosystem','productivity|energy flow|decomposition|ecological pyramids and nutrient cycling'),
-      C('Biodiversity and Conservation','levels and patterns of biodiversity|biodiversity loss|in-situ conservation|ex-situ conservation')
-    ]),
-
+      C('Biotechnology and its Applications','medicine|agriculture|transgenic organisms|biosafety and ethics')
+    ],'NCERT Reprint 2025-26 · current 10-chapter edition'),
     B('Class 11','Accountancy','Financial Accounting – I',[
       C('Introduction to Accounting','meaning and objectives|users of accounting|accounting information|basic terminology'),
       C('Theory Base of Accounting','assumptions and principles|accounting standards|GST basics|accounting equation'),
@@ -254,18 +250,14 @@
     ],'NCERT text aligned to CBSE 2026-27 assessed content'),
 
     B('Class 11','History','Themes in World History',[
-      C('From the Beginning of Time','human evolution|hunter-gatherers|early evidence|historical reconstruction'),
       C('Writing and City Life','Mesopotamia|urbanisation|writing|social hierarchy and trade'),
       C('An Empire Across Three Continents','Roman Empire|administration|economy|social and religious change'),
-      C('The Central Islamic Lands','rise of Islam|caliphates|economy and cities|culture and knowledge'),
       C('Nomadic Empires','Mongols|pastoral societies|empire building|Eurasian connections'),
       C('The Three Orders','medieval Europe|feudal society|clergy nobility peasants|change'),
       C('Changing Cultural Traditions','Renaissance|humanism|art and science|printing and reform'),
-      C('Confrontation of Cultures','Americas|European conquest|indigenous societies|colonial exchange'),
-      C('The Industrial Revolution','Britain|technology and factories|labour|urbanisation and debate'),
       C('Displacing Indigenous Peoples','settler colonies|land and indigenous peoples|Australia and North America|historical memory'),
       C('Paths to Modernisation','China and Japan|state reform|industrialisation|competing paths to modernity')
-    ]),
+    ],'NCERT textbook · CBSE 2026-27 assessed themes'),
     B('Class 12','History','Themes in Indian History',[
       C('Bricks, Beads and Bones','Harappan archaeology|urbanism|craft and trade|interpreting material evidence'),
       C('Kings, Farmers and Towns','early states|agriculture and towns|inscriptions|political economy'),
@@ -275,15 +267,11 @@
       C('Bhakti-Sufi Traditions','devotional traditions|saints and Sufis|language|social interaction'),
       C('An Imperial Capital: Vijayanagara','urban centre|kingship|temples|archaeological reconstruction'),
       C('Peasants, Zamindars and the State','Mughal agrarian system|zamindars|revenue|Ain-i-Akbari'),
-      C('Kings and Chronicles','Mughal court|chronicles|kingship|manuscript evidence'),
       C('Colonialism and the Countryside','Permanent Settlement|peasants and zamindars|revenue|official records'),
       C('Rebels and the Raj','1857 revolt|causes|participants|representations'),
-      C('Colonial Cities','urbanisation|Bombay Calcutta Madras|planning|segregation'),
       C('Mahatma Gandhi and the Nationalist Movement','mass nationalism|Gandhian politics|sources|major movements'),
-      C('Understanding Partition','communal politics|violence and displacement|oral histories|memory'),
       C('Framing the Constitution','Constituent Assembly|debates|federalism and rights|democratic settlement')
-    ]),
-
+    ],'NCERT textbook · CBSE 2026-27 assessed themes'),
     B('Class 11','Geography','Fundamentals of Physical Geography',[
       C('Geography as a Discipline','geographical questions|systematic and regional approaches|physical and human geography|spatial thinking'),
       C('The Origin and Evolution of the Earth','universe and solar system|earth formation|evolution of lithosphere atmosphere hydrosphere|life'),
@@ -322,15 +310,13 @@
     B('Class 12','Geography','Fundamentals of Human Geography',[
       C('Human Geography: Nature and Scope','human-environment relationship|approaches|spatial organisation|scope'),
       C('The World Population: Distribution, Density and Growth','population patterns|density|growth|demographic transition'),
-      C('Population Composition','age sex literacy occupation|population pyramids|composition|regional differences'),
       C('Human Development','capabilities|HDI|international comparison|development approaches'),
       C('Primary Activities','agriculture|pastoralism|forestry fishing mining|subsistence and commercial systems'),
       C('Secondary Activities','manufacturing|industrial location|industry types|global shifts'),
       C('Tertiary and Quaternary Activities','services|knowledge economy|outsourcing|regional patterns'),
-      C('Transport and Communication','transport modes|networks|communication|connectivity'),
-      C('International Trade','basis of trade|balance of trade|trade organisations|ports'),
-      C('Human Settlements','rural and urban settlements|patterns|functions|urbanisation')
-    ]),
+      C('Transport, Communication and Trade','transport modes|networks|communication|trade and connectivity'),
+      C('International Trade','basis of trade|balance of trade|trade organisations|ports')
+    ],'NCERT textbook · CBSE 2026-27 assessed chapters'),
     B('Class 12','Geography','India: People and Economy',[
       C('Population: Distribution, Density, Growth and Composition','population patterns|growth phases|composition|regional variation'),
       C('Human Settlements','rural settlement types|urbanisation|city classification|urban issues'),
@@ -371,10 +357,8 @@
       C('Rights','meaning and sources|legal and moral rights|human rights|duties'),
       C('Citizenship','membership|rights and duties|migration|equal citizenship'),
       C('Nationalism','nation and state|self-determination|pluralism|national identity'),
-      C('Secularism','state and religion|Indian model|Western models|religious freedom'),
-      C('Peace','violence|structural violence|conflict resolution|peace building'),
-      C('Development','models of development|costs|sustainability|alternative approaches')
-    ]),
+      C('Secularism','state and religion|Indian model|Western models|religious freedom')
+    ],'NCERT textbook · CBSE 2026-27 assessed chapters'),
     B('Class 12','Political Science','Contemporary World Politics',[
       C('The End of Bipolarity','Soviet system|disintegration|post-Soviet politics|global consequences'),
       C('Contemporary Centres of Power','European Union|China|ASEAN|shifting power'),
@@ -413,21 +397,16 @@
       C('Introducing Indian Society','colonialism nationalism modernity|plurality|sociological perspective|continuity and change'),
       C('The Demographic Structure of the Indian Society','population|age sex ratio|demographic transition|policy'),
       C('Social Institutions: Continuity and Change','caste tribe family kinship|change|law and reform|social organisation'),
-      C('The Market as a Social Institution','markets and society|traditional markets|liberalisation|consumption'),
       C('Patterns of Social Inequality and Exclusion','caste tribe gender disability|prejudice|discrimination|social policy'),
       C('The Challenges of Cultural Diversity','community nation state|regionalism communalism|secularism|diversity')
-    ]),
+    ],'NCERT textbook · CBSE 2026-27 assessed chapters'),
     B('Class 12','Sociology','Social Change and Development in India',[
       C('Structural Change','colonialism|industrialisation|urbanisation|structural transformation'),
       C('Cultural Change','Sanskritisation|Westernisation|secularisation|modernisation'),
-      C('The Story of Indian Democracy','democracy|panchayati raj|political participation|social movements'),
       C('Change and Development in Rural Society','agrarian structure|land reform|Green Revolution|rural transformation'),
       C('Change and Development in Industrial Society','industrialisation|work|labour|informal sector'),
-      C('Globalisation and Social Change','global flows|liberalisation|culture|work and markets'),
-      C('Mass Media and Communications','media forms|ownership|public sphere|digital change'),
       C('Social Movements','environmental|class caste gender tribal movements|collective action|change')
-    ]),
-
+    ],'NCERT textbook · CBSE 2026-27 assessed chapters'),
     B('Class 11','Psychology','Psychology',[
       C('What is Psychology?','behaviour and mental processes|schools and perspectives|applications|psychology as science'),
       C('Methods of Enquiry in Psychology','research questions|experiments observation surveys|sampling|ethics and interpretation'),

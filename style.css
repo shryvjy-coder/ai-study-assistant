@@ -396,3 +396,18 @@ html[data-theme="dark"] .hero-summary,html[data-theme="dark"] .reader-view,html[
 @media(prefers-reduced-motion:reduce){
   .hero-copy>*,.hero-summary,.motion-reveal,.motion-reveal.motion-in,.content-enter,.auth-dialog[open],.password-shell.password-revealed #auth-password,.password-shell.concealing #auth-password,.password-shell.dusting .password-dust i{animation:none!important;transform:none!important;opacity:1!important}.flashcard-inner{transition:none!important}.flashcard.flipped .flashcard-inner{transform:rotateY(180deg)!important}
 }
+
+
+/* NCERT textbook grouping inside the chapter rail */
+.chapter-book-label{
+  margin:18px 10px 8px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  line-height:1.35;
+  text-transform:uppercase;
+}
+.chapter-book-label:first-child{margin-top:2px;padding-top:0;border-top:0}

@@ -17,7 +17,7 @@ const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalN
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 const bootStateJSON=JSON.stringify(state);
 let cloudUser=null,cloudProviders={},cloudRegistrationMode='open',cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
-let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null};
+let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null,topicId:null};
 let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
 function save(){
  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
@@ -49,7 +49,7 @@ async function saveCloudState(showToast=false){
  finally{cloudSyncing=false;if(cloudDirty){cloudDirty=false;scheduleCloudSave()}}
 }
 const keyOf=e=>e.id;
-const currentEntry=()=>STUDY_DATA.find(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&e.title===current.topic);
+const currentEntry=()=>STUDY_DATA.find(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&(current.topicId?e.id===current.topicId:e.title===current.topic));
 
 // Mastery Engine v1
 // Curriculum topics are current school mastery units; SAT already exposes skill-level metadata.
@@ -653,7 +653,14 @@ function renderFilters(){
  $('#curriculum-notice').textContent=notice; renderTopicList(); populateQuizFilters(); renderPlannerBoards();
 }
 function topicList(){return STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject).sort((a,b)=>a.order-b.order)}
-function renderTopicList(){const list=topicList();$('#chapter-count').textContent=list.length;$('#chapter-list').innerHTML=list.map(e=>`<button class="chapter-item ${current.topic===e.title?'active':''}" data-topic="${esc(e.title)}">${state.completed.includes(e.id)?'✓ ':''}${esc(e.title)}</button>`).join('');$$('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic));if(current.topic&&!list.some(e=>e.title===current.topic)){current.topic=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden')}}
+function renderTopicList(){
+ const list=topicList();$('#chapter-count').textContent=list.length;
+ const groups=[];const byBook=new Map();
+ list.forEach(e=>{const book=e.sourceBook||'';if(!byBook.has(book)){const group={book,items:[]};byBook.set(book,group);groups.push(group)}byBook.get(book).items.push(e)});
+ $('#chapter-list').innerHTML=groups.map(group=>`${group.book?'<div class="chapter-book-label">'+esc(group.book)+'</div>':''}${group.items.map(e=>`<button class="chapter-item ${(current.topicId?current.topicId===e.id:current.topic===e.title)?'active':''}" data-topic="${esc(e.title)}" data-id="${esc(e.id)}">${state.completed.includes(e.id)?'✓ ':''}${esc(e.title)}</button>`).join('')}`).join('');
+ $('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
+ if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden')}
+}
 function deepSections(e){
  const formulas=e.formulas.length?`<div class="formula-list">${e.formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'<p>No single formula defines this topic. Focus on the relationships, definitions and reasoning steps.</p>';
  const kp=e.keyPoints.map(p=>`<li>${esc(p)}</li>`).join('');
@@ -671,11 +678,11 @@ function deepSections(e){
  </div>`;
 }
 function quickReview(e){return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula / relationship</h3><p>${esc(e.formulas.join(' · ')||'Focus on definitions, relationships and process rather than one formula.')}</p></div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0])} ${esc(e.method[1])}</p></div>`}
-function openTopic(title){current.topic=title;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#detailed-notes').innerHTML=deepSections(e);$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
+function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#detailed-notes').innerHTML=deepSections(e);$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
 function updateTopicActions(){const e=currentEntry();if(!e)return;$('#complete-btn').textContent=state.completed.includes(e.id)?'Completed ✓':'Mark complete';$('#bookmark-btn').textContent=state.bookmarks.includes(e.id)?'Bookmarked':'Bookmark';$('#weak-btn').textContent=state.review.includes(e.id)?'In review queue':'Review'}
 function toggle(arr,key){const i=arr.indexOf(key);i>=0?arr.splice(i,1):arr.push(key);save()}
 function searchAll(q){q=q.trim().toLowerCase();if(!q)return[];return STUDY_DATA.filter(e=>[e.title,e.subject,e.grade,e.board,e.summary,...e.keyPoints].join(' ').toLowerCase().includes(q)).slice(0,24)}
-function showSearch(){const r=searchAll($('#global-search').value),box=$('#search-results');box.classList.toggle('hidden',!r.length);box.innerHTML=r.length?r.map(e=>`<button data-id="${esc(e.id)}"><strong>${esc(e.title)}</strong><span>${esc(e.board)} · ${esc(e.grade)} · ${esc(e.subject)}</span></button>`).join(''):'<p>No matching topic found.</p>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>{const e=STUDY_DATA.find(x=>x.id===b.dataset.id);current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title);box.classList.add('hidden')})}
+function showSearch(){const r=searchAll($('#global-search').value),box=$('#search-results');box.classList.toggle('hidden',!r.length);box.innerHTML=r.length?r.map(e=>`<button data-id="${esc(e.id)}"><strong>${esc(e.title)}</strong><span>${esc(e.board)} · ${esc(e.grade)} · ${esc(e.subject)}</span></button>`).join(''):'<p>No matching topic found.</p>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>{const e=STUDY_DATA.find(x=>x.id===b.dataset.id);current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id);box.classList.add('hidden')})}
 // Spaced repetition v1: bounded intervals, persisted in existing account state.
 const SRS_MINUTE=60*1000, SRS_DAY=24*60*SRS_MINUTE, SRS_MAX_MINUTES=365*24*60;
 function scheduledCard(card){
@@ -923,7 +930,7 @@ function renderDashboardNow(){const total=STUDY_DATA.length,done=state.completed
 let dashboardRenderFrame=0;
 function updateDashboard(){if(dashboardRenderFrame)return;dashboardRenderFrame=requestAnimationFrame(()=>{dashboardRenderFrame=0;renderDashboardNow()})}
 function renderLists(){const row=(id,arr)=>{const byId=window.StudyAIEntryById||(window.StudyAIEntryById=new Map(STUDY_DATA.map(e=>[e.id,e]))),es=arr.map(k=>byId.get(k)).filter(Boolean);$(id).innerHTML=es.length?es.slice(0,20).map(e=>`<button data-id="${esc(e.id)}">${esc(e.title)}<small>${esc(e.board)} · ${esc(e.grade)}</small></button>`).join(''):'<p class="muted">Nothing here yet.</p>';$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))};row('#bookmark-list',state.bookmarks);row('#review-list',state.review)}
-function jumpToEntry(id){const byId=window.StudyAIEntryById||(window.StudyAIEntryById=new Map(STUDY_DATA.map(e=>[e.id,e]))),e=byId.get(id);if(!e)return;current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title);location.hash='#study'}
+function jumpToEntry(id){const byId=window.StudyAIEntryById||(window.StudyAIEntryById=new Map(STUDY_DATA.map(e=>[e.id,e]))),e=byId.get(id);if(!e)return;current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id);location.hash='#study'}
 function tutor(){const q=$('#tutor-query').value,r=searchAll(q).slice(0,6);$('#tutor-answer').innerHTML=r.length?r.map(e=>`<div class="tutor-result"><strong>${esc(e.title)}</strong><p>${esc(e.summary)}</p><button data-id="${esc(e.id)}">Open note</button></div>`).join(''):'<p>I could not find that in the material stored locally. Try a topic name, formula keyword or concept.</p>';$('#tutor-answer').querySelectorAll('button').forEach(b=>b.onclick=()=>jumpToEntry(b.dataset.id))}
 function speak(text,rate=1){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=rate;speechSynthesis.speak(u)}
 function noteText(){const e=currentEntry();return e?`${e.title}. ${e.summary}. Key ideas: ${e.keyPoints.join('. ')}. ${e.formulas.join('. ')}`:''}
@@ -1017,7 +1024,7 @@ function bind(){
  mainNav.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMobileNav(false)));
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mainNav.classList.contains('open')){setMobileNav(false);mobileNavButton.focus()}});
  window.addEventListener('resize',()=>{if(innerWidth>1000)setMobileNav(false)});
- $('#board-filter').onchange=e=>{current.board=e.target.value;current.topic=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.topic=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.topic=null;renderFilters()};
+ $('#board-filter').onchange=e=>{current.board=e.target.value;current.topic=null;current.topicId=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.topic=null;current.topicId=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.topic=null;current.topicId=null;renderFilters()};
  $('#collapse-chapters').onclick=()=>$('#chapter-list').classList.toggle('hidden');$('#search-btn').onclick=showSearch;$('#global-search').onkeydown=e=>{if(e.key==='Enter')showSearch()};
  $('#complete-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.completed,e.id);updateTopicActions();renderTopicList();updateDashboard()}};$('#bookmark-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.bookmarks,e.id);updateTopicActions();updateDashboard()}};$('#weak-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.review,e.id);updateTopicActions();renderTopicList();updateDashboard()}};
  $$('.article-tabs button').forEach(b=>b.onclick=()=>{$$('.article-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.tab-panel').forEach(x=>x.classList.add('hidden'));$('#tab-'+b.dataset.tab).classList.remove('hidden')});let nt;$('#personal-note-editor').oninput=e=>{const ce=currentEntry();if(!ce)return;state.personalNotes[ce.id]=e.target.value;$('#personal-save-status').textContent='Saving…';clearTimeout(nt);nt=setTimeout(()=>{save();$('#personal-save-status').textContent='Saved automatically'},350)};
@@ -1030,5 +1037,5 @@ function bind(){
  $('#timer-start').onclick=toggleTimer;$('#timer-reset').onclick=()=>{if(timerHandle)clearInterval(timerHandle);timerHandle=null;timerSeconds=25*60;renderTimer();$('#timer-start').textContent='Start'};$('#export-data').onclick=exportData;$('#import-data').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);$('#join-room').onclick=joinRoom;$('#reset-data').onclick=()=>{if(confirm('Reset all StudyAI data saved in this browser?')){localStorage.removeItem(STORAGE_KEY);location.reload()}};$('#share-current').onclick=()=>shareText(noteText()||'StudyAI');
  const d=$('#command-dialog');$('#open-command').onclick=()=>window.StudyAICommandCenter?.open?.()||d.showModal();d.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{d.close();document.querySelector(b.dataset.jump).scrollIntoView({behavior:'smooth'})})
 }
-function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title};renderFilters();openTopic(e.title)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
+function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
 init();

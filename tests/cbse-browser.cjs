@@ -44,6 +44,7 @@ async function choose(page,grade,subject){
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#chapter-list');
+  await page.waitForTimeout(800);
   await dismiss(page);
 
   await choose(page,'Class 9','English');
@@ -87,7 +88,7 @@ async function choose(page,grade,subject){
   check((await page.locator('#detailed-notes').textContent()).includes('Language, structure and evidence'),'literature notes use language-analysis guidance');
 
   const subjects=await page.evaluate(()=>[...document.querySelectorAll('#subject-filter option')].map(o=>o.value));
-  check(subjects.includes('English Elective')||true,'curriculum filters remain operational after repeated subject changes');
+  check(subjects.includes('English Elective'),'curriculum filters remain operational after repeated subject changes');
   check(errors.length===0,'no browser JavaScript errors: '+errors.join('; '));
   console.log('CBSE BROWSER OK');
 })().catch(e=>{console.error(e);console.error(serverErrors);process.exitCode=1}).finally(async()=>{

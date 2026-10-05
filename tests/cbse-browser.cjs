@@ -59,6 +59,43 @@ async function choose(page,grade,subject){
   await choose(page,'Class 9','Hindi');
   check(await page.locator('#chapter-count').textContent()==='12','Class 9 Ganga has 12 main chapters');
 
+  const deepStatus=await page.evaluate(()=>window.STUDYAI_GRADE9_DEEP_NOTES_STATUS);
+  check(deepStatus?.total===56,'Class 9 deep-note source contains exactly 56 runtime topics');
+  check(deepStatus?.matched===56&&deepStatus?.unmatched?.length===0,'all 56 Class 9 deep notes attach to exact runtime chapter/book keys');
+  const grade9Coverage=await page.evaluate(()=>{
+    const rows=(window.STUDYAI_CURRICULUM||[]).filter(e=>e.board==='CBSE'&&e.grade==='Class 9');
+    return {
+      total:rows.length,
+      verified:rows.filter(e=>e.notesVerified===true&&e.deepNotes?.overview&&e.deepNotes?.concepts?.length>=3&&e.deepNotes?.selfCheck?.length>=3).length
+    };
+  });
+  check(grade9Coverage.total===56&&grade9Coverage.verified===56,'every Class 9 topic has a verified chapter-specific deep-note structure');
+
+  await choose(page,'Class 9','Mathematics');
+  await page.locator('.chapter-item').filter({hasText:'The World of Algorithms'}).click();
+  const mathDeep=await page.locator('#detailed-notes').textContent();
+  check(mathDeep.includes('How to reason through this chapter')&&mathDeep.includes('Euclidean idea'),'Class 9 Mathematics renders chapter-specific algorithm reasoning');
+
+  await choose(page,'Class 9','Science');
+  await page.locator('.chapter-item').filter({hasText:'Earth as a System'}).click();
+  const scienceDeep=await page.locator('#detailed-notes').textContent();
+  check(scienceDeep.includes('Earth spheres')&&scienceDeep.includes('Energy flows through the system'),'Class 9 Science renders textbook-grounded Earth-system distinctions');
+
+  await choose(page,'Class 9','English');
+  await page.locator('.chapter-item').first().click();
+  const englishDeep=await page.locator('#detailed-notes').textContent();
+  check(englishDeep.includes('Literacy and agency')&&englishDeep.includes('Vocabulary to know'),'Class 9 Kaveri renders unit-specific literature notes and vocabulary');
+
+  await choose(page,'Class 9','Hindi');
+  await page.locator('.chapter-item').filter({hasText:'रीढ़ की हड्डी'}).click();
+  const hindiDeep=await page.locator('#detailed-notes').textContent();
+  check(hindiDeep.includes('स्त्री-शिक्षा')&&hindiDeep.includes('उमा का चरित्र'),'Class 9 Ganga renders पाठ-specific Hindi analysis');
+
+  await choose(page,'Class 9','Social Science');
+  await page.locator('.chapter-item').filter({hasText:'The Price Puzzle'}).click();
+  const sstDeep=await page.locator('#detailed-notes').textContent();
+  check(sstDeep.includes('Movement along versus shift')&&sstDeep.includes('Government intervention'),'Class 9 Social Science renders chapter-specific economics distinctions');
+
   await choose(page,'Class 10','Hindi Course A');
   check(await page.locator('#chapter-count').textContent()==='15','Class 10 Hindi Course A exposes Kshitij and Kritika chapters');
   check(await page.locator('.chapter-book-label').count()===2,'Hindi Course A is grouped by both NCERT books');

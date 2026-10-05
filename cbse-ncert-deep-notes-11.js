@@ -114,6 +114,106 @@ const focus={
   }
 };
 
+const literatureFocus={
+  'English Elective':{
+    'The Lament':P('grief and the need to be heard','loneliness amid social indifference','empathy and human connection','irony, repetition and narrative perspective'),
+    'A Pair of Mustachios':P('status symbols and social hierarchy','pride, honour and wounded prestige','satire of class and caste pretensions','comic exaggeration and social criticism'),
+    'The Rocking-horse Winner':P('materialism and emotional deprivation','luck, money and parental dissatisfaction','the child’s obsessive quest for approval','symbolism and tragic irony'),
+    'The Adventure of the Three Garridebs':P('deception built around greed','Holmes’s detection and inference','Watson and Holmes’s friendship','suspense, clues and revelation'),
+    'Pappachi’s Moth':P('patriarchal authority and resentment','family violence and emotional damage','status, colonial attitudes and insecurity','symbolic memory and narrative perspective'),
+    'The Third and Final Continent':P('migration and cultural adaptation','home, belonging and displacement','quiet human connection across cultures','memory and retrospective narration'),
+    'Glory at Twilight':P('decline, reputation and social change','self-image versus material reality','dignity, compromise and disappointment','irony in character and circumstance'),
+    'The Luncheon':P('social pretence and manipulation','money, embarrassment and self-control','the unreliable gap between words and actions','comic irony and reversal'),
+    'The Peacock':P('sensory perception of the peacock','beauty, movement and elusiveness','colour and sound imagery','attention, surprise and poetic form'),
+    'Let me Not to the Marriage of True Minds':P('steadfast love','love versus change and time','navigation and star imagery','sonnet structure and argumentative progression'),
+    'Coming':P('arrival of spring','renewal and childlike joy','light, sound and natural imagery','tone shift and compressed lyric form'),
+    'Telephone Conversation':P('racial prejudice','absurd classification by skin colour','speaker’s wit and resistance','satire, dialogue and dramatic irony'),
+    'The World is too Much With Us':P('materialism and alienation','loss of connection with nature','Romantic imagination','sonnet form and mythic allusion'),
+    'Mother Tongue':P('language and identity','endangered linguistic heritage','memory and cultural continuity','personification and emotional appeal'),
+    'Hawk Roosting':P('power and self-authority','violence presented as natural order','the hawk’s dramatic monologue','irony, imagery and controlling voice'),
+    'For Elkana':P('domestic family relationships','childhood perception and adult tension','everyday speech and intimacy','dramatic voice and understated humour'),
+    'Refugee Blues':P('statelessness and displacement','bureaucratic exclusion','loss of home and rights','blues repetition, contrast and irony'),
+    'Felling of the Banyan Tree':P('tradition versus modernisation','family memory and displacement','ecological and cultural loss','the banyan as symbol'),
+    'Ode to a Nightingale':P('mortality and transience','imagination versus reality','art, nature and the desire to escape','sensuous imagery and ode structure'),
+    'Ajamil and the Tigers':P('power, violence and social order','fable-like characters and political satire','moral ambiguity','irony, repetition and narrative compression'),
+    'My Watch':P('mechanical complexity and expert intervention','escalating repair and loss of control','comic frustration','satire, exaggeration and anecdotal structure'),
+    'My Three Passions':P('longing for love','search for knowledge','compassion for human suffering','autobiographical structure and philosophical reflection'),
+    'Patterns of Creativity':P('creative discovery across disciplines','pattern, intuition and disciplined work','individual insight and cultural context','examples as evidence for an argument'),
+    'Tribal Verse':P('oral and community traditions','relationship with land and collective memory','translation and cultural context','limits of judging oral literature by written norms'),
+    'What is a Good Book?':P('lasting value in reading','active and attentive reading','books as intellectual companionship','argument, examples and evaluative criteria'),
+    'The Story':P('story as sequence and curiosity','narrative expectations','plot, character and causality','the craft of sustaining reader interest'),
+    'Bridges':P('connection across difference','literal and metaphorical bridging','communication and shared human experience','structure, example and reflective argument')
+  },
+  'Hindi Core':{
+    'नमक का दारोगा':P('ईमानदारी और भ्रष्ट व्यवस्था','वंशीधर का नैतिक दृढ़ता','पंडित अलोपीदीन और धन-सत्ता','व्यंग्य, चरित्र-चित्रण और नैतिक विडंबना'),
+    'मियाँ नसीरुद्दीन':P('कारीगरी और पेशे की निष्ठा','खानदानी हुनर और परंपरा','आत्मसम्मान और व्यक्तित्व','संवादप्रधान शैली और चरित्र-चित्रण'),
+    'अपू के साथ ढाई साल':P('फिल्म निर्माण की सृजन-प्रक्रिया','सीमित साधनों में काम','यथार्थवादी दृश्य और धैर्य','संस्मरणात्मक शैली और अनुभव'),
+    'विदाई-संभाषण':P('औपनिवेशिक सत्ता की आलोचना','शासक और जनता का संबंध','विडंबना और राजनीतिक व्यंग्य','भाषण-शैली और व्यंजना'),
+    'गलता लोहा':P('जातिगत भेदभाव और सामाजिक विषमता','श्रम, कौशल और प्रतिभा','मानवीय गरिमा','यथार्थवादी कथा और प्रतीक'),
+    'रजनी':P('अन्याय के विरुद्ध नागरिक साहस','शिक्षा व्यवस्था और जवाबदेही','रजनी का संघर्षशील व्यक्तित्व','संवाद और सामाजिक व्यंग्य'),
+    'जामुन का पेड़':P('नौकरशाही और लालफीताशाही','व्यक्ति बनाम व्यवस्था','निर्णयहीनता की विडंबना','हास्य-व्यंग्य और प्रतीक'),
+    'भारत माता':P('राष्ट्र की अवधारणा','भारत के लोग और विविधता','देशभक्ति बनाम संकीर्ण राष्ट्रवाद','विचारात्मक गद्य और संवाद'),
+    'कबीर':P('निर्गुण भक्ति और आत्मज्ञान','धार्मिक आडंबर की आलोचना','गुरु, प्रेम और अनुभव','साखी/पद की लोकभाषा और व्यंग्य'),
+    'मीरा':P('कृष्ण-भक्ति और समर्पण','विरह और आध्यात्मिक प्रेम','सामाजिक बंधनों से मुक्ति','लोकधर्मी भाषा और भावात्मकता'),
+    'भवानी प्रसाद मिश्र':P('घर और परिवार की स्मृति','विरह और आत्मीयता','प्रकृति तथा वर्षा-बिंब','सरल बोलचाल और लय'),
+    'त्रिलोचन':P('शिक्षा और ग्रामीण जीवन','चंपा का व्यक्तित्व','साक्षरता, गरीबी और आकांक्षा','संवादात्मक सहज भाषा'),
+    'दुष्यंत कुमार':P('सामाजिक-राजनीतिक बेचैनी','परिवर्तन की आकांक्षा','आम आदमी का अनुभव','ग़ज़ल की तीखी बिंबात्मक भाषा'),
+    'अक्क महादेवी':P('आध्यात्मिक समर्पण','देह, अहं और विरक्ति','ईश्वर से निजी संबंध','वचन शैली और प्रतीक'),
+    'पाश':P('जड़ता और निष्क्रियता का खतरा','सपनों और प्रतिरोध का महत्व','मानवीय चेतना','सीधी, तीखी और राजनीतिक भाषा'),
+    'निर्मला पुतुल':P('आदिवासी जीवन और सांस्कृतिक पहचान','प्रकृति और समुदाय का संबंध','भाषा, स्मृति और परंपरा का संरक्षण','आह्वानात्मक स्वर और प्रतिरोध'),
+    'भारतीय गायिकाओं में बेजोड़: लता मंगेशकर':P('लता मंगेशकर की गायकी की विशिष्टता','स्वर, लय और भाव-संप्रेषण','लोकप्रियता और कलात्मक अनुशासन','संगीत-समीक्षा की भाषा'),
+    'राजस्थान की रजत बूँदें':P('मरुस्थलीय जल-संरक्षण','कुंड, टांका और पारंपरिक तकनीक','समुदाय का पर्यावरणीय ज्ञान','वर्णन, लोकज्ञान और जल-संस्कृति'),
+    'आलो-आँधारि':P('घरेलू श्रम और स्त्री-अनुभव','गरीबी, हिंसा और संघर्ष','शिक्षा, लेखन और आत्मनिर्भरता','आत्मकथात्मक यथार्थ'),
+    'भारतीय कलाएँ':P('भारतीय कला-परंपराओं की विविधता','संगीत, नृत्य, चित्र और स्थापत्य का संबंध','परंपरा और नवाचार','सांस्कृतिक संदर्भ और सौंदर्यबोध')
+  },
+  'Hindi Elective':{
+    'ईदगाह':P('हामिद का त्याग और संवेदनशीलता','अमीना के प्रति प्रेम','गरीबी और आत्मसम्मान','बाल-दृष्टि, विडंबना और मानवीय करुणा'),
+    'दोपहर का भोजन':P('गरीबी और भूख','परिवार की गरिमा','अभाव में संबंधों की संवेदनशीलता','यथार्थवादी विवरण और मौन तनाव'),
+    'टार्च बेचनेवाले':P('भय और विश्वास का बाजारीकरण','ढोंग और उपभोक्ता मानसिकता','सामाजिक व्यंग्य','विडंबना और रूपक'),
+    'गूँगे':P('अभिव्यक्ति और संवाद की कठिनाई','विकलांगता के प्रति सामाजिक दृष्टि','करुणा बनाम दया','चरित्र और मानवीय गरिमा'),
+    'ज्योतिबा फुले':P('जाति-विरोधी सामाजिक सुधार','स्त्री-शिक्षा','समानता और सत्यशोधक दृष्टि','जीवन-वृत्त और वैचारिक संघर्ष'),
+    'खानाबदोश':P('मजदूर जीवन और विस्थापन','श्रम-शोषण और असुरक्षा','जाति तथा वर्ग का दबाव','यथार्थवादी कथा और प्रतिरोध'),
+    'उसकी माँ':P('मातृत्व और वैचारिक संघर्ष','युवा आदर्श और जोखिम','व्यक्ति, परिवार और समाज','करुणा और राजनीतिक संदर्भ'),
+    'भारतवर्ष की उन्नति कैसे हो सकती है?':P('राष्ट्रीय उन्नति और आत्मनिर्भरता','शिक्षा और सामाजिक सुधार','आर्थिक-सांस्कृतिक जागरण','तर्क, व्यंग्य और आह्वान'),
+    'कबीर':P('निर्गुण भक्ति','रूढ़ि और पाखंड की आलोचना','अनुभवजन्य ज्ञान','साखी/पद की लोकभाषा'),
+    'सूरदास':P('कृष्ण-भक्ति','वात्सल्य और भाव-सूक्ष्मता','ब्रजभाषा','दृश्यात्मकता और संगीतात्मकता'),
+    'देव':P('रीतिकालीन शृंगार','अलंकार और बिंब','भाषिक चमत्कार','छंद और काव्य-शिल्प'),
+    'सुमित्रानंदन पंत':P('प्रकृति और सौंदर्य','छायावादी संवेदना','मानवीय अनुभूति','कोमल बिंब और संगीतात्मक भाषा'),
+    'महादेवी वर्मा':P('विरह और आध्यात्मिक खोज','अकेलापन और करुणा','प्रकृति-प्रतीक','छायावादी बिंब और लय'),
+    'नागार्जुन':P('जनजीवन और सामाजिक यथार्थ','सत्ता पर व्यंग्य','किसान-मजदूर की दृष्टि','सीधी जनभाषा'),
+    'श्रीकांत वर्मा':P('आधुनिक मनुष्य और असुरक्षा','इतिहास तथा सत्ता की स्मृति','विडंबना और प्रश्नाकुलता','संक्षिप्त आधुनिक काव्य-भाषा'),
+    'धूमिल':P('राजनीतिक मोहभंग','लोकतंत्र और आम आदमी','भाषा में प्रतिरोध','कटु व्यंग्य और बोलचाल'),
+    'हुसैन की कहानी अपनी जबानी':P('एम. एफ. हुसैन की कलायात्रा','सृजन, प्रयोग और दृश्य-स्मृति','कलाकार का आत्मनिर्माण','आत्मकथात्मक शैली'),
+    'आवारा मसीहा':P('शरतचंद्र का जीवन-संघर्ष','लेखक और समाज','सृजन तथा संवेदनशीलता','जीवनी की शोधपरक और कथात्मक शैली')
+  },
+  'Sanskrit Core':{
+    'कुशलप्रशासनम्':P('सुशासनम् तथा लोकहितम्','कर्तव्यपरायणता','प्रशासनिक दक्षता','नीतिपरक शब्दावली और वाक्यरचना'),
+    'सूक्तिसुधा':P('सूक्तयः और जीवन-मूल्य','संक्षिप्त नीति-वचन','अर्थ-गौरव और व्यंजना','छन्द/अलंकार और शब्दार्थ'),
+    'ऋतुचर्या':P('ऋतूनुसार आहार-विहार','स्वास्थ्य और दिनचर्या','आयुर्वेदीय संतुलन','निर्देशात्मक भाषा और शब्दावली'),
+    'वीरः सर्वदमनः':P('बालक सर्वदमन का वीरत्व','चरित्र-चित्रण','नाटकीय प्रसंग','संवाद, समास और क्रियारूप'),
+    'शुकशावकोदन्तः':P('कथानक और नीति','जीव-जगत के प्रति संवेदना','संवाद और घटनाक्रम','कथा-भाषा और व्याकरण'),
+    'भव्यः सत्याग्रहाश्रमः':P('सत्य और अहिंसा','आश्रम-जीवन और अनुशासन','सामुदायिक श्रम','गांधीवादी शब्दावली और प्रसंग'),
+    'संगीतानुरागी सुब्बण्णः':P('संगीत-समर्पण','कलाकार का व्यक्तित्व','कला और जीवन का संबंध','चरित्र-चित्रण और भाव'),
+    'वस्त्रविक्रयः':P('क्रय-विक्रय संवाद','वस्त्र और मूल्य की शब्दावली','व्यावहारिक संस्कृत','संख्या, कारक और संवाद-रचना'),
+    'यद्भूतहितं तत्सत्यम्':P('सत्य और लोकहित','नैतिक निर्णय','वाणी की जिम्मेदारी','तर्क, नीति और सूक्ति'),
+    'स मे प्रियः':P('भक्त के गुण','समत्व और अहिंसा','आत्मसंयम','दार्शनिक शब्दावली और श्लोक-अर्थ'),
+    'अथ शिक्षां प्रवक्ष्यामि':P('शिक्षा और शुद्ध उच्चारण','वर्ण, स्वर और ध्वनि','अनुशासन और अध्ययन','वैदिक/शास्त्रीय भाषा-विन्यास')
+  },
+  'Sanskrit Elective':{
+    'वेदामृतम्':P('वैदिक मन्त्रों का भाव','प्रकृति और दिव्यता','मानवीय कल्याण','वैदिक शब्द, छन्द और व्याख्या'),
+    'परोपकाराय सतां विभूतयः':P('परोपकार और उदारता','सज्जनों के गुण','प्रकृति-उदाहरण','नीति, उपमा और श्लोक-अर्थ'),
+    'मानो हि महतां धनम्':P('मान और आत्मसम्मान','नैतिक दृढ़ता','महान चरित्र के गुण','संवाद/कथा और नीति'),
+    'सौवर्णशकटिका':P('नाटकीय प्रसंग और पात्र','धन तथा सामाजिक भेद','करुणा और हास्य','संवाद, नाट्य-शिल्प और व्याकरण'),
+    'आहारविचारः':P('आहार और स्वास्थ्य','सात्त्विकता और संतुलन','भोजन संबंधी अनुशासन','स्वास्थ्य-शब्दावली और निर्देश'),
+    'सन्ततिप्रबोधनम्':P('नई पीढ़ी को उपदेश','कर्तव्य और मूल्य','शिक्षा और चरित्र','उपदेशात्मक शैली और व्याकरण'),
+    'विज्ञाननौका':P('विज्ञान और जिज्ञासा','नवाचार और तर्क','वैज्ञानिक संस्कृत शब्दावली','विचार, उदाहरण और आधुनिक संदर्भ'),
+    'कन्थामाणिक्यम्':P('बाह्य रूप और वास्तविक मूल्य','कथानक तथा नैतिक बोध','पात्र और निर्णय','कथा-शैली और शब्दार्थ'),
+    'ईशः कुत्रास्ति':P('ईश्वर की खोज','आस्था और तर्क','सर्वव्यापकता का विचार','प्रश्नोत्तर शैली और दार्शनिक शब्द'),
+    'सत्त्वमाहो रजस्तमः':P('सत्त्व, रजस् और तमस्','गुण और व्यवहार','आत्मनिरीक्षण','दार्शनिक वर्गीकरण और उदाहरण'),
+    'नवद्रव्याणि':P('वैशेषिक दर्शन के द्रव्य','नौ द्रव्यों का वर्गीकरण','गुण और पदार्थ का संबंध','दार्शनिक पारिभाषिक शब्दावली')
+  }
+};
+
 const formulaFocus={
   'Units and Measurements':['[M^a L^b T^c] dimensional form','percentage error ≈ sum of relevant fractional errors × 100'],
   'Motion in a Straight Line':['v = u + at','s = ut + 1/2 at²','v² = u² + 2as'],
@@ -191,6 +291,8 @@ const officialBasis=e=>{
 };
 
 const rawFocus=e=>{
+  const literary=literatureFocus[e.subject]&&literatureFocus[e.subject][e.title];
+  if(literary) return literary;
   const bySubject=focus[e.subject]&&focus[e.subject][e.title];
   if(bySubject) return bySubject;
   const points=(e.keyPoints||[]).map(clean).filter(Boolean);
@@ -303,7 +405,17 @@ const makeNote=e=>{
     distinctions:distinctions(e),
     quickRevision:[...f,...uniqueFormulas.slice(0,2)].slice(0,7),
     vocabulary:isLang?[...new Set(f.concat(e.subject.includes('Sanskrit')?['पदच्छेद','अन्वय','कारक/धातु/समास']:e.subject.includes('Hindi')?['केंद्रीय भाव','प्रसंग','भाषा-शैली','पाठ-साक्ष्य']:['theme','voice','imagery','structure']))].slice(0,8):f.slice(0,6),
-    selfCheck:[
+    selfCheck:e.subject.includes('Hindi')?[
+      e.title+' का केंद्रीय विचार अपने शब्दों में स्पष्ट कीजिए।',
+      (f[0]||'मुख्य विचार')+' और '+(f[1]||'दूसरे विचार')+' के बीच संबंध क्या है?',
+      'कौन-सा प्रसंग, बिंब, पात्र या भाषा-विशेषता '+(f[2]||'मुख्य भाव')+' को सबसे अच्छी तरह सिद्ध करती है?',
+      'इस पाठ के उत्तर में सार और विश्लेषण के बीच अंतर कैसे बनाए रखेंगे?'
+    ]:e.subject.includes('Sanskrit')?[
+      e.title+'स्य मुख्यभावः कः? सरलया भाषया लिखत।',
+      (f[0]||'मुख्यविषयः')+' इति पदस्य/विषयस्य प्रसङ्गः कः?',
+      'एकं महत्त्वपूर्णं पदरूपं, समासं, धातुरूपं वा अर्थेन सह स्पष्टयत।',
+      'अन्वयः कथं श्लोकस्य अथवा गद्यस्य अर्थबोधं स्पष्टं करोति?'
+    ]:[
       'Explain '+f[0]+' in the context of '+e.title+'.',
       'How is '+(f[1]||'the second key idea')+' connected to '+(f[0]||'the chapter’s central idea')+'?',
       'What evidence, diagram, calculation, example or textual feature best demonstrates '+(f[2]||'the main relationship')+'?',

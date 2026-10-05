@@ -13,23 +13,40 @@ const CBSE_NCERT_EXPANSION = [...(window.CBSE_NCERT_SECONDARY||[]),...(window.CB
  for(const scope of window.CBSE_NCERT_REPLACEMENTS||[]){
   for(let i=STUDY_DATA.length-1;i>=0;i--)if(matchesScope(STUDY_DATA[i],scope))STUDY_DATA.splice(i,1);
  }
- const previousByTopic=new Map(beforeRefresh.map(entry=>[[entry.board,entry.grade,entry.subject,entry.title].join('|'),entry]));
+ const previousByBookTopic=new Map(beforeRefresh.map(entry=>[[entry.board,entry.grade,entry.subject,entry.sourceBook||'',entry.title].join('|'),entry]));
+ const previousByTopic=new Map();
+ for(const entry of beforeRefresh){
+  const key=[entry.board,entry.grade,entry.subject,entry.title].join('|');
+  if(!previousByTopic.has(key))previousByTopic.set(key,[]);
+  previousByTopic.get(key).push(entry);
+ }
+ const refreshedIds=new Set(STUDY_DATA.map(entry=>entry.id));
  for(const fresh of window.CBSE_NCERT_EXTRA||[]){
   if(!fresh?.id)continue;
-  const key=[fresh.board,fresh.grade,fresh.subject,fresh.title].join('|');
-  const previous=previousByTopic.get(key);
+  const bookKey=[fresh.board,fresh.grade,fresh.subject,fresh.sourceBook||'',fresh.title].join('|');
+  const topicKey=[fresh.board,fresh.grade,fresh.subject,fresh.title].join('|');
+  let previous=previousByBookTopic.get(bookKey);
+  if(!previous){
+   const candidates=previousByTopic.get(topicKey)||[];
+   if(candidates.length===1)previous=candidates[0];
+  }
+  let preservedId=previous?.id||fresh.id;
+  if(refreshedIds.has(preservedId)&&!STUDY_DATA.some(item=>item.id===preservedId&&item.board===fresh.board&&item.grade===fresh.grade&&item.subject===fresh.subject&&item.sourceBook===fresh.sourceBook&&item.title===fresh.title)){
+   preservedId=fresh.id;
+  }
   const entry=previous?{
    ...fresh,
-   id:previous.id||fresh.id,
+   id:preservedId,
    summary:previous.summary||fresh.summary,
    keyPoints:previous.keyPoints?.length?previous.keyPoints:fresh.keyPoints,
    formulas:previous.formulas?.length?previous.formulas:fresh.formulas,
    lens:fresh.lens||previous.lens,
    method:fresh.method?.length?fresh.method:previous.method,
    mistakes:fresh.mistakes?.length?fresh.mistakes:previous.mistakes
-  }:{...fresh};
+  }:{...fresh,id:preservedId};
   const existing=STUDY_DATA.findIndex(item=>item.id===entry.id);
   if(existing>=0)STUDY_DATA[existing]=entry;else STUDY_DATA.push(entry);
+  refreshedIds.add(entry.id);
  }
  for(const patch of window.CBSE_NCERT_PATCHES||[]){
   for(const entry of STUDY_DATA){

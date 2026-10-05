@@ -7,6 +7,26 @@ const CBSE_NCERT_EXPANSION = [...(window.CBSE_NCERT_SECONDARY||[]),...(window.CB
   if(!entry?.id||ids.has(entry.id))continue;
   STUDY_DATA.push(entry);ids.add(entry.id);
  }
+
+ const beforeRefresh=[...STUDY_DATA];
+ const matchesScope=(entry,scope)=>entry?.board==='CBSE'&&entry.grade===scope.grade&&entry.subject===scope.subject&&(!scope.sourceBook||entry.sourceBook===scope.sourceBook);
+ for(const scope of window.CBSE_NCERT_REPLACEMENTS||[]){
+  for(let i=STUDY_DATA.length-1;i>=0;i--)if(matchesScope(STUDY_DATA[i],scope))STUDY_DATA.splice(i,1);
+ }
+ const previousByTopic=new Map(beforeRefresh.map(entry=>[[entry.board,entry.grade,entry.subject,entry.title].join('|'),entry]));
+ for(const fresh of window.CBSE_NCERT_EXTRA||[]){
+  if(!fresh?.id)continue;
+  const key=[fresh.board,fresh.grade,fresh.subject,fresh.title].join('|');
+  const previous=previousByTopic.get(key);
+  const entry=previous?{...previous,...fresh,id:previous.id||fresh.id}:{...fresh};
+  const existing=STUDY_DATA.findIndex(item=>item.id===entry.id);
+  if(existing>=0)STUDY_DATA[existing]=entry;else STUDY_DATA.push(entry);
+ }
+ for(const patch of window.CBSE_NCERT_PATCHES||[]){
+  for(const entry of STUDY_DATA){
+   if(entry.board==='CBSE'&&entry.grade===patch.grade&&entry.subject===patch.subject)Object.assign(entry,patch);
+  }
+ }
 }
 const SAT_DOMAINS = {"Reading & Writing": {"Information and Ideas": ["Central Ideas and Details", "Command of Evidence: Textual", "Command of Evidence: Quantitative", "Inferences"], "Craft and Structure": ["Words in Context", "Text Structure and Purpose", "Cross-Text Connections"], "Expression of Ideas": ["Rhetorical Synthesis", "Transitions"], "Standard English Conventions": ["Boundaries", "Form, Structure, and Sense"]}, "Math": {"Algebra": ["Linear Equations in One Variable", "Linear Functions", "Linear Equations in Two Variables", "Systems of Two Linear Equations", "Linear Inequalities"], "Advanced Math": ["Equivalent Expressions", "Nonlinear Equations in One Variable", "Systems of Linear and Nonlinear Equations", "Nonlinear Functions"], "Problem-Solving and Data Analysis": ["Ratios, Rates and Proportions", "Percentages", "One-variable Data", "Two-variable Data", "Probability and Conditional Probability", "Inference from Sample Statistics"], "Geometry and Trigonometry": ["Area and Volume", "Lines, Angles and Triangles", "Right Triangles and Trigonometry", "Circles"]}};
 if(Array.isArray(window.STUDYAI_CBSE_EXTRA)) STUDY_DATA.push(...window.STUDYAI_CBSE_EXTRA);
@@ -590,7 +610,7 @@ function practiceMistakeUnit(item){
   $('#quiz-board').value=entry.board;populateQuizFilters();
   $('#quiz-grade').value=entry.grade;populateQuizFilters();
   $('#quiz-subject').value=entry.subject;populateQuizFilters();
-  $('#quiz-chapter').value=entry.title;
+  $('#quiz-chapter').value=entry.id;
   location.hash='#practice';toast('Topic selected. Start a quiz when you are ready.');
   return;
  }
@@ -663,19 +683,46 @@ function renderTopicList(){
  if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden')}
 }
 function deepSections(e){
- const formulas=e.formulas.length?`<div class="formula-list">${e.formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'<p>No single formula defines this topic. Focus on the relationships, definitions and reasoning steps.</p>';
- const kp=e.keyPoints.map(p=>`<li>${esc(p)}</li>`).join('');
- const method=e.method.map((p,i)=>`<li><strong>Step ${i+1}.</strong> ${esc(p)}</li>`).join('');
- const mistakes=e.mistakes.map(p=>`<li>${esc(p)}</li>`).join('');
+ const subject=e.subject||'',keyPoints=e.keyPoints||[],formulas=e.formulas||[],method=e.method||[],mistakes=e.mistakes||[];
+ const language=/English|Hindi|Sanskrit/.test(subject);
+ const humanities=/Social Science|History|Political Science|Sociology|Psychology|Geography|Business Studies|Fine Art/.test(subject);
+ const quantitative=/Mathematics|Physics|Chemistry|Accountancy|Economics|Computer Science|Informatics Practices/.test(subject);
+ const kp=keyPoints.map(p=>`<li>${esc(p)}</li>`).join('');
+ const methodHtml=method.map((p,i)=>`<li><strong>Step ${i+1}.</strong> ${esc(p)}</li>`).join('');
+ const mistakesHtml=mistakes.map(p=>`<li>${esc(p)}</li>`).join('');
+ const source=[e.sourcePublisher,e.sourceBook,e.sourceYear].filter(Boolean).join(' · ');
+ const relationshipSection=formulas.length
+  ? `<section class="note-section"><h3>3. Key relationships and formulas</h3><div class="formula-list">${formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div><p>Use each relationship only after identifying what the symbols mean and checking the conditions, units and assumptions.</p></section>`
+  : language
+   ? `<section class="note-section"><h3>3. Language, structure and evidence</h3><p>Track the exact words, images, events, contrasts or structural choices that support an interpretation. Explain what the evidence shows and how it shapes meaning. Avoid reproducing long passages from the textbook.</p></section>`
+   : humanities
+    ? `<section class="note-section"><h3>3. Evidence, comparison and interpretation</h3><p>Organise evidence by cause, feature, change, consequence or comparison. Use examples, maps, data, institutions or case studies only when they directly support the claim you are making.</p></section>`
+    : `<section class="note-section"><h3>3. Key relationships</h3><p>No single formula defines this topic. Focus on the relationships, definitions, processes and evidence that connect the core ideas.</p></section>`;
+ const examFocus=language
+  ? 'Answer the exact prompt. Move from claim to evidence to explanation. For literature, analyse the effect of language, structure, character, voice or context instead of retelling the chapter.'
+  : humanities
+   ? 'Build answers around a clear claim and supporting evidence. Distinguish description from explanation, and use comparison, cause, consequence or evaluation when the command word requires it.'
+   : quantitative
+    ? 'Show the governing idea before calculation or code. Keep units, signs, assumptions, intermediate reasoning and final interpretation visible so a correct answer is also a defensible solution.'
+    : 'Use precise subject vocabulary, connect evidence to the claim, and make the final sentence answer the exact question.';
+ const revision=language
+  ? ['I can explain the central idea without retelling the whole text.','I can identify important language, structural or character choices.','I can support an interpretation with precise evidence in my own words.','I can distinguish summary from analysis.','I can answer an unfamiliar question using the same evidence.']
+  : humanities
+   ? ['I can define the central concepts precisely.','I can organise evidence into causes, features, changes or consequences.','I can use a relevant example, map, case or data point accurately.','I can compare viewpoints or regions when required.','I can build a short evidence-based conclusion.']
+   : ['I can explain the core idea without reading these notes.','I can identify the correct method from an unfamiliar question.','I can use the key equation, representation, process or algorithm accurately.','I can explain common errors and how to avoid them.','I can solve or analyse one unfamiliar application.'];
+ const selfCheck=language
+  ? [`What is the central idea of ${e.title}, in one precise sentence?`,'Which detail, event, image or structural choice best supports that interpretation?','How does the writer’s language, voice or form shape the reader’s response?','What is one plausible alternative interpretation, and what evidence supports or limits it?','How would you turn this chapter into a concise exam paragraph?']
+  : humanities
+   ? [`What is the central concept in ${e.title}?`,'Which cause, process or institution explains the main pattern?','What evidence or example would best support that explanation?','Which comparison or distinction is most likely to be tested?','What conclusion follows from the evidence, and what limitation should be remembered?']
+   : [`What is the central idea of ${e.title}?`,'Which relationship, representation or process is most useful here?','What information would tell you which method to use?','Which common shortcut can fail, and why?','How would you check whether a final answer or conclusion is reasonable?'];
  return `<div class="note-prose">
- <section class="note-section"><h3>1. Big picture</h3><p>${esc(e.summary)}</p><p>${esc(e.lens)}</p><p>Do not treat this chapter as a list of facts. Build a mental model first, then connect definitions, representations and exam methods to that model. When a question changes context, the model is what lets you transfer what you know.</p></section>
- <section class="note-section"><h3>2. Core ideas you should be able to explain</h3><ul>${kp}</ul><div class="concept-grid"><div class="concept-card"><strong>Definition test</strong><p>Can you define the central terms in your own words, then give an example and a non-example?</p></div><div class="concept-card"><strong>Connection test</strong><p>Can you explain how this topic connects to an earlier idea in the course and why that connection matters?</p></div><div class="concept-card"><strong>Representation test</strong><p>Can you move between a written explanation and the most useful equation, graph, diagram, table or particle model?</p></div><div class="concept-card"><strong>Application test</strong><p>Can you recognise the same principle when the question is placed in an unfamiliar real-world or experimental setting?</p></div></div></section>
- <section class="note-section"><h3>3. Key relationships and formulas</h3>${formulas}<p><strong>How to use formulas well:</strong> write the relationship before substituting, define each symbol, convert units first, rearrange symbolically where possible, and finish by checking whether the size and sign of the answer make sense.</p></section>
- <section class="note-section"><h3>4. A reliable problem-solving method</h3><ol>${method}</ol><div class="worked-box"><h4>Worked reasoning pattern</h4><p>Start by translating the wording into the language of the subject. List the information that is genuinely relevant. Choose one governing idea, carry out the reasoning cleanly, then use the final sentence to answer the exact question rather than merely presenting a calculation.</p></div></section>
- <section class="note-section"><h3>5. Depth and exam interpretation</h3><p>Examiners often test the same knowledge at different depths. A recall question asks you to state or identify. An application question changes the context. An analysis question gives data, a graph, an experiment or competing explanations and expects you to select evidence and justify a conclusion.</p><div class="exam-box"><h4>High-value exam habits</h4><ul><li>Underline command words such as <em>state</em>, <em>calculate</em>, <em>explain</em>, <em>compare</em> and <em>evaluate</em>.</li><li>Match the amount of reasoning to the number of marks.</li><li>Use subject vocabulary, not vague words such as “thing,” “it changes,” or “more strong.”</li><li>For data questions, quote or use the data rather than describing from memory.</li></ul></div></section>
- <section class="note-section"><h3>6. Common mistakes</h3><div class="mistake-box"><ul>${mistakes}</ul><p>Another common error is stopping one step too early. If the question asks “why,” a description is not enough. If it asks for a comparison, both sides must be addressed. If it asks for a calculation, units and sensible rounding matter.</p></div></section>
- <section class="note-section"><h3>7. Revision checklist</h3><ul><li>I can explain the topic without reading these notes.</li><li>I can identify the right method from an unfamiliar question.</li><li>I can use the key equation, graph, diagram or process accurately.</li><li>I can explain at least two common mistakes and how to avoid them.</li><li>I can answer one easy, one standard and one unfamiliar application question.</li></ul></section>
- <section class="note-section"><h3>8. Self-check questions</h3><div class="self-check-box"><ol><li>What is the central idea of <strong>${esc(e.title)}</strong>, in one precise sentence?</li><li>Which representation or relationship is most useful in this topic, and why?</li><li>Describe one situation in which a commonly memorised shortcut would fail.</li><li>How would you recognise a harder exam question on this topic?</li><li>What earlier topic does this depend on most strongly?</li></ol></div></section>
+ <section class="note-section"><h3>1. Big picture</h3><p>${esc(e.summary)}</p><p>${esc(e.lens||'Build a connected model of the topic before memorising details.')}</p>${source?`<p class="muted"><strong>Source:</strong> ${esc(source)}</p>`:''}</section>
+ <section class="note-section"><h3>2. Core ideas you should be able to explain</h3><ul>${kp}</ul></section>
+ ${relationshipSection}
+ <section class="note-section"><h3>4. How to study and answer this topic</h3><ol>${methodHtml}</ol><div class="worked-box"><h4>Exam reasoning pattern</h4><p>${esc(examFocus)}</p></div></section>
+ <section class="note-section"><h3>5. Common mistakes</h3><div class="mistake-box"><ul>${mistakesHtml}</ul></div></section>
+ <section class="note-section"><h3>6. Revision checklist</h3><ul>${revision.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
+ <section class="note-section"><h3>7. Self-check questions</h3><div class="self-check-box"><ol>${selfCheck.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div></section>
  </div>`;
 }
 function quickReview(e){return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula / relationship</h3><p>${esc(e.formulas.join(' · ')||'Focus on definitions, relationships and process rather than one formula.')}</p></div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0])} ${esc(e.method[1])}</p></div>`}
@@ -909,9 +956,9 @@ function answerSat(i){const q=satRun[satIndex],ok=i===q.answer;if(ok)satScore++;
 function finishSat(){$('#sat-runner').innerHTML=`<div class="quiz-result"><span class="small-label">SAT practice complete</span><h3>${satScore} / ${satRun.length}</h3><p>Review the domains below, then run another targeted set on the weakest one.</p><button class="button primary" id="sat-again">Practice again</button></div>`;$('#sat-again').onclick=()=>startSat(false);renderSatDomainCards()}
 
 // Curriculum quiz from note data
-function populateQuizFilters(){const boards=uniq(STUDY_DATA.map(e=>e.board));fillSelect($('#quiz-board'),boards,$('#quiz-board').value||current.board);const b=$('#quiz-board').value;const grades=uniq(STUDY_DATA.filter(e=>e.board===b).map(e=>e.grade));fillSelect($('#quiz-grade'),grades,$('#quiz-grade').value||grades[0]);const g=$('#quiz-grade').value;const subs=uniq(STUDY_DATA.filter(e=>e.board===b&&e.grade===g).map(e=>e.subject));fillSelect($('#quiz-subject'),subs,$('#quiz-subject').value||subs[0]);const s=$('#quiz-subject').value;const topics=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s);$('#quiz-chapter').innerHTML='<option value="all">Mixed topics</option>'+topics.map(e=>`<option>${esc(e.title)}</option>`).join('')}
-function makeCurriculumQuestion(e){const others=shuffle(STUDY_DATA.filter(x=>x.subject===e.subject&&x.id!==e.id)).slice(0,3).map(x=>x.summary);const options=shuffle([e.summary,...others]);return {entry:e,stem:`Which statement best matches ${e.title}?`,options,answer:options.indexOf(e.summary),explanation:e.summary}}
-function startQuiz(){const b=$('#quiz-board').value,g=$('#quiz-grade').value,s=$('#quiz-subject').value,t=$('#quiz-chapter').value,n=+$('#quiz-length').value;let pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s&&(t==='all'||e.title===t));if(pool.length<n)pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s);activeQuiz=shuffle(pool).slice(0,Math.min(n,pool.length)).map(makeCurriculumQuestion);quizIndex=0;quizScore=0;$('#quiz-setup').classList.add('hidden');$('#quiz-result').classList.add('hidden');$('#quiz-runner').classList.remove('hidden');renderQuizQuestion()}
+function populateQuizFilters(){const boards=uniq(STUDY_DATA.map(e=>e.board));fillSelect($('#quiz-board'),boards,$('#quiz-board').value||current.board);const b=$('#quiz-board').value;const grades=uniq(STUDY_DATA.filter(e=>e.board===b).map(e=>e.grade));fillSelect($('#quiz-grade'),grades,$('#quiz-grade').value||grades[0]);const g=$('#quiz-grade').value;const subs=uniq(STUDY_DATA.filter(e=>e.board===b&&e.grade===g).map(e=>e.subject));fillSelect($('#quiz-subject'),subs,$('#quiz-subject').value||subs[0]);const s=$('#quiz-subject').value;const topics=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s);$('#quiz-chapter').innerHTML='<option value="all">Mixed topics</option>'+topics.map(e=>`<option value="${esc(e.id)}">${esc(e.sourceBook?e.title+' · '+e.sourceBook:e.title)}</option>`).join('')}
+function makeCurriculumQuestion(e){const peers=STUDY_DATA.filter(x=>x.board===e.board&&x.grade===e.grade&&x.subject===e.subject&&x.id!==e.id);const others=shuffle(peers).slice(0,3).map(x=>x.summary);const options=shuffle([e.summary,...others]);return {entry:e,stem:`Which statement best matches ${e.title}?`,options,answer:options.indexOf(e.summary),explanation:e.summary}}
+function startQuiz(){const b=$('#quiz-board').value,g=$('#quiz-grade').value,s=$('#quiz-subject').value,t=$('#quiz-chapter').value,n=+$('#quiz-length').value;let pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s&&(t==='all'||e.id===t));if(pool.length<n&&t==='all')pool=STUDY_DATA.filter(e=>e.board===b&&e.grade===g&&e.subject===s);activeQuiz=shuffle(pool).slice(0,Math.min(n,pool.length)).map(makeCurriculumQuestion);quizIndex=0;quizScore=0;$('#quiz-setup').classList.add('hidden');$('#quiz-result').classList.add('hidden');$('#quiz-runner').classList.remove('hidden');renderQuizQuestion()}
 function renderQuizQuestion(){const q=activeQuiz[quizIndex];$('#quiz-runner').innerHTML=`<div class="runner-top"><strong>${esc(q.entry.subject)} practice</strong><span>${quizIndex+1} / ${activeQuiz.length}</span></div><div class="question-stem">${esc(q.stem)}</div><div class="options">${q.options.map((o,i)=>`<button class="option-btn" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}</div><div id="quiz-feedback"></div>`;$('#quiz-runner').querySelectorAll('.option-btn').forEach(b=>b.onclick=()=>answerQuiz(+b.dataset.i))}
 function answerQuiz(i){const q=activeQuiz[quizIndex],ok=i===q.answer;if(ok)quizScore++;else if(!state.review.includes(q.entry.id))state.review.push(q.entry.id);curriculumMasteryEvidence(q.entry,ok);noteMistakeResult(q,'curriculum',i,ok,'curriculum-quiz');save();renderMistakeNotebook();$('#quiz-runner').querySelectorAll('.option-btn').forEach((b,idx)=>{b.disabled=true;if(idx===q.answer)b.classList.add('correct');else if(idx===i)b.classList.add('wrong')});$('#quiz-feedback').innerHTML=`<div class="explanation"><strong>${ok?'Correct':'Review this topic'}</strong><p>${esc(q.explanation)}</p><button class="button primary compact" id="quiz-next">${quizIndex===activeQuiz.length-1?'Finish':'Next'}</button></div>`;$('#quiz-next').onclick=()=>{if(quizIndex<activeQuiz.length-1){quizIndex++;renderQuizQuestion()}else finishQuiz()}}
 function finishQuiz(){state.quizHistory.push({date:new Date().toISOString(),score:quizScore,total:activeQuiz.length});save();$('#quiz-runner').classList.add('hidden');$('#quiz-result').classList.remove('hidden');$('#quiz-result').innerHTML=`<span class="small-label">Practice complete</span><h3>${quizScore} / ${activeQuiz.length}</h3><p>Missed topics were added to your review queue.</p><button class="button primary" id="quiz-again">Build another set</button>`;$('#quiz-again').onclick=()=>{$('#quiz-result').classList.add('hidden');$('#quiz-setup').classList.remove('hidden')};updateDashboard()}

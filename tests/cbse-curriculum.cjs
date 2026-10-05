@@ -84,6 +84,7 @@ expectCount('Class 9','Hindi',12);
 expectCount('Class 10','Hindi Course A',15);
 expectCount('Class 10','Hindi Course B',17);
 
+expectCount('Class 11','Economics',13);
 expectCount('Class 11','Accountancy',9);
 expectCount('Class 11','Business Studies',11);
 expectCount('Class 11','Geography',26);
@@ -104,6 +105,10 @@ expectCount('Class 12','Sanskrit Core',10);
 expectCount('Class 12','Sanskrit Elective',11);
 
 const has=(g,s,t)=>key(g,s).some(x=>x.title===t);
+assert.equal(key('Class 11','Economics').filter(x=>x.title==='Introduction').length,2,'Class 11 Economics keeps both book-specific Introduction chapters');
+assert.equal(new Set(key('Class 11','Economics').filter(x=>x.title==='Introduction').map(x=>x.id)).size,2,'Class 11 Economics Introduction chapters use distinct IDs');
+assert.ok(has('Class 11','Economics','Use of Statistical Tools'),'Class 11 Statistics includes Use of Statistical Tools');
+assert.ok(!has('Class 11','Economics','Measures of Dispersion'),'stale Class 11 Statistics Measures of Dispersion chapter is removed');
 assert.ok(has('Class 12','English','Memories of Childhood'),'Vistas includes Memories of Childhood');
 assert.ok(has('Class 12','Biology','Biodiversity and Conservation'),'Class 12 Biology includes chapter 13');
 assert.ok(has('Class 12','Sociology','Mass Media and Communications'),'Class 12 Sociology includes current social-change chapter');

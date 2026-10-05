@@ -59,6 +59,11 @@
       method:['Identify the key question, period, place or institution.','Organise evidence into causes, features, consequences and comparisons.','Use maps, examples or data where relevant.','Link the evidence back to the question.'],
       mistakes:['Memorising isolated facts.','Confusing chronology, scale or institutions.','Giving opinion where evidence is required.']
     },
+    'Economics':{
+      lens:'Economics combines concepts, models, data and real-world interpretation. Define the economic idea precisely, show the relationship between variables or institutions, and use diagrams or statistics only when they help answer the question.',
+      method:['Identify the economic concept, agents and variables involved.','Choose the right model, diagram, statistic or chain of reasoning.','Explain the direction and cause of each relationship.','Interpret the result in economic terms and note important assumptions.'],
+      mistakes:['Using everyday meanings instead of economic definitions.','Drawing or quoting a diagram without explaining the mechanism.','Confusing correlation, causation, movement along a curve and a shift of the curve.']
+    },
     'Accountancy':{
       lens:'Accountancy is a traceable system. Every entry should follow the accounting equation, the relevant principle and the correct reporting treatment.',
       method:['Identify the transaction or adjustment.','Determine accounts and debit-credit effects.','Record and post systematically.','Verify balances and statement impact.'],
@@ -169,6 +174,25 @@
   add('Class 10','Hindi Course B','संचयन भाग 2',['हरिहर काका','टोपी शुक्ला','सपनों के-से दिन']);
 
   // Senior-secondary corrections proven by the supplied current NCERT editions.
+
+  add('Class 11','Economics','Statistics for Economics',[
+    ['Introduction',['meaning and scope of economics','role and importance of statistics in economics','economic data and evidence','limits of statistical conclusions']],
+    ['Collection of Data',['primary and secondary data','sampling and census methods','sources of economic data','sampling and non-sampling errors']],
+    ['Organisation of Data',['variables and classification','frequency distributions','raw versus organised data','choosing meaningful class intervals']],
+    ['Presentation of Data',['tabular presentation','bar and pie diagrams','histograms and frequency polygons','reading displays without distorting scale']],
+    ['Measures of Central Tendency',['arithmetic mean','median','mode','choosing an appropriate average']],
+    ['Correlation',['direction and degree of association','scatter diagrams','correlation coefficient','correlation versus causation']],
+    ['Index Numbers',['meaning and uses of index numbers','base year and weights','price indices','interpreting inflation and change over time']],
+    ['Use of Statistical Tools',['selecting a suitable statistical tool','connecting data with an economic question','interpreting results in context','limits and responsible use of statistics']]
+  ]);
+  add('Class 11','Economics','Introductory Microeconomics',[
+    ['Introduction',['microeconomics and macroeconomics','positive and normative economics','central problems of an economy','production possibility frontier and opportunity cost']],
+    ['Theory of Consumer Behaviour',['utility and consumer equilibrium','budget set and budget line','indifference curves','demand and price elasticity']],
+    ['Production and Costs',['production function','short run and long run','total, average and marginal product','cost concepts and cost curves']],
+    ['The Theory of the Firm under Perfect Competition',['perfect competition assumptions','revenue concepts','profit maximisation','producer equilibrium and supply']],
+    ['Market Equilibrium',['market demand and supply','equilibrium price and quantity','shifts in demand or supply','simple applications of price determination']]
+  ]);
+
   add('Class 11','Accountancy','Financial Accounting – I',[
     'Introduction to Accounting','Theory Base of Accounting','Recording of Transactions - I','Recording of Transactions - II','Bank Reconciliation Statement','Trial Balance and Rectification of Errors','Depreciation, Provisions and Reserves'
   ]);
@@ -282,6 +306,7 @@
     {grade:'Class 9',subject:'Hindi'},
     {grade:'Class 10',subject:'Hindi Course A'},
     {grade:'Class 10',subject:'Hindi Course B'},
+    {grade:'Class 11',subject:'Economics'},
     {grade:'Class 11',subject:'Accountancy'},
     {grade:'Class 11',subject:'Business Studies'},
     {grade:'Class 11',subject:'Geography'},

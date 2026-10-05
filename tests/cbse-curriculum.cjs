@@ -1,0 +1,112 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+
+const window={};
+const context=vm.createContext({window,console});
+for(const file of ['cbse-ncert-secondary.js','cbse-ncert-senior-secondary.js','cbse-ncert-extra.js']){
+  vm.runInContext(fs.readFileSync(file,'utf8'),context,{filename:file});
+}
+
+const script=fs.readFileSync('script.js','utf8');
+const match=script.match(/const STUDY_DATA = (\[[\s\S]*?\]);\nconst CBSE_NCERT_EXPANSION/);
+assert.ok(match,'embedded STUDY_DATA is readable');
+const data=JSON.parse(match[1]);
+
+const expansions=[...(window.CBSE_NCERT_SECONDARY||[]),...(window.CBSE_NCERT_SENIOR_SECONDARY||[])];
+const ids=new Set(data.map(entry=>entry.id));
+for(const entry of expansions){
+  if(!entry?.id||ids.has(entry.id))continue;
+  data.push(entry);ids.add(entry.id);
+}
+
+const beforeRefresh=[...data];
+const matchesScope=(entry,scope)=>entry?.board==='CBSE'&&entry.grade===scope.grade&&entry.subject===scope.subject&&(!scope.sourceBook||entry.sourceBook===scope.sourceBook);
+for(const scope of window.CBSE_NCERT_REPLACEMENTS||[]){
+  for(let i=data.length-1;i>=0;i--)if(matchesScope(data[i],scope))data.splice(i,1);
+}
+const previousByTopic=new Map(beforeRefresh.map(entry=>[[entry.board,entry.grade,entry.subject,entry.title].join('|'),entry]));
+for(const fresh of window.CBSE_NCERT_EXTRA||[]){
+  if(!fresh?.id)continue;
+  const key=[fresh.board,fresh.grade,fresh.subject,fresh.title].join('|');
+  const previous=previousByTopic.get(key);
+  const entry=previous?{
+    ...fresh,
+    id:previous.id||fresh.id,
+    summary:previous.summary||fresh.summary,
+    keyPoints:previous.keyPoints?.length?previous.keyPoints:fresh.keyPoints,
+    formulas:previous.formulas?.length?previous.formulas:fresh.formulas,
+    lens:fresh.lens||previous.lens,
+    method:fresh.method?.length?fresh.method:previous.method,
+    mistakes:fresh.mistakes?.length?fresh.mistakes:previous.mistakes
+  }:{...fresh};
+  const existing=data.findIndex(item=>item.id===entry.id);
+  if(existing>=0)data[existing]=entry;else data.push(entry);
+}
+for(const patch of window.CBSE_NCERT_PATCHES||[]){
+  for(const entry of data){
+    if(entry.board==='CBSE'&&entry.grade===patch.grade&&entry.subject===patch.subject)Object.assign(entry,patch);
+  }
+}
+
+const cbse=data.filter(x=>x.board==='CBSE');
+const key=(g,s)=>cbse.filter(x=>x.grade===g&&x.subject===s);
+const expectCount=(g,s,n)=>{
+  const actual=key(g,s).length;
+  assert.equal(actual,n,`${g} ${s}: expected ${n}, got ${actual}`);
+  console.log('PASS',g,s,n);
+};
+
+assert.equal(new Set(data.map(x=>x.id)).size,data.length,'curriculum IDs are unique');
+
+expectCount('Class 9','Mathematics',14);
+expectCount('Class 9','Science',13);
+expectCount('Class 9','English',8);
+expectCount('Class 9','Social Science',9);
+expectCount('Class 9','Hindi',12);
+expectCount('Class 10','Hindi Course A',15);
+expectCount('Class 10','Hindi Course B',17);
+
+expectCount('Class 11','Accountancy',9);
+expectCount('Class 11','Business Studies',11);
+expectCount('Class 11','Geography',26);
+expectCount('Class 11','English Elective',27);
+expectCount('Class 11','Hindi Core',20);
+expectCount('Class 11','Hindi Elective',18);
+expectCount('Class 11','Sanskrit Core',11);
+expectCount('Class 11','Sanskrit Elective',11);
+
+expectCount('Class 12','Biology',13);
+expectCount('Class 12','Business Studies',11);
+expectCount('Class 12','Geography',21);
+expectCount('Class 12','Sociology',15);
+expectCount('Class 12','English Elective',21);
+expectCount('Class 12','Hindi Core',18);
+expectCount('Class 12','Hindi Elective',20);
+expectCount('Class 12','Sanskrit Core',10);
+expectCount('Class 12','Sanskrit Elective',11);
+
+const has=(g,s,t)=>key(g,s).some(x=>x.title===t);
+assert.ok(has('Class 12','English','Memories of Childhood'),'Vistas includes Memories of Childhood');
+assert.ok(has('Class 12','Biology','Biodiversity and Conservation'),'Class 12 Biology includes chapter 13');
+assert.ok(has('Class 12','Sociology','Mass Media and Communications'),'Class 12 Sociology includes current social-change chapter');
+assert.ok(has('Class 11','Business Studies','MSME and Business Entrepreneurship'),'Class 11 Business Studies uses current MSME title');
+
+assert.ok(!has('Class 11','Accountancy','Bills of Exchange'),'stale Class 11 Bills of Exchange is removed');
+assert.ok(!has('Class 11','Accountancy','Accounts from Incomplete Records'),'stale Class 11 incomplete-records chapter is removed');
+assert.ok(!has('Class 12','Business Studies','Financial Markets'),'stale Class 12 Financial Markets chapter is removed');
+assert.ok(!has('Class 12','Geography','Field Surveys'),'stale Class 12 Geography Field Surveys chapter is removed');
+assert.ok(!has('Class 11','Geography','Soils'),'stale Class 11 India Physical Environment Soils chapter is removed');
+
+for(const entry of [...key('Class 9','Mathematics'),...key('Class 9','Science')]){
+  assert.equal(entry.sourceYear,'2026-27',entry.title+' has current source year');
+  assert.equal(entry.sourcePublisher,'NCERT',entry.title+' has NCERT source');
+}
+for(const entry of window.CBSE_NCERT_EXTRA||[]){
+  assert.equal(entry.sourcePublisher,'NCERT',entry.id+' has NCERT source');
+  assert.equal(entry.sourceYear,'2026-27',entry.id+' has 2026-27 source year');
+  assert.ok(entry.sourceBook,entry.id+' identifies its source book');
+  assert.ok(entry.summary&&entry.keyPoints?.length>=4,entry.id+' has usable study-note content');
+}
+
+console.log('CBSE CURRICULUM OK',cbse.length,'CBSE entries');

@@ -189,7 +189,7 @@ async function choose(page,grade,subject){
   check(business11Deep.includes('Promotion')&&business11Deep.includes('Incorporation'),'Class 11 Business Studies renders company-formation concepts');
 
   await choose(page,'Class 11','Geography');
-  await page.locator('.chapter-item').filter({hasText:'Climate'}).click();
+  await page.locator('.chapter-item[data-topic="Climate"]').click();
   const geography11Deep=await page.locator('#detailed-notes').textContent();
   check(geography11Deep.includes('Monsoon mechanism')&&geography11Deep.includes('Rainfall distribution'),'Class 11 Geography renders India-climate concepts');
 

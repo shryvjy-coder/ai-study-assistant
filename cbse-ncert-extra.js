@@ -107,7 +107,7 @@
     const points=(focus.length?focus:defaultFocus(subject,title)).map(cap);
     const isLang=/English|Hindi|Sanskrit/.test(subject);
     return {
-      id:['CBSE',grade,subject,title].join('|'),
+      id:['CBSE',grade,subject,book,title].join('|'),
       board:'CBSE',grade,subject,title,
       summary:isLang
         ? `${title} is studied from NCERT’s ${book}. Build a clear understanding of the text’s central idea, structure and language, then support interpretation with evidence from the chapter.`

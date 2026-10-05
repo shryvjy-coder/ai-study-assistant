@@ -232,8 +232,19 @@ async function choose(page,grade,subject){
 
   await choose(page,'Class 11','English Elective');
   check(await page.locator('#chapter-count').textContent()==='27','Class 11 English Elective loads Woven Words');
-  await page.locator('.chapter-item').first().click();
-  check((await page.locator('#detailed-notes').textContent()).includes('Language, structure and evidence'),'literature notes use language-analysis guidance');
+  await page.locator('.chapter-item').filter({hasText:'The Lament'}).click();
+  const elective11Deep=await page.locator('#detailed-notes').textContent();
+  check(elective11Deep.includes('Grief and the need to be heard')&&elective11Deep.includes('Vocabulary to know'),'Class 11 English Elective renders text-specific literary analysis');
+
+  await choose(page,'Class 11','Hindi Core');
+  await page.locator('.chapter-item').filter({hasText:'नमक का दारोगा'}).click();
+  const hindi11Deep=await page.locator('#detailed-notes').textContent();
+  check(hindi11Deep.includes('ईमानदारी और भ्रष्ट व्यवस्था')&&hindi11Deep.includes('पाठ-साक्ष्य'),'Class 11 Hindi Core renders पाठ-specific literary analysis');
+
+  await choose(page,'Class 11','Sanskrit Core');
+  await page.locator('.chapter-item').filter({hasText:'कुशलप्रशासनम्'}).click();
+  const sanskrit11Deep=await page.locator('#detailed-notes').textContent();
+  check(sanskrit11Deep.includes('सुशासनम् तथा लोकहितम्')&&sanskrit11Deep.includes('पदच्छेद'),'Class 11 Sanskrit Core renders पाठ-specific concept and grammar guidance');
 
   const subjects=await page.evaluate(()=>[...document.querySelectorAll('#subject-filter option')].map(o=>o.value));
   check(subjects.includes('English Elective'),'curriculum filters remain operational after repeated subject changes');

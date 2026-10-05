@@ -303,7 +303,15 @@
 
   window.CBSE_NCERT_PATCHES=[
     {grade:'Class 9',subject:'Mathematics',sourceBook:'Ganita Manjari · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
-    {grade:'Class 9',subject:'Science',sourceBook:'Exploration · Textbook of Science for Grade 9',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS}
+    {grade:'Class 9',subject:'Science',sourceBook:'Exploration · Textbook of Science for Grade 9',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 10',subject:'Mathematics',sourceBook:'Mathematics · Class X',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 10',subject:'Science',sourceBook:'Science · Class X',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 11',subject:'Physics',sourceBook:'Physics · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 11',subject:'Chemistry',sourceBook:'Chemistry · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 11',subject:'Mathematics',sourceBook:'Mathematics · Class XI',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 12',subject:'Physics',sourceBook:'Physics · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 12',subject:'Chemistry',sourceBook:'Chemistry · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
+    {grade:'Class 12',subject:'Mathematics',sourceBook:'Mathematics · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS}
   ];
 
   window.CBSE_NCERT_EXTRA=entries;

@@ -115,9 +115,14 @@ assert.ok(!has('Class 12','Business Studies','Financial Markets'),'stale Class 1
 assert.ok(!has('Class 12','Geography','Field Surveys'),'stale Class 12 Geography Field Surveys chapter is removed');
 assert.ok(!has('Class 11','Geography','Soils'),'stale Class 11 India Physical Environment Soils chapter is removed');
 
-for(const entry of [...key('Class 9','Mathematics'),...key('Class 9','Science')]){
-  assert.equal(entry.sourceYear,'2026-27',entry.title+' has current source year');
-  assert.equal(entry.sourcePublisher,'NCERT',entry.title+' has NCERT source');
+for(const patch of window.CBSE_NCERT_PATCHES||[]){
+  const patched=key(patch.grade,patch.subject);
+  assert.ok(patched.length,patch.grade+' '+patch.subject+' has entries to source');
+  for(const entry of patched){
+    assert.equal(entry.sourceYear,'2026-27',entry.title+' has current source year');
+    assert.equal(entry.sourcePublisher,'NCERT',entry.title+' has NCERT source');
+    assert.ok(entry.sourceBook,entry.title+' identifies its NCERT source book');
+  }
 }
 for(const entry of window.CBSE_NCERT_EXTRA||[]){
   assert.equal(entry.sourcePublisher,'NCERT',entry.id+' has NCERT source');

@@ -53,6 +53,26 @@ const CBSE_NCERT_EXPANSION = [...(window.CBSE_NCERT_SECONDARY||[]),...(window.CB
    if(entry.board==='CBSE'&&entry.grade===patch.grade&&entry.subject===patch.subject)Object.assign(entry,patch);
   }
  }
+
+ const deepNotes=Array.isArray(window.CBSE_NCERT_DEEP_NOTES)?window.CBSE_NCERT_DEEP_NOTES:[];
+ const deepByKey=new Map(deepNotes.map(note=>[[note.grade,note.subject,note.sourceBook||'',note.title].join('|'),note]));
+ let deepMatched=0;
+ for(const entry of STUDY_DATA){
+  if(entry.board!=='CBSE'||entry.grade!=='Class 9')continue;
+  const key=[entry.grade,entry.subject,entry.sourceBook||'',entry.title].join('|');
+  const note=deepByKey.get(key);
+  if(!note)continue;
+  entry.deepNotes=note.deepNotes;
+  entry.notesVerified=note.notesVerified===true;
+  entry.noteSourceFile=note.sourceFile||'';
+  entry.noteSourceBasis=note.sourceBasis||'';
+  deepMatched++;
+ }
+ window.STUDYAI_GRADE9_DEEP_NOTES_STATUS={
+  total:deepNotes.filter(note=>note.grade==='Class 9').length,
+  matched:deepMatched,
+  unmatched:deepNotes.filter(note=>note.grade==='Class 9'&&!STUDY_DATA.some(entry=>entry.board==='CBSE'&&entry.grade===note.grade&&entry.subject===note.subject&&(entry.sourceBook||'')===(note.sourceBook||'')&&entry.title===note.title)).map(note=>[note.subject,note.sourceBook,note.title])
+ };
 }
 const SAT_DOMAINS = {"Reading & Writing": {"Information and Ideas": ["Central Ideas and Details", "Command of Evidence: Textual", "Command of Evidence: Quantitative", "Inferences"], "Craft and Structure": ["Words in Context", "Text Structure and Purpose", "Cross-Text Connections"], "Expression of Ideas": ["Rhetorical Synthesis", "Transitions"], "Standard English Conventions": ["Boundaries", "Form, Structure, and Sense"]}, "Math": {"Algebra": ["Linear Equations in One Variable", "Linear Functions", "Linear Equations in Two Variables", "Systems of Two Linear Equations", "Linear Inequalities"], "Advanced Math": ["Equivalent Expressions", "Nonlinear Equations in One Variable", "Systems of Linear and Nonlinear Equations", "Nonlinear Functions"], "Problem-Solving and Data Analysis": ["Ratios, Rates and Proportions", "Percentages", "One-variable Data", "Two-variable Data", "Probability and Conditional Probability", "Inference from Sample Statistics"], "Geometry and Trigonometry": ["Area and Volume", "Lines, Angles and Triangles", "Right Triangles and Trigonometry", "Circles"]}};
 if(Array.isArray(window.STUDYAI_CBSE_EXTRA)) STUDY_DATA.push(...window.STUDYAI_CBSE_EXTRA);
@@ -708,7 +728,33 @@ function renderTopicList(){
  $$('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
  if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden')}
 }
+function richDeepSections(e){
+ const d=e.deepNotes||{};
+ const pairs=items=>(Array.isArray(items)?items:[]).map(item=>Array.isArray(item)?`<li><strong>${esc(item[0])}:</strong> ${esc(item[1])}</li>`:`<li>${esc(item)}</li>`).join('');
+ const bullets=items=>(Array.isArray(items)?items:[]).map(item=>`<li>${esc(item)}</li>`).join('');
+ const source=[e.sourcePublisher,e.sourceBook,e.sourceYear].filter(Boolean).join(' · ');
+ const concepts=pairs(d.concepts);
+ const reasoning=bullets(d.reasoning);
+ const visuals=bullets(d.visuals);
+ const examTips=bullets(d.examTips);
+ const distinctions=bullets(d.distinctions);
+ const revision=bullets(d.quickRevision);
+ const selfCheck=bullets(d.selfCheck);
+ const vocabulary=bullets(d.vocabulary);
+ return `<div class="note-prose deep-note-verified">
+ <section class="note-section"><h3>1. Chapter overview</h3><p>${esc(d.overview||e.summary||'')}</p>${source?`<p class="muted"><strong>Source:</strong> ${esc(source)}</p>`:''}</section>
+ <section class="note-section"><h3>2. Key concepts and explanations</h3><ul>${concepts}</ul></section>
+ ${reasoning?`<section class="note-section"><h3>3. How to reason through this chapter</h3><ol>${reasoning}</ol></section>`:''}
+ ${visuals?`<section class="note-section"><h3>4. Diagrams and visual thinking</h3><ul>${visuals}</ul></section>`:''}
+ <section class="note-section"><h3>5. Exam focus and common mistakes</h3><ul>${examTips}</ul></section>
+ ${distinctions?`<section class="note-section"><h3>6. Important distinctions</h3><ul>${distinctions}</ul></section>`:''}
+ <section class="note-section"><h3>7. Quick revision</h3><ul>${revision}</ul></section>
+ <section class="note-section"><h3>8. Self-check</h3><ol>${selfCheck}</ol></section>
+ ${vocabulary?`<section class="note-section"><h3>9. Vocabulary to know</h3><ul>${vocabulary}</ul></section>`:''}
+ </div>`;
+}
 function deepSections(e){
+ if(e.deepNotes?.overview)return richDeepSections(e);
  const subject=e.subject||'',keyPoints=e.keyPoints||[],formulas=e.formulas||[],method=e.method||[],mistakes=e.mistakes||[];
  const language=/English|Hindi|Sanskrit/.test(subject);
  const humanities=/Social Science|History|Political Science|Sociology|Psychology|Geography|Business Studies|Fine Art/.test(subject);

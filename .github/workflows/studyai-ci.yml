@@ -31,8 +31,33 @@ jobs:
           node --check tests/product-experience.cjs
           node --check tests/pre-beta-smoke.cjs
           node --check tests/cbse-curriculum.cjs
+          node --check tests/cbse-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
+
+
+  curriculum-browser:
+    runs-on: ubuntu-latest
+    needs: static
+    timeout-minutes: 10
+    env:
+      SECRET_KEY: local-ci-placeholder-key
+      FLASK_DEBUG: "0"
+      COOKIE_SECURE: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: pip install -r requirements.txt
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Refreshed CBSE browser coverage
+        run: node tests/cbse-browser.cjs
 
   browser:
     runs-on: ubuntu-latest

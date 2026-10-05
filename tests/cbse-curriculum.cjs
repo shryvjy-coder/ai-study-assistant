@@ -66,15 +66,20 @@ for(const patch of window.CBSE_NCERT_PATCHES||[]){
   }
 }
 
+window.STUDYAI_CURRICULUM=data;
+vm.runInContext(fs.readFileSync('cbse-ncert-deep-notes-11.js','utf8'),context,{filename:'cbse-ncert-deep-notes-11.js'});
+
 const deepNotes=window.CBSE_NCERT_DEEP_NOTES||[];
 const grade9DeepNotes=deepNotes.filter(note=>note.grade==='Class 9');
 const grade10DeepNotes=deepNotes.filter(note=>note.grade==='Class 10');
+const grade11DeepNotes=deepNotes.filter(note=>note.grade==='Class 11');
 assert.equal(grade9DeepNotes.length,56,'Class 9 deep-note layer remains at exactly 56 entries');
 assert.equal(grade10DeepNotes.length,109,'Class 10 deep-note layer has exactly 109 entries');
-assert.equal(new Set(deepNotes.map(note=>[note.grade,note.subject,note.sourceBook||'',note.title].join('|'))).size,165,'Class 9 and 10 deep-note keys are unique');
+assert.equal(grade11DeepNotes.length,286,'Class 11 deep-note layer has exactly 286 entries');
+assert.equal(new Set(deepNotes.map(note=>[note.grade,note.subject,note.sourceBook||'',note.title].join('|'))).size,451,'Class 9, 10 and 11 deep-note keys are unique');
 let matchedDeepNotes=0;
 for(const note of deepNotes){
-  assert.ok(note.grade==='Class 9'||note.grade==='Class 10','deep-note layer remains scoped to Classes 9 and 10 only');
+  assert.ok(['Class 9','Class 10','Class 11'].includes(note.grade),'deep-note layer remains scoped to Classes 9, 10 and 11 only');
   const entry=data.find(item=>item.board==='CBSE'&&item.grade===note.grade&&item.subject===note.subject&&(item.sourceBook||'')===(note.sourceBook||'')&&item.title===note.title);
   assert.ok(entry,'deep note maps to runtime curriculum: '+note.subject+' / '+note.title);
   assert.ok(note.notesVerified===true,'deep note is marked verified: '+note.title);
@@ -86,7 +91,16 @@ for(const note of deepNotes){
   assert.ok(note.deepNotes?.selfCheck?.length>=3,'deep note has self-check questions: '+note.title);
   matchedDeepNotes++;
 }
-assert.equal(matchedDeepNotes,165,'all Class 9 and Class 10 deep notes map to current curriculum');
+assert.equal(matchedDeepNotes,451,'all Class 9, Class 10 and Class 11 deep notes map to current curriculum');
+
+assert.equal(new Set(grade11DeepNotes.map(note=>[note.subject,note.sourceBook||'',note.title].join('|'))).size,286,'Class 11 deep-note keys are unique');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Physics'&&note.deepNotes.formulas?.length),'Class 11 Physics deep notes include formulas');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Geography'&&note.title==='Climate'&&note.deepNotes.concepts.some(c=>c[0].includes('Monsoon'))),'Class 11 Geography deep notes include chapter-specific monsoon concepts');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Accountancy'&&note.title==='Bank Reconciliation Statement'&&note.deepNotes.concepts.some(c=>c[0].includes('Timing'))),'Class 11 Accountancy deep notes include reconciliation-specific concepts');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Computer Science'&&note.sourceBasis.includes('Official NCERT/CBSE')),'Class 11 missing-Drive subjects record official-source fallback');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='English Elective'&&note.title==='The Lament'&&note.deepNotes.concepts.some(c=>c[0].includes('Grief'))),'Class 11 English Elective notes are text-specific');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Hindi Core'&&note.title==='नमक का दारोगा'&&note.deepNotes.concepts.some(c=>c[0].includes('ईमानदारी'))),'Class 11 Hindi Core notes are पाठ-specific');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Sanskrit Core'&&note.title==='कुशलप्रशासनम्'&&note.deepNotes.concepts.some(c=>c[0].includes('सुशासनम्'))),'Class 11 Sanskrit Core notes are पाठ-specific');
 
 const cbse=data.filter(x=>x.board==='CBSE');
 const key=(g,s)=>cbse.filter(x=>x.grade===g&&x.subject===s);

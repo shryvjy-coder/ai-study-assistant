@@ -144,6 +144,70 @@ async function choose(page,grade,subject){
   const hindiBDeep=await page.locator('#detailed-notes').textContent();
   check(hindiBDeep.includes('जमीन')&&hindiBDeep.includes('व्यक्ति-अधिकार'),'Class 10 Hindi Course B renders पाठ-specific analysis');
 
+  const grade11Status=await page.evaluate(()=>window.STUDYAI_GRADE11_DEEP_NOTES_STATUS);
+  check(grade11Status?.total===286,'Class 11 deep-note layer contains exactly 286 runtime topics');
+  check(grade11Status?.matched===286&&grade11Status?.unmatched?.length===0,'all 286 Class 11 deep notes attach to the final runtime curriculum');
+  const grade11Coverage=await page.evaluate(()=>{
+    const rows=(window.STUDYAI_CURRICULUM||[]).filter(e=>e.board==='CBSE'&&e.grade==='Class 11');
+    return {
+      total:rows.length,
+      verified:rows.filter(e=>e.notesVerified===true&&e.deepNotes?.overview&&e.deepNotes?.concepts?.length>=3&&e.deepNotes?.reasoning?.length>=3&&e.deepNotes?.examTips?.length>=2&&e.deepNotes?.selfCheck?.length>=3).length,
+      ids:rows.map(e=>e.id)
+    };
+  });
+  check(grade11Coverage.total===286&&grade11Coverage.verified===286,'every Class 11 runtime topic has a verified structured deep note');
+  check(new Set(grade11Coverage.ids).size===286,'Class 11 topic IDs remain unique for mastery keys');
+
+  await choose(page,'Class 11','Physics');
+  await page.locator('.chapter-item').filter({hasText:'Laws of Motion'}).click();
+  const physics11Deep=await page.locator('#detailed-notes').textContent();
+  check(physics11Deep.includes('Momentum and impulse')&&physics11Deep.includes('F = ma'),'Class 11 Physics renders chapter-specific laws-of-motion notes and formulas');
+
+  await choose(page,'Class 11','Chemistry');
+  await page.locator('.chapter-item').filter({hasText:'Equilibrium'}).click();
+  const chemistry11Deep=await page.locator('#detailed-notes').textContent();
+  check(chemistry11Deep.includes('Dynamic chemical equilibrium')&&chemistry11Deep.includes('pH = -log'),'Class 11 Chemistry renders equilibrium-specific concepts and formulas');
+
+  await choose(page,'Class 11','Mathematics');
+  await page.locator('.chapter-item').filter({hasText:'Limits and Derivatives'}).click();
+  const maths11Deep=await page.locator('#detailed-notes').textContent();
+  check(maths11Deep.includes('Derivative as rate of change')&&maths11Deep.includes('f′(x)'),'Class 11 Mathematics renders limits-and-derivatives concepts and formula');
+
+  await choose(page,'Class 11','Biology');
+  await page.locator('.chapter-item').filter({hasText:'Biomolecules'}).click();
+  const biology11Deep=await page.locator('#detailed-notes').textContent();
+  check(biology11Deep.includes('Carbohydrates proteins lipids')&&biology11Deep.includes('Nucleic acids'),'Class 11 Biology renders Biomolecules-specific structure');
+
+  await choose(page,'Class 11','Accountancy');
+  await page.locator('.chapter-item').filter({hasText:'Bank Reconciliation Statement'}).click();
+  const accounts11Deep=await page.locator('#detailed-notes').textContent();
+  check(accounts11Deep.includes('Timing differences')&&accounts11Deep.includes('Reconciliation procedure'),'Class 11 Accountancy renders reconciliation-specific notes');
+
+  await choose(page,'Class 11','Business Studies');
+  await page.locator('.chapter-item').filter({hasText:'Formation of a Company'}).click();
+  const business11Deep=await page.locator('#detailed-notes').textContent();
+  check(business11Deep.includes('Promotion')&&business11Deep.includes('Incorporation'),'Class 11 Business Studies renders company-formation concepts');
+
+  await choose(page,'Class 11','Geography');
+  await page.locator('.chapter-item[data-topic="Climate"]').click();
+  const geography11Deep=await page.locator('#detailed-notes').textContent();
+  check(geography11Deep.includes('Monsoon mechanism')&&geography11Deep.includes('Rainfall distribution'),'Class 11 Geography renders India-climate concepts');
+
+  await choose(page,'Class 11','History');
+  await page.locator('.chapter-item').filter({hasText:'Writing and City Life'}).click();
+  const history11Deep=await page.locator('#detailed-notes').textContent();
+  check(history11Deep.includes('Mesopotamia')&&history11Deep.includes('Urbanisation'),'Class 11 History renders theme-specific evidence prompts');
+
+  await choose(page,'Class 11','Psychology');
+  await page.locator('.chapter-item').filter({hasText:'Human Memory'}).click();
+  const psychology11Deep=await page.locator('#detailed-notes').textContent();
+  check(psychology11Deep.includes('Encoding storage retrieval')&&psychology11Deep.includes('Forgetting'),'Class 11 Psychology renders memory-specific concepts');
+
+  await choose(page,'Class 11','Computer Science');
+  await page.locator('.chapter-item').filter({hasText:'Flow of Control'}).click();
+  const cs11Deep=await page.locator('#detailed-notes').textContent();
+  check(cs11Deep.includes('Conditions')&&cs11Deep.includes('Loops'),'Class 11 Computer Science renders official-source programming concepts');
+
   await choose(page,'Class 11','Economics');
   check(await page.locator('#chapter-count').textContent()==='13','Class 11 Economics includes all 13 chapters across Statistics and Microeconomics');
   check(await page.locator('.chapter-book-label').count()===2,'Class 11 Economics is grouped by both prescribed NCERT books');
@@ -168,8 +232,19 @@ async function choose(page,grade,subject){
 
   await choose(page,'Class 11','English Elective');
   check(await page.locator('#chapter-count').textContent()==='27','Class 11 English Elective loads Woven Words');
-  await page.locator('.chapter-item').first().click();
-  check((await page.locator('#detailed-notes').textContent()).includes('Language, structure and evidence'),'literature notes use language-analysis guidance');
+  await page.locator('.chapter-item').filter({hasText:'The Lament'}).click();
+  const elective11Deep=await page.locator('#detailed-notes').textContent();
+  check(elective11Deep.includes('Grief and the need to be heard')&&elective11Deep.includes('Vocabulary to know'),'Class 11 English Elective renders text-specific literary analysis');
+
+  await choose(page,'Class 11','Hindi Core');
+  await page.locator('.chapter-item').filter({hasText:'नमक का दारोगा'}).click();
+  const hindi11Deep=await page.locator('#detailed-notes').textContent();
+  check(hindi11Deep.includes('ईमानदारी और भ्रष्ट व्यवस्था')&&hindi11Deep.includes('पाठ-साक्ष्य'),'Class 11 Hindi Core renders पाठ-specific literary analysis');
+
+  await choose(page,'Class 11','Sanskrit Core');
+  await page.locator('.chapter-item').filter({hasText:'कुशलप्रशासनम्'}).click();
+  const sanskrit11Deep=await page.locator('#detailed-notes').textContent();
+  check(sanskrit11Deep.includes('सुशासनम् तथा लोकहितम्')&&sanskrit11Deep.includes('पदच्छेद'),'Class 11 Sanskrit Core renders पाठ-specific concept and grammar guidance');
 
   const subjects=await page.evaluate(()=>[...document.querySelectorAll('#subject-filter option')].map(o=>o.value));
   check(subjects.includes('English Elective'),'curriculum filters remain operational after repeated subject changes');

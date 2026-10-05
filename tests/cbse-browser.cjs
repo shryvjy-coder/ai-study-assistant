@@ -96,13 +96,53 @@ async function choose(page,grade,subject){
   const sstDeep=await page.locator('#detailed-notes').textContent();
   check(sstDeep.includes('Movement along versus shift')&&sstDeep.includes('Government intervention'),'Class 9 Social Science renders chapter-specific economics distinctions');
 
+  const grade10Status=await page.evaluate(()=>window.STUDYAI_GRADE10_DEEP_NOTES_STATUS);
+  check(grade10Status?.total===109,'Class 10 deep-note source contains exactly 109 runtime topics');
+  check(grade10Status?.matched===109&&grade10Status?.unmatched?.length===0,'all 109 Class 10 deep notes attach to exact runtime chapter/book keys');
+  const grade10Coverage=await page.evaluate(()=>{
+    const rows=(window.STUDYAI_CURRICULUM||[]).filter(e=>e.board==='CBSE'&&e.grade==='Class 10');
+    return {
+      total:rows.length,
+      verified:rows.filter(e=>e.notesVerified===true&&e.deepNotes?.overview&&e.deepNotes?.concepts?.length>=3&&e.deepNotes?.selfCheck?.length>=3).length,
+      ids:rows.map(e=>e.id)
+    };
+  });
+  check(grade10Coverage.total===109&&grade10Coverage.verified===109,'every Class 10 topic has a verified chapter-specific deep-note structure');
+  check(new Set(grade10Coverage.ids).size===109,'Class 10 topic IDs remain unique for mastery keys');
+
+  await choose(page,'Class 10','Mathematics');
+  await page.locator('.chapter-item').filter({hasText:'Real Numbers'}).click();
+  const math10Deep=await page.locator('#detailed-notes').textContent();
+  check(math10Deep.includes('Fundamental Theorem of Arithmetic')&&math10Deep.includes('proof by contradiction'),'Class 10 Mathematics renders textbook-grounded Real Numbers reasoning');
+
+  await choose(page,'Class 10','Science');
+  await page.locator('.chapter-item').filter({hasText:'Electricity'}).click();
+  const science10Deep=await page.locator('#detailed-notes').textContent();
+  check(science10Deep.includes('resistivity')&&science10Deep.includes('kWh'),'Class 10 Science renders chapter-specific Electricity distinctions');
+
+  await choose(page,'Class 10','English');
+  await page.locator('.chapter-item').filter({hasText:'Madam Rides the Bus'}).click();
+  const english10Deep=await page.locator('#detailed-notes').textContent();
+  check(english10Deep.includes('Valli')&&english10Deep.includes('dead cow'),'Class 10 English renders text-specific literary analysis');
+
+  await choose(page,'Class 10','Social Science');
+  await page.locator('.chapter-item').filter({hasText:'Power Sharing'}).click();
+  const sst10Deep=await page.locator('#detailed-notes').textContent();
+  check(sst10Deep.includes('Belgium')&&sst10Deep.includes('Sri Lanka'),'Class 10 Social Science renders case-grounded democratic analysis');
+
   await choose(page,'Class 10','Hindi Course A');
   check(await page.locator('#chapter-count').textContent()==='15','Class 10 Hindi Course A exposes Kshitij and Kritika chapters');
   check(await page.locator('.chapter-book-label').count()===2,'Hindi Course A is grouped by both NCERT books');
+  await page.locator('.chapter-item').filter({hasText:'नौबतखाने में इबादत'}).click();
+  const hindiADeep=await page.locator('#detailed-notes').textContent();
+  check(hindiADeep.includes('बिस्मिल्ला खाँ')&&hindiADeep.includes('शहनाई'),'Class 10 Hindi Course A renders पाठ-specific analysis');
 
   await choose(page,'Class 10','Hindi Course B');
   check(await page.locator('#chapter-count').textContent()==='17','Class 10 Hindi Course B exposes Sparsh and Sanchayan chapters');
   check(await page.locator('.chapter-book-label').count()===2,'Hindi Course B is grouped by both NCERT books');
+  await page.locator('.chapter-item').filter({hasText:'हरिहर काका'}).click();
+  const hindiBDeep=await page.locator('#detailed-notes').textContent();
+  check(hindiBDeep.includes('जमीन')&&hindiBDeep.includes('व्यक्ति-अधिकार'),'Class 10 Hindi Course B renders पाठ-specific analysis');
 
   await choose(page,'Class 11','Economics');
   check(await page.locator('#chapter-count').textContent()==='13','Class 11 Economics includes all 13 chapters across Statistics and Microeconomics');

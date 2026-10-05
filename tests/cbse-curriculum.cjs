@@ -4,12 +4,12 @@ const vm=require('node:vm');
 
 const window={};
 const context=vm.createContext({window,console});
-for(const file of ['cbse-ncert-secondary.js','cbse-ncert-senior-secondary.js','cbse-ncert-extra.js','cbse-ncert-deep-notes-09.js']){
+for(const file of ['cbse-ncert-secondary.js','cbse-ncert-senior-secondary.js','cbse-ncert-extra.js','cbse-ncert-deep-notes-09.js','cbse-ncert-deep-notes-10.js']){
   vm.runInContext(fs.readFileSync(file,'utf8'),context,{filename:file});
 }
 
 const script=fs.readFileSync('script.js','utf8');
-const match=script.match(/const STUDY_DATA = (\[[\s\S]*?\]);\nconst CBSE_NCERT_EXPANSION/);
+const match=script.match(/const STUDY_DATA = (\[[\s\S]*?\]);\r?\nconst CBSE_NCERT_EXPANSION/);
 assert.ok(match,'embedded STUDY_DATA is readable');
 const data=JSON.parse(match[1]);
 
@@ -67,11 +67,14 @@ for(const patch of window.CBSE_NCERT_PATCHES||[]){
 }
 
 const deepNotes=window.CBSE_NCERT_DEEP_NOTES||[];
-assert.equal(deepNotes.length,56,'Class 9 deep-note layer has exactly 56 entries');
-assert.equal(new Set(deepNotes.map(note=>[note.grade,note.subject,note.sourceBook||'',note.title].join('|'))).size,56,'Class 9 deep-note keys are unique');
+const grade9DeepNotes=deepNotes.filter(note=>note.grade==='Class 9');
+const grade10DeepNotes=deepNotes.filter(note=>note.grade==='Class 10');
+assert.equal(grade9DeepNotes.length,56,'Class 9 deep-note layer remains at exactly 56 entries');
+assert.equal(grade10DeepNotes.length,109,'Class 10 deep-note layer has exactly 109 entries');
+assert.equal(new Set(deepNotes.map(note=>[note.grade,note.subject,note.sourceBook||'',note.title].join('|'))).size,165,'Class 9 and 10 deep-note keys are unique');
 let matchedDeepNotes=0;
 for(const note of deepNotes){
-  assert.equal(note.grade,'Class 9','deep-note layer remains scoped to Class 9 only');
+  assert.ok(note.grade==='Class 9'||note.grade==='Class 10','deep-note layer remains scoped to Classes 9 and 10 only');
   const entry=data.find(item=>item.board==='CBSE'&&item.grade===note.grade&&item.subject===note.subject&&(item.sourceBook||'')===(note.sourceBook||'')&&item.title===note.title);
   assert.ok(entry,'deep note maps to runtime curriculum: '+note.subject+' / '+note.title);
   assert.ok(note.notesVerified===true,'deep note is marked verified: '+note.title);
@@ -83,7 +86,7 @@ for(const note of deepNotes){
   assert.ok(note.deepNotes?.selfCheck?.length>=3,'deep note has self-check questions: '+note.title);
   matchedDeepNotes++;
 }
-assert.equal(matchedDeepNotes,56,'all Class 9 deep notes map to current curriculum');
+assert.equal(matchedDeepNotes,165,'all Class 9 and Class 10 deep notes map to current curriculum');
 
 const cbse=data.filter(x=>x.board==='CBSE');
 const key=(g,s)=>cbse.filter(x=>x.grade===g&&x.subject===s);
@@ -100,6 +103,10 @@ expectCount('Class 9','Science',13);
 expectCount('Class 9','English',8);
 expectCount('Class 9','Social Science',9);
 expectCount('Class 9','Hindi',12);
+expectCount('Class 10','Mathematics',14);
+expectCount('Class 10','Science',13);
+expectCount('Class 10','English',28);
+expectCount('Class 10','Social Science',22);
 expectCount('Class 10','Hindi Course A',15);
 expectCount('Class 10','Hindi Course B',17);
 

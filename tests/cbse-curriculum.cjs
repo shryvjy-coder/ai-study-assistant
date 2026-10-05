@@ -4,7 +4,7 @@ const vm=require('node:vm');
 
 const window={};
 const context=vm.createContext({window,console});
-for(const file of ['cbse-ncert-secondary.js','cbse-ncert-senior-secondary.js','cbse-ncert-extra.js']){
+for(const file of ['cbse-ncert-secondary.js','cbse-ncert-senior-secondary.js','cbse-ncert-extra.js','cbse-ncert-deep-notes-09.js']){
   vm.runInContext(fs.readFileSync(file,'utf8'),context,{filename:file});
 }
 
@@ -65,6 +65,25 @@ for(const patch of window.CBSE_NCERT_PATCHES||[]){
     if(entry.board==='CBSE'&&entry.grade===patch.grade&&entry.subject===patch.subject)Object.assign(entry,patch);
   }
 }
+
+const deepNotes=window.CBSE_NCERT_DEEP_NOTES||[];
+assert.equal(deepNotes.length,56,'Class 9 deep-note layer has exactly 56 entries');
+assert.equal(new Set(deepNotes.map(note=>[note.grade,note.subject,note.sourceBook||'',note.title].join('|'))).size,56,'Class 9 deep-note keys are unique');
+let matchedDeepNotes=0;
+for(const note of deepNotes){
+  assert.equal(note.grade,'Class 9','deep-note layer remains scoped to Class 9 only');
+  const entry=data.find(item=>item.board==='CBSE'&&item.grade===note.grade&&item.subject===note.subject&&(item.sourceBook||'')===(note.sourceBook||'')&&item.title===note.title);
+  assert.ok(entry,'deep note maps to runtime curriculum: '+note.subject+' / '+note.title);
+  assert.ok(note.notesVerified===true,'deep note is marked verified: '+note.title);
+  assert.ok(note.sourceFile,'deep note records its NCERT source file: '+note.title);
+  assert.ok(note.deepNotes?.overview,'deep note has chapter overview: '+note.title);
+  assert.ok(note.deepNotes?.concepts?.length>=3,'deep note has chapter-specific concepts: '+note.title);
+  assert.ok(note.deepNotes?.examTips?.length>=2,'deep note has exam guidance: '+note.title);
+  assert.ok(note.deepNotes?.quickRevision?.length>=3,'deep note has quick revision: '+note.title);
+  assert.ok(note.deepNotes?.selfCheck?.length>=3,'deep note has self-check questions: '+note.title);
+  matchedDeepNotes++;
+}
+assert.equal(matchedDeepNotes,56,'all Class 9 deep notes map to current curriculum');
 
 const cbse=data.filter(x=>x.board==='CBSE');
 const key=(g,s)=>cbse.filter(x=>x.grade===g&&x.subject===s);

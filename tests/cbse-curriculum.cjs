@@ -98,6 +98,9 @@ assert.ok(grade11DeepNotes.some(note=>note.subject==='Physics'&&note.deepNotes.f
 assert.ok(grade11DeepNotes.some(note=>note.subject==='Geography'&&note.title==='Climate'&&note.deepNotes.concepts.some(c=>c[0].includes('Monsoon'))),'Class 11 Geography deep notes include chapter-specific monsoon concepts');
 assert.ok(grade11DeepNotes.some(note=>note.subject==='Accountancy'&&note.title==='Bank Reconciliation Statement'&&note.deepNotes.concepts.some(c=>c[0].includes('Timing'))),'Class 11 Accountancy deep notes include reconciliation-specific concepts');
 assert.ok(grade11DeepNotes.some(note=>note.subject==='Computer Science'&&note.sourceBasis.includes('Official NCERT/CBSE')),'Class 11 missing-Drive subjects record official-source fallback');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='English Elective'&&note.title==='The Lament'&&note.deepNotes.concepts.some(c=>c[0].includes('Grief'))),'Class 11 English Elective notes are text-specific');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Hindi Core'&&note.title==='नमक का दारोगा'&&note.deepNotes.concepts.some(c=>c[0].includes('ईमानदारी'))),'Class 11 Hindi Core notes are पाठ-specific');
+assert.ok(grade11DeepNotes.some(note=>note.subject==='Sanskrit Core'&&note.title==='कुशलप्रशासनम्'&&note.deepNotes.concepts.some(c=>c[0].includes('सुशासनम्'))),'Class 11 Sanskrit Core notes are पाठ-specific');
 
 const cbse=data.filter(x=>x.board==='CBSE');
 const key=(g,s)=>cbse.filter(x=>x.grade===g&&x.subject===s);

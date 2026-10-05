@@ -67,6 +67,13 @@ async function choose(page,grade,subject){
   check(await page.locator('#chapter-count').textContent()==='17','Class 10 Hindi Course B exposes Sparsh and Sanchayan chapters');
   check(await page.locator('.chapter-book-label').count()===2,'Hindi Course B is grouped by both NCERT books');
 
+  await choose(page,'Class 11','Economics');
+  check(await page.locator('#chapter-count').textContent()==='13','Class 11 Economics includes all 13 chapters across Statistics and Microeconomics');
+  check(await page.locator('.chapter-book-label').count()===2,'Class 11 Economics is grouped by both prescribed NCERT books');
+  check(await page.locator('.chapter-item').filter({hasText:'Introduction'}).count()===2,'both Class 11 Economics Introduction chapters coexist');
+  const economicsIds=await page.locator('.chapter-item').filter({hasText:'Introduction'}).evaluateAll(nodes=>nodes.map(n=>n.dataset.id));
+  check(new Set(economicsIds).size===2,'book-specific Economics Introduction chapters use distinct IDs');
+
   await choose(page,'Class 12','Biology');
   check(await page.locator('#chapter-count').textContent()==='13','Class 12 Biology includes all 13 current NCERT chapters');
   check(await page.locator('.chapter-item').filter({hasText:'Biodiversity and Conservation'}).count()===1,'Class 12 Biology includes Biodiversity and Conservation');

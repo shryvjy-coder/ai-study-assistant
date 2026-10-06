@@ -32,8 +32,12 @@ jobs:
           node --check tests/pre-beta-smoke.cjs
           node --check tests/cbse-curriculum.cjs
           node --check tests/cbse-browser.cjs
+          node --check tests/caie-as-physics.cjs
+          node --check tests/caie-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
+      - name: CAIE AS Physics deep-note regression
+        run: node tests/caie-as-physics.cjs
 
 
   curriculum-browser:
@@ -58,6 +62,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Refreshed CBSE browser coverage
         run: node tests/cbse-browser.cjs
+      - name: CAIE AS Physics browser coverage
+        run: node tests/caie-browser.cjs
 
   browser:
     runs-on: ubuntu-latest

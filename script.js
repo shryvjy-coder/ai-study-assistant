@@ -84,7 +84,7 @@ const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalN
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 const bootStateJSON=JSON.stringify(state);
 let cloudUser=null,cloudProviders={},cloudRegistrationMode='open',cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
-let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null,topicId:null};
+let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',component:'All AS components',topic:null,topicId:null};
 let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
 function save(){
  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
@@ -716,10 +716,32 @@ function renderFilters(){
  const boards=uniq(STUDY_DATA.map(e=>e.board)); if(!boards.includes(current.board))current.board=boards[0]; fillSelect($('#board-filter'),boards,current.board);
  const grades=uniq(STUDY_DATA.filter(e=>e.board===current.board).map(e=>e.grade));if(!grades.includes(current.grade))current.grade=grades[0];fillSelect($('#grade-filter'),grades,current.grade);
  const subs=uniq(STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade).map(e=>e.subject));if(!subs.includes(current.subject))current.subject=subs[0];fillSelect($('#subject-filter'),subs,current.subject);
- const notice = current.board==='Cambridge IGCSE' ? 'Cambridge IGCSE is a two-year qualification, so topics are shown as one 9–10 pathway rather than falsely split by school year.' : current.board.includes('AS & A') ? 'Cambridge content is organised by qualification stage. Schools may sequence individual topics differently.' : 'CBSE topics are organised by class and subject.';
+ const isASMath=current.board==='Cambridge International AS & A Level'&&current.grade==='AS Level (11)'&&current.subject==='Mathematics';
+ const componentWrap=$('#math-component-wrap');
+ if(componentWrap)componentWrap.classList.toggle('hidden',!isASMath);
+ if(isASMath){
+  const routes=['All AS components','Paper 1 + Paper 2 (Pure Mathematics)','Paper 1 + Paper 4 (Mechanics)','Paper 1 + Paper 5 (Statistics 1)'];
+  if(!routes.includes(current.component))current.component=routes[0];
+  fillSelect($('#math-component-filter'),routes,current.component);
+ }else current.component='All AS components';
+ const notice = current.board==='Cambridge IGCSE'
+  ? 'Cambridge IGCSE is a two-year qualification, so topics are shown as one 9–10 pathway rather than falsely split by school year.'
+  : isASMath
+   ? 'Cambridge AS Mathematics 9709 always uses Paper 1 as the foundation. Choose the additional AS component used by your route: Paper 2, Paper 4 Mechanics, or Paper 5 Probability & Statistics 1.'
+   : current.board.includes('AS & A')
+    ? 'Cambridge content is organised by qualification stage. Schools may sequence individual topics differently.'
+    : 'CBSE topics are organised by class and subject.';
  $('#curriculum-notice').textContent=notice; renderTopicList(); populateQuizFilters(); renderPlannerBoards();
 }
-function topicList(){return STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject).sort((a,b)=>a.order-b.order)}
+function topicList(){
+ let list=STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject);
+ const isASMath=current.board==='Cambridge International AS & A Level'&&current.grade==='AS Level (11)'&&current.subject==='Mathematics';
+ if(isASMath&&current.component&&current.component!=='All AS components'){
+  const optional=current.component.includes('Paper 2')?'Paper 2':current.component.includes('Paper 4')?'Paper 4':'Paper 5';
+  list=list.filter(e=>e.component==='Paper 1'||e.component===optional);
+ }
+ return list.sort((a,b)=>a.order-b.order);
+}
 function renderTopicList(){
  const list=topicList();$('#chapter-count').textContent=list.length;
  const groups=[];const byBook=new Map();
@@ -741,6 +763,7 @@ function richDeepSections(e){
  const revision=bullets(d.quickRevision);
  const selfCheck=bullets(d.selfCheck);
  const vocabulary=bullets(d.vocabulary);
+ const practice=bullets(d.practice);
  return `<div class="note-prose deep-note-verified">
  <section class="note-section"><h3>1. Chapter overview</h3><p>${esc(d.overview||e.summary||'')}</p>${source?`<p class="muted"><strong>Source:</strong> ${esc(source)}</p>`:''}</section>
  <section class="note-section"><h3>2. Key concepts and explanations</h3><ul>${concepts}</ul></section>
@@ -751,6 +774,7 @@ function richDeepSections(e){
  <section class="note-section"><h3>7. Quick revision</h3><ul>${revision}</ul></section>
  <section class="note-section"><h3>8. Self-check</h3><ol>${selfCheck}</ol></section>
  ${vocabulary?`<section class="note-section"><h3>9. Vocabulary to know</h3><ul>${vocabulary}</ul></section>`:''}
+ ${practice?`<section class="note-section"><h3>10. Practice plan</h3><ul>${practice}</ul></section>`:''}
  </div>`;
 }
 function deepSections(e){
@@ -1144,7 +1168,7 @@ function bind(){
  mainNav.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMobileNav(false)));
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mainNav.classList.contains('open')){setMobileNav(false);mobileNavButton.focus()}});
  window.addEventListener('resize',()=>{if(innerWidth>1000)setMobileNav(false)});
- $('#board-filter').onchange=e=>{current.board=e.target.value;current.topic=null;current.topicId=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.topic=null;current.topicId=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.topic=null;current.topicId=null;renderFilters()};
+ $('#board-filter').onchange=e=>{current.board=e.target.value;current.component='All AS components';current.topic=null;current.topicId=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.component='All AS components';current.topic=null;current.topicId=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.component='All AS components';current.topic=null;current.topicId=null;renderFilters()};$('#math-component-filter').onchange=e=>{current.component=e.target.value;current.topic=null;current.topicId=null;renderTopicList()};
  $('#collapse-chapters').onclick=()=>$('#chapter-list').classList.toggle('hidden');$('#search-btn').onclick=showSearch;$('#global-search').onkeydown=e=>{if(e.key==='Enter')showSearch()};
  $('#complete-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.completed,e.id);updateTopicActions();renderTopicList();updateDashboard()}};$('#bookmark-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.bookmarks,e.id);updateTopicActions();updateDashboard()}};$('#weak-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.review,e.id);updateTopicActions();renderTopicList();updateDashboard()}};
  $$('.article-tabs button').forEach(b=>b.onclick=()=>{$$('.article-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.tab-panel').forEach(x=>x.classList.add('hidden'));$('#tab-'+b.dataset.tab).classList.remove('hidden')});let nt;$('#personal-note-editor').oninput=e=>{const ce=currentEntry();if(!ce)return;state.personalNotes[ce.id]=e.target.value;$('#personal-save-status').textContent='Saving…';clearTimeout(nt);nt=setTimeout(()=>{save();$('#personal-save-status').textContent='Saved automatically'},350)};

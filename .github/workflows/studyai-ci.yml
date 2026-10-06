@@ -36,12 +36,16 @@ jobs:
           node --check tests/caie-browser.cjs
           node --check tests/caie-as-chemistry.cjs
           node --check tests/caie-chemistry-browser.cjs
+          node --check tests/caie-as-mathematics.cjs
+          node --check tests/caie-mathematics-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
         run: node tests/caie-as-physics.cjs
       - name: CAIE AS Chemistry deep-note regression
         run: node tests/caie-as-chemistry.cjs
+      - name: CAIE AS Mathematics deep-note regression
+        run: node tests/caie-as-mathematics.cjs
 
 
   curriculum-browser:
@@ -70,6 +74,8 @@ jobs:
         run: node tests/caie-browser.cjs
       - name: CAIE AS Chemistry browser coverage
         run: node tests/caie-chemistry-browser.cjs
+      - name: CAIE AS Mathematics browser coverage
+        run: node tests/caie-mathematics-browser.cjs
 
   browser:
     runs-on: ubuntu-latest

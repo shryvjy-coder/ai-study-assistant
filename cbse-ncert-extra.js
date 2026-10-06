@@ -84,6 +84,16 @@
       method:['Locate the phenomenon and scale.','Identify the processes involved.','Use maps, graphs, field data or examples.','Connect pattern, process and consequence.'],
       mistakes:['Describing a map without explaining it.','Ignoring scale or regional variation.','Treating data as self-explanatory.']
     },
+    'Computer Science':{
+      lens:'Computer Science rewards precise algorithmic thinking. Trace data, state and control flow, test edge cases, and connect code with the underlying data structure, database or network model.',
+      method:['Identify inputs, outputs, state and constraints.','Trace the algorithm or program step by step.','Test normal, boundary and error cases.','Explain why the result follows from the underlying concept, not only the syntax.'],
+      mistakes:['Tracing code without tracking changing state.','Memorising syntax without understanding the data model or algorithm.','Ignoring edge cases, errors or resource constraints.']
+    },
+    'Informatics Practices':{
+      lens:'Informatics Practices connects data handling, SQL, visualisation, networks and responsible digital behaviour. Use small datasets and queries to explain what each operation changes and why.',
+      method:['Identify the data structure, table, network concept or digital issue.','Apply the relevant operation or query with correct syntax and conditions.','Check the output against the data and constraints.','Interpret the result and note data-quality, privacy or ethical implications where relevant.'],
+      mistakes:['Confusing Series, DataFrames and database tables.','Writing SQL without checking grouping, joins or null values.','Treating a graph or digital-safety rule as self-explanatory.']
+    },
     'Sociology':{
       lens:'Connect everyday life with institutions, structures and social change. Use concepts to explain patterns instead of relying on stereotypes.',
       method:['Identify the institution, group or process.','Apply the sociological concept precisely.','Use examples across social locations.','Connect individual experience with wider structure.'],

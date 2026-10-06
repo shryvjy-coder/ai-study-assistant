@@ -941,3 +941,41 @@ html[data-theme="dark"] .hero-summary,html[data-theme="dark"] .reader-view,html[
     font-size:.96rem;
   }
 }
+
+
+/* Defensive visibility for full revision notes. */
+.full-notes-section,
+.full-notes-section.full-notes-visible{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+.full-notes-section .detailed-notes-list{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  height:auto!important;
+  min-height:1px!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+.full-notes-section .detailed-note-block{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  height:auto!important;
+  min-height:1px!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+.full-notes-section .detailed-note-block h4,
+.full-notes-section .detailed-note-block p{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}

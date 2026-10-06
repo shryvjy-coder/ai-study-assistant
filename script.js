@@ -795,13 +795,26 @@ function noteDetailBlock(item,index){
    body=body.slice(colon+1).trim();
   }else title='Key idea '+(index+1);
  }
- return '<article class="detailed-note-block"><h4>'+esc(title)+'</h4><p>'+esc(body)+'</p></article>';
+ if(!body)body='Review this point together with the chapter overview, worked method and exam guidance below.';
+ return '<div class="detailed-note-block" data-note-block="'+(index+1)+'"><h4>'+esc(title)+'</h4><p>'+esc(body)+'</p></div>';
+}
+function detailedNoteItems(e){
+ const concepts=Array.isArray(e.deepNotes?.concepts)?e.deepNotes.concepts.filter(Boolean):[];
+ if(concepts.length)return concepts;
+ const keyPoints=Array.isArray(e.keyPoints)?e.keyPoints.filter(Boolean):[];
+ if(keyPoints.length)return keyPoints;
+ const method=Array.isArray(e.method)?e.method.filter(Boolean):[];
+ if(method.length)return method.map((x,i)=>['Explanation '+(i+1),x]);
+ return [['Chapter explanation',e.summary||'Open the syllabus checklist, method and exam guidance below for this topic.']];
+}
+function renderDetailedNoteList(e){
+ return detailedNoteItems(e).map(noteDetailBlock).join('');
 }
 function richDeepSections(e){
  const d=e.deepNotes||{};
  const list=items=>(Array.isArray(items)?items:[]).map(item=>'<li>'+esc(item)+'</li>').join('');
  const concepts=Array.isArray(d.concepts)?d.concepts:[];
- const detailedNotes=concepts.map(noteDetailBlock).join('');
+ const detailedNotes=renderDetailedNoteList(e);
  const formulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:e.formulas)||[];
  const reasoning=Array.isArray(d.reasoning)?d.reasoning:[];
  const visuals=Array.isArray(d.visuals)?d.visuals:[];
@@ -857,7 +870,7 @@ function deepSections(e){
   : humanities
    ? ['What is the central concept in '+e.title+'?','Which cause, process or institution explains the main pattern?','What evidence or example would best support that explanation?','Which comparison or distinction is most likely to be tested?','What conclusion follows from the evidence, and what limitation should be remembered?']
    : ['What is the central idea of '+e.title+'?','Which relationship, representation or process is most useful here?','What information would tell you which method to use?','Which common shortcut can fail, and why?','How would you check whether a final answer or conclusion is reasonable?'];
- const detailedNotes=keyPoints.map(noteDetailBlock).join('');
+ const detailedNotes=renderDetailedNoteList(e);
  const formulaHtml=renderFormulaSheet(formulas);
  const methodHtml=method.map((p,i)=>'<li><span class="method-step-number">'+(i+1)+'</span><div>'+esc(p)+'</div></li>').join('');
  const mistakeHtml=mistakes.map(p=>'<li>'+esc(p)+'</li>').join('');
@@ -870,6 +883,35 @@ function deepSections(e){
   '<section class="note-section" data-nav-label="Exam focus"><span class="note-section-kicker">Exam technique</span><h3>Common mistakes & exam focus</h3><div class="callout-grid"><div class="exam-box note-callout"><span class="callout-label">Examiner focus</span><p>'+esc(examFocus)+'</p></div>'+(mistakeHtml?'<div class="mistake-box note-callout"><span class="callout-label">Common mistakes</span><ul>'+mistakeHtml+'</ul></div>':'')+'</div></section>'+
   '<section class="note-section" data-nav-label="Self-check"><span class="note-section-kicker">Active recall</span><h3>Can you answer these without looking?</h3><div class="self-check-box"><ol>'+selfCheck.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></div></section>'+
  '</div>';
+}
+function ensureDetailedNotesVisible(e){
+ const root=$('#detailed-notes');
+ if(!root)return;
+ const section=root.querySelector('.full-notes-section');
+ if(!section)return;
+ let list=section.querySelector('.detailed-notes-list');
+ const sourceItems=detailedNoteItems(e);
+ const currentText=(list?.textContent||'').trim();
+ if(!list){
+  list=document.createElement('div');
+  list.className='detailed-notes-list';
+  section.appendChild(list);
+ }
+ if(list.children.length<1||currentText.length<40){
+  list.innerHTML=sourceItems.map(noteDetailBlock).join('');
+ }
+ section.classList.add('full-notes-visible');
+ section.hidden=false;
+ list.hidden=false;
+ list.style.removeProperty('display');
+ list.style.removeProperty('visibility');
+ list.style.removeProperty('opacity');
+ list.querySelectorAll('.detailed-note-block').forEach(block=>{
+  block.hidden=false;
+  block.style.removeProperty('display');
+  block.style.removeProperty('visibility');
+  block.style.removeProperty('opacity');
+ });
 }
 function noteReadingMinutes(e){
  const deep=e.deepNotes||{};
@@ -908,7 +950,7 @@ function setupNoteNavigation(){
  updateNoteReadingProgress();
 }
 function quickReview(e){const formulas=(e.deepNotes?.formulas?.length?e.deepNotes.formulas:e.formulas)||[];return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula sheet</h3>${formulas.length?renderFormulaSheet(formulas,{compact:true}):'<p>Focus on definitions, relationships and process rather than one formula.</p>'}</div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0]||'')} ${esc(e.method[1]||'')}</p></div>`}
-function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#note-alignment-chip').textContent=e.notesVerified?'Syllabus-aligned':'StudyAI revision note';$('#note-source-chip').textContent=e.sourceBook||e.subject||'Revision notes';$('#note-reading-time').textContent=noteReadingMinutes(e)+' min read';$('#note-reading-progress').style.width='0%';$('#detailed-notes').innerHTML=deepSections(e);setupNoteNavigation();$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
+function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#note-alignment-chip').textContent=e.notesVerified?'Syllabus-aligned':'StudyAI revision note';$('#note-source-chip').textContent=e.sourceBook||e.subject||'Revision notes';$('#note-reading-time').textContent=noteReadingMinutes(e)+' min read';$('#note-reading-progress').style.width='0%';$('#detailed-notes').innerHTML=deepSections(e);ensureDetailedNotesVisible(e);setupNoteNavigation();$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
 function updateTopicActions(){const e=currentEntry();if(!e)return;$('#complete-btn').textContent=state.completed.includes(e.id)?'Completed ✓':'Mark complete';$('#bookmark-btn').textContent=state.bookmarks.includes(e.id)?'Bookmarked':'Bookmark';$('#weak-btn').textContent=state.review.includes(e.id)?'In review queue':'Review'}
 function toggle(arr,key){const i=arr.indexOf(key);i>=0?arr.splice(i,1):arr.push(key);save()}
 function searchAll(q){q=q.trim().toLowerCase();if(!q)return[];return STUDY_DATA.filter(e=>[e.title,e.sourceBook,e.subject,e.grade,e.board,e.summary,...e.keyPoints].filter(Boolean).join(' ').toLowerCase().includes(q)).slice(0,24)}

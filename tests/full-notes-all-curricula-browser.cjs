@@ -85,6 +85,12 @@ async function dismiss(page){
   await first.click();
   check(await page.locator('#detailed-notes .full-notes-section').count()===1,group.board+' / '+group.grade+' opens a full detailed-notes section');
   check(await page.locator('#detailed-notes .detailed-note-block').count()>=3,group.board+' / '+group.grade+' renders multiple detailed explanations');
+  const visibleBlocks=page.locator('#detailed-notes .detailed-note-block:visible');
+  check(await visibleBlocks.count()>=3,group.board+' / '+group.grade+' shows multiple full-note blocks visibly on screen');
+  const firstVisible=visibleBlocks.first();
+  const txt=(await firstVisible.textContent()||'').trim();
+  const box=await firstVisible.boundingBox();
+  check(txt.length>40&&!!box&&box.height>30,group.board+' / '+group.grade+' has visible explanatory paragraph text with real height');
  }
 
  check(errors.length===0,'no browser JavaScript errors during all-curriculum note audit: '+errors.join('; '));

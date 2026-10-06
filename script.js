@@ -777,15 +777,31 @@ function renderTopicList(){
  $$('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
  if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden')}
 }
+function renderFormulaSheet(formulas,{compact=false}={}){
+ const rows=(Array.isArray(formulas)?formulas:[]).filter(Boolean);
+ if(!rows.length)return '';
+ return '<div class="formula-sheet'+(compact?' compact':'')+'">'+rows.map(formula=>
+  '<div class="formula-row"><div class="formula-expression">'+esc(formula)+'</div></div>'
+ ).join('')+'</div>';
+}
+function noteDetailBlock(item,index){
+ const raw=Array.isArray(item)?String(item[1]??''):String(item??'');
+ let title=Array.isArray(item)?String(item[0]??'').trim():'';
+ let body=raw.trim();
+ if(!title){
+  const colon=body.indexOf(':');
+  if(colon>1&&colon<72){
+   title=body.slice(0,colon).trim();
+   body=body.slice(colon+1).trim();
+  }else title='Key idea '+(index+1);
+ }
+ return '<article class="detailed-note-block"><h4>'+esc(title)+'</h4><p>'+esc(body)+'</p></article>';
+}
 function richDeepSections(e){
  const d=e.deepNotes||{};
  const list=items=>(Array.isArray(items)?items:[]).map(item=>'<li>'+esc(item)+'</li>').join('');
  const concepts=Array.isArray(d.concepts)?d.concepts:[];
- const conceptCards=concepts.map((item,i)=>{
-  const title=Array.isArray(item)?item[0]:'Key idea '+(i+1);
-  const body=Array.isArray(item)?item[1]:item;
-  return '<article class="concept-card"><span class="concept-number">'+String(i+1).padStart(2,'0')+'</span><h4>'+esc(title)+'</h4><p>'+esc(body)+'</p></article>';
- }).join('');
+ const detailedNotes=concepts.map(noteDetailBlock).join('');
  const formulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:e.formulas)||[];
  const reasoning=Array.isArray(d.reasoning)?d.reasoning:[];
  const visuals=Array.isArray(d.visuals)?d.visuals:[];
@@ -799,7 +815,7 @@ function richDeepSections(e){
  const source=[e.sourcePublisher,e.sourceBook,e.sourceYear].filter(Boolean).join(' · ');
  const methodHtml=reasoning.map((p,i)=>'<li><span class="method-step-number">'+(i+1)+'</span><div>'+esc(p)+'</div></li>').join('');
  const checklist=revision.map(item=>'<li><span class="check-marker">✓</span><span>'+esc(item)+'</span></li>').join('');
- const formulaHtml=formulas.map((formula,i)=>'<div class="formula-card"><span class="formula-label">Formula '+(i+1)+'</span><div class="formula">'+esc(formula)+'</div></div>').join('');
+ const formulaHtml=renderFormulaSheet(formulas);
  const examHtml=examTips.length?'<div class="exam-box note-callout"><span class="callout-label">Examiner focus</span><h4>How marks are won</h4><ul>'+list(examTips)+'</ul></div>':'';
  const mistakesHtml=mistakes.length?'<div class="mistake-box note-callout"><span class="callout-label">Common mistakes</span><h4>Easy marks to protect</h4><ul>'+list(mistakes)+'</ul></div>':'';
  const distinctionsHtml=distinctions.length?'<div class="distinction-box note-callout"><span class="callout-label">Do not mix these up</span><ul>'+list(distinctions)+'</ul></div>':'';
@@ -807,11 +823,11 @@ function richDeepSections(e){
  return '<div class="note-prose deep-note-verified">'+
   '<section class="note-section note-overview-section" data-nav-label="Overview"><span class="note-section-kicker">Start here</span><h3>Chapter overview</h3><p class="note-lead">'+esc(d.overview||e.summary||'')+'</p>'+(source?'<div class="note-source-line"><span>Source basis</span><strong>'+esc(source)+'</strong></div>':'')+'</section>'+
   (checklist?'<section class="note-section" data-nav-label="Checklist"><span class="note-section-kicker">Syllabus checklist</span><h3>What you need to know</h3><ul class="revision-checklist">'+checklist+'</ul></section>':'')+
-  '<section class="note-section" data-nav-label="Concepts"><span class="note-section-kicker">Learn</span><h3>Key concepts</h3><p class="section-deck">Work through each idea separately, then connect them. This keeps a large chapter from turning into one block of memorisation.</p><div class="concept-grid note-concept-grid">'+conceptCards+'</div></section>'+
-  (formulaHtml?'<section class="note-section" data-nav-label="Formula bank"><span class="note-section-kicker">Must know</span><h3>Formula & relationship bank</h3><p class="section-deck">Know what every symbol means, the conditions for using the relationship, and what a sensible answer should look like.</p><div class="formula-bank">'+formulaHtml+'</div></section>':'')+
+  '<section class="note-section full-notes-section" data-nav-label="Detailed notes"><span class="note-section-kicker">Full notes</span><h3>Detailed notes</h3><p class="section-deck">These are the full chapter explanations. Use the overview for orientation, then study each section below in depth.</p><div class="detailed-notes-list">'+detailedNotes+'</div></section>'+
+  (formulaHtml?'<section class="note-section formula-sheet-section" data-nav-label="Formula sheet"><span class="note-section-kicker">Reference</span><h3>Formula sheet</h3><p class="section-deck">One relationship per row. Read the equation together with the detailed notes so you know what each symbol means and when the formula applies.</p>'+formulaHtml+'</section>':'')+
   (methodHtml?'<section class="note-section" data-nav-label="Method"><span class="note-section-kicker">Apply</span><h3>How to reason through this chapter</h3><ol class="method-steps">'+methodHtml+'</ol></section>':'')+
-  (visuals.length?'<section class="note-section compact-note-section" data-nav-label="Visual thinking"><span class="note-section-kicker">Represent</span><h3>Diagrams & visual thinking</h3><ul class="clean-list">'+list(visuals)+'</ul></section>':'')+
-  ((examHtml||mistakesHtml)?'<section class="note-section" data-nav-label="Exam focus"><span class="note-section-kicker">Exam technique</span><h3>Examiner focus & common traps</h3><div class="callout-grid">'+examHtml+mistakesHtml+'</div>'+distinctionsHtml+'</section>':'')+
+  (visuals.length?'<section class="note-section" data-nav-label="Visual thinking"><span class="note-section-kicker">Represent</span><h3>Diagrams & visual thinking</h3><ul class="clean-list">'+list(visuals)+'</ul></section>':'')+
+  ((examHtml||mistakesHtml||distinctionsHtml)?'<section class="note-section" data-nav-label="Exam focus"><span class="note-section-kicker">Exam technique</span><h3>Examiner focus & common traps</h3><div class="callout-grid">'+examHtml+mistakesHtml+'</div>'+distinctionsHtml+'</section>':'')+
   (selfCheck.length?'<section class="note-section" data-nav-label="Self-check"><span class="note-section-kicker">Active recall</span><h3>Can you answer these without looking?</h3><div class="self-check-box"><ol>'+list(selfCheck)+'</ol></div></section>':'')+
   (practice.length?'<section class="note-section" data-nav-label="Practice"><span class="note-section-kicker">Next step</span><h3>Practice plan</h3><ul class="practice-list">'+list(practice)+'</ul></section>':'')+
   (vocabHtml?'<section class="note-section compact-note-section" data-nav-label="Vocabulary"><span class="note-section-kicker">Language</span><h3>Vocabulary to know</h3>'+vocabHtml+'</section>':'')+
@@ -841,16 +857,16 @@ function deepSections(e){
   : humanities
    ? ['What is the central concept in '+e.title+'?','Which cause, process or institution explains the main pattern?','What evidence or example would best support that explanation?','Which comparison or distinction is most likely to be tested?','What conclusion follows from the evidence, and what limitation should be remembered?']
    : ['What is the central idea of '+e.title+'?','Which relationship, representation or process is most useful here?','What information would tell you which method to use?','Which common shortcut can fail, and why?','How would you check whether a final answer or conclusion is reasonable?'];
- const conceptCards=keyPoints.map((p,i)=>'<article class="concept-card"><span class="concept-number">'+String(i+1).padStart(2,'0')+'</span><h4>Core idea '+(i+1)+'</h4><p>'+esc(p)+'</p></article>').join('');
- const formulaHtml=formulas.map((formula,i)=>'<div class="formula-card"><span class="formula-label">Formula '+(i+1)+'</span><div class="formula">'+esc(formula)+'</div></div>').join('');
+ const detailedNotes=keyPoints.map(noteDetailBlock).join('');
+ const formulaHtml=renderFormulaSheet(formulas);
  const methodHtml=method.map((p,i)=>'<li><span class="method-step-number">'+(i+1)+'</span><div>'+esc(p)+'</div></li>').join('');
  const mistakeHtml=mistakes.map(p=>'<li>'+esc(p)+'</li>').join('');
  return '<div class="note-prose">'+
-  '<section class="note-section note-overview-section" data-nav-label="Overview"><span class="note-section-kicker">Start here</span><h3>Big picture</h3><p class="note-lead">'+esc(e.summary)+'</p><p>'+esc(e.lens||'Build a connected model of the topic before memorising details.')+'</p>'+(source?'<div class="note-source-line"><span>Source basis</span><strong>'+esc(source)+'</strong></div>':'')+'</section>'+
+  '<section class="note-section note-overview-section" data-nav-label="Overview"><span class="note-section-kicker">Start here</span><h3>Chapter overview</h3><p class="note-lead">'+esc(e.summary)+'</p><p>'+esc(e.lens||'Build a connected model of the topic before memorising details.')+'</p>'+(source?'<div class="note-source-line"><span>Source basis</span><strong>'+esc(source)+'</strong></div>':'')+'</section>'+
   '<section class="note-section" data-nav-label="Checklist"><span class="note-section-kicker">Revision checklist</span><h3>What you should be able to do</h3><ul class="revision-checklist">'+revision.map(x=>'<li><span class="check-marker">✓</span><span>'+esc(x)+'</span></li>').join('')+'</ul></section>'+
-  '<section class="note-section" data-nav-label="Concepts"><span class="note-section-kicker">Learn</span><h3>Core ideas</h3><div class="concept-grid note-concept-grid">'+conceptCards+'</div></section>'+
-  (formulaHtml?'<section class="note-section" data-nav-label="Formula bank"><span class="note-section-kicker">Must know</span><h3>Formula & relationship bank</h3><div class="formula-bank">'+formulaHtml+'</div></section>':'')+
-  (methodHtml?'<section class="note-section" data-nav-label="Method"><span class="note-section-kicker">Apply</span><h3>Step-by-step method</h3><ol class="method-steps">'+methodHtml+'</ol><div class="worked-box note-callout"><span class="callout-label">Exam reasoning pattern</span><p>'+esc(examFocus)+'</p></div></section>':'')+
+  '<section class="note-section full-notes-section" data-nav-label="Detailed notes"><span class="note-section-kicker">Full notes</span><h3>Detailed notes</h3><div class="detailed-notes-list">'+detailedNotes+'</div></section>'+
+  (formulaHtml?'<section class="note-section formula-sheet-section" data-nav-label="Formula sheet"><span class="note-section-kicker">Reference</span><h3>Formula sheet</h3>'+formulaHtml+'</section>':'')+
+  (methodHtml?'<section class="note-section" data-nav-label="Method"><span class="note-section-kicker">Apply</span><h3>How to reason through this chapter</h3><ol class="method-steps">'+methodHtml+'</ol><div class="worked-box note-callout"><span class="callout-label">Exam reasoning pattern</span><p>'+esc(examFocus)+'</p></div></section>':'')+
   '<section class="note-section" data-nav-label="Exam focus"><span class="note-section-kicker">Exam technique</span><h3>Common mistakes & exam focus</h3><div class="callout-grid"><div class="exam-box note-callout"><span class="callout-label">Examiner focus</span><p>'+esc(examFocus)+'</p></div>'+(mistakeHtml?'<div class="mistake-box note-callout"><span class="callout-label">Common mistakes</span><ul>'+mistakeHtml+'</ul></div>':'')+'</div></section>'+
   '<section class="note-section" data-nav-label="Self-check"><span class="note-section-kicker">Active recall</span><h3>Can you answer these without looking?</h3><div class="self-check-box"><ol>'+selfCheck.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></div></section>'+
  '</div>';
@@ -891,7 +907,7 @@ function setupNoteNavigation(){
  });
  updateNoteReadingProgress();
 }
-function quickReview(e){return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula / relationship</h3><p>${esc(e.formulas.join(' · ')||'Focus on definitions, relationships and process rather than one formula.')}</p></div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0])} ${esc(e.method[1])}</p></div>`}
+function quickReview(e){const formulas=(e.deepNotes?.formulas?.length?e.deepNotes.formulas:e.formulas)||[];return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula sheet</h3>${formulas.length?renderFormulaSheet(formulas,{compact:true}):'<p>Focus on definitions, relationships and process rather than one formula.</p>'}</div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0]||'')} ${esc(e.method[1]||'')}</p></div>`}
 function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#note-alignment-chip').textContent=e.notesVerified?'Syllabus-aligned':'StudyAI revision note';$('#note-source-chip').textContent=e.sourceBook||e.subject||'Revision notes';$('#note-reading-time').textContent=noteReadingMinutes(e)+' min read';$('#note-reading-progress').style.width='0%';$('#detailed-notes').innerHTML=deepSections(e);setupNoteNavigation();$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
 function updateTopicActions(){const e=currentEntry();if(!e)return;$('#complete-btn').textContent=state.completed.includes(e.id)?'Completed ✓':'Mark complete';$('#bookmark-btn').textContent=state.bookmarks.includes(e.id)?'Bookmarked':'Bookmark';$('#weak-btn').textContent=state.review.includes(e.id)?'In review queue':'Review'}
 function toggle(arr,key){const i=arr.indexOf(key);i>=0?arr.splice(i,1):arr.push(key);save()}

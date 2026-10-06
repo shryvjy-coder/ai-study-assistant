@@ -45,8 +45,9 @@ async function dismiss(page){
  check(/\d+ min read/.test(await page.locator('#note-reading-time').textContent()),'reading-time estimate is shown');
  check(await page.locator('#note-section-nav').count()===1,'section navigation exists');
  check(await page.locator('#note-section-nav button').count()>=6,'section navigation exposes granular revision sections');
- check(await page.locator('.note-concept-grid .concept-card').count()>=6,'key concepts render as bite-sized subtopic cards');
- check(await page.locator('.formula-bank .formula-card').count()>=4,'formula bank is rendered separately');
+ check(await page.locator('.detailed-notes-list .detailed-note-block').count()>=6,'full detailed notes render as expanded long-form sections');
+ check(await page.locator('.formula-sheet-section .formula-row').count()>=4,'formula sheet renders one clean row per formula');
+ check(await page.locator('.formula-label').count()===0,'formula sheet does not use cluttered Formula 1 / Formula 2 labels');
  check(await page.locator('.exam-box').count()>=1,'examiner-focus callout renders');
  check(await page.locator('.mistake-box').count()>=1,'common-mistake callout renders');
  check(await page.locator('.revision-checklist li').count()>=5,'syllabus/revision checklist renders');
@@ -55,9 +56,10 @@ async function dismiss(page){
  check((await page.locator('#make-flashcards').textContent())==='Recall with flashcards','recall CTA is clearer');
 
  const navLabels=await page.locator('#note-section-nav button').allTextContents();
- check(navLabels.includes('Concepts')&&navLabels.includes('Formula bank')&&navLabels.includes('Exam focus'),'jump navigation names major revision blocks');
+ check(navLabels.includes('Detailed notes')&&navLabels.includes('Formula sheet')&&navLabels.includes('Exam focus'),'jump navigation names full notes, formula sheet and exam focus');
 
  await page.locator('.article-tabs button[data-tab="quick"]').click();
+ check(await page.locator('#quick-review .formula-sheet.compact .formula-row').count()>=4,'quick review keeps formulas separated instead of joining them into one line');
  check(await page.locator('#note-section-nav').evaluate(el=>el.classList.contains('hidden')),'section nav hides outside revision-notes tab');
  await page.locator('.article-tabs button[data-tab="notes"]').click();
  check(!(await page.locator('#note-section-nav').evaluate(el=>el.classList.contains('hidden'))),'section nav returns for revision-notes tab');

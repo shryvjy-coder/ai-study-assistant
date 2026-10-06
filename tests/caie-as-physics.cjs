@@ -20,7 +20,7 @@ const rows=data.filter(e=>e.board==='Cambridge International AS & A Level'&&e.gr
 const status=window.STUDYAI_CAIE_AS_PHYSICS_DEEP_NOTES_STATUS;
 assert.equal(status.total,12,'deep-note layer expects exactly 12 AS Physics topics');
 assert.equal(status.matched,12,'all AS Physics deep notes attach to runtime topics');
-assert.deepEqual(status.unmatched,[],'AS Physics has no unmatched deep-note topics');
+assert.equal(status.unmatched.length,0,'AS Physics has no unmatched deep-note topics');
 assert.deepEqual(rows.map(e=>e.id),before.map(e=>e.id),'existing AS Physics IDs are preserved');
 
 for(const entry of rows){

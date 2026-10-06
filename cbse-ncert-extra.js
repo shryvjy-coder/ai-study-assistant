@@ -222,6 +222,33 @@
     'Introduction to Maps','Map Scale','Latitude, Longitude and Time','Map Projections','Topographical Maps','Introduction to Remote Sensing'
   ]);
 
+  // Class 12 computing books verified directly against current NCERT 2026-27 contents.
+  add('Class 12','Computer Science','Computer Science',[
+    ['Exception Handling in Python',['syntax and runtime errors','built-in and raised exceptions','try-except-else-finally flow','robust error-handling strategy']],
+    ['File Handling in Python',['text, binary and CSV files','open modes and context management','read, write, seek and tell','structured file operations']],
+    ['Stack',['LIFO data structure','push, pop and peek operations','Python-list implementation','infix, postfix and expression evaluation']],
+    ['Queue',['FIFO data structure','enqueue and dequeue operations','Python implementation','double-ended queue and use cases']],
+    ['Sorting',['bubble sort','selection sort','insertion sort','comparison of passes and time complexity']],
+    ['Searching',['linear search','binary search and sorted-data requirement','hash-based search idea','time-complexity comparison']],
+    ['Understanding Data',['data collection and storage','data processing','descriptive statistical techniques','data quality and interpretation']],
+    ['Database Concepts',['database versus file system','DBMS purpose and advantages','relational data model','keys and integrity']],
+    ['Structured Query Language (SQL)',['DDL and DML','constraints and data types','SELECT filtering grouping and functions','joins and operations on relations']],
+    ['Computer Networks',['network types and evolution','network devices','topologies','Internet, web, IoT and DNS']],
+    ['Data Communication',['communication components','bandwidth and data rate','switching and transmission media','protocols and mobile generations']],
+    ['Security Aspects',['common online-safety risks','protective software and firewalls','secure web connections and cookies','safe network practices']],
+    ['Project Based Learning',['problem definition','decomposition and project planning','teamwork and testing','documentation and presentation']]
+  ]);
+
+  add('Class 12','Informatics Practices','Informatics Practices',[
+    ['Querying and SQL Functions',['SQL functions','GROUP BY and aggregate queries','operations on relations','queries using two relations']],
+    ['Data Handling using Pandas - I',['Python libraries','Series creation and selection','DataFrame creation and indexing','CSV import and export']],
+    ['Data Handling using Pandas - II',['descriptive statistics','aggregation and grouping','sorting and index changes','missing values and Pandas-MySQL data exchange']],
+    ['Plotting Data using Matplotlib',['plot construction','line, bar and histogram choices','labels legends and customisation','Pandas plotting and interpretation']],
+    ['Internet and Web',['computer-network basics','network devices and topologies','Internet services','websites, web servers, hosting and browsers']],
+    ['Societal Impacts',['digital footprints and netiquette','data privacy and protection','copyright and responsible digital conduct','e-waste and health impacts']],
+    ['Project Based Learning',['problem definition','dataset or database planning','implementation and testing','teamwork, documentation and presentation']]
+  ]);
+
   add('Class 12','Biology','Biology',[
     'Sexual Reproduction in Flowering Plants','Human Reproduction','Reproductive Health','Principles of Inheritance and Variation','Molecular Basis of Inheritance','Evolution','Human Health and Disease','Microbes in Human Welfare','Biotechnology: Principles and Processes','Biotechnology and its Applications','Organisms and Populations','Ecosystem','Biodiversity and Conservation'
   ]);

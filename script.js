@@ -84,7 +84,7 @@ const defaults=()=>({theme:'light',completed:[],bookmarks:[],review:[],personalN
 let state={...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
 const bootStateJSON=JSON.stringify(state);
 let cloudUser=null,cloudProviders={},cloudRegistrationMode='open',cloudSaveTimer=null,cloudSyncing=false,cloudDirty=false,authMode='login';
-let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',topic:null,topicId:null};
+let current={board:'CBSE',grade:'Class 9',subject:'Mathematics',component:'All AS components',topic:null,topicId:null};
 let activeDeck=[],cardIndex=0,cardFlipped=false,dueReviewSession=false,activeQuiz=[],quizIndex=0,quizScore=0,satRun=[],satIndex=0,satScore=0,satSection='Reading & Writing',activeWorkspaceId=null,timerSeconds=25*60,timerHandle=null,roomChannel=null;
 function save(){
  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
@@ -716,10 +716,32 @@ function renderFilters(){
  const boards=uniq(STUDY_DATA.map(e=>e.board)); if(!boards.includes(current.board))current.board=boards[0]; fillSelect($('#board-filter'),boards,current.board);
  const grades=uniq(STUDY_DATA.filter(e=>e.board===current.board).map(e=>e.grade));if(!grades.includes(current.grade))current.grade=grades[0];fillSelect($('#grade-filter'),grades,current.grade);
  const subs=uniq(STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade).map(e=>e.subject));if(!subs.includes(current.subject))current.subject=subs[0];fillSelect($('#subject-filter'),subs,current.subject);
- const notice = current.board==='Cambridge IGCSE' ? 'Cambridge IGCSE is a two-year qualification, so topics are shown as one 9–10 pathway rather than falsely split by school year.' : current.board.includes('AS & A') ? 'Cambridge content is organised by qualification stage. Schools may sequence individual topics differently.' : 'CBSE topics are organised by class and subject.';
+ const isASMath=current.board==='Cambridge International AS & A Level'&&current.grade==='AS Level (11)'&&current.subject==='Mathematics';
+ const componentWrap=$('#math-component-wrap');
+ if(componentWrap)componentWrap.classList.toggle('hidden',!isASMath);
+ if(isASMath){
+  const routes=['All AS components','Paper 1 + Paper 2 (Pure Mathematics)','Paper 1 + Paper 4 (Mechanics)','Paper 1 + Paper 5 (Statistics 1)'];
+  if(!routes.includes(current.component))current.component=routes[0];
+  fillSelect($('#math-component-filter'),routes,current.component);
+ }else current.component='All AS components';
+ const notice = current.board==='Cambridge IGCSE'
+  ? 'Cambridge IGCSE is a two-year qualification, so topics are shown as one 9–10 pathway rather than falsely split by school year.'
+  : isASMath
+   ? 'Cambridge AS Mathematics 9709 always uses Paper 1 as the foundation. Choose the additional AS component used by your route: Paper 2, Paper 4 Mechanics, or Paper 5 Probability & Statistics 1.'
+   : current.board.includes('AS & A')
+    ? 'Cambridge content is organised by qualification stage. Schools may sequence individual topics differently.'
+    : 'CBSE topics are organised by class and subject.';
  $('#curriculum-notice').textContent=notice; renderTopicList(); populateQuizFilters(); renderPlannerBoards();
 }
-function topicList(){return STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject).sort((a,b)=>a.order-b.order)}
+function topicList(){
+ let list=STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject);
+ const isASMath=current.board==='Cambridge International AS & A Level'&&current.grade==='AS Level (11)'&&current.subject==='Mathematics';
+ if(isASMath&&current.component&&current.component!=='All AS components'){
+  const optional=current.component.includes('Paper 2')?'Paper 2':current.component.includes('Paper 4')?'Paper 4':'Paper 5';
+  list=list.filter(e=>e.component==='Paper 1'||e.component===optional);
+ }
+ return list.sort((a,b)=>a.order-b.order);
+}
 function renderTopicList(){
  const list=topicList();$('#chapter-count').textContent=list.length;
  const groups=[];const byBook=new Map();

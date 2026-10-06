@@ -152,6 +152,13 @@ const focus={
   }
 };
 
+const bookFocus={
+  'Fundamentals of Human Geography|Transport and Communication':P('land, water and air transport','transport networks and accessibility','communication systems','global spatial connectivity'),
+  'Fundamentals of Human Geography|International Trade':P('basis of international trade','balance of trade','changing global trade patterns','ports and international exchange'),
+  'India: People and Economy|Transport and Communication':P('roads and railways in India','waterways and airways','pipelines','communication networks and regional connectivity'),
+  'India: People and Economy|International Trade':P('India’s changing trade composition','direction of India’s trade','major seaports and gateways','trade balance and economic linkages')
+};
+
 const literatureSeeds={
   'English Elective':{
     'I Sell My Dreams':['dreams, prediction and ambiguity','storytelling, belief and uncertainty'],
@@ -274,6 +281,8 @@ const genericLanguage=(subject)=>{
 };
 
 const rawFocus=e=>{
+  const byBook=bookFocus[(e.sourceBook||'')+'|'+e.title];
+  if(byBook) return byBook;
   const explicit=focus[e.subject]?.[e.title];
   if(explicit) return explicit;
   const seed=literatureSeeds[e.subject]?.[e.title];

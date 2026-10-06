@@ -46,6 +46,14 @@ async function dismiss(page){
  check(await page.locator('#note-section-nav').count()===1,'section navigation exists');
  check(await page.locator('#note-section-nav button').count()>=6,'section navigation exposes granular revision sections');
  check(await page.locator('.detailed-notes-list .detailed-note-block').count()>=6,'full detailed notes render as expanded long-form sections');
+ const firstDetail=page.locator('.detailed-note-block').first();
+ check(await firstDetail.isVisible(),'first full-note block is actually visible on screen');
+ const firstDetailText=(await firstDetail.textContent()||'').trim();
+ check(firstDetailText.length>40,'first full-note block contains visible explanatory text');
+ const firstDetailBox=await firstDetail.boundingBox();
+ check(!!firstDetailBox&&firstDetailBox.height>30,'first full-note block occupies real screen height');
+ const detailStyle=await firstDetail.evaluate(el=>{const s=getComputedStyle(el);return {display:s.display,visibility:s.visibility,opacity:s.opacity}});
+ check(detailStyle.display!=='none'&&detailStyle.visibility!=='hidden'&&Number(detailStyle.opacity)>0,'full-note block computed styles keep it visible');
  check(await page.locator('.formula-sheet-section .formula-row').count()>=4,'formula sheet renders one clean row per formula');
  check(await page.locator('.formula-label').count()===0,'formula sheet does not use cluttered Formula 1 / Formula 2 labels');
  check(await page.locator('.exam-box').count()>=1,'examiner-focus callout renders');

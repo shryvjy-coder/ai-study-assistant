@@ -116,7 +116,7 @@ async function saveCloudState(showToast=false){
  finally{cloudSyncing=false;if(cloudDirty){cloudDirty=false;scheduleCloudSave()}}
 }
 const keyOf=e=>e.id;
-const currentEntry=()=>STUDY_DATA.find(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&(current.topicId?e.id===current.topicId:e.title===current.topic));
+const currentEntry=()=>current.topicId?STUDY_DATA.find(e=>e.id===current.topicId):STUDY_DATA.find(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&e.title===current.topic);
 
 // Mastery Engine v1
 // Curriculum topics are current school mastery units; SAT already exposes skill-level metadata.
@@ -717,28 +717,55 @@ function renderFilters(){
  const grades=uniq(STUDY_DATA.filter(e=>e.board===current.board).map(e=>e.grade));if(!grades.includes(current.grade))current.grade=grades[0];fillSelect($('#grade-filter'),grades,current.grade);
  const subs=uniq(STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade).map(e=>e.subject));if(!subs.includes(current.subject))current.subject=subs[0];fillSelect($('#subject-filter'),subs,current.subject);
  const isASMath=current.board==='Cambridge International AS & A Level'&&current.grade==='AS Level (11)'&&current.subject==='Mathematics';
+ const isALevelMath=current.board==='Cambridge International AS & A Level'&&current.grade==='A Level (12)'&&current.subject==='Mathematics';
  const componentWrap=$('#math-component-wrap');
- if(componentWrap)componentWrap.classList.toggle('hidden',!isASMath);
+ const componentLabel=$('#math-component-label');
+ if(componentWrap)componentWrap.classList.toggle('hidden',!(isASMath||isALevelMath));
  if(isASMath){
   const routes=['All AS components','Paper 1 + Paper 2 (Pure Mathematics)','Paper 1 + Paper 4 (Mechanics)','Paper 1 + Paper 5 (Statistics 1)'];
   if(!routes.includes(current.component))current.component=routes[0];
+  if(componentLabel)componentLabel.textContent='AS Maths route';
   fillSelect($('#math-component-filter'),routes,current.component);
- }else current.component='All AS components';
+ }else if(isALevelMath){
+  const routes=[
+   'All Year 2 options',
+   'Year 2: Paper 3 + Paper 5 (after AS Mechanics)',
+   'Year 2: Paper 3 + Paper 4 (after AS Statistics 1)',
+   'Year 2: Paper 3 + Paper 6 (after AS Statistics 1)'
+  ];
+  if(!routes.includes(current.component))current.component=routes[0];
+  if(componentLabel)componentLabel.textContent='A Level Maths route';
+  fillSelect($('#math-component-filter'),routes,current.component);
+ }else current.component='All components';
  const notice = current.board==='Cambridge IGCSE'
   ? 'Cambridge IGCSE is a two-year qualification, so topics are shown as one 9–10 pathway rather than falsely split by school year.'
   : isASMath
-   ? 'Cambridge AS Mathematics 9709 always uses Paper 1 as the foundation. Choose the additional AS component used by your route: Paper 2, Paper 4 Mechanics, or Paper 5 Probability & Statistics 1.'
-   : current.board.includes('AS & A')
-    ? 'Cambridge content is organised by qualification stage. Schools may sequence individual topics differently.'
-    : 'CBSE topics are organised by class and subject.';
+   ? 'Cambridge AS Mathematics 9709 always uses Paper 1 as the foundation. The Paper 1 + Paper 2 pure-only route cannot be carried forward to complete A Level.'
+   : isALevelMath
+    ? 'Cambridge A Level Mathematics 9709 requires Paper 1 and Paper 3, plus either Papers 4 + 5 or Papers 5 + 6. For the staged Class 12 year, choose the two Year 2 papers that follow your AS route; Paper 4 and Paper 6 cannot be combined.'
+    : current.board.includes('AS & A')
+     ? 'Cambridge content is organised by qualification stage. Schools may sequence individual topics differently.'
+     : 'CBSE topics are organised by class and subject.';
  $('#curriculum-notice').textContent=notice; renderTopicList(); populateQuizFilters(); renderPlannerBoards();
 }
 function topicList(){
- let list=STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject);
+ let list=STUDY_DATA.filter(e=>e.board===current.board&&e.grade===current.grade&&e.subject===current.subject&&!e.curriculumHidden);
  const isASMath=current.board==='Cambridge International AS & A Level'&&current.grade==='AS Level (11)'&&current.subject==='Mathematics';
+ const isALevelMath=current.board==='Cambridge International AS & A Level'&&current.grade==='A Level (12)'&&current.subject==='Mathematics';
  if(isASMath&&current.component&&current.component!=='All AS components'){
   const optional=current.component.includes('Paper 2')?'Paper 2':current.component.includes('Paper 4')?'Paper 4':'Paper 5';
   list=list.filter(e=>e.component==='Paper 1'||e.component===optional);
+ }
+ if(isALevelMath){
+  const p3=list.filter(e=>e.component==='Paper 3');
+  const p6=list.filter(e=>e.component==='Paper 6');
+  const asMath=STUDY_DATA.filter(e=>e.board===current.board&&e.grade==='AS Level (11)'&&e.subject==='Mathematics'&&!e.curriculumHidden);
+  const p4=asMath.filter(e=>e.component==='Paper 4');
+  const p5=asMath.filter(e=>e.component==='Paper 5');
+  if(current.component==='Year 2: Paper 3 + Paper 5 (after AS Mechanics)') list=[...p3,...p5];
+  else if(current.component==='Year 2: Paper 3 + Paper 4 (after AS Statistics 1)') list=[...p3,...p4];
+  else if(current.component==='Year 2: Paper 3 + Paper 6 (after AS Statistics 1)') list=[...p3,...p6];
+  else list=[...p3,...p4,...p5,...p6];
  }
  return list.sort((a,b)=>a.order-b.order);
 }
@@ -1168,7 +1195,7 @@ function bind(){
  mainNav.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMobileNav(false)));
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mainNav.classList.contains('open')){setMobileNav(false);mobileNavButton.focus()}});
  window.addEventListener('resize',()=>{if(innerWidth>1000)setMobileNav(false)});
- $('#board-filter').onchange=e=>{current.board=e.target.value;current.component='All AS components';current.topic=null;current.topicId=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.component='All AS components';current.topic=null;current.topicId=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.component='All AS components';current.topic=null;current.topicId=null;renderFilters()};$('#math-component-filter').onchange=e=>{current.component=e.target.value;current.topic=null;current.topicId=null;renderTopicList()};
+ $('#board-filter').onchange=e=>{current.board=e.target.value;current.component='All components';current.topic=null;current.topicId=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.component='All components';current.topic=null;current.topicId=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.component='All components';current.topic=null;current.topicId=null;renderFilters()};$('#math-component-filter').onchange=e=>{current.component=e.target.value;current.topic=null;current.topicId=null;renderTopicList()};
  $('#collapse-chapters').onclick=()=>$('#chapter-list').classList.toggle('hidden');$('#search-btn').onclick=showSearch;$('#global-search').onkeydown=e=>{if(e.key==='Enter')showSearch()};
  $('#complete-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.completed,e.id);updateTopicActions();renderTopicList();updateDashboard()}};$('#bookmark-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.bookmarks,e.id);updateTopicActions();updateDashboard()}};$('#weak-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.review,e.id);updateTopicActions();renderTopicList();updateDashboard()}};
  $$('.article-tabs button').forEach(b=>b.onclick=()=>{$$('.article-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.tab-panel').forEach(x=>x.classList.add('hidden'));$('#tab-'+b.dataset.tab).classList.remove('hidden')});let nt;$('#personal-note-editor').oninput=e=>{const ce=currentEntry();if(!ce)return;state.personalNotes[ce.id]=e.target.value;$('#personal-save-status').textContent='Saving…';clearTimeout(nt);nt=setTimeout(()=>{save();$('#personal-save-status').textContent='Saved automatically'},350)};

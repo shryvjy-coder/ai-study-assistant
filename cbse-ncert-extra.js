@@ -360,7 +360,8 @@
     {grade:'Class 12',subject:'Hindi Core'},
     {grade:'Class 12',subject:'Hindi Elective'},
     {grade:'Class 12',subject:'Sanskrit Core'},
-    {grade:'Class 12',subject:'Sanskrit Elective'}
+    {grade:'Class 12',subject:'Sanskrit Elective'},
+    {grade:'Class 12',subject:'Informatics Practices'}
   ];
 
   window.CBSE_NCERT_PATCHES=[
@@ -375,6 +376,12 @@
     {grade:'Class 12',subject:'Chemistry',sourceBook:'Chemistry · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS},
     {grade:'Class 12',subject:'Mathematics',sourceBook:'Mathematics · Parts I & II',sourceYear:'2026-27',sourcePublisher:'NCERT',sourceStatus:SOURCE_STATUS}
   ];
+
+  for(const entry of entries){
+    if(entry.grade==='Class 12'&&(entry.subject==='Computer Science'||entry.subject==='Informatics Practices')){
+      entry.sourceStatus='Verified against official NCERT/CBSE 2026-27 sources; this textbook set was not present in the supplied Drive.';
+    }
+  }
 
   window.CBSE_NCERT_EXTRA=entries;
 })();

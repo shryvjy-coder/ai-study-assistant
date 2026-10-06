@@ -20,7 +20,7 @@ assert.equal(status.total,24);
 assert.equal(status.matched,24);
 assert.equal(status.unmatched.length,0);
 assert.deepEqual(status.preservedIds,legacyIds,'all 16 pre-existing mastery IDs are preserved');
-assert.deepEqual(status.componentCounts,{'Paper 1':8,'Paper 2':6,'Paper 4':5,'Paper 5':5});
+assert.equal(JSON.stringify(status.componentCounts),JSON.stringify({'Paper 1':8,'Paper 2':6,'Paper 4':5,'Paper 5':5}),'component counts match official AS routes');
 
 for(const e of rows){
  assert.equal(e.notesVerified,true,e.title+' verified');

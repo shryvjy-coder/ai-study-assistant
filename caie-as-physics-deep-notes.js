@@ -45,7 +45,7 @@ const notesByTitle={
    ['Physical quantity','A physical quantity has both a numerical value and a unit. Estimation is part of physics too: an answer should be plausible in scale before it is accepted.'],
    ['SI base and derived units','Mass, length, time, current and thermodynamic temperature use kg, m, s, A and K. Derived units should be reducible to products or quotients of base units.'],
    ['Dimensional homogeneity','A valid physical equation must have the same dimensions for every term that is added or equated. This is a fast way to reject many incorrect expressions, although dimensional consistency alone cannot prove an equation.'],
-   ['Prefixes and powers of ten','Convert prefixes before calculation. Keep the power of ten attached to the unit conversion, especially when area or volume is involved because the conversion factor must also be squared or cubed.'],
+   ['Prefixes and powers of ten','Recall the syllabus prefixes explicitly: pico p = 10^-12, nano n = 10^-9, micro μ = 10^-6, milli m = 10^-3, centi c = 10^-2, deci d = 10^-1, kilo k = 10^3, mega M = 10^6, giga G = 10^9 and tera T = 10^12. Convert prefixes before calculation. For area or volume, square or cube the conversion factor as well.'],
    ['Random and systematic error','Random error produces scatter and can often be reduced by repeated readings and averaging. Systematic error shifts measurements in a consistent direction and is not removed by repetition.'],
    ['Accuracy and precision','Accuracy describes closeness to the accepted value. Precision describes the spread or repeatability of measurements. A set can be precise but inaccurate.'],
    ['Uncertainty','Absolute uncertainty is expressed in the same unit as the measurement. Percentage uncertainty compares the uncertainty with the measured value and is useful when multiplying or dividing quantities.'],
@@ -129,6 +129,7 @@ const notesByTitle={
    ['Velocity-time graphs','The gradient gives acceleration and the signed area gives displacement. Area below the time axis represents displacement in the negative direction.'],
    ['Uniform acceleration','When acceleration is constant, the familiar equations of motion can be derived from the definitions of velocity, acceleration and graph geometry.'],
    ['Free fall','With negligible air resistance near Earth, acceleration is approximately constant and vertically downward. The sign of g depends on the chosen positive direction.'],
+   ['Experiment to determine g','Use a falling object with a measured drop distance and an electronic timing method such as light gates, or collect displacement-time data. Repeat measurements, reduce timing uncertainty where possible, and determine g from an appropriate constant-acceleration relation or graph. State how the release method avoids giving the object an unintended initial speed.'],
    ['Perpendicular motion','A uniform velocity in one direction and uniform acceleration in a perpendicular direction can be analysed by treating the components independently while sharing the same time.']
   ],
   formulas:['v = u + at','s = ut + 1/2 at²','v² = u² + 2as','s = 1/2 (u + v)t'],
@@ -199,7 +200,7 @@ const notesByTitle={
    ['Newton’s third law','Interaction forces come in equal-magnitude, opposite-direction pairs acting on different bodies.'],
    ['Weight','Weight is the gravitational force on a mass, W = mg. Mass stays constant while weight depends on gravitational field strength.'],
    ['Drag and terminal velocity','Resistive force generally increases with speed. Terminal velocity is reached when resistive forces balance the driving force so resultant force and acceleration become zero.'],
-   ['Conservation of momentum','For an isolated system, total vector momentum is unchanged during an interaction. Kinetic energy is conserved only for elastic collisions.']
+   ['Conservation of momentum','For an isolated system, total vector momentum is unchanged during an interaction. In an elastic collision total kinetic energy is also conserved, and the relative speed of approach equals the relative speed of separation.']
   ],
   formulas:['F = ma','p = mv','F = Δp/Δt','W = mg'],
   reasoning:[
@@ -269,7 +270,7 @@ const notesByTitle={
    ['Vector triangle','Three coplanar forces in equilibrium can be represented by a closed vector triangle when drawn head-to-tail.'],
    ['Density','Density is mass per unit volume. Keep mass and volume units compatible before using ρ = m/V.'],
    ['Pressure and hydrostatics','Pressure is normal force per unit area. In a fluid at rest, pressure increases with vertical depth according to Δp = ρgΔh.'],
-   ['Upthrust','Because pressure is greater lower down, a submerged body experiences a net upward force. The magnitude equals the weight of displaced fluid, ρgV.']
+   ['Upthrust and Archimedes’ principle','Because pressure is greater lower down, a submerged body experiences a net upward force. Archimedes’ principle gives the upthrust as the weight of displaced fluid, F = ρgV.']
   ],
   formulas:['M = Fd_perpendicular','τ_couple = Fs','ρ = m/V','p = F/A','Δp = ρgΔh','F_upthrust = ρgV'],
   reasoning:[
@@ -765,7 +766,8 @@ const notesByTitle={
    ['Alpha, beta and gamma','Alpha radiation consists of helium nuclei. Beta-minus is electrons, beta-plus is positrons, and gamma is electromagnetic radiation. Their masses and charges differ.'],
    ['Beta spectrum and neutrinos','Beta particles have a continuous energy distribution because decay energy is shared with a neutrino or antineutrino. Beta-minus emits an electron antineutrino; beta-plus emits an electron neutrino.'],
    ['Antiparticles','An antiparticle has the same mass as its corresponding particle and opposite charge. The positron is the electron’s antiparticle.'],
-   ['Quarks','Six quark flavours exist. Up-type quarks have charge +2/3e and down-type quarks have charge -1/3e; antiquarks have opposite charges.'],
+   ['Unified atomic mass unit','The unified atomic mass unit, symbol u, is used for particle and nuclear masses. Treat it as a mass unit and keep it distinct from nucleon number, which is a count.'],
+   ['Quarks','The six quark flavours are up, down, strange, charm, top and bottom. Up, charm and top have charge +2/3e; down, strange and bottom have charge -1/3e. Each antiquark has the opposite charge.'],
    ['Hadrons','Baryons consist of three quarks. Mesons consist of one quark and one antiquark. Protons are uud and neutrons are udd, so nucleons are composite rather than fundamental.'],
    ['Leptons','Electrons and neutrinos are fundamental leptons. They are not made from quarks.'],
    ['Quark changes in beta decay','In beta-minus decay a down quark changes to an up quark; in beta-plus decay an up quark changes to a down quark, consistent with neutron-proton conversion.']
@@ -834,15 +836,15 @@ const notesByTitle={
  deepNotes:{
   overview:'Paper 3 rewards disciplined experimental communication as much as taking readings. The strongest practical answers make measurements traceable from apparatus, to table, to graph, to calculation, to conclusion, then evaluate exactly what limits reliability.',
   concepts:[
-   ['Data collection','Set up apparatus from written or diagram instructions, collect an appropriate number of readings, span a wide useful range and repeat readings when appropriate.'],
+   ['Data collection','Set up apparatus from written or diagram instructions, collect an appropriate number of readings, span the largest useful range allowed by the apparatus and instructions, and repeat readings when appropriate. Be able to use common analogue and digital instruments. For oscillations, reduce reaction-time uncertainty by timing several consecutive periods rather than only one.'],
    ['Instrument precision','Record raw readings to precision justified by the instrument. Repeated values in one column should normally use consistent decimal places.'],
    ['Tables','Create the table before data collection. Include raw and calculated quantities, and write headings as quantity with unit, such as I / A.'],
    ['Calculated values','Show key working and use a sensible number of significant figures based on the precision of measured quantities.'],
    ['Graph layout','Label both axes with quantity and unit, choose simple scales, use a large fraction of the grid and use a false origin when appropriate.'],
    ['Plotting and trend','Plot points accurately, identify genuine anomalies when justified, and draw a smooth best-fit curve or straight line with balanced scatter.'],
-   ['Gradient and intercept','For a straight line, use widely separated points on the best-fit line to determine gradient. Relate m and c back to the physical equation.'],
-   ['Uncertainty','Express uncertainty in absolute or percentage form. For derived quantities, combine uncertainty using the appropriate simple rules.'],
-   ['Evaluation','Identify limitations that actually affect the result, explain their effect, and suggest a feasible improvement that reduces that specific limitation.'],
+   ['Gradient, tangent and intercept','For a straight line, choose points on the best-fit line separated by more than half the drawn line length to determine the gradient. For a curve, draw a tangent when a gradient is required. Determine an intercept directly when possible, or substitute a point and the gradient into y = mx + c when a false origin prevents direct reading. Relate m and c back to the physical equation.'],
+   ['Uncertainty','Estimate absolute uncertainty, convert between absolute and percentage forms, and for an appropriate repeated measurement use half the range as the absolute uncertainty. For derived quantities, combine uncertainty using the appropriate simple rules.'],
+   ['Conclusions and evaluation','Use data to determine constants, test whether a hypothesis is supported and make predictions. When comparing two experimental values of a constant, compare their percentage difference with the stated percentage uncertainty before deciding whether they agree. Identify limitations that actually affect the result, explain their effect, and suggest a feasible improvement that reduces that specific limitation.'],
    ['Experimental judgement','A good method produces measurable changes larger than the resolution and uncertainty of the apparatus.']
   ],
   formulas:['y = mx + c','percentage uncertainty = absolute uncertainty/value × 100%','Δm ≈ |m_best - m_worst|'],

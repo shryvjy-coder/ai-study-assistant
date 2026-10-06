@@ -779,30 +779,43 @@ function renderTopicList(){
 }
 function richDeepSections(e){
  const d=e.deepNotes||{};
- const pairs=items=>(Array.isArray(items)?items:[]).map(item=>Array.isArray(item)?`<li><strong>${esc(item[0])}:</strong> ${esc(item[1])}</li>`:`<li>${esc(item)}</li>`).join('');
- const bullets=items=>(Array.isArray(items)?items:[]).map(item=>`<li>${esc(item)}</li>`).join('');
+ const list=items=>(Array.isArray(items)?items:[]).map(item=>'<li>'+esc(item)+'</li>').join('');
+ const concepts=Array.isArray(d.concepts)?d.concepts:[];
+ const conceptCards=concepts.map((item,i)=>{
+  const title=Array.isArray(item)?item[0]:'Key idea '+(i+1);
+  const body=Array.isArray(item)?item[1]:item;
+  return '<article class="concept-card"><span class="concept-number">'+String(i+1).padStart(2,'0')+'</span><h4>'+esc(title)+'</h4><p>'+esc(body)+'</p></article>';
+ }).join('');
+ const formulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:e.formulas)||[];
+ const reasoning=Array.isArray(d.reasoning)?d.reasoning:[];
+ const visuals=Array.isArray(d.visuals)?d.visuals:[];
+ const examTips=Array.isArray(d.examTips)?d.examTips:[];
+ const distinctions=Array.isArray(d.distinctions)?d.distinctions:[];
+ const revision=Array.isArray(d.quickRevision)?d.quickRevision:[];
+ const selfCheck=Array.isArray(d.selfCheck)?d.selfCheck:[];
+ const vocabulary=Array.isArray(d.vocabulary)?d.vocabulary:[];
+ const practice=Array.isArray(d.practice)?d.practice:[];
+ const mistakes=Array.isArray(e.mistakes)?e.mistakes:[];
  const source=[e.sourcePublisher,e.sourceBook,e.sourceYear].filter(Boolean).join(' · ');
- const concepts=pairs(d.concepts);
- const reasoning=bullets(d.reasoning);
- const visuals=bullets(d.visuals);
- const examTips=bullets(d.examTips);
- const distinctions=bullets(d.distinctions);
- const revision=bullets(d.quickRevision);
- const selfCheck=bullets(d.selfCheck);
- const vocabulary=bullets(d.vocabulary);
- const practice=bullets(d.practice);
- return `<div class="note-prose deep-note-verified">
- <section class="note-section"><h3>1. Chapter overview</h3><p>${esc(d.overview||e.summary||'')}</p>${source?`<p class="muted"><strong>Source:</strong> ${esc(source)}</p>`:''}</section>
- <section class="note-section"><h3>2. Key concepts and explanations</h3><ul>${concepts}</ul></section>
- ${reasoning?`<section class="note-section"><h3>3. How to reason through this chapter</h3><ol>${reasoning}</ol></section>`:''}
- ${visuals?`<section class="note-section"><h3>4. Diagrams and visual thinking</h3><ul>${visuals}</ul></section>`:''}
- <section class="note-section"><h3>5. Exam focus and common mistakes</h3><ul>${examTips}</ul></section>
- ${distinctions?`<section class="note-section"><h3>6. Important distinctions</h3><ul>${distinctions}</ul></section>`:''}
- <section class="note-section"><h3>7. Quick revision</h3><ul>${revision}</ul></section>
- <section class="note-section"><h3>8. Self-check</h3><ol>${selfCheck}</ol></section>
- ${vocabulary?`<section class="note-section"><h3>9. Vocabulary to know</h3><ul>${vocabulary}</ul></section>`:''}
- ${practice?`<section class="note-section"><h3>10. Practice plan</h3><ul>${practice}</ul></section>`:''}
- </div>`;
+ const methodHtml=reasoning.map((p,i)=>'<li><span class="method-step-number">'+(i+1)+'</span><div>'+esc(p)+'</div></li>').join('');
+ const checklist=revision.map(item=>'<li><span class="check-marker">✓</span><span>'+esc(item)+'</span></li>').join('');
+ const formulaHtml=formulas.map((formula,i)=>'<div class="formula-card"><span class="formula-label">Formula '+(i+1)+'</span><div class="formula">'+esc(formula)+'</div></div>').join('');
+ const examHtml=examTips.length?'<div class="exam-box note-callout"><span class="callout-label">Examiner focus</span><h4>How marks are won</h4><ul>'+list(examTips)+'</ul></div>':'';
+ const mistakesHtml=mistakes.length?'<div class="mistake-box note-callout"><span class="callout-label">Common mistakes</span><h4>Easy marks to protect</h4><ul>'+list(mistakes)+'</ul></div>':'';
+ const distinctionsHtml=distinctions.length?'<div class="distinction-box note-callout"><span class="callout-label">Do not mix these up</span><ul>'+list(distinctions)+'</ul></div>':'';
+ const vocabHtml=vocabulary.length?'<div class="vocab-chips">'+vocabulary.map(v=>'<span>'+esc(v)+'</span>').join('')+'</div>':'';
+ return '<div class="note-prose deep-note-verified">'+
+  '<section class="note-section note-overview-section" data-nav-label="Overview"><span class="note-section-kicker">Start here</span><h3>Chapter overview</h3><p class="note-lead">'+esc(d.overview||e.summary||'')+'</p>'+(source?'<div class="note-source-line"><span>Source basis</span><strong>'+esc(source)+'</strong></div>':'')+'</section>'+
+  (checklist?'<section class="note-section" data-nav-label="Checklist"><span class="note-section-kicker">Syllabus checklist</span><h3>What you need to know</h3><ul class="revision-checklist">'+checklist+'</ul></section>':'')+
+  '<section class="note-section" data-nav-label="Concepts"><span class="note-section-kicker">Learn</span><h3>Key concepts</h3><p class="section-deck">Work through each idea separately, then connect them. This keeps a large chapter from turning into one block of memorisation.</p><div class="concept-grid note-concept-grid">'+conceptCards+'</div></section>'+
+  (formulaHtml?'<section class="note-section" data-nav-label="Formula bank"><span class="note-section-kicker">Must know</span><h3>Formula & relationship bank</h3><p class="section-deck">Know what every symbol means, the conditions for using the relationship, and what a sensible answer should look like.</p><div class="formula-bank">'+formulaHtml+'</div></section>':'')+
+  (methodHtml?'<section class="note-section" data-nav-label="Method"><span class="note-section-kicker">Apply</span><h3>How to reason through this chapter</h3><ol class="method-steps">'+methodHtml+'</ol></section>':'')+
+  (visuals.length?'<section class="note-section compact-note-section" data-nav-label="Visual thinking"><span class="note-section-kicker">Represent</span><h3>Diagrams & visual thinking</h3><ul class="clean-list">'+list(visuals)+'</ul></section>':'')+
+  ((examHtml||mistakesHtml)?'<section class="note-section" data-nav-label="Exam focus"><span class="note-section-kicker">Exam technique</span><h3>Examiner focus & common traps</h3><div class="callout-grid">'+examHtml+mistakesHtml+'</div>'+distinctionsHtml+'</section>':'')+
+  (selfCheck.length?'<section class="note-section" data-nav-label="Self-check"><span class="note-section-kicker">Active recall</span><h3>Can you answer these without looking?</h3><div class="self-check-box"><ol>'+list(selfCheck)+'</ol></div></section>':'')+
+  (practice.length?'<section class="note-section" data-nav-label="Practice"><span class="note-section-kicker">Next step</span><h3>Practice plan</h3><ul class="practice-list">'+list(practice)+'</ul></section>':'')+
+  (vocabHtml?'<section class="note-section compact-note-section" data-nav-label="Vocabulary"><span class="note-section-kicker">Language</span><h3>Vocabulary to know</h3>'+vocabHtml+'</section>':'')+
+ '</div>';
 }
 function deepSections(e){
  if(e.deepNotes?.overview)return richDeepSections(e);
@@ -810,17 +823,7 @@ function deepSections(e){
  const language=/English|Hindi|Sanskrit/.test(subject);
  const humanities=/Social Science|History|Political Science|Sociology|Psychology|Geography|Business Studies|Fine Art/.test(subject);
  const quantitative=/Mathematics|Physics|Chemistry|Accountancy|Economics|Computer Science|Informatics Practices/.test(subject);
- const kp=keyPoints.map(p=>`<li>${esc(p)}</li>`).join('');
- const methodHtml=method.map((p,i)=>`<li><strong>Step ${i+1}.</strong> ${esc(p)}</li>`).join('');
- const mistakesHtml=mistakes.map(p=>`<li>${esc(p)}</li>`).join('');
  const source=[e.sourcePublisher,e.sourceBook,e.sourceYear].filter(Boolean).join(' · ');
- const relationshipSection=formulas.length
-  ? `<section class="note-section"><h3>3. Key relationships and formulas</h3><div class="formula-list">${formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div><p>Use each relationship only after identifying what the symbols mean and checking the conditions, units and assumptions.</p></section>`
-  : language
-   ? `<section class="note-section"><h3>3. Language, structure and evidence</h3><p>Track the exact words, images, events, contrasts or structural choices that support an interpretation. Explain what the evidence shows and how it shapes meaning. Avoid reproducing long passages from the textbook.</p></section>`
-   : humanities
-    ? `<section class="note-section"><h3>3. Evidence, comparison and interpretation</h3><p>Organise evidence by cause, feature, change, consequence or comparison. Use examples, maps, data, institutions or case studies only when they directly support the claim you are making.</p></section>`
-    : `<section class="note-section"><h3>3. Key relationships</h3><p>No single formula defines this topic. Focus on the relationships, definitions, processes and evidence that connect the core ideas.</p></section>`;
  const examFocus=language
   ? 'Answer the exact prompt. Move from claim to evidence to explanation. For literature, analyse the effect of language, structure, character, voice or context instead of retelling the chapter.'
   : humanities
@@ -834,22 +837,62 @@ function deepSections(e){
    ? ['I can define the central concepts precisely.','I can organise evidence into causes, features, changes or consequences.','I can use a relevant example, map, case or data point accurately.','I can compare viewpoints or regions when required.','I can build a short evidence-based conclusion.']
    : ['I can explain the core idea without reading these notes.','I can identify the correct method from an unfamiliar question.','I can use the key equation, representation, process or algorithm accurately.','I can explain common errors and how to avoid them.','I can solve or analyse one unfamiliar application.'];
  const selfCheck=language
-  ? [`What is the central idea of ${e.title}, in one precise sentence?`,'Which detail, event, image or structural choice best supports that interpretation?','How does the writer’s language, voice or form shape the reader’s response?','What is one plausible alternative interpretation, and what evidence supports or limits it?','How would you turn this chapter into a concise exam paragraph?']
+  ? ['What is the central idea of '+e.title+', in one precise sentence?','Which detail, event, image or structural choice best supports that interpretation?','How does the writer’s language, voice or form shape the reader’s response?','What is one plausible alternative interpretation, and what evidence supports or limits it?','How would you turn this chapter into a concise exam paragraph?']
   : humanities
-   ? [`What is the central concept in ${e.title}?`,'Which cause, process or institution explains the main pattern?','What evidence or example would best support that explanation?','Which comparison or distinction is most likely to be tested?','What conclusion follows from the evidence, and what limitation should be remembered?']
-   : [`What is the central idea of ${e.title}?`,'Which relationship, representation or process is most useful here?','What information would tell you which method to use?','Which common shortcut can fail, and why?','How would you check whether a final answer or conclusion is reasonable?'];
- return `<div class="note-prose">
- <section class="note-section"><h3>1. Big picture</h3><p>${esc(e.summary)}</p><p>${esc(e.lens||'Build a connected model of the topic before memorising details.')}</p>${source?`<p class="muted"><strong>Source:</strong> ${esc(source)}</p>`:''}</section>
- <section class="note-section"><h3>2. Core ideas you should be able to explain</h3><ul>${kp}</ul></section>
- ${relationshipSection}
- <section class="note-section"><h3>4. How to study and answer this topic</h3><ol>${methodHtml}</ol><div class="worked-box"><h4>Exam reasoning pattern</h4><p>${esc(examFocus)}</p></div></section>
- <section class="note-section"><h3>5. Common mistakes</h3><div class="mistake-box"><ul>${mistakesHtml}</ul></div></section>
- <section class="note-section"><h3>6. Revision checklist</h3><ul>${revision.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
- <section class="note-section"><h3>7. Self-check questions</h3><div class="self-check-box"><ol>${selfCheck.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div></section>
- </div>`;
+   ? ['What is the central concept in '+e.title+'?','Which cause, process or institution explains the main pattern?','What evidence or example would best support that explanation?','Which comparison or distinction is most likely to be tested?','What conclusion follows from the evidence, and what limitation should be remembered?']
+   : ['What is the central idea of '+e.title+'?','Which relationship, representation or process is most useful here?','What information would tell you which method to use?','Which common shortcut can fail, and why?','How would you check whether a final answer or conclusion is reasonable?'];
+ const conceptCards=keyPoints.map((p,i)=>'<article class="concept-card"><span class="concept-number">'+String(i+1).padStart(2,'0')+'</span><h4>Core idea '+(i+1)+'</h4><p>'+esc(p)+'</p></article>').join('');
+ const formulaHtml=formulas.map((formula,i)=>'<div class="formula-card"><span class="formula-label">Formula '+(i+1)+'</span><div class="formula">'+esc(formula)+'</div></div>').join('');
+ const methodHtml=method.map((p,i)=>'<li><span class="method-step-number">'+(i+1)+'</span><div>'+esc(p)+'</div></li>').join('');
+ const mistakeHtml=mistakes.map(p=>'<li>'+esc(p)+'</li>').join('');
+ return '<div class="note-prose">'+
+  '<section class="note-section note-overview-section" data-nav-label="Overview"><span class="note-section-kicker">Start here</span><h3>Big picture</h3><p class="note-lead">'+esc(e.summary)+'</p><p>'+esc(e.lens||'Build a connected model of the topic before memorising details.')+'</p>'+(source?'<div class="note-source-line"><span>Source basis</span><strong>'+esc(source)+'</strong></div>':'')+'</section>'+
+  '<section class="note-section" data-nav-label="Checklist"><span class="note-section-kicker">Revision checklist</span><h3>What you should be able to do</h3><ul class="revision-checklist">'+revision.map(x=>'<li><span class="check-marker">✓</span><span>'+esc(x)+'</span></li>').join('')+'</ul></section>'+
+  '<section class="note-section" data-nav-label="Concepts"><span class="note-section-kicker">Learn</span><h3>Core ideas</h3><div class="concept-grid note-concept-grid">'+conceptCards+'</div></section>'+
+  (formulaHtml?'<section class="note-section" data-nav-label="Formula bank"><span class="note-section-kicker">Must know</span><h3>Formula & relationship bank</h3><div class="formula-bank">'+formulaHtml+'</div></section>':'')+
+  (methodHtml?'<section class="note-section" data-nav-label="Method"><span class="note-section-kicker">Apply</span><h3>Step-by-step method</h3><ol class="method-steps">'+methodHtml+'</ol><div class="worked-box note-callout"><span class="callout-label">Exam reasoning pattern</span><p>'+esc(examFocus)+'</p></div></section>':'')+
+  '<section class="note-section" data-nav-label="Exam focus"><span class="note-section-kicker">Exam technique</span><h3>Common mistakes & exam focus</h3><div class="callout-grid"><div class="exam-box note-callout"><span class="callout-label">Examiner focus</span><p>'+esc(examFocus)+'</p></div>'+(mistakeHtml?'<div class="mistake-box note-callout"><span class="callout-label">Common mistakes</span><ul>'+mistakeHtml+'</ul></div>':'')+'</div></section>'+
+  '<section class="note-section" data-nav-label="Self-check"><span class="note-section-kicker">Active recall</span><h3>Can you answer these without looking?</h3><div class="self-check-box"><ol>'+selfCheck.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></div></section>'+
+ '</div>';
+}
+function noteReadingMinutes(e){
+ const deep=e.deepNotes||{};
+ const text=[e.summary,...(e.keyPoints||[]),...(e.formulas||[]),...(e.method||[]),...(e.mistakes||[]),deep.overview,
+  ...(deep.concepts||[]).flat(),...(deep.reasoning||[]),...(deep.visuals||[]),...(deep.examTips||[]),...(deep.quickRevision||[]),...(deep.selfCheck||[]),...(deep.practice||[])
+ ].filter(Boolean).join(' ');
+ const words=text.trim()?text.trim().split(/\s+/).length:0;
+ return Math.max(2,Math.ceil(words/210));
+}
+function updateNoteReadingProgress(){
+ const details=$('#detailed-notes'),bar=$('#note-reading-progress'),nav=$('#note-section-nav');
+ if(!details||!bar||$('#reader-view')?.classList.contains('hidden'))return;
+ const rect=details.getBoundingClientRect();
+ const total=Math.max(1,details.offsetHeight-innerHeight*.52);
+ const read=Math.min(total,Math.max(0,-rect.top+innerHeight*.28));
+ const pct=Math.max(0,Math.min(100,Math.round(read/total*100)));
+ bar.style.width=pct+'%';
+ const sections=[...details.querySelectorAll('.note-section')];
+ let active=sections[0]?.id||'';
+ for(const section of sections){if(section.getBoundingClientRect().top<=190)active=section.id}
+ if(nav)nav.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.noteTarget===active));
+}
+function setupNoteNavigation(){
+ const nav=$('#note-section-nav'),details=$('#detailed-notes');
+ if(!nav||!details)return;
+ const sections=[...details.querySelectorAll('.note-section')];
+ sections.forEach((section,i)=>{section.id='revision-note-section-'+(i+1)});
+ nav.innerHTML=sections.map((section,i)=>{
+  const label=section.dataset.navLabel||section.querySelector('h3')?.textContent||('Section '+(i+1));
+  return '<button type="button" data-note-target="'+esc(section.id)+'">'+esc(label)+'</button>';
+ }).join('');
+ nav.classList.toggle('hidden',sections.length<2);
+ nav.querySelectorAll('button').forEach(button=>button.onclick=()=>{
+  document.getElementById(button.dataset.noteTarget)?.scrollIntoView({behavior:'smooth',block:'start'});
+ });
+ updateNoteReadingProgress();
 }
 function quickReview(e){return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula / relationship</h3><p>${esc(e.formulas.join(' · ')||'Focus on definitions, relationships and process rather than one formula.')}</p></div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0])} ${esc(e.method[1])}</p></div>`}
-function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#detailed-notes').innerHTML=deepSections(e);$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
+function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#note-alignment-chip').textContent=e.notesVerified?'Syllabus-aligned':'StudyAI revision note';$('#note-source-chip').textContent=e.sourceBook||e.subject||'Revision notes';$('#note-reading-time').textContent=noteReadingMinutes(e)+' min read';$('#note-reading-progress').style.width='0%';$('#detailed-notes').innerHTML=deepSections(e);setupNoteNavigation();$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
 function updateTopicActions(){const e=currentEntry();if(!e)return;$('#complete-btn').textContent=state.completed.includes(e.id)?'Completed ✓':'Mark complete';$('#bookmark-btn').textContent=state.bookmarks.includes(e.id)?'Bookmarked':'Bookmark';$('#weak-btn').textContent=state.review.includes(e.id)?'In review queue':'Review'}
 function toggle(arr,key){const i=arr.indexOf(key);i>=0?arr.splice(i,1):arr.push(key);save()}
 function searchAll(q){q=q.trim().toLowerCase();if(!q)return[];return STUDY_DATA.filter(e=>[e.title,e.sourceBook,e.subject,e.grade,e.board,e.summary,...e.keyPoints].filter(Boolean).join(' ').toLowerCase().includes(q)).slice(0,24)}
@@ -1198,7 +1241,7 @@ function bind(){
  $('#board-filter').onchange=e=>{current.board=e.target.value;current.component='All components';current.topic=null;current.topicId=null;renderFilters()};$('#grade-filter').onchange=e=>{current.grade=e.target.value;current.component='All components';current.topic=null;current.topicId=null;renderFilters()};$('#subject-filter').onchange=e=>{current.subject=e.target.value;current.component='All components';current.topic=null;current.topicId=null;renderFilters()};$('#math-component-filter').onchange=e=>{current.component=e.target.value;current.topic=null;current.topicId=null;renderTopicList()};
  $('#collapse-chapters').onclick=()=>$('#chapter-list').classList.toggle('hidden');$('#search-btn').onclick=showSearch;$('#global-search').onkeydown=e=>{if(e.key==='Enter')showSearch()};
  $('#complete-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.completed,e.id);updateTopicActions();renderTopicList();updateDashboard()}};$('#bookmark-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.bookmarks,e.id);updateTopicActions();updateDashboard()}};$('#weak-btn').onclick=()=>{const e=currentEntry();if(e){toggle(state.review,e.id);updateTopicActions();renderTopicList();updateDashboard()}};
- $$('.article-tabs button').forEach(b=>b.onclick=()=>{$$('.article-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.tab-panel').forEach(x=>x.classList.add('hidden'));$('#tab-'+b.dataset.tab).classList.remove('hidden')});let nt;$('#personal-note-editor').oninput=e=>{const ce=currentEntry();if(!ce)return;state.personalNotes[ce.id]=e.target.value;$('#personal-save-status').textContent='Saving…';clearTimeout(nt);nt=setTimeout(()=>{save();$('#personal-save-status').textContent='Saved automatically'},350)};
+ $$('.article-tabs button').forEach(b=>b.onclick=()=>{$$('.article-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.tab-panel').forEach(x=>x.classList.add('hidden'));$('#tab-'+b.dataset.tab).classList.remove('hidden');const nav=$('#note-section-nav');if(nav)nav.classList.toggle('hidden',b.dataset.tab!=='notes'||!nav.children.length);if(b.dataset.tab==='notes')updateNoteReadingProgress()});let nt;$('#personal-note-editor').oninput=e=>{const ce=currentEntry();if(!ce)return;state.personalNotes[ce.id]=e.target.value;$('#personal-save-status').textContent='Saving…';clearTimeout(nt);nt=setTimeout(()=>{save();$('#personal-save-status').textContent='Saved automatically'},350)};
  $('#listen-start').onclick=()=>speak(noteText(),+$('#listen-rate').value);$('#listen-pause').onclick=()=>speechSynthesis.paused?speechSynthesis.resume():speechSynthesis.pause();$('#listen-stop').onclick=()=>speechSynthesis.cancel();$('#make-flashcards').onclick=loadDeckFromCurrent;$('#chapter-quiz').onclick=()=>{const e=currentEntry();if(!e)return;$('#quiz-board').value=e.board;populateQuizFilters();$('#quiz-grade').value=e.grade;populateQuizFilters();$('#quiz-subject').value=e.subject;populateQuizFilters();$('#quiz-chapter').value=e.id;location.hash='#practice'};$('#share-note').onclick=()=>shareText(noteText());
  $$('#sat-section-tabs button').forEach(b=>b.onclick=()=>{satSection=b.dataset.satSection;$$('#sat-section-tabs button').forEach(x=>x.classList.toggle('active',x===b));renderSatFilters()});$('#sat-domain').onchange=renderSatFilters;$('#sat-targeted').onclick=()=>startSat(false);$('#sat-timed').onclick=()=>startSat(true);$('#sat-reset-filter').onclick=renderSatFilters;
  $('#deck-source').onchange=loadDeckSource;$('#flashcard').onclick=()=>{if(!activeDeck[cardIndex])return;cardFlipped=!cardFlipped;const card=$('#flashcard');card.classList.toggle('flipped',cardFlipped);card.setAttribute('aria-pressed',String(cardFlipped));card.setAttribute('aria-label',cardFlipped?'Flip flashcard to see the question':'Flip flashcard to reveal the answer');refreshSrsRatingButtons()};$('#next-card').onclick=nextCard;document.querySelectorAll('[data-srs-rating]').forEach(b=>b.onclick=()=>rateFlashcard(b.dataset.srsRating));$('#shuffle-deck').onclick=()=>{shuffle(activeDeck);cardIndex=0;renderCard();renderFlashStats()};$('#reset-deck').onclick=resetCurrentDeckSchedule;$('#srs-start-due').onclick=loadDueReviews;$('#srs-progress-open').onclick=loadDueReviews;$('#favorite-card').onclick=()=>{const c=activeDeck[cardIndex];if(!c)return;toggle(state.favoriteCards,c.id);renderCard()};
@@ -1208,5 +1251,5 @@ function bind(){
  $('#timer-start').onclick=toggleTimer;$('#timer-reset').onclick=()=>{if(timerHandle)clearInterval(timerHandle);timerHandle=null;timerSeconds=25*60;renderTimer();$('#timer-start').textContent='Start'};$('#export-data').onclick=exportData;$('#import-data').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);$('#join-room').onclick=joinRoom;$('#reset-data').onclick=()=>{if(confirm('Reset all StudyAI data saved in this browser?')){localStorage.removeItem(STORAGE_KEY);location.reload()}};$('#share-current').onclick=()=>shareText(noteText()||'StudyAI');
  const d=$('#command-dialog');$('#open-command').onclick=()=>window.StudyAICommandCenter?.open?.()||d.showModal();d.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{d.close();document.querySelector(b.dataset.jump).scrollIntoView({behavior:'smooth'})})
 }
-function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
+function init(){setTheme(state.theme||'light');bind();window.addEventListener('scroll',updateNoteReadingProgress,{passive:true});window.addEventListener('resize',updateNoteReadingProgress,{passive:true});bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
 init();

@@ -147,7 +147,7 @@ const focus={
     'Data Handling using Pandas - II':P('descriptive statistics','aggregation and grouping','sorting and indexing','missing values and database exchange'),
     'Plotting Data using Matplotlib':P('plot types','plot construction','labels and customisation','Pandas visualisation and interpretation'),
     'Internet and Web':P('network basics','network devices and topologies','Internet services','websites, hosting and browsers'),
-    'Societal Impacts':P('digital footprints','privacy and data protection','responsible digital conduct','e-waste and health considerations'),
+    'Societal Impacts':P('digital footprints','data privacy and protection','responsible digital conduct','e-waste and health considerations'),
     'Project Based Learning':P('problem definition','data/database planning','implementation and testing','documentation and presentation')
   }
 };

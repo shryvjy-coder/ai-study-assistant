@@ -80,7 +80,7 @@ async function choosePhysics(page){
 
   await page.locator('.chapter-item').filter({hasText:'Particle Physics'}).click();
   text=await page.locator('#detailed-notes').textContent();
-  check(text.includes('Quarks')&&text.includes('Leptons')&&text.includes('proton = uud'),'Particle Physics renders quark and lepton structure');
+  check(text.includes('Quarks')&&text.includes('Leptons')&&text.includes('Protons are uud')&&text.includes('neutrons are udd'),'Particle Physics renders quark and lepton structure');
 
   await page.locator('.chapter-item').filter({hasText:'AS Practical Skills'}).click();
   text=await page.locator('#detailed-notes').textContent();

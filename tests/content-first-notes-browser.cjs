@@ -32,7 +32,7 @@ async function dismiss(page){
  browser=await chromium.launch({headless:true});
  const page=await browser.newPage({viewport:{width:1440,height:950},reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(url,{waitUntil:'domcontentloaded'});
+ await page.goto(url+'#study',{waitUntil:'domcontentloaded'});
  await page.waitForSelector('#chapter-list');
  await page.waitForTimeout(900);
  await dismiss(page);

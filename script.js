@@ -1227,6 +1227,65 @@ function initMotion(){
  if(!('IntersectionObserver'in window)){targets.forEach(el=>el.classList.add('motion-in'));return}
  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('motion-in');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -40px'});targets.forEach(el=>obs.observe(el));
 }
+const APP_PAGE_IDS=['today','study','sat','workspace','flashcards','practice','progress','planner','tutor','tools','help'];
+function appPageFromHash(hash=location.hash){
+ const id=(hash||'').replace(/^#/,'')||'today';
+ if(APP_PAGE_IDS.includes(id))return id;
+ if(id==='home')return 'today';
+ if(['mistake-notebook','spaced-repetition','smart-review-queue'].includes(id))return 'progress';
+ if(id==='practice-studio'||id.startsWith('practice-'))return 'practice';
+ if(id==='sat-study-planner'||id==='learning-planner'||id.endsWith('-planner'))return 'planner';
+ if(id==='personal-ai')return 'tutor';
+ if(id.startsWith('help'))return 'help';
+ const target=document.getElementById(id);
+ const top=target?.closest('main > section');
+ if(top?.id&&APP_PAGE_IDS.includes(top.id))return top.id;
+ return 'today';
+}
+function appSectionsForPage(page){
+ if(page==='today'){
+  const today=document.getElementById('today');
+  return today?new Set(['today']):new Set(['home','today-features']);
+ }
+ if(page==='practice')return new Set(['practice','practice-studio']);
+ if(page==='planner')return new Set(['planner','sat-study-planner','learning-planner']);
+ if(page==='tutor')return new Set(['tutor','personal-ai']);
+ if(page==='help')return new Set(['help','help-center']);
+ return new Set([page]);
+}
+function applyAppPageRoute({scroll=true}={}){
+ const page=appPageFromHash();
+ const allowed=appSectionsForPage(page);
+ const main=document.getElementById('main-content');
+ if(!main)return;
+ main.querySelectorAll(':scope > section').forEach(section=>{
+  const id=section.id||'';
+  const visible=allowed.has(id);
+  section.hidden=!visible;
+  section.classList.toggle('app-page-active',visible);
+ });
+ document.body.dataset.appPage=page;
+ const nav=document.getElementById('main-nav');
+ nav?.querySelectorAll('a').forEach(link=>{
+  const active=appPageFromHash(link.getAttribute('href'))===page;
+  link.classList.toggle('active',active);
+  if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+ });
+ if(!scroll)return;
+ const id=(location.hash||'#today').replace(/^#/,'');
+ requestAnimationFrame(()=>{
+  const target=document.getElementById(id);
+  if(target&&!target.hidden&&id!==page)target.scrollIntoView({block:'start'});
+  else window.scrollTo({top:0,left:0,behavior:'auto'});
+ });
+}
+function initAppPageRouting(){
+ if(!location.hash)history.replaceState({},'',location.pathname+location.search+'#today');
+ applyAppPageRoute({scroll:false});
+ window.addEventListener('hashchange',()=>applyAppPageRoute());
+ const main=document.getElementById('main-content');
+ if(main)new MutationObserver(()=>applyAppPageRoute({scroll:false})).observe(main,{childList:true});
+}
 function bind(){
  $('#theme-toggle').onclick=toggleThemePremium;
  const mobileNavButton=$('#mobile-nav-btn'),mainNav=$('#main-nav');
@@ -1246,7 +1305,7 @@ function bind(){
  $('#new-note-btn').onclick=newWorkspace;$('#save-workspace-note').onclick=saveWorkspace;$('#delete-workspace-note').onclick=deleteWorkspace;$('#add-folder-btn').onclick=addFolder;$('#workspace-search').oninput=renderWorkspace;$('#workspace-folder-filter').onchange=renderWorkspace;$('#workspace-to-flashcards').onclick=()=>{saveWorkspace();const n=state.workspaceNotes.find(x=>x.id===activeWorkspaceId);dueReviewSession=false;activeDeck=workspaceCards(n);cardIndex=0;renderCard();renderFlashStats();location.hash='#flashcards'};$('#workspace-listen').onclick=()=>speak($('#workspace-editor').value);$('#text-file-input').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{newWorkspace();$('#workspace-title').value=f.name.replace(/\.(txt|md)$/i,'');$('#workspace-editor').value=r.result;saveWorkspace()};r.readAsText(f)};
  $('#clear-bookmarks').onclick=()=>{state.bookmarks=[];save();updateDashboard()};$('#clear-review').onclick=()=>{state.review=[];save();updateDashboard();renderTopicList()};$('#generate-plan').onclick=buildPlan;$('#ask-tutor').onclick=tutor;
  $('#timer-start').onclick=toggleTimer;$('#timer-reset').onclick=()=>{if(timerHandle)clearInterval(timerHandle);timerHandle=null;timerSeconds=25*60;renderTimer();$('#timer-start').textContent='Start'};$('#export-data').onclick=exportData;$('#import-data').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);$('#join-room').onclick=joinRoom;$('#reset-data').onclick=()=>{if(confirm('Reset all StudyAI data saved in this browser?')){localStorage.removeItem(STORAGE_KEY);location.reload()}};$('#share-current').onclick=()=>shareText(noteText()||'StudyAI');
- const d=$('#command-dialog');$('#open-command').onclick=()=>window.StudyAICommandCenter?.open?.()||d.showModal();d.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{d.close();document.querySelector(b.dataset.jump).scrollIntoView({behavior:'smooth'})})
+ const d=$('#command-dialog');$('#open-command').onclick=()=>window.StudyAICommandCenter?.open?.()||d.showModal();d.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{d.close();location.hash=b.dataset.jump})
 }
-function init(){setTheme(state.theme||'light');bind();bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
+function init(){setTheme(state.theme||'light');initAppPageRouting();bind();bindMistakeNotebook();bindSmartReviewQueue();bindAuth();document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderFlashStats()});setInterval(renderFlashStats,60000);initMotion();renderFilters();renderSatFilters();populateQuizFilters();renderWorkspace();rebuildDeckSources();renderFlashStats();renderCard();renderPlannerBoards();renderTimer();updateDashboard();newWorkspace();if(state.lastTopic){const e=STUDY_DATA.find(x=>x.id===state.lastTopic);if(e){current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};renderFilters();openTopic(e.title,e.id)}}initAuth();console.log(`StudyAI multicurriculum loaded: ${STUDY_DATA.length} study topics, ${SAT_QUESTIONS.length} original SAT questions.`)}
 init();

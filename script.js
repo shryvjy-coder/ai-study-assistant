@@ -780,21 +780,25 @@ function renderTopicList(){
  if(active&&!$('#reader-view').classList.contains('hidden'))renderReaderContent(active);
 }
 function class9CbseMathNotes(e){
+ const full=window.CBSE_CLASS9_MATH_FULL_NOTES?.[e.title];
+ if(full){
+  const list=items=>(Array.isArray(items)&&items.length)?`<ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+  const formulas=items=>(Array.isArray(items)&&items.length)?`<div class="formula-list">${items.map(x=>`<div class="formula">${esc(x)}</div>`).join('')}</div>`:'';
+  const examples=items=>(Array.isArray(items)?items:[]).map(ex=>`<div class="worked-box"><h4>${esc(ex.title||'Worked example')}</h4>${ex.question?`<p><strong>Question:</strong> ${esc(ex.question)}</p>`:''}${Array.isArray(ex.steps)&&ex.steps.length?`<ol>${ex.steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol>`:''}${ex.answer?`<p><strong>Answer:</strong> ${esc(ex.answer)}</p>`:''}</div>`).join('');
+  const sections=(full.sections||[]).map(section=>`<section class="note-section actual-note-topic"><h3>${esc(section.title||'')}</h3>${(section.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join('')}${list(section.bullets)}${formulas(section.formulas)}${examples(section.examples)}${section.tip?`<div class="exam-box"><h4>Exam tip</h4><p>${esc(section.tip)}</p></div>`:''}</section>`).join('');
+  return `<div class="note-prose actual-chapter-notes detailed-exam-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(full.lead||e.summary||'')}</p></section>${sections}</div>`;
+ }
  const d=e.deepNotes||{};
  const concepts=Array.isArray(d.concepts)?d.concepts:[];
- const formulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:(Array.isArray(e.formulas)?e.formulas:[]));
+ const chapterFormulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:(Array.isArray(e.formulas)?e.formulas:[]));
  const sections=concepts.map(item=>{
   const pair=Array.isArray(item)?item:['',item];
   const heading=pair[0]||'';
   const body=pair[1]||'';
   return `<section class="note-section actual-note-topic">${heading?`<h3>${esc(heading)}</h3>`:''}<p>${esc(body)}</p></section>`;
  }).join('');
- const formulaHtml=formulas.length?`<div class="formula-list actual-note-formulas" aria-label="Chapter formulas">${formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'';
- return `<div class="note-prose actual-chapter-notes">
-  <section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>
-  ${sections}
-  ${formulaHtml}
- </div>`;
+ const formulaHtml=chapterFormulas.length?`<div class="formula-list actual-note-formulas" aria-label="Chapter formulas">${chapterFormulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'';
+ return `<div class="note-prose actual-chapter-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>${sections}${formulaHtml}</div>`;
 }
 function richDeepSections(e){
  const d=e.deepNotes||{};

@@ -779,6 +779,23 @@ function renderTopicList(){
  const active=currentEntry();
  if(active&&!$('#reader-view').classList.contains('hidden'))renderReaderContent(active);
 }
+function class9CbseMathNotes(e){
+ const d=e.deepNotes||{};
+ const concepts=Array.isArray(d.concepts)?d.concepts:[];
+ const formulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:(Array.isArray(e.formulas)?e.formulas:[]));
+ const sections=concepts.map(item=>{
+  const pair=Array.isArray(item)?item:['',item];
+  const heading=pair[0]||'';
+  const body=pair[1]||'';
+  return `<section class="note-section actual-note-topic">${heading?`<h3>${esc(heading)}</h3>`:''}<p>${esc(body)}</p></section>`;
+ }).join('');
+ const formulaHtml=formulas.length?`<div class="formula-list actual-note-formulas" aria-label="Chapter formulas">${formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'';
+ return `<div class="note-prose actual-chapter-notes">
+  <p class="chapter-lead">${esc(d.overview||e.summary||'')}</p>
+  ${sections}
+  ${formulaHtml}
+ </div>`;
+}
 function richDeepSections(e){
  const d=e.deepNotes||{};
  const pairs=items=>(Array.isArray(items)?items:[]).map(item=>Array.isArray(item)?`<li><strong>${esc(item[0])}:</strong> ${esc(item[1])}</li>`:`<li>${esc(item)}</li>`).join('');
@@ -810,6 +827,7 @@ function richDeepSections(e){
  </div>`;
 }
 function deepSections(e){
+ if(e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics'&&e.deepNotes?.overview)return class9CbseMathNotes(e);
  if(e.deepNotes?.overview)return richDeepSections(e);
  const subject=e.subject||'',keyPoints=e.keyPoints||[],formulas=e.formulas||[],method=e.method||[],mistakes=e.mistakes||[];
  const language=/English|Hindi|Sanskrit/.test(subject);

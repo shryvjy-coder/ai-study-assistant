@@ -823,7 +823,7 @@ function cambridgeFullNotes(e){
  const distinctions=Array.isArray(d.distinctions)&&d.distinctions.length?`<section class="note-section actual-note-topic"><h3>Important distinctions</h3><ul>${d.distinctions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`:'';
  const examTips=[...(Array.isArray(d.examTips)?d.examTips:[]),...(Array.isArray(e.mistakes)?e.mistakes.map(x=>'Avoid: '+x):[])];
  const examHtml=examTips.length?`<section class="note-section actual-note-topic"><h3>Exam technique and common errors</h3><div class="exam-box"><ul>${examTips.slice(0,10).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></section>`:'';
- const practice=Array.isArray(d.practice)&&d.practice.length?`<section class="note-section actual-note-topic"><h3>Practice strategy</h3><ul>${d.practice.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`:'';
+ const practice=Array.isArray(d.practice)&&d.practice.length?`<section class="note-section actual-note-topic"><h3>Practice plan</h3><ul>${d.practice.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`:'';
  const checks=Array.isArray(d.selfCheck)&&d.selfCheck.length?`<section class="note-section actual-note-topic"><h3>Check your understanding</h3><ol>${d.selfCheck.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>`:'';
  return `<div class="note-prose actual-chapter-notes detailed-exam-notes cambridge-full-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>${sections}${formulaHtml}${distinctions}${reasoning}${examHtml}${practice}${checks}</div>`;
 }

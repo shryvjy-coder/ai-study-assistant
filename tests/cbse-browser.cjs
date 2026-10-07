@@ -25,6 +25,8 @@ async function dismiss(page){
     await page.locator('[data-tour-skip-confirm]').click();
     await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
   }
+  await page.evaluate(()=>location.hash='#study');
+  await page.waitForSelector('#study:not([hidden])');
 }
 
 async function choose(page,grade,subject){

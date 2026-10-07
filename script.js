@@ -855,8 +855,8 @@ function deepSections(e){
 }
 function quickReview(e){return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula / relationship</h3><p>${esc(e.formulas.join(' · ')||'Focus on definitions, relationships and process rather than one formula.')}</p></div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0])} ${esc(e.method[1])}</p></div>`}
 function activateFullNotesTab(){
- $('.article-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.tab==='notes'));
- $('.tab-panel').forEach(panel=>panel.classList.toggle('hidden',panel.id!=='tab-notes'));
+ document.querySelectorAll('.article-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.tab==='notes'));
+ document.querySelectorAll('.tab-panel').forEach(panel=>panel.classList.toggle('hidden',panel.id!=='tab-notes'));
 }
 function renderReaderContent(e){
  if(!e)return;

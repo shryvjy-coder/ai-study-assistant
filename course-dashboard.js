@@ -21,9 +21,11 @@ function buildCourseCatalogue(){
 
 let courses=[];
 let byKey=new Map();
+let catalogueReady=false;
 
 function ensureCourseState(){
   if(!Array.isArray(state.selectedCourses))state.selectedCourses=[];
+  if(!catalogueReady)return;
   state.selectedCourses=[...new Set(state.selectedCourses)].filter(key=>byKey.has(key));
 }
 
@@ -198,6 +200,7 @@ function bind(){
   }
   courses=buildCourseCatalogue();
   byKey=new Map(courses.map(c=>[c.key,c]));
+  catalogueReady=true;
   ensureCourseState();
   q('#open-add-course')?.addEventListener('click',openDialog);
   q('#dashboard-add-another')?.addEventListener('click',openDialog);

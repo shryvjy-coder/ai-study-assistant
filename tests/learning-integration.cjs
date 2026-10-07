@@ -28,7 +28,7 @@ const dismissFirstRunTour=async page=>{
  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install();
- await page.goto(url);await page.waitForSelector('#learning-goals');await page.waitForSelector('#today-dashboard');await page.waitForTimeout(600);
+ await page.goto(url);await page.waitForSelector('#learning-goals',{state:'attached'});await page.waitForSelector('#today-dashboard');await page.waitForTimeout(600);
  if(await page.locator('#studyai-onboarding[open]').count())await page.locator('[data-onboarding-skip]').click();
  await dismissFirstRunTour(page);
  check(await page.locator('#learning-goals').count()===1,'Flask injects planning after existing assets');
@@ -47,7 +47,7 @@ const dismissFirstRunTour=async page=>{
  }
  check(await page.evaluate(()=>nextSrsInterval({intervalMinutes:1440},'good')>1440&&nextSrsInterval({intervalMinutes:1440},'hard')>1440&&nextSrsInterval({intervalMinutes:1440},'easy')>1440),'later Good, Hard, Easy extend intervals');
  await page.evaluate(()=>{state.flashcardState['untouched-legacy']='Mastered';state.flashcardSchedule['srs-again'].dueAt=Date.now()-1;save()});
- await page.reload();await page.waitForSelector('#learning-goals');
+ await page.reload();await page.waitForSelector('#learning-goals',{state:'attached'});
  check(await page.evaluate(()=>srsDueCards().some(c=>c.id==='srs-again')&&state.flashcardState['untouched-legacy']==='Mastered'),'catalog and legacy progress survive reload');
  await page.evaluate(()=>location.hash='#progress');await page.waitForSelector('#progress:not([hidden])');
  await page.locator('#srs-progress-open').click();await page.evaluate(()=>{document.querySelector('#flashcard').click();const button=document.querySelector('[data-srs-rating="good"]');if(button.disabled)throw new Error('due-review rating stayed disabled after reveal');button.click()});
@@ -79,7 +79,7 @@ const dismissFirstRunTour=async page=>{
  await page.locator('[data-school-check]').first().click();
  check(await page.evaluate(()=>Object.values(state.smartPlannerPlan.completed).filter(Boolean).length===1),'school completion is stored');
  check(await page.evaluate(()=>JSON.stringify(state.mastery))===masteryBefore,'planner completion never awards mastery');
- await page.reload();await page.waitForSelector('#learning-goals');
+ await page.reload();await page.waitForSelector('#learning-goals',{state:'attached'});
  check(await page.locator('[data-school-check][aria-pressed="true"]').count()===1,'school completion survives restart');
  await page.evaluate(()=>location.hash='#practice-studio');
  await page.evaluate(async()=>{await StudyAIPerformance.loadFeature('practice')});

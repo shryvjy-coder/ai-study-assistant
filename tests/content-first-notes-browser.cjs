@@ -63,10 +63,10 @@ async function dismiss(page){
   const notes=page.locator('#detailed-notes');
   check(await notes.isVisible(),board+' / '+grade+' detailed notes area is visible');
   const text=(await notes.textContent()||'').trim();
-  check(text.length>300,board+' / '+grade+' shows substantial actual note text ('+text.length+' chars)');
-  check(await notes.locator('.note-section').count()>=5,board+' / '+grade+' shows multiple real note sections');
+  check(text.length>1800,board+' / '+grade+' shows long-form actual note text ('+text.length+' chars)');
+  check(await notes.locator('.note-section').count()>=7,board+' / '+grade+' shows a full multi-section note page');
   const box=await notes.boundingBox();
-  check(!!box&&box.height>250,board+' / '+grade+' notes occupy substantial page height');
+  check(!!box&&box.height>650,board+' / '+grade+' notes occupy long-form page height');
  }
 
  // Regression: a saved deep-note topic can auto-open before deferred note overlays attach.
@@ -87,8 +87,8 @@ async function dismiss(page){
  await page.reload({waitUntil:'load'});
  await page.waitForSelector('#reader-view:not(.hidden)');
  const restoredNotes=page.locator('#detailed-notes');
- check(await restoredNotes.locator('.deep-note-verified').count()===1,'saved chapter refreshes to verified deep notes after deferred overlays attach');
- check((await restoredNotes.textContent()||'').trim().length>500,'saved chapter contains substantial refreshed deep-note content');
+ check(await restoredNotes.locator('.content-first-long-notes').count()===1,'saved chapter refreshes to long-form content-first notes after deferred overlays attach');
+ check((await restoredNotes.textContent()||'').trim().length>1800,'saved chapter contains substantial refreshed long-form content');
 
  // Regression: opening a chapter must always reveal Full notes, even if another reader tab was active.
  await page.locator('.article-tabs button[data-tab="quick"]').click();

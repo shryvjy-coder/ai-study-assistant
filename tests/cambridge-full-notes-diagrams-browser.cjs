@@ -59,14 +59,15 @@ async function openEntry(page,board,grade,subject,title){
 
   await page.waitForFunction(()=>window.STUDYAI_CAMBRIDGE_IGCSE_FULL_NOTES_STATUS?.matched===50,{timeout:8000});
   await page.waitForFunction(()=>window.STUDYAI_CAMBRIDGE_BIOLOGY_FULL_NOTES_STATUS?.matched===21,{timeout:8000});
+  await page.waitForFunction(()=>window.STUDYAI_LONG_NOTES_STATUS?.cambridgeFull>=71,{timeout:8000});
   check(await page.evaluate(()=>window.STUDYAI_CAMBRIDGE_IGCSE_FULL_NOTES_STATUS.expected===50),'all 50 Cambridge IGCSE topics have detailed full-note overlays');
   check(await page.evaluate(()=>window.STUDYAI_CAMBRIDGE_BIOLOGY_FULL_NOTES_STATUS.expected===21),'all 21 AS/A Biology topics have detailed full-note overlays');
 
   const weakCoverage=await page.evaluate(()=>{
     const weak=STUDY_DATA.filter(e=>e.board==='Cambridge IGCSE'||(e.board==='Cambridge International AS & A Level'&&e.subject==='Biology'));
-    return {total:weak.length,full:weak.filter(e=>e.cambridgeFullNotes?.sections?.length>=4).length,minSections:Math.min(...weak.map(e=>e.cambridgeFullNotes?.sections?.length||0))};
+    return {total:weak.length,full:weak.filter(e=>e.cambridgeFullNotes?.sections?.length>=8).length,minSections:Math.min(...weak.map(e=>e.cambridgeFullNotes?.sections?.length||0))};
   });
-  check(weakCoverage.total===71&&weakCoverage.full===71&&weakCoverage.minSections>=4,'every previously-summary Cambridge IGCSE/Biology topic now has multi-section full notes');
+  check(weakCoverage.total===71&&weakCoverage.full===71&&weakCoverage.minSections>=8,'every previously-summary Cambridge IGCSE/Biology topic now has expanded long-form full notes');
 
   const samples=[
     ['Cambridge IGCSE','IGCSE 9–10','Mathematics','Number'],
@@ -87,8 +88,10 @@ async function openEntry(page,board,grade,subject,title){
     await openEntry(page,board,grade,subject,title);
     const text=(await page.locator('#detailed-notes').innerText()).replace(/\s+/g,' ');
     const headings=await page.locator('#detailed-notes .actual-note-topic h3').count();
-    check(headings>=4,title+' renders as multi-section actual notes');
+    check(headings>=8,title+' renders as a long-form multi-section note page');
+    check(text.length>=2500,title+' contains substantial exam-ready note depth ('+text.length+' chars)');
     check(!/Chapter overview|Key concepts and explanations|How to reason through this chapter|Quick revision/.test(text),title+' does not use the old generic summary headings');
+    check(await page.locator('#detailed-notes .content-first-long-notes').count()===1,title+' uses the content-first long-note renderer');
     check(await page.locator('#detailed-notes .studyai-diagram svg').count()===1,title+' renders an inline SVG learning diagram');
   }
 

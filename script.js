@@ -800,6 +800,31 @@ function class9CbseMathNotes(e){
  const formulaHtml=chapterFormulas.length?`<div class="formula-list actual-note-formulas" aria-label="Chapter formulas">${chapterFormulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'';
  return `<div class="note-prose actual-chapter-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>${sections}${formulaHtml}</div>`;
 }
+function cambridgeFullNotes(e){
+ const full=e.cambridgeFullNotes;
+ const list=items=>(Array.isArray(items)&&items.length)?`<ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+ const formulas=items=>(Array.isArray(items)&&items.length)?`<div class="formula-list actual-note-formulas">${items.map(x=>`<div class="formula">${esc(x)}</div>`).join('')}</div>`:'';
+ const examples=items=>(Array.isArray(items)?items:[]).map(ex=>`<div class="worked-box"><h4>${esc(ex.title||'Worked example')}</h4>${ex.question?`<p><strong>Question:</strong> ${esc(ex.question)}</p>`:''}${Array.isArray(ex.steps)&&ex.steps.length?`<ol>${ex.steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol>`:''}${ex.answer?`<p><strong>Answer:</strong> ${esc(ex.answer)}</p>`:''}</div>`).join('');
+ if(full){
+  const sections=(full.sections||[]).map(section=>`<section class="note-section actual-note-topic"><h3>${esc(section.title||'')}</h3>${(section.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join('')}${list(section.bullets)}${formulas(section.formulas)}${examples(section.examples)}${section.tip?`<div class="exam-box"><h4>Exam tip</h4><p>${esc(section.tip)}</p></div>`:''}</section>`).join('');
+  return `<div class="note-prose actual-chapter-notes detailed-exam-notes cambridge-full-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(full.lead||e.summary||'')}</p></section>${sections}</div>`;
+ }
+ const d=e.deepNotes||{};
+ const concepts=Array.isArray(d.concepts)?d.concepts:[];
+ const chapterFormulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:(Array.isArray(e.formulas)?e.formulas:[]));
+ const sections=concepts.map(item=>{
+  const pair=Array.isArray(item)?item:['',item];
+  const heading=pair[0]||'';
+  const body=pair[1]||'';
+  return `<section class="note-section actual-note-topic">${heading?`<h3>${esc(heading)}</h3>`:''}<p>${esc(body)}</p></section>`;
+ }).join('');
+ const formulaHtml=chapterFormulas.length?`<section class="note-section actual-note-topic"><h3>Equations and relationships</h3>${formulas(chapterFormulas)}<p>Define every symbol, keep units consistent and check that the relationship applies to the conditions in the question before substituting values.</p></section>`:'';
+ const reasoning=Array.isArray(d.reasoning)&&d.reasoning.length?`<section class="note-section actual-note-topic"><h3>Applying the ideas</h3><ol>${d.reasoning.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>`:'';
+ const examTips=[...(Array.isArray(d.examTips)?d.examTips:[]),...(Array.isArray(e.mistakes)?e.mistakes.map(x=>'Avoid: '+x):[])];
+ const examHtml=examTips.length?`<section class="note-section actual-note-topic"><h3>Exam technique and common errors</h3><div class="exam-box"><ul>${examTips.slice(0,10).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></section>`:'';
+ const checks=Array.isArray(d.selfCheck)&&d.selfCheck.length?`<section class="note-section actual-note-topic"><h3>Check your understanding</h3><ol>${d.selfCheck.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>`:'';
+ return `<div class="note-prose actual-chapter-notes detailed-exam-notes cambridge-full-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>${sections}${formulaHtml}${reasoning}${examHtml}${checks}</div>`;
+}
 function richDeepSections(e){
  const d=e.deepNotes||{};
  const pairs=items=>(Array.isArray(items)?items:[]).map(item=>Array.isArray(item)?`<li><strong>${esc(item[0])}:</strong> ${esc(item[1])}</li>`:`<li>${esc(item)}</li>`).join('');
@@ -832,6 +857,7 @@ function richDeepSections(e){
 }
 function deepSections(e){
  if(e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics'&&e.deepNotes?.overview)return class9CbseMathNotes(e);
+ if(/^Cambridge/.test(e.board||'')&&(e.cambridgeFullNotes||e.deepNotes?.overview))return cambridgeFullNotes(e);
  if(e.deepNotes?.overview)return richDeepSections(e);
  const subject=e.subject||'',keyPoints=e.keyPoints||[],formulas=e.formulas||[],method=e.method||[],mistakes=e.mistakes||[];
  const language=/English|Hindi|Sanskrit/.test(subject);
@@ -885,7 +911,14 @@ function renderReaderContent(e){
  $('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');
  $('#note-title').textContent=e.title;
  $('#note-summary').textContent=e.summary||'';
- $('#detailed-notes').innerHTML=deepSections(e);
+ const notesBox=$('#detailed-notes');
+ notesBox.innerHTML=deepSections(e);
+ const diagramHtml=window.StudyAIDiagrams?.render?.(e)||'';
+ if(diagramHtml){
+  const firstSection=notesBox.querySelector('.note-section');
+  if(firstSection)firstSection.insertAdjacentHTML('afterend',diagramHtml);
+  else notesBox.insertAdjacentHTML('afterbegin',diagramHtml);
+ }
  $('#quick-review').innerHTML=quickReview(e);
  $('#personal-note-editor').value=state.personalNotes[e.id]||'';
 }

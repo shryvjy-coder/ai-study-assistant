@@ -42,7 +42,7 @@ async function choosePhysics(page){
   browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:1365,height:900},reducedMotion:'reduce'});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.goto(url+'#study',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#chapter-list');
   await page.waitForTimeout(800);
   await dismiss(page);

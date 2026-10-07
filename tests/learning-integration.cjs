@@ -94,6 +94,7 @@ const dismissFirstRunTour=async page=>{
  check(await page.evaluate(()=>state.masteryHistory.length)===before+1,'skipping does not produce mastery evidence');
  // Defensive mock ingestion, including valid numerical zero.
  check(await page.evaluate(()=>{const count=state.masteryHistory.length,q=SAT_QUESTIONS[0];captureMockResults([{question:q,chosen:null},{question:{...q,pretest:true},chosen:0},{question:{...q,id:'numeric-test',format:'spr',correctAnswer:'0',acceptedAnswers:['0']},chosen:'0',correct:true}]);return state.masteryHistory.length===count+1}),'mock ignores blanks/pretests and accepts numeric zero');
+ await page.evaluate(()=>location.hash='#planner');await page.waitForSelector('#planner:not([hidden])');
  for(const width of [390,1440]){
   await page.setViewportSize({width,height:900});
   await page.evaluate(()=>setTheme('dark'));

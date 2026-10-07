@@ -47,6 +47,7 @@ const dismissFirstRunTour=async page=>{
  await page.evaluate(()=>{state.flashcardState['untouched-legacy']='Mastered';state.flashcardSchedule['srs-again'].dueAt=Date.now()-1;save()});
  await page.reload();await page.waitForSelector('#learning-goals');
  check(await page.evaluate(()=>srsDueCards().some(c=>c.id==='srs-again')&&state.flashcardState['untouched-legacy']==='Mastered'),'catalog and legacy progress survive reload');
+ await page.evaluate(()=>location.hash='#progress');await page.waitForSelector('#progress:not([hidden])');
  await page.locator('#srs-progress-open').click();await page.evaluate(()=>{document.querySelector('#flashcard').click();const button=document.querySelector('[data-srs-rating="good"]');if(button.disabled)throw new Error('due-review rating stayed disabled after reveal');button.click()});
  check(await page.evaluate(()=>activeDeck.length===0&&srsSummary().due===0),'due review reschedules and advances');
  await setup('other-deck');await page.evaluate(()=>{cardFlipped=true;rateFlashcard('good')});
@@ -72,11 +73,13 @@ const dismissFirstRunTour=async page=>{
  check(plans.school.days.every((day,i)=>day.items.reduce((n,t)=>n+t.minutes,0)+plans.sat.days[i].items.reduce((n,t)=>n+t.minutes,0)<=60),'SAT and school respect combined daily budget');
  check(plans.school.days[0].items[0].kind==='goal','topic deadline gets a revision slot before new topics');
  const masteryBefore=await page.evaluate(()=>JSON.stringify(state.mastery));
+ await page.evaluate(()=>location.hash='#planner');await page.waitForSelector('#planner:not([hidden])');
  await page.locator('[data-school-check]').first().click();
  check(await page.evaluate(()=>Object.values(state.smartPlannerPlan.completed).filter(Boolean).length===1),'school completion is stored');
  check(await page.evaluate(()=>JSON.stringify(state.mastery))===masteryBefore,'planner completion never awards mastery');
  await page.reload();await page.waitForSelector('#learning-goals');
  check(await page.locator('[data-school-check][aria-pressed="true"]').count()===1,'school completion survives restart');
+ await page.evaluate(()=>location.hash='#practice-studio');
  await page.evaluate(async()=>{await StudyAIPerformance.loadFeature('practice')});
  await page.waitForFunction(()=>!!window.StudyAIPracticeStudio);
  await page.evaluate(()=>{StudyAIPracticeStudio.configure({mode:'custom',section:'Math',domain:'Algebra',skill:'Linear equations in one variable',level:'Advanced',time:10});StudyAIPracticeStudio.configure({mode:'diagnostic',section:'all'})});
@@ -103,7 +106,7 @@ const dismissFirstRunTour=async page=>{
  const authBody=await auth.text();check(auth.ok(),'temporary Flask email/password account works · HTTP '+auth.status()+' · '+authBody.slice(0,240)+' · server '+serverErrors.slice(-1800));
  await ap.route('**/api/personal-ai/status',r=>r.fulfill({json:{ok:true,configured:true}}));
  await ap.route('**/api/personal-ai/generate',r=>r.fulfill({json:{ok:true,flashcards:{cards:[{front:'Fixture question',back:'Fixture answer'}]},sources:[]}}));
- await ap.goto(url);await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});
+ await ap.goto(url+'#tutor');await ap.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});
  await ap.waitForSelector('#pai-provider-status');await ap.waitForTimeout(600);
  if(await ap.locator('#studyai-onboarding[open]').count())await ap.locator('[data-onboarding-skip]').click();
  await dismissFirstRunTour(ap);

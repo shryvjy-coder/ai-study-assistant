@@ -11,6 +11,7 @@
   let currentScript = null;
   let currentQuiz = null;
   let generatedCards = [];
+  let generatedDeckSourceButton = null;
   let currentAudioUrl = null;
   let busy = false;
   let providerReady = false;
@@ -435,6 +436,9 @@
   function renderFlashcards(cards, refs = []) {
     currentQuiz = null;
     generatedCards = Array.isArray(cards) ? cards : [];
+    const staleDeckButton = document.querySelector('#flashcards #pai-load-generated-cards');
+    if (staleDeckButton) staleDeckButton.remove();
+    generatedDeckSourceButton = null;
     const deckId='pai|'+(window.crypto?.randomUUID?.()||Date.now()+'|'+Math.random().toString(36).slice(2));
     showStructured('AI flashcards', refs);
     const box = $('#pai-structured');
@@ -464,7 +468,7 @@
       box.appendChild(card);
     });
 
-    $('#pai-load-generated-cards')?.addEventListener('click',()=>{
+    const loadGeneratedDeck=()=>{
       if (!generatedCards.length) return;
       try {
         if (typeof dueReviewSession !== 'undefined') dueReviewSession=false;
@@ -479,10 +483,25 @@
         if (typeof renderFlashStats === 'function') renderFlashStats();
         location.hash = '#flashcards';
         notify('AI flashcards loaded into your StudyAI deck.','success');
+        const flashcards = $('#flashcards .section-head') || $('#flashcards .shell');
+        if (flashcards && !document.querySelector('#flashcards #pai-load-generated-cards')) {
+          if (generatedDeckSourceButton && generatedDeckSourceButton.id === 'pai-load-generated-cards') {
+            generatedDeckSourceButton.id = 'pai-load-generated-cards-tutor';
+          }
+          const reload=document.createElement('button');
+          reload.type='button';
+          reload.id='pai-load-generated-cards';
+          reload.className='button secondary compact';
+          reload.textContent='Reload AI flashcards';
+          reload.addEventListener('click',loadGeneratedDeck);
+          flashcards.appendChild(reload);
+        }
       } catch (_) {
         notify('Could not open the StudyAI flashcard deck. You can still use the cards here.','error');
       }
-    });
+    };
+    generatedDeckSourceButton=$('#pai-load-generated-cards');
+    generatedDeckSourceButton?.addEventListener('click',loadGeneratedDeck);
   }
 
   function refreshWorkspaceChoices() {
@@ -738,6 +757,12 @@
 
   function mount() {
     if ($('#personal-ai')) return;
+    window.addEventListener('hashchange',()=>{
+      if (location.hash === '#tutor' || location.hash === '#personal-ai') {
+        document.querySelector('#flashcards #pai-load-generated-cards')?.remove();
+        if (generatedDeckSourceButton && generatedDeckSourceButton.isConnected) generatedDeckSourceButton.id='pai-load-generated-cards';
+      }
+    });
     const target=$('#workspace');
     if (!target) return;
     const section=document.createElement('section');

@@ -783,6 +783,8 @@ function richDeepSections(e){
  const bullets=items=>(Array.isArray(items)?items:[]).map(item=>`<li>${esc(item)}</li>`).join('');
  const source=[e.sourcePublisher,e.sourceBook,e.sourceYear].filter(Boolean).join(' · ');
  const concepts=pairs(d.concepts);
+ const formulas=(Array.isArray(d.formulas)&&d.formulas.length?d.formulas:(Array.isArray(e.formulas)?e.formulas:[]));
+ const formulaHtml=formulas.length?`<section class="note-section"><h3>3. Key formulas and relationships</h3><div class="formula-list">${formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div><p>Use each formula together with the definitions, conditions and reasoning in the notes above and below.</p></section>`:'';
  const reasoning=bullets(d.reasoning);
  const visuals=bullets(d.visuals);
  const examTips=bullets(d.examTips);
@@ -794,14 +796,15 @@ function richDeepSections(e){
  return `<div class="note-prose deep-note-verified">
  <section class="note-section"><h3>1. Chapter overview</h3><p>${esc(d.overview||e.summary||'')}</p>${source?`<p class="muted"><strong>Source:</strong> ${esc(source)}</p>`:''}</section>
  <section class="note-section"><h3>2. Key concepts and explanations</h3><ul>${concepts}</ul></section>
- ${reasoning?`<section class="note-section"><h3>3. How to reason through this chapter</h3><ol>${reasoning}</ol></section>`:''}
- ${visuals?`<section class="note-section"><h3>4. Diagrams and visual thinking</h3><ul>${visuals}</ul></section>`:''}
- <section class="note-section"><h3>5. Exam focus and common mistakes</h3><ul>${examTips}</ul></section>
- ${distinctions?`<section class="note-section"><h3>6. Important distinctions</h3><ul>${distinctions}</ul></section>`:''}
- <section class="note-section"><h3>7. Quick revision</h3><ul>${revision}</ul></section>
- <section class="note-section"><h3>8. Self-check</h3><ol>${selfCheck}</ol></section>
- ${vocabulary?`<section class="note-section"><h3>9. Vocabulary to know</h3><ul>${vocabulary}</ul></section>`:''}
- ${practice?`<section class="note-section"><h3>10. Practice plan</h3><ul>${practice}</ul></section>`:''}
+ ${formulaHtml}
+ ${reasoning?`<section class="note-section"><h3>4. How to reason through this chapter</h3><ol>${reasoning}</ol></section>`:''}
+ ${visuals?`<section class="note-section"><h3>5. Diagrams and visual thinking</h3><ul>${visuals}</ul></section>`:''}
+ <section class="note-section"><h3>6. Exam focus and common mistakes</h3><ul>${examTips}</ul></section>
+ ${distinctions?`<section class="note-section"><h3>7. Important distinctions</h3><ul>${distinctions}</ul></section>`:''}
+ <section class="note-section"><h3>8. Quick revision</h3><ul>${revision}</ul></section>
+ <section class="note-section"><h3>9. Self-check</h3><ol>${selfCheck}</ol></section>
+ ${vocabulary?`<section class="note-section"><h3>10. Vocabulary to know</h3><ul>${vocabulary}</ul></section>`:''}
+ ${practice?`<section class="note-section"><h3>11. Practice plan</h3><ul>${practice}</ul></section>`:''}
  </div>`;
 }
 function deepSections(e){

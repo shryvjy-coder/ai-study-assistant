@@ -252,11 +252,17 @@ function contentFirstDeepNotes(entry){
     paragraphs:['Define every symbol, keep units consistent and check that the relationship applies to the situation before substituting values.'],
     formulas
   }));
-  const distinctions=unique([...(asArray(d.distinctions)),...(asArray(d.vocabulary))]);
+  const distinctions=unique(d.distinctions);
   if(distinctions.length)extra.push(renderSection({
     title:'Important distinctions',
     paragraphs:['Learn these differences precisely because exam questions often test whether closely related terms are being used correctly.'],
     bullets:distinctions
+  }));
+  const vocabulary=unique(d.vocabulary);
+  if(vocabulary.length)extra.push(renderSection({
+    title:'Vocabulary to know',
+    paragraphs:['Use these terms precisely in explanations and text analysis. Knowing the word is not enough, you should be able to apply it to the chapter or passage.'],
+    bullets:vocabulary
   }));
   const reasoning=unique([...(asArray(d.reasoning)),...(asArray(entry.method))]);
   if(reasoning.length)extra.push(renderSection({

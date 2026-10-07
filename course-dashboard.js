@@ -19,8 +19,8 @@ function buildCourseCatalogue(){
   return [...map.values()];
 }
 
-const courses=buildCourseCatalogue();
-const byKey=new Map(courses.map(c=>[c.key,c]));
+let courses=[];
+let byKey=new Map();
 
 function ensureCourseState(){
   if(!Array.isArray(state.selectedCourses))state.selectedCourses=[];
@@ -192,6 +192,12 @@ function addSelectedCourse(){
 }
 
 function bind(){
+  if(typeof STUDY_DATA==='undefined'||typeof state==='undefined'){
+    window.addEventListener('studyai:curriculum-ready',bind,{once:true});
+    return;
+  }
+  courses=buildCourseCatalogue();
+  byKey=new Map(courses.map(c=>[c.key,c]));
   ensureCourseState();
   q('#open-add-course')?.addEventListener('click',openDialog);
   q('#dashboard-add-another')?.addEventListener('click',openDialog);

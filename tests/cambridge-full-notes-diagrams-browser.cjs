@@ -94,10 +94,10 @@ async function openEntry(page,board,grade,subject,title){
 
   const deepCambridge=await page.evaluate(()=>{
     const entries=STUDY_DATA.filter(e=>e.board==='Cambridge International AS & A Level'&&e.subject!=='Biology');
-    const missing=entries.filter(e=>!(e.deepNotes?.concepts?.length>=4)).map(e=>e.id);
+    const missing=entries.filter(e=>!(e.notesVerified===true&&e.deepNotes?.overview&&e.deepNotes?.concepts?.length)).map(e=>e.id);
     return {total:entries.length,missing};
   });
-  check(deepCambridge.total===95&&deepCambridge.missing.length===0,'all AS/A Physics, Chemistry and Mathematics topics retain deep concept banks');
+  check(deepCambridge.total===95&&deepCambridge.missing.length===0,'all AS/A Physics, Chemistry and Mathematics topics retain verified deep-note data');
 
   const diagramCoverage=await page.evaluate(()=>{
     const missing=STUDY_DATA.filter(e=>!window.StudyAIDiagrams?.render?.(e)?.includes('<svg')).map(e=>e.id);

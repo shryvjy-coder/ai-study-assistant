@@ -774,8 +774,10 @@ function renderTopicList(){
  const groups=[];const byBook=new Map();
  list.forEach(e=>{const book=e.sourceBook||'';if(!byBook.has(book)){const group={book,items:[]};byBook.set(book,group);groups.push(group)}byBook.get(book).items.push(e)});
  $('#chapter-list').innerHTML=groups.map(group=>`${group.book?'<div class="chapter-book-label">'+esc(group.book)+'</div>':''}${group.items.map(e=>`<button class="chapter-item ${(current.topicId?current.topicId===e.id:current.topic===e.title)?'active':''}" data-topic="${esc(e.title)}" data-id="${esc(e.id)}">${state.completed.includes(e.id)?'✓ ':''}${esc(e.title)}</button>`).join('')}`).join('');
- $$('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
- if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden')}
+ $('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
+ if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden');return}
+ const active=currentEntry();
+ if(active&&!$('#reader-view').classList.contains('hidden'))renderReaderContent(active);
 }
 function richDeepSections(e){
  const d=e.deepNotes||{};
@@ -852,7 +854,20 @@ function deepSections(e){
  </div>`;
 }
 function quickReview(e){return `<div class="quick-card"><h3>Core idea</h3><p>${esc(e.summary)}</p></div><div class="quick-card"><h3>Must know</h3><ul>${e.keyPoints.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="quick-card"><h3>Formula / relationship</h3><p>${esc(e.formulas.join(' · ')||'Focus on definitions, relationships and process rather than one formula.')}</p></div><div class="quick-card"><h3>Exam move</h3><p>${esc(e.method[0])} ${esc(e.method[1])}</p></div>`}
-function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');$('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');$('#note-title').textContent=e.title;$('#note-summary').textContent=e.summary;$('#detailed-notes').innerHTML=deepSections(e);$('#quick-review').innerHTML=quickReview(e);$('#personal-note-editor').value=state.personalNotes[e.id]||'';updateTopicActions();renderTopicList();updateDashboard()}
+function activateFullNotesTab(){
+ $('.article-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.tab==='notes'));
+ $('.tab-panel').forEach(panel=>panel.classList.toggle('hidden',panel.id!=='tab-notes'));
+}
+function renderReaderContent(e){
+ if(!e)return;
+ $('#note-breadcrumb').textContent=[e.board,e.grade,e.subject,e.sourceBook].filter(Boolean).join(' · ');
+ $('#note-title').textContent=e.title;
+ $('#note-summary').textContent=e.summary||'';
+ $('#detailed-notes').innerHTML=deepSections(e);
+ $('#quick-review').innerHTML=quickReview(e);
+ $('#personal-note-editor').value=state.personalNotes[e.id]||'';
+}
+function openTopic(title,id=null){current.topic=title;current.topicId=id;const e=currentEntry();if(!e)return;state.lastTopic=e.id;save();$('#reader-empty').classList.add('hidden');const view=$('#reader-view');view.classList.remove('hidden');view.classList.remove('content-enter');void view.offsetWidth;view.classList.add('content-enter');activateFullNotesTab();renderReaderContent(e);updateTopicActions();renderTopicList();updateDashboard()}
 function updateTopicActions(){const e=currentEntry();if(!e)return;$('#complete-btn').textContent=state.completed.includes(e.id)?'Completed ✓':'Mark complete';$('#bookmark-btn').textContent=state.bookmarks.includes(e.id)?'Bookmarked':'Bookmark';$('#weak-btn').textContent=state.review.includes(e.id)?'In review queue':'Review'}
 function toggle(arr,key){const i=arr.indexOf(key);i>=0?arr.splice(i,1):arr.push(key);save()}
 function searchAll(q){q=q.trim().toLowerCase();if(!q)return[];return STUDY_DATA.filter(e=>[e.title,e.sourceBook,e.subject,e.grade,e.board,e.summary,...e.keyPoints].filter(Boolean).join(' ').toLowerCase().includes(q)).slice(0,24)}

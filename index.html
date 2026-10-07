@@ -15,6 +15,7 @@
     } catch (_) {}
   </script>
   <link rel="stylesheet" href="cobalt-theme.css" />
+  <link rel="stylesheet" href="course-dashboard.css" />
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -23,7 +24,7 @@
     <a class="brand" href="#today"><span class="brand-mark">S</span><span>StudyAI</span></a>
     <button class="mobile-nav-btn" id="mobile-nav-btn" type="button" aria-controls="main-nav" aria-expanded="false">Menu</button>
     <nav class="main-nav" id="main-nav" aria-label="Primary navigation">
-      <a href="#today">Today</a><a href="#study">Study</a><a href="#sat">SAT</a><a href="#workspace">Workspace</a>
+      <a href="#today">Dashboard</a><a href="#study">Study</a><a href="#sat">SAT</a><a href="#workspace">Workspace</a>
       <a href="#flashcards">Flashcards</a><a href="#practice">Practice</a>
       <a href="#progress">Progress</a><a href="#planner">Planner</a><a href="#tutor">Tutor</a>
     </nav>
@@ -36,35 +37,70 @@
 </header>
 
 <main id="main-content" tabindex="-1">
-<section class="hero" id="home">
-  <div class="shell hero-grid">
-    <div class="hero-copy">
-      <p class="kicker">CBSE · Cambridge IGCSE · AS &amp; A Level · SAT</p>
-      <h1>One study system, from Class 9 to university applications.</h1>
-      <p class="hero-deck">Detailed notes, personal annotations, flashcards, curriculum quizzes, SAT mastery practice, revision planning and progress tracking in one calmer workspace.</p>
-      <div class="button-row"><a class="button primary" href="#study">Open study library</a><a class="button secondary" href="#sat">Practice SAT</a></div>
-      <div class="trust-row"><span>Original notes</span><span>Local-first</span><span>Account sync available</span></div>
+<section class="dashboard-home" id="home">
+  <div class="shell">
+    <div class="dashboard-heading">
+      <div>
+        <p class="kicker">Your StudyAI dashboard</p>
+        <h1>Your courses, your progress, your next step.</h1>
+        <p>Add the courses you actually study. StudyAI keeps notes, completion, practice evidence and revision actions together without making you dig through every curriculum.</p>
+      </div>
+      <div class="dashboard-actions">
+        <button class="button primary" id="open-add-course" type="button">+ Add course</button>
+        <a class="button secondary" href="#study">Open study library</a>
+      </div>
     </div>
-    <aside class="hero-summary">
-      <div class="summary-head"><span class="small-label">Your browser</span><strong id="hero-percent">0%</strong></div>
-      <div class="rule-progress"><span id="hero-progress"></span></div>
-      <dl class="summary-list">
-        <div><dt>Completed</dt><dd id="hero-completed">0</dd></div>
-        <div><dt>Review actions</dt><dd id="hero-review">0</dd></div>
-        <div><dt>Quiz average</dt><dd id="hero-average">—</dd></div>
-        <div><dt>SAT mastery</dt><dd id="hero-sat">0%</dd></div>
-      </dl>
-      <p class="summary-note" id="hero-next">Choose a pathway to begin.</p>
-    </aside>
+
+    <div class="dashboard-metric-grid" aria-label="Dashboard summary">
+      <article class="dashboard-metric"><span>My courses</span><strong id="dashboard-course-count">0</strong></article>
+      <article class="dashboard-metric"><span>Topics completed</span><strong id="dashboard-topic-progress">—</strong></article>
+      <article class="dashboard-metric"><span>Practiced mastery</span><strong id="dashboard-mastery">—</strong></article>
+      <article class="dashboard-metric"><span>Review actions</span><strong id="dashboard-review-count">0</strong></article>
+    </div>
+
+    <div class="dashboard-progress-card">
+      <article class="dashboard-next" id="dashboard-next-topic">
+        <div><span class="small-label">Continue studying</span><h3>Add your first course</h3><p>Your next topic will appear here once you choose what you are studying.</p></div>
+        <button class="button primary" type="button" data-dashboard-add>Add course</button>
+      </article>
+      <aside class="dashboard-snapshot">
+        <div class="summary-head"><span class="small-label">Selected-course completion</span><strong id="hero-percent">0%</strong></div>
+        <div class="rule-progress"><span id="hero-progress"></span></div>
+        <dl class="summary-list">
+          <div><dt>Completed</dt><dd id="hero-completed">0</dd></div>
+          <div><dt>Review actions</dt><dd id="hero-review">0</dd></div>
+          <div><dt>Practiced mastery</dt><dd id="hero-average">—</dd></div>
+          <div><dt>SAT mastery</dt><dd id="hero-sat">0%</dd></div>
+        </dl>
+        <p class="summary-note" id="hero-next">Add your courses to personalise StudyAI.</p>
+      </aside>
+    </div>
   </div>
 </section>
 
-<section class="feature-strip" id="today-features">
-  <div class="shell feature-strip-grid">
-    <a href="#study"><span>01</span><strong>Multi-board notes</strong><p>CBSE, IGCSE and AS/A Level PCM study paths.</p></a>
-    <a href="#sat"><span>02</span><strong>SAT mastery</strong><p>Foundation, Medium and Advanced skill practice.</p></a>
-    <a href="#flashcards"><span>03</span><strong>Active recall</strong><p>Flashcards with New, Learning and Mastered states.</p></a>
-    <a href="#workspace"><span>04</span><strong>Your material</strong><p>Import, edit, organise, listen and revise from your own notes.</p></a>
+<section class="my-courses-section" id="today-features">
+  <div class="shell">
+    <div class="my-courses-head">
+      <div><span class="small-label">My Courses</span><h2>Everything you are studying.</h2></div>
+      <button class="button secondary compact" id="dashboard-add-another" type="button">+ Add another course</button>
+    </div>
+    <div id="course-empty-state" class="course-empty-state">
+      <span class="small-label">Start here</span>
+      <h3>No courses added yet</h3>
+      <p>Choose your curriculum, level and subject. Your dashboard will then show only the courses and progress that matter to you.</p>
+      <button class="button primary" id="course-empty-add" type="button">Add my first course</button>
+    </div>
+    <div id="my-course-grid" class="my-course-grid"></div>
+    <p class="dashboard-evidence-note">Mastery only changes when you answer practice questions. Reading or marking a note complete does not increase mastery.</p>
+  </div>
+</section>
+
+<section class="dashboard-quick-links">
+  <div class="shell dashboard-quick-grid">
+    <a href="#study"><span>Study</span><strong>Revision notes</strong><p>Open detailed notes for one of your selected courses.</p></a>
+    <a href="#practice"><span>Practice</span><strong>Test yourself</strong><p>Turn what you studied into evidence-backed progress.</p></a>
+    <a href="#flashcards"><span>Recall</span><strong>Flashcards</strong><p>Review due cards and strengthen memory over time.</p></a>
+    <a href="#planner"><span>Plan</span><strong>Revision planner</strong><p>Build a focused plan around what needs attention.</p></a>
   </div>
 </section>
 
@@ -346,6 +382,24 @@
   </div>
 </dialog>
 
+<dialog id="add-course-dialog" class="course-dialog" aria-labelledby="add-course-title">
+  <div class="course-dialog-inner">
+    <div class="course-dialog-head">
+      <div><span class="small-label">My Courses</span><h2 id="add-course-title">Add a course</h2><p>Choose exactly what you study. You can add more courses any time.</p></div>
+      <button class="quiet-button" id="course-dialog-close" type="button" aria-label="Close Add Course">Close</button>
+    </div>
+    <div class="course-picker">
+      <label>Curriculum / board<select id="course-board"></select></label>
+      <label>Class / level<select id="course-grade"></select></label>
+      <label>Subject<select id="course-subject"></select></label>
+      <p class="course-dialog-meta" id="course-dialog-meta"></p>
+    </div>
+    <div class="course-dialog-actions">
+      <button class="button primary" id="add-course-confirm" type="button">Add course</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="command-dialog" class="command-dialog" aria-label="StudyAI quick actions"><form method="dialog"><div class="command-head"><strong>Quick actions</strong><button class="quiet-button">Close</button></div><button data-jump="#study">Study library <span>S</span></button><button data-jump="#sat">SAT practice <span>A</span></button><button data-jump="#workspace">Workspace <span>W</span></button><button data-jump="#flashcards">Flashcards <span>F</span></button><button data-jump="#progress">Progress <span>P</span></button></form></dialog>
 <script src="cbse-ncert-secondary.js"></script>
 <script src="cbse-ncert-senior-secondary.js"></script>
@@ -355,6 +409,7 @@
 <script src="cbse-class9-math-full-notes-b.js"></script>
 <script src="cbse-class9-math-full-notes-c.js"></script>
 <script src="script.js"></script>
+<script src="course-dashboard.js"></script>
 <script defer src="caie-as-physics-deep-notes.js"></script>\n<script defer src="caie-as-chemistry-deep-notes.js"></script>
 <script defer src="caie-as-mathematics-deep-notes.js"></script>
 <script defer src="caie-a-level-physics-deep-notes.js"></script>

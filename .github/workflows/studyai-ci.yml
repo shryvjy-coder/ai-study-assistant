@@ -45,6 +45,7 @@ jobs:
           node --check tests/caie-a-level-mathematics.cjs
           node --check tests/caie-a-level-mathematics-browser.cjs
           node --check tests/content-first-notes-browser.cjs
+          node --check tests/course-dashboard-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -126,6 +127,9 @@ jobs:
       - name: Pre-beta browser smoke
         if: ${{ !cancelled() }}
         run: node tests/pre-beta-smoke.cjs
+      - name: Course dashboard browser coverage
+        if: ${{ !cancelled() }}
+        run: node tests/course-dashboard-browser.cjs
 
 
   postgres:

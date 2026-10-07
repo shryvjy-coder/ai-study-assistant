@@ -25,6 +25,8 @@ async function dismiss(page){
   await page.locator('[data-tour-skip-confirm]').click();
   await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
  }
+  await page.evaluate(()=>location.hash='#study');
+  await page.waitForSelector('#study:not([hidden])');
 }
 
 (async()=>{
@@ -32,7 +34,7 @@ async function dismiss(page){
  browser=await chromium.launch({headless:true});
  const page=await browser.newPage({viewport:{width:1365,height:900},reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(url,{waitUntil:'domcontentloaded'});
+ await page.goto(url+'#study',{waitUntil:'domcontentloaded'});
  await page.waitForSelector('#chapter-list'); await page.waitForTimeout(800); await dismiss(page);
  await page.selectOption('#board-filter','Cambridge International AS & A Level');
  await page.selectOption('#grade-filter','A Level (12)');

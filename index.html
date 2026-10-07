@@ -37,7 +37,7 @@
 </header>
 
 <main id="main-content" tabindex="-1">
-<section class="dashboard-home" id="home">
+<section class="section today-section dashboard-home" id="today">
   <div class="shell">
     <div class="dashboard-heading">
       <div>
@@ -75,32 +75,34 @@
         <p class="summary-note" id="hero-next">Add your courses to personalise StudyAI.</p>
       </aside>
     </div>
-  </div>
-</section>
 
-<section class="my-courses-section" id="today-features">
-  <div class="shell">
-    <div class="my-courses-head">
-      <div><span class="small-label">My Courses</span><h2>Everything you are studying.</h2></div>
-      <button class="button secondary compact" id="dashboard-add-another" type="button">+ Add another course</button>
+    <div class="my-courses-section">
+      <div class="my-courses-head">
+        <div><span class="small-label">My Courses</span><h2>Everything you are studying.</h2></div>
+        <button class="button secondary compact" id="dashboard-add-another" type="button">+ Add another course</button>
+      </div>
+      <div id="course-empty-state" class="course-empty-state">
+        <span class="small-label">Start here</span>
+        <h3>No courses added yet</h3>
+        <p>Choose your curriculum, level and subject. Your dashboard will then show only the courses and progress that matter to you.</p>
+        <button class="button primary" id="course-empty-add" type="button">Add my first course</button>
+      </div>
+      <div id="my-course-grid" class="my-course-grid"></div>
+      <p class="dashboard-evidence-note">Mastery only changes when you answer practice questions. Reading or marking a note complete does not increase mastery.</p>
     </div>
-    <div id="course-empty-state" class="course-empty-state">
-      <span class="small-label">Start here</span>
-      <h3>No courses added yet</h3>
-      <p>Choose your curriculum, level and subject. Your dashboard will then show only the courses and progress that matter to you.</p>
-      <button class="button primary" id="course-empty-add" type="button">Add my first course</button>
-    </div>
-    <div id="my-course-grid" class="my-course-grid"></div>
-    <p class="dashboard-evidence-note">Mastery only changes when you answer practice questions. Reading or marking a note complete does not increase mastery.</p>
-  </div>
-</section>
 
-<section class="dashboard-quick-links" id="today-quick-links">
-  <div class="shell dashboard-quick-grid">
-    <a href="#study"><span>Study</span><strong>Revision notes</strong><p>Open detailed notes for one of your selected courses.</p></a>
-    <a href="#practice"><span>Practice</span><strong>Test yourself</strong><p>Turn what you studied into evidence-backed progress.</p></a>
-    <a href="#flashcards"><span>Recall</span><strong>Flashcards</strong><p>Review due cards and strengthen memory over time.</p></a>
-    <a href="#planner"><span>Plan</span><strong>Revision planner</strong><p>Build a focused plan around what needs attention.</p></a>
+    <div class="dashboard-quick-links">
+      <div class="dashboard-quick-grid">
+        <a href="#study"><span>Study</span><strong>Revision notes</strong><p>Open detailed notes for one of your selected courses.</p></a>
+        <a href="#practice"><span>Practice</span><strong>Test yourself</strong><p>Turn what you studied into evidence-backed progress.</p></a>
+        <a href="#flashcards"><span>Recall</span><strong>Flashcards</strong><p>Review due cards and strengthen memory over time.</p></a>
+        <a href="#planner"><span>Plan</span><strong>Revision planner</strong><p>Build a focused plan around what needs attention.</p></a>
+      </div>
+    </div>
+
+    <div class="today-product-wrap">
+      <div id="today-dashboard"></div>
+    </div>
   </div>
 </section>
 

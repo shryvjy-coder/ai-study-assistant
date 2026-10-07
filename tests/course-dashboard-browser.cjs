@@ -94,7 +94,8 @@ async function dismissFirstRun(page){
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForSelector('#today-dashboard');
   await dismissFirstRun(page);
-  check(await page.locator('#my-course-grid .course-card').count()===1,'selected courses survive reload');
+  await page.waitForFunction(()=>document.querySelectorAll('#my-course-grid .course-card').length===1);
+  check(await page.evaluate(()=>Array.isArray(state.selectedCourses)&&state.selectedCourses.length===1)&&await page.locator('#my-course-grid .course-card').count()===1,'selected courses survive reload');
   check(errors.length===0,'dashboard and Add Course produce no browser JavaScript errors: '+errors.join(' | '));
 
   console.log('TOTAL',checks,'course-dashboard checks passed');

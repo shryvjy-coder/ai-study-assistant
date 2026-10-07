@@ -774,7 +774,7 @@ function renderTopicList(){
  const groups=[];const byBook=new Map();
  list.forEach(e=>{const book=e.sourceBook||'';if(!byBook.has(book)){const group={book,items:[]};byBook.set(book,group);groups.push(group)}byBook.get(book).items.push(e)});
  $('#chapter-list').innerHTML=groups.map(group=>`${group.book?'<div class="chapter-book-label">'+esc(group.book)+'</div>':''}${group.items.map(e=>`<button class="chapter-item ${(current.topicId?current.topicId===e.id:current.topic===e.title)?'active':''}" data-topic="${esc(e.title)}" data-id="${esc(e.id)}">${state.completed.includes(e.id)?'✓ ':''}${esc(e.title)}</button>`).join('')}`).join('');
- $('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
+ document.querySelectorAll('.chapter-item').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic,b.dataset.id));
  if((current.topicId||current.topic)&&!list.some(e=>current.topicId?e.id===current.topicId:e.title===current.topic)){current.topic=null;current.topicId=null;$('#reader-view').classList.add('hidden');$('#reader-empty').classList.remove('hidden');return}
  const active=currentEntry();
  if(active&&!$('#reader-view').classList.contains('hidden'))renderReaderContent(active);

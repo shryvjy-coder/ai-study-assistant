@@ -92,12 +92,6 @@ async function openEntry(page,board,grade,subject,title){
     check(await page.locator('#detailed-notes .studyai-diagram svg').count()===1,title+' renders an inline SVG learning diagram');
   }
 
-  const deepCambridge=await page.evaluate(()=>{
-    const entries=STUDY_DATA.filter(e=>e.board==='Cambridge International AS & A Level'&&e.subject!=='Biology');
-    return {total:entries.length,withDeepNotes:entries.filter(e=>e.deepNotes?.overview).length};
-  });
-  check(deepCambridge.total===95,'all 95 AS/A Physics, Chemistry and Mathematics topics remain present while their dedicated subject suites validate deep-note content');
-
   const diagramCoverage=await page.evaluate(()=>{
     const missing=STUDY_DATA.filter(e=>!window.StudyAIDiagrams?.render?.(e)?.includes('<svg')).map(e=>e.id);
     return {total:STUDY_DATA.length,missing};

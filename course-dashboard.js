@@ -213,6 +213,8 @@ function bind(){
   });
   window.addEventListener('studyai:state-changed',()=>requestAnimationFrame(render));
   window.addEventListener('hashchange',()=>{if(location.hash==='#today')requestAnimationFrame(render)});
+  window.addEventListener('load',()=>requestAnimationFrame(render),{once:true});
+  window.addEventListener('pageshow',()=>requestAnimationFrame(render));
   render();
 }
 

@@ -72,16 +72,30 @@ async function choose(page,grade,subject){
   check(grade9Coverage.total===56&&grade9Coverage.verified===56,'every Class 9 topic has a verified chapter-specific deep-note structure');
 
   await choose(page,'Class 9','Mathematics');
+  const fullMathCount=await page.evaluate(()=>Object.keys(window.CBSE_CLASS9_MATH_FULL_NOTES||{}).length);
+  check(fullMathCount===14,'all 14 Class 9 Mathematics chapters have exam-ready full-note data');
   await page.locator('.chapter-item').filter({hasText:'The World of Numbers'}).click();
   const numberNotes=page.locator('#detailed-notes');
   const numberText=await numberNotes.textContent();
   const numberHeadings=await numberNotes.locator('h3').allTextContents();
-  check(numberHeadings.includes('Rational numbers')&&numberHeadings.includes('Irrational numbers')&&numberHeadings.includes('Density')&&numberHeadings.includes('Decimal representation')&&numberHeadings.includes('Proof and construction'),'Class 9 Mathematics renders chapter-specific note headings');
+  check(numberHeadings.includes('Rational numbers')&&numberHeadings.includes('Irrational numbers')&&numberHeadings.includes('Density of rational numbers')&&numberHeadings.includes('Decimal expansions of real numbers'),'Class 9 Mathematics renders detailed chapter-specific subtopics');
   check(!/Chapter overview|Key concepts and explanations|How to reason through this chapter|Exam focus and common mistakes|Quick revision|Self-check/.test(numberText),'Class 9 Mathematics Full notes removes generic study-template sections');
-  check(numberText.includes('p/q')&&numberText.includes('non-terminating and non-repeating'),'Class 9 Mathematics Full notes contains actual number-system content');
+  check(numberText.length>3500,'The World of Numbers contains exam-ready detailed notes ('+numberText.length+' chars)');
+  check(await numberNotes.locator('.worked-box').count()>=3,'The World of Numbers includes multiple worked examples');
+  check(await numberNotes.locator('.exam-box').count()>=2,'The World of Numbers includes targeted exam tips inside relevant subtopics');
+  check(numberText.includes('p/q')&&numberText.includes('non-terminating and non-repeating')&&numberText.includes('contradiction'),'Class 9 Mathematics Full notes contains definitions, classification and proof reasoning');
+  const mathButtons=page.locator('.chapter-item');
+  const mathChapterCount=await mathButtons.count();
+  let detailedChapters=0;
+  for(let i=0;i<mathChapterCount;i++){
+    await mathButtons.nth(i).click();
+    const txt=(await page.locator('#detailed-notes').textContent()||'').trim();
+    if(txt.length>1200&&await page.locator('#detailed-notes .note-section').count()>=4)detailedChapters++;
+  }
+  check(detailedChapters===14,'all 14 Class 9 Mathematics chapters render substantial multi-section notes');
   await page.locator('.chapter-item').filter({hasText:'The World of Algorithms'}).click();
   const mathDeep=await page.locator('#detailed-notes').textContent();
-  check(mathDeep.includes('Algorithm')&&mathDeep.includes('Euclidean idea'),'Class 9 Mathematics renders chapter-specific algorithm notes');
+  check(mathDeep.includes('Euclid')&&mathDeep.includes('gcd')&&mathDeep.includes('Data structures and tracing'),'Class 9 Mathematics renders detailed algorithm notes');
 
   await choose(page,'Class 9','Science');
   await page.locator('.chapter-item').filter({hasText:'Earth as a System'}).click();

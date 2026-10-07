@@ -63,6 +63,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
   check(await page.locator('#help-start-tour').count()===1,
     'Help keeps a replay control for the full tutorial');
+  await page.evaluate(()=>location.hash='#help');await page.waitForSelector('#help:not([hidden])');
   await page.locator('#help-start-tour').click();
   await page.waitForSelector('#help-guided-tour:not(.hidden)');
   check((await page.locator('#help-tour-step').textContent())?.startsWith('1 of '),
@@ -95,6 +96,11 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   check(await page.locator('#main-content').count()===1,'main content has a keyboard skip target');
   check(await page.locator('.skip-link[href="#main-content"]').count()===1,'skip-to-content link is present');
   check(await page.locator('#main-nav[aria-label="Primary navigation"]').count()===1,'primary navigation is labelled');
+  await page.locator('#main-nav a[href="#study"]').click();
+  await page.waitForSelector('#study:not([hidden])');
+  check(await page.locator('#sat[hidden]').count()===1&&await page.locator('#workspace[hidden]').count()===1,'top-level navigation shows only the selected page view');
+  check(await page.locator('#main-nav a[href="#study"][aria-current="page"]').count()===1,'active page is reflected in primary navigation');
+  await page.locator('#main-nav a[href="#today"]').click();await page.waitForTimeout(50);
 
   await page.locator('#account-button').click();
   await page.locator('#auth-register-tab').click();
@@ -127,6 +133,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
     'skip link is keyboard focusable');
 
   await page.setViewportSize({width:1280,height:900});
+  await page.evaluate(()=>location.hash='#sat');await page.waitForSelector('#sat:not([hidden])');
   await page.evaluate(async()=>{await StudyAIPerformance.loadFeature('practice')});
   await page.waitForSelector('#sat-exam-lab');
   check(await page.locator('#mock-test-grid [data-start-mock]').count()===4,'four SAT mock tests render');
@@ -202,6 +209,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PAS
   await page.route('**/api/personal-ai/status',route=>route.fulfill({json:{
     ok:true,configured:false,daily_limits:{text:60,audio:10},daily_remaining:null
   }}));
+  await page.evaluate(()=>location.hash='#tutor');await page.waitForSelector('#tutor:not([hidden])');
   await page.evaluate(async()=>{await StudyAIPerformance.loadFeature('personalAI')});
   await page.waitForSelector('#personal-ai');
   await page.waitForFunction(()=>document.querySelector('#pai-provider-status')?.textContent.includes('Gemini key not configured'));

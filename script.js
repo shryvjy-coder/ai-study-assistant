@@ -1245,7 +1245,7 @@ function appPageFromHash(hash=location.hash){
 function appSectionsForPage(page){
  if(page==='today'){
   const today=document.getElementById('today');
-  return today?new Set(['today']):new Set(['home','today-features']);
+  return today?new Set(['today']):new Set(['home','today-features','today-quick-links']);
  }
  if(page==='practice')return new Set(['practice','practice-studio']);
  if(page==='planner')return new Set(['planner','sat-study-planner','learning-planner']);

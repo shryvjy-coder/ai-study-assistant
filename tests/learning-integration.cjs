@@ -9,6 +9,10 @@ code=code.replace(
   "await ap.reload();await ap.waitForSelector('#learning-goals');",
   "await ap.reload();await ap.waitForSelector('#learning-goals',{state:'attached'});"
 );
+code=code.replace(
+  "await ap.evaluate(()=>{state.learningGoals=[];save()});\n for(const theme of ['light','dark']){",
+  "await ap.evaluate(()=>{state.learningGoals=[];save();location.hash='#planner'});await ap.waitForSelector('#planner:not([hidden])');\n for(const theme of ['light','dark']){"
+);
 fs.writeFileSync(temp,code);
 const result=spawnSync(process.execPath,[temp],{
   cwd:path.join(__dirname,'..'),

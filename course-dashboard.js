@@ -3,7 +3,7 @@
 
 const q=(s,r=document)=>r.querySelector(s);
 const qa=(s,r=document)=>[...r.querySelectorAll(s)];
-const escDash=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+const escDash=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const SEP='¦';
 const courseKey=(board,grade,subject)=>[board,grade,subject].join(SEP);
 const courseKeyForEntry=e=>courseKey(e.board,e.grade,e.subject);

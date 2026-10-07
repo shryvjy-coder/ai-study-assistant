@@ -13,12 +13,14 @@ let serverErrors='';server.stderr.on('data',chunk=>{serverErrors=(serverErrors+S
 let browser,checks=0;
 const check=(value,message)=>{assert.ok(value,message);checks++;console.log('PASS',message)};
 const dismissFirstRunTour=async page=>{
+  const returnHash=await page.evaluate(()=>location.hash||'#today');
   await page.waitForSelector('#help-guided-tour:not(.hidden)',{timeout:3000}).catch(()=>{});
   if(await page.locator('#help-guided-tour:not(.hidden)').count()){
     await page.locator('[data-tour-skip]').click();
     await page.locator('[data-tour-skip-confirm]').click();
     await page.waitForFunction(()=>document.querySelector('#help-guided-tour')?.classList.contains('hidden'));
   }
+  await page.evaluate(hash=>location.hash=hash,returnHash);
 };
 (async()=>{
  for(let i=0;i<80;i++){try{if((await fetch(url+'/api/auth/me')).ok)break}catch{}await new Promise(r=>setTimeout(r,100))}

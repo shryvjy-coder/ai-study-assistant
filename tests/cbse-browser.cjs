@@ -72,9 +72,16 @@ async function choose(page,grade,subject){
   check(grade9Coverage.total===56&&grade9Coverage.verified===56,'every Class 9 topic has a verified chapter-specific deep-note structure');
 
   await choose(page,'Class 9','Mathematics');
+  await page.locator('.chapter-item').filter({hasText:'The World of Numbers'}).click();
+  const numberNotes=page.locator('#detailed-notes');
+  const numberText=await numberNotes.textContent();
+  const numberHeadings=await numberNotes.locator('h3').allTextContents();
+  check(numberHeadings.includes('Rational numbers')&&numberHeadings.includes('Irrational numbers')&&numberHeadings.includes('Density')&&numberHeadings.includes('Decimal representation')&&numberHeadings.includes('Proof and construction'),'Class 9 Mathematics renders chapter-specific note headings');
+  check(!/Chapter overview|Key concepts and explanations|How to reason through this chapter|Exam focus and common mistakes|Quick revision|Self-check/.test(numberText),'Class 9 Mathematics Full notes removes generic study-template sections');
+  check(numberText.includes('p/q')&&numberText.includes('non-terminating and non-repeating'),'Class 9 Mathematics Full notes contains actual number-system content');
   await page.locator('.chapter-item').filter({hasText:'The World of Algorithms'}).click();
   const mathDeep=await page.locator('#detailed-notes').textContent();
-  check(mathDeep.includes('How to reason through this chapter')&&mathDeep.includes('Euclidean idea'),'Class 9 Mathematics renders chapter-specific algorithm reasoning');
+  check(mathDeep.includes('Algorithm')&&mathDeep.includes('Euclidean idea'),'Class 9 Mathematics renders chapter-specific algorithm notes');
 
   await choose(page,'Class 9','Science');
   await page.locator('.chapter-item').filter({hasText:'Earth as a System'}).click();

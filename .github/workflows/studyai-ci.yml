@@ -46,6 +46,7 @@ jobs:
           node --check tests/caie-a-level-mathematics-browser.cjs
           node --check tests/content-first-notes-browser.cjs
           node --check tests/course-dashboard-browser.cjs
+          node --check tests/cambridge-full-notes-diagrams-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -98,6 +99,8 @@ jobs:
         run: node tests/caie-a-level-mathematics-browser.cjs
       - name: Content-first notes coverage
         run: node tests/content-first-notes-browser.cjs
+      - name: Cambridge full-note and diagram coverage
+        run: node tests/cambridge-full-notes-diagrams-browser.cjs
 
   browser:
     runs-on: ubuntu-latest

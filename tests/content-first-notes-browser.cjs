@@ -67,6 +67,35 @@ async function dismiss(page){
   check(!!box&&box.height>250,board+' / '+grade+' notes occupy substantial page height');
  }
 
+ // Regression: a saved deep-note topic can auto-open before deferred note overlays attach.
+ // Once the overlay attaches, the visible reader must refresh from fallback content to verified deep notes.
+ await page.selectOption('#board-filter','CBSE');
+ await page.selectOption('#grade-filter','Class 12');
+ await page.selectOption('#subject-filter','Physics');
+ await page.waitForTimeout(120);
+ const savedTopic=page.locator('.chapter-item').filter({hasText:'Electric Charges and Fields'}).first();
+ check(await savedTopic.count()===1,'Class 12 Physics saved-topic regression chapter exists');
+ const savedId=await savedTopic.getAttribute('data-id');
+ await page.evaluate(id=>{
+  const key='studyai-multicurriculum-v1';
+  const state=JSON.parse(localStorage.getItem(key)||'{}');
+  state.lastTopic=id;
+  localStorage.setItem(key,JSON.stringify(state));
+ },savedId);
+ await page.reload({waitUntil:'load'});
+ await page.waitForSelector('#reader-view:not(.hidden)');
+ const restoredNotes=page.locator('#detailed-notes');
+ check(await restoredNotes.locator('.deep-note-verified').count()===1,'saved chapter refreshes to verified deep notes after deferred overlays attach');
+ check((await restoredNotes.textContent()||'').trim().length>500,'saved chapter contains substantial refreshed deep-note content');
+
+ // Regression: opening a chapter must always reveal Full notes, even if another reader tab was active.
+ await page.locator('.article-tabs button[data-tab="quick"]').click();
+ check(await page.locator('#tab-notes').isHidden(),'quick-review tab hides Full notes before chapter change');
+ const nextPhysics=page.locator('.chapter-item').nth(1);
+ await nextPhysics.click();
+ check(await page.locator('#tab-notes').isVisible(),'opening a chapter forces Full notes visible');
+ check(await page.locator('.article-tabs button[data-tab="notes"]').evaluate(el=>el.classList.contains('active')),'Full notes tab becomes active on chapter open');
+
  // Quantitative formula rendering: individual formula lines, no redesign formula cards/badges.
  await page.selectOption('#board-filter','Cambridge International AS & A Level');
  await page.selectOption('#grade-filter','A Level (12)');

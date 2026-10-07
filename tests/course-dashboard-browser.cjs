@@ -81,7 +81,7 @@ async function dismissFirstRun(page){
 
   await page.locator('#my-course-grid .course-card').first().locator('[data-open-course]').click();
   await page.waitForSelector('#study:not([hidden])');
-  check(locationHash=await page.evaluate(()=>location.hash),locationHash==='#study');
+  const locationHash=await page.evaluate(()=>location.hash);\n  check(locationHash==='#study','course card routes into the Study page');
   check((await page.locator('#board-filter').inputValue())==='CBSE'&&(await page.locator('#grade-filter').inputValue())==='Class 9','course card opens the correct curriculum in Study');
 
   await page.evaluate(()=>location.hash='#today');

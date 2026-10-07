@@ -791,7 +791,7 @@ function class9CbseMathNotes(e){
  }).join('');
  const formulaHtml=formulas.length?`<div class="formula-list actual-note-formulas" aria-label="Chapter formulas">${formulas.map(f=>`<div class="formula">${esc(f)}</div>`).join('')}</div>`:'';
  return `<div class="note-prose actual-chapter-notes">
-  <p class="chapter-lead">${esc(d.overview||e.summary||'')}</p>
+  <section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>
   ${sections}
   ${formulaHtml}
  </div>`;

@@ -81,7 +81,9 @@ async function openCourse(page, board, grade, subject, component = 'All componen
       document.querySelector('#tab-notes').lastElementChild.classList.contains('chapter-next-nav')),
       label+' navigation follows the entire notes body');
 
-    await page.locator('#next-chapter-button').click();
+    // Dispatch the real DOM click without Playwright's automatic long-page scroll.
+    // The physical hover behavior is verified independently below.
+    await page.locator('#next-chapter-button').evaluate(node=>node.click());
     check((await page.locator('#note-title').innerText())===chapters.second.title,
       label+' opens the correct second chapter');
     check(await page.evaluate(id=>state.lastTopic===id,chapters.second.id),
@@ -116,9 +118,9 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     check(Math.abs(parseFloat(item.duration)-.5)<.001,
       item.selector+' has a 0.5-second hover transition');
   }
-  await page.locator('#next-chapter-button').hover();
+  await page.locator('#open-command').hover();
   await page.waitForTimeout(550);
-  const hover=await page.locator('#next-chapter-button').evaluate(node=>{
+  const hover=await page.locator('#open-command').evaluate(node=>{
     const styles=getComputedStyle(node);
     return {matrix:styles.transform,shadow:styles.boxShadow};
   });

@@ -50,7 +50,26 @@ const figures={
     '<text x="435" y="109" class="st">d² = 1² + 1²</text>'+
     '<text x="435" y="145" class="sm">d = √2</text>');
  },
- repeating(){
+ semicircle(){
+  return start('Semicircle construction for √4',
+    'AC = 4 units and CB = 1 unit on diameter AB. The perpendicular CD = 2 units, because CD² = AC × CB.',
+    '<path d="M140 210 A175 175 0 0 0 490 210" class="sl"/>'+
+    '<line x1="140" y1="210" x2="490" y2="210" class="sl"/>'+
+    '<line x1="420" y1="210" x2="420" y2="70" class="sf"/>'+
+    '<line x1="140" y1="210" x2="420" y2="70" class="sl"/>'+
+    '<line x1="420" y1="70" x2="490" y2="210" class="sl"/>'+
+    '<path d="M420 194 h-16 v16" class="sl"/>'+
+    '<circle cx="140" cy="210" r="5" class="dot"/><circle cx="420" cy="210" r="5" class="dot"/>'+
+    '<circle cx="490" cy="210" r="5" class="dot"/><circle cx="420" cy="70" r="5" class="dot"/>'+
+    '<text x="133" y="238" class="st">A</text><text x="410" y="238" class="st">C</text>'+
+    '<text x="486" y="238" class="st">B</text><text x="427" y="64" class="sm">D</text>'+
+    '<text x="272" y="230" class="sm" text-anchor="middle">4</text>'+
+    '<text x="458" y="230" class="sm" text-anchor="middle">1</text>'+
+    '<text x="430" y="144" class="sm">2 = √4</text>'+
+    '<text x="565" y="102" class="st" text-anchor="middle">CD² = 4×1</text>'+
+    '<text x="565" y="131" class="sm" text-anchor="middle">CD = 2</text>');
+  },
+repeating(){
   const rem=[1,3,2,6,4,5],digits=[1,4,2,8,5,7];
   const boxes=rem.map((n,i)=>{
     const x=30+i*107;

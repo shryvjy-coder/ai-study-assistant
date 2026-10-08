@@ -86,6 +86,19 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
     'mathematical closure and absolute value remain accessible on their own subtopic page');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()===1,
     'selecting a subtopic never reveals the whole lesson at once');
+  await page.locator('.studyai-subtopic-select').selectOption(String(firstSubtopicCount-1));
+  check(await page.locator('#detailed-notes .studyai-topic-review:not([hidden])').count()===1,
+    'authored worked examples, formulas and chapter warnings live on a separate review page');
+  check((await page.locator('#detailed-notes .studyai-topic-review:not([hidden])').innerText()).length>100,
+    'the review page preserves the chapter-topic material rather than discarding it');
+  await page.locator('.studyai-next-page').click();
+  check(await page.locator('.studyai-topic-select').inputValue()==='1' &&
+        await page.locator('.studyai-subtopic-select').inputValue()==='0',
+    'Next page moves to the next topic after the last subtopic');
+  await page.locator('.studyai-prev-page').click();
+  check(await page.locator('.studyai-topic-select').inputValue()==='0' &&
+        await page.locator('.studyai-subtopic-select').inputValue()===String(firstSubtopicCount-1),
+    'Previous page returns to the last subtopic of the preceding topic');
   await page.locator('.studyai-subtopic-select').selectOption('0');
   await page.locator('.studyai-next-subtopic').click();
   check(await page.locator('.studyai-subtopic-select').inputValue()==='1',

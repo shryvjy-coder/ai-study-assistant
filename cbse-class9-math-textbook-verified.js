@@ -108,6 +108,16 @@ add('Natural numbers, zero and integers',[
     examples:[{title:'Worked check of a universal claim',question:'A student says every quotient of two integers is an integer. Is the claim true?',steps:['The claim says every permitted quotient stays an integer.','Choose 7 and 2: 7÷2=3.5.','3.5 is not an integer, so this pair is a counterexample.'],answer:'The claim is false: integer division is not closed.'}]
   }
 ]);
+add('Irrational numbers',[
+  {
+    title:'A precise decimal definition of irrational numbers',
+    paragraphs:[
+      'A rational number has the exact form p/q, with integers p and q and q not equal to zero. When we perform long division, the remainder either becomes zero or eventually repeats. Consequently every rational number has a decimal that either terminates or eventually repeats a finite block of digits.',
+      'By contrast, an irrational number has a decimal expansion that is non-terminating and non-repeating. These two conditions must both hold. The number 1/3 has a non-terminating decimal 0.333… but it repeats, so it is rational. The irrational number √2 has digits that never settle into a repeating period.',
+      'This description is a classification criterion, not a substitute for a proof of irrationality. A contradiction proof for √2 rules out every hypothetical expression p/q exactly; observing the first few digits cannot establish how an infinite decimal behaves.'
+    ]
+  }
+]);
 add('Properties, inclusion and classification of number sets',[
   {
     title:'The real line is a one-to-one correspondence',

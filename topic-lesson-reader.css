@@ -1,33 +1,78 @@
-/* One topic at a time: Grade 9 CBSE Mathematics only. */
-#detailed-notes .note-section[hidden]{display:none!important}
+/* CBSE Grade 9 Mathematics: one academic topic and one subtopic page at a time. */
+#detailed-notes .note-section[hidden],
+#detailed-notes .studyai-lesson-subtopic[hidden],
+#detailed-notes .studyai-subtopic-nav[hidden]{
+  display:none!important;
+}
 .studyai-lesson-reader{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:end;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,315px),1fr));
   gap:14px;
+  padding:18px;
+  margin:14px 0 24px;
   border:1px solid var(--line);
   background:var(--surface);
   border-radius:14px;
-  padding:18px;
-  margin:12px 0 24px;
-  scroll-margin-top:100px;
+  scroll-margin-top:110px;
 }
-.studyai-lesson-label{display:flex;flex-direction:column;gap:5px;min-width:94px}
-.studyai-lesson-total{font-size:.86rem;font-weight:800;color:var(--ink)}
-.studyai-topic-select{
-  flex:1 1 220px;
-  min-width:160px;
-  max-width:100%;
+.studyai-lesson-group,.studyai-subtopic-nav{
+  min-width:0;
+  display:grid;
+  align-content:start;
+  gap:12px;
+}
+.studyai-subtopic-nav{
+  border-left:1px solid var(--line);
+  padding-left:18px;
+}
+.studyai-lesson-label{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:7px;
+  min-width:0;
+}
+.studyai-lesson-total{
+  font-size:.86rem;
+  font-weight:800;
+  color:var(--ink);
+}
+.studyai-topic-select,.studyai-subtopic-select{
+  display:block;
+  width:100%;
+  min-width:0;
   border:1px solid var(--line);
   border-radius:9px;
-  padding:11px 12px;
+  padding:12px 13px;
   font:inherit;
-  font-weight:700;
+  font-weight:650;
   color:var(--ink);
   background:var(--surface);
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
-.studyai-lesson-controls{display:flex;gap:8px;flex-wrap:wrap}
-.studyai-lesson-controls .button{white-space:nowrap}
+.studyai-lesson-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.studyai-lesson-controls .button{
+  flex:1;
+  min-width:min(100%,125px);
+}
+#detailed-notes .studyai-current-topic .studyai-lesson-subtopic{
+  margin:0;
+  border:0;
+  padding:6px 0 12px;
+}
+#detailed-notes .studyai-current-topic .studyai-lesson-subtopic > h4{
+  font-size:clamp(1.15rem,2vw,1.38rem);
+  margin:0 0 20px;
+  line-height:1.3;
+}
+#detailed-notes .studyai-current-topic > h3{
+  margin-bottom:20px;
+}
 .studyai-topic-pagination{
   display:flex;
   align-items:center;
@@ -37,21 +82,25 @@
   margin-top:24px;
   padding:24px 0 8px;
 }
-.studyai-topic-progress{font-size:.9rem;font-weight:800;color:var(--muted)}
-.studyai-current-topic{animation:studyai-lesson-appear .25s ease}
-@keyframes studyai-lesson-appear{
-  from{opacity:.85}
-  to{opacity:1}
+.studyai-topic-progress{
+  font-size:.9rem;
+  font-weight:800;
+  color:var(--muted);
+  text-align:center;
 }
-@media(max-width:820px){
-  .studyai-lesson-controls{width:100%}
-  .studyai-lesson-controls .button{flex:1}
+.studyai-current-topic,.studyai-current-subtopic{
+  animation:studyai-lesson-appear .2s ease;
+}
+@keyframes studyai-lesson-appear{from{opacity:.8}to{opacity:1}}
+@media(max-width:760px){
+  .studyai-lesson-reader{grid-template-columns:minmax(0,1fr)}
+  .studyai-subtopic-nav{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:14px}
 }
 @media(max-width:550px){
   .studyai-topic-pagination{flex-wrap:wrap}
   .studyai-topic-pagination .button{flex:1}
-  .studyai-topic-progress{width:100%;order:-1;text-align:center}
+  .studyai-topic-progress{width:100%;order:-1}
 }
 @media(prefers-reduced-motion:reduce){
-  .studyai-current-topic{animation:none}
+  .studyai-current-topic,.studyai-current-subtopic{animation:none}
 }

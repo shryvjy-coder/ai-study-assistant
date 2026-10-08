@@ -70,7 +70,7 @@ async function dismiss(page){
  await page.locator('.chapter-item').filter({hasText:'Statistics: Normal Distribution'}).click();
  const text=await page.locator('#detailed-notes').textContent();
  check(text.includes('Continuity correction'),'normal note renders syllabus-specific continuity correction');
- check(text.includes('Practice plan'),'Maths note renders practice plan');
+ check(text.includes('Practice targets'),'Maths note renders actionable study-practice section');
  check(text.includes('exam-mate'),'full-paper practice guidance renders');
 
  check(errors.length===0,'no browser JavaScript errors: '+errors.join('; '));

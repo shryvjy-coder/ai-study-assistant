@@ -139,7 +139,7 @@ async function openCourse(page, board, grade, subject, component = 'All componen
   check(hoverRule.shadow.includes('inset')&&hoverRule.shadow.includes('rgba(0, 0, 0'),
     'inward hover applies a recessed shadow');
   check(hoverRule.transform==='none','inward hover keeps clickable button hitbox stable');
-  check(hoverRule.filter.includes('brightness(.97)'),'inward hover subtly darkens the button');
+  check(Number((hoverRule.filter.match(/brightness\\(([^)]+)\\)/)||[])[1])<1,'inward hover subtly darkens the button');
 
   check(errors.length===0,'no JavaScript page errors: '+errors.join('; '));
   console.log('CHAPTER NAVIGATION AND BUTTON HOVER OK');

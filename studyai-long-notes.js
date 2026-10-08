@@ -140,7 +140,8 @@ function enrichClass9Math(){
   for(const entry of curriculum){
     if(entry.board!=='CBSE'||entry.grade!=='Class 9'||entry.subject!=='Mathematics')continue;
     const full=bank[entry.title];
-    if(!full||full._studyaiLongForm)continue;
+    // Fully authored topic lessons should not receive generic length-padding sections.
+    if(!full||full._studyaiLongForm||full._studyaiTopicFirst)continue;
     full._studyaiLongForm=true;
     const keyPoints=unique(entry.keyPoints);
     full.sections=asArray(full.sections).map((section,index)=>{

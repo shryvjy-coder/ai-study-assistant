@@ -32,12 +32,27 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   await page.goto(base+'#study',{waitUntil:'load'});
   await page.waitForFunction(()=>window.STUDYAI_WORLD_OF_NUMBERS_STATUS?.lessonCount>=13);
   const status=await page.evaluate(()=>window.STUDYAI_WORLD_OF_NUMBERS_STATUS);
-  check(status.lessonCount===13,'World of Numbers contains 13 independent substantive lessons');
+  check(status.lessonCount===14,'World of Numbers contains 14 lessons including an explicitly labelled optional algebra extension');
   check(status.workedExamples>=15,'World of Numbers includes 15 or more original examples');
+  check(status.optionalExtensions===1,'unprescribed algebra topics are explicitly marked as enrichment, not core syllabus');
+  const syllabusCheck=await page.evaluate(()=>{
+    const bank=window.CBSE_CLASS9_MATH_FULL_NOTES['The World of Numbers'];
+    return {
+      proof:bank.sections.find(s=>s.title==='Why √2 is irrational').subtopics.some(s=>s.title.includes('√3')),
+      periodic:bank.sections.find(s=>s.title==='Decimal expansions of real numbers').subtopics.some(s=>s.title.includes('repeating decimal period')),
+      hard:bank.sections.find(s=>s.title==='Mixed exam applications and full solutions').subtopics.some(s=>s.examples?.some(e=>e.answer.includes('34'))),
+      extension:bank.sections.find(s=>s.extension===true)?.title,
+      warning:bank.sections.find(s=>s.title==='Simplifying radicals and operations involving irrational numbers').exam_warning?.includes('√(9+16)'),
+    };
+  });
+  check(syllabusCheck.proof&&syllabusCheck.periodic&&syllabusCheck.hard&&syllabusCheck.warning,
+    'independent review fixes add √3 proof, period limits, 4-mark worked algebra and misconception warning');
+  check(syllabusCheck.extension?.startsWith('Extension:'),'additional rational exponents/conjugates clearly marked as optional');
+
   const quality=await page.evaluate(()=>window.STUDYAI_CONCEPT_FIRST_STATUS);
   check(quality.taughtSections>=12,'12 chapter topics have authored concept-first subsections');
   check(quality.teachingSubsections>=20,'chapter contains at least 20 focused explanatory subtopics');
-  check(quality.conceptFigures===5,'four unique accurate diagrams are used in five relevant lessons');
+  check(quality.conceptFigures===5,'original core teaching diagrams remain linked to five lessons');
 
   await page.evaluate(()=>{
     const entry=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Mathematics'&&x.title==='The World of Numbers');
@@ -48,7 +63,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
     location.hash='#study';
   });
 
-  check(await page.locator('.studyai-topic-select option').count()===13,'13 topics are selectable within the chapter');
+  check(await page.locator('.studyai-topic-select option').count()===14,'14 topics are selectable including labelled optional extension');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure').count()===1,'initial teaching lesson displays a correctly labelled integer line');
   check(await page.locator('#detailed-notes .studyai-lesson-subtopic h4').count()>=3,'initial lesson has explanatory subtopics, not just a syllabus checklist');
   check(await page.locator('#detailed-notes .studyai-diagram').count()===0,'no meaningless generic graph at the start of the chapter');
@@ -75,7 +90,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   await page.locator('.studyai-topic-select').selectOption('7');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('142857'),
     'decimal-expansion lesson demonstrates the one-seventh remainder cycle');
-  await page.locator('.studyai-topic-select').selectOption('12');
+  await page.locator('.studyai-topic-select').selectOption('13');
   check(await page.locator('.studyai-next-topic').first().isDisabled(),'last topic disables Next topic');
 
   await page.evaluate(()=>{

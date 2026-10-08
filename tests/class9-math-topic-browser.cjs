@@ -111,7 +111,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   await page.locator('.studyai-topic-select').selectOption('7');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('142857'),
     'decimal-expansion lesson demonstrates the one-seventh remainder cycle');
-  await page.locator('.studyai-topic-select').selectOption('8');
+  await page.locator('.studyai-topic-select').selectOption('9');
   check((await page.locator('.studyai-subtopic-select option').allTextContents()).some(x=>x.includes('Zoom 1')),
     'successive magnification has dedicated subtopic pages');
   await page.locator('.studyai-topic-select').selectOption('14');

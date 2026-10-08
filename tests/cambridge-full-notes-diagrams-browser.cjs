@@ -86,6 +86,9 @@ async function openEntry(page,board,grade,subject,title){
 
   for(const [board,grade,subject,title] of samples){
     await openEntry(page,board,grade,subject,title);
+    // Notes live inside a content-visibility:auto section. Bring it into view
+    // before reading innerText, which reports empty for skipped offscreen layout.
+    await page.locator('#detailed-notes').scrollIntoViewIfNeeded();
     const text=(await page.locator('#detailed-notes').innerText()).replace(/\s+/g,' ');
     const headings=await page.locator('#detailed-notes .actual-note-topic h3').count();
     check(headings>=8,title+' renders as a long-form multi-section note page');

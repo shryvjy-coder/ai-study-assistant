@@ -227,6 +227,7 @@ function renderSection(section){
       asArray(part.paragraphs).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+
       renderList(part.bullets)+renderFormulas(part.formulas)+renderExamples(part.examples)+'</div>').join('')+
     renderList(section.bullets)+renderFormulas(section.formulas)+renderExamples(section.examples)+
+    (section.exam_warning?'<div class="studyai-mistake-warning" role="note"><h4>Common mistake</h4><p>'+escapeHtml(section.exam_warning)+'</p></div>':'')+
     (section.tip?'<div class="exam-box"><h4>Exam tip</h4><p>'+escapeHtml(section.tip)+'</p></div>':'')+
     '</section>';
 }

@@ -118,16 +118,16 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     check(Math.abs(parseFloat(item.duration)-.5)<.001,
       item.selector+' has a 0.5-second hover transition');
   }
-  await page.locator('#open-command').hover();
+  await page.locator('#complete-btn').hover();
   await page.waitForTimeout(550);
-  const hover=await page.locator('#open-command').evaluate(node=>{
+  const hover=await page.locator('#complete-btn').evaluate(node=>{
     const styles=getComputedStyle(node);
-    return {matrix:styles.transform,shadow:styles.boxShadow,scale:new DOMMatrixReadOnly(styles.transform).a};
+    return {matrix:styles.transform,shadow:styles.boxShadow,scale:new DOMMatrixReadOnly(styles.transform).a,hovered:node.matches(':hover')};
   });
   console.log('HOVER_STYLES', hover);
   check(Math.abs(hover.scale-1)<.01,
     'hover keeps the clickable button stable instead of lifting or shrinking its hit area');
-  check(hover.shadow.includes('inset')&&hover.shadow.includes('0, 0, 0'),
+  check(hover.hovered && hover.shadow.includes('inset')&&hover.shadow.includes('0, 0, 0'),
     'hover applies a dark recessed inner shadow');
   check(errors.length===0,'no JavaScript page errors: '+errors.join('; '));
   console.log('CHAPTER NAVIGATION AND BUTTON HOVER OK');

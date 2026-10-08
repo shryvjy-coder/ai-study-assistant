@@ -1,0 +1,48 @@
+/* Concept illustrations are authored for the exact accompanying lesson.
+ * Never draw an unexplained curve as a generic substitute for a mathematical graph.
+ */
+.studyai-concept-figure{
+  margin:24px 0 28px;
+  border:1px solid var(--line, #ccd9d6);
+  border-radius:14px;
+  background:var(--surface, #fff);
+  overflow:hidden;
+}
+.studyai-concept-figure svg{
+  width:100%;
+  max-width:750px;
+  height:auto;
+  display:block;
+  margin:auto;
+}
+.studyai-concept-figure figcaption{
+  color:var(--muted, #586969);
+  background:var(--surface-strong, #f7faf9);
+  border-top:1px solid var(--line, #ccd9d6);
+  font-size:.9rem;
+  line-height:1.55;
+  padding:14px 18px;
+}
+.studyai-lesson-subtopic{
+  margin:28px 0;
+  padding:0 0 10px;
+  border-bottom:1px solid var(--line, #ccd9d6);
+}
+.studyai-lesson-subtopic:last-of-type{border-bottom:none}
+.studyai-lesson-subtopic h4{
+  font-weight:800;
+  font-size:1.12rem;
+  line-height:1.4;
+  margin:0 0 14px;
+  color:var(--ink, #1e3837);
+}
+.studyai-lesson-subtopic p{
+  font-size:1rem;
+  line-height:1.85;
+  margin:0 0 16px;
+  max-width:82ch;
+}
+@media(max-width:550px){
+ .studyai-concept-figure figcaption{padding:12px}
+ .studyai-lesson-subtopic{margin:22px 0}
+}

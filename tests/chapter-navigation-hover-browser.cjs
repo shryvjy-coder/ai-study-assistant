@@ -125,9 +125,10 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     return {matrix:styles.transform,shadow:styles.boxShadow,scale:new DOMMatrixReadOnly(styles.transform).a};
   });
   console.log('HOVER_STYLES', hover);
-  check(hover.scale<.99,
-    'hover shrinks the button inward rather than lifting it outward');
-  check(hover.shadow.includes('inset'),'hover applies an inward shadow');
+  check(Math.abs(hover.scale-1)<.01,
+    'hover keeps the clickable button stable instead of lifting or shrinking its hit area');
+  check(hover.shadow.includes('inset')&&hover.shadow.includes('0, 0, 0'),
+    'hover applies a dark recessed inner shadow');
   check(errors.length===0,'no JavaScript page errors: '+errors.join('; '));
   console.log('CHAPTER NAVIGATION AND BUTTON HOVER OK');
 })().catch(error=>{

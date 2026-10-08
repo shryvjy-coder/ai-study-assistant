@@ -122,9 +122,10 @@ async function openCourse(page, board, grade, subject, component = 'All componen
   await page.waitForTimeout(550);
   const hover=await page.locator('#open-command').evaluate(node=>{
     const styles=getComputedStyle(node);
-    return {matrix:styles.transform,shadow:styles.boxShadow};
+    return {matrix:styles.transform,shadow:styles.boxShadow,scale:new DOMMatrixReadOnly(styles.transform).a};
   });
-  check(hover.matrix.startsWith('matrix(')&&parseFloat(hover.matrix.slice(7))<1,
+  console.log('HOVER_STYLES', hover);
+  check(hover.scale<.99,
     'hover shrinks the button inward rather than lifting it outward');
   check(hover.shadow.includes('inset'),'hover applies an inward shadow');
   check(errors.length===0,'no JavaScript page errors: '+errors.join('; '));

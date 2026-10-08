@@ -44,11 +44,9 @@ body :is(button, a.button, input[type="button"], input[type="submit"], input[typ
               color .5s ease !important;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):hover {
-    transform: translateY(1px) scale(.965) !important;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, .08) !important;
-  }
+body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):hover {
+  transform: translateY(1px) scale(.965) !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .08) !important;
 }
 
 body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):active {

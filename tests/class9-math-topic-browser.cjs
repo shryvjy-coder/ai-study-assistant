@@ -37,7 +37,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   const quality=await page.evaluate(()=>window.STUDYAI_CONCEPT_FIRST_STATUS);
   check(quality.taughtSections>=12,'12 chapter topics have authored concept-first subsections');
   check(quality.teachingSubsections>=20,'chapter contains at least 20 focused explanatory subtopics');
-  check(quality.conceptFigures===4,'four mathematically specific diagrams appear in the appropriate lessons');
+  check(quality.conceptFigures===5,'four unique accurate diagrams are used in five relevant lessons');
 
   await page.evaluate(()=>{
     const entry=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Mathematics'&&x.title==='The World of Numbers');
@@ -49,7 +49,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   });
 
   check(await page.locator('.studyai-topic-select option').count()===13,'13 topics are selectable within the chapter');
-  check(await page.locator('#detailed-notes .studyai-concept-figure').count()===1,'initial teaching lesson displays a correctly labelled integer line');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure').count()===1,'initial teaching lesson displays a correctly labelled integer line');
   check(await page.locator('#detailed-notes .studyai-lesson-subtopic h4').count()>=3,'initial lesson has explanatory subtopics, not just a syllabus checklist');
   check(await page.locator('#detailed-notes .studyai-diagram').count()===0,'no meaningless generic graph at the start of the chapter');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,'only one academic topic shows at a time');
@@ -69,7 +69,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   check(await page.locator('#note-title').innerText()===initial,'switching topic stays in the same chapter');
 
   await page.locator('.studyai-topic-select').selectOption('4');
-  check(await page.locator('#detailed-notes .studyai-concept-figure svg').count()===1,'irrational-number explanation has a real unit-square visual');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure svg').count()===1,'irrational-number explanation has a real unit-square visual');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('π'),
     'irrational-number lesson explains the meaning of pi');
   await page.locator('.studyai-topic-select').selectOption('7');

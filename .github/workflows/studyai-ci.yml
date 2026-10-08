@@ -84,6 +84,8 @@ jobs:
       - run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
+      - name: Chapter navigation and hover motion
+        run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage
         run: node tests/cbse-browser.cjs
       - name: CAIE AS Physics browser coverage
@@ -102,8 +104,6 @@ jobs:
         run: node tests/content-first-notes-browser.cjs
       - name: Cambridge full-note and diagram coverage
         run: node tests/cambridge-full-notes-diagrams-browser.cjs
-      - name: Chapter navigation and hover motion
-        run: node tests/chapter-navigation-hover-browser.cjs
 
   browser:
     runs-on: ubuntu-latest

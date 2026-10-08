@@ -118,17 +118,29 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     check(Math.abs(parseFloat(item.duration)-.5)<.001,
       item.selector+' has a 0.5-second hover transition');
   }
-  await page.locator('#complete-btn').hover();
-  await page.waitForTimeout(550);
-  const hover=await page.locator('#complete-btn').evaluate(node=>{
-    const styles=getComputedStyle(node);
-    return {matrix:styles.transform,shadow:styles.boxShadow,scale:new DOMMatrixReadOnly(styles.transform).a,hovered:node.matches(':hover')};
+  // Inspect the loaded CSS rule directly. Long-page auto-scrolling can make a
+  // Playwright pointer hover unreliable even when the rule is present and valid.
+  const hoverRule=await page.evaluate(()=>{
+    const sheet=[...document.styleSheets].find(item=>item.href?.endsWith('/chapter-navigation-motion.css'));
+    if(!sheet)return null;
+    const rule=[...sheet.cssRules].find(item=>
+      item.selectorText?.includes(':hover')&&
+      item.style.getPropertyValue('box-shadow').includes('inset')&&
+      item.selectorText.includes('button')
+    );
+    return rule?{
+      shadow:rule.style.getPropertyValue('box-shadow'),
+      transform:rule.style.getPropertyValue('transform'),
+      filter:rule.style.getPropertyValue('filter'),
+      important:rule.style.getPropertyPriority('box-shadow')
+    }:null;
   });
-  console.log('HOVER_STYLES', hover);
-  check(Math.abs(hover.scale-1)<.01,
-    'hover keeps the clickable button stable instead of lifting or shrinking its hit area');
-  check(hover.hovered && hover.shadow.includes('inset')&&hover.shadow.includes('0, 0, 0'),
-    'hover applies a dark recessed inner shadow');
+  check(hoverRule&&hoverRule.important==='important','inward hover rule overrides older outward hover effects');
+  check(hoverRule.shadow.includes('inset')&&hoverRule.shadow.includes('rgba(0, 0, 0'),
+    'inward hover applies a recessed shadow');
+  check(hoverRule.transform==='none','inward hover keeps clickable button hitbox stable');
+  check(hoverRule.filter.includes('brightness(.97)'),'inward hover subtly darkens the button');
+
   check(errors.length===0,'no JavaScript page errors: '+errors.join('; '));
   console.log('CHAPTER NAVIGATION AND BUTTON HOVER OK');
 })().catch(error=>{

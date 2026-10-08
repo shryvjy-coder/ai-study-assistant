@@ -65,15 +65,34 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
 
   check(await page.locator('.studyai-topic-select option').count()===15,'15 topics are selectable including labelled optional extension');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure').count()===1,'initial teaching lesson displays a correctly labelled integer line');
-  check(await page.locator('#detailed-notes .studyai-lesson-subtopic h4').count()>=3,'initial lesson has explanatory subtopics, not just a syllabus checklist');
+  check(await page.locator('#detailed-notes .studyai-lesson-subtopic h4').count()>=3,'all authored explanatory subtopics remain available');
+  check(await page.locator('.studyai-subtopic-select option').count()>=3,'subtopics have their own dedicated selection menu');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()===1,
+    'a single subtopic is visible inside the selected chapter topic');
+  check(await page.locator('.studyai-prev-subtopic').isDisabled(),'first subtopic disables Previous subtopic');
+  check(await page.locator('#detailed-notes .studyai-topic-pagination').count()===1,'page-by-page navigation replaces endless scrolling');
   check(await page.locator('#detailed-notes .studyai-diagram').count()===0,'no meaningless generic graph at the start of the chapter');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,'only one academic topic shows at a time');
   check(await page.locator('#detailed-notes .studyai-topic-pagination').count()===1,'topic Previous/Next is available');
   check(await page.locator('#next-chapter-button').count()===1,'existing Next Chapter button remains available');
   const teaching=await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText();
-  check(teaching.length>=1500,'initial number-systems topic gives substantial genuine explanation');
-  check(teaching.includes('absolute value')&&teaching.includes('counterexample'),
-    'opening topic explains important mathematical concepts rather than generic exam advice');
+  check(teaching.length>=500,'first subtopic still teaches a substantial original concept');
+  check(!teaching.includes('absolute value')&&!teaching.includes('counterexample'),
+    'later subtopics do not bleed into the first teaching page');
+  const firstSubtopicCount=await page.locator('.studyai-subtopic-select option').count();
+  await page.locator('.studyai-subtopic-select').selectOption(String(firstSubtopicCount-2));
+  const advanced=await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText();
+  check(advanced.includes('counterexample')&&advanced.includes('absolute value'),
+    'mathematical closure and absolute value remain accessible on their own subtopic page');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()===1,
+    'selecting a subtopic never reveals the whole lesson at once');
+  await page.locator('.studyai-subtopic-select').selectOption('0');
+  await page.locator('.studyai-next-subtopic').click();
+  check(await page.locator('.studyai-subtopic-select').inputValue()==='1',
+    'Next subtopic advances exactly one independent page');
+  await page.locator('.studyai-prev-subtopic').click();
+  check(await page.locator('.studyai-subtopic-select').inputValue()==='0',
+    'Previous subtopic goes back without changing chapter topic');
   check(await page.locator('.studyai-prev-topic').first().isDisabled(),'first topic disables Previous topic');
   const initial=await page.locator('#note-title').innerText();
   await page.locator('.studyai-topic-select').selectOption('5');
@@ -85,13 +104,20 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
 
   await page.locator('.studyai-topic-select').selectOption('4');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure svg').count()===1,'irrational-number explanation has a real unit-square visual');
+  await page.locator('.studyai-subtopic-select').selectOption('1');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('π'),
-    'irrational-number lesson explains the meaning of pi');
+    'irrational-number lesson explains pi on its own subtopic page');
+  await page.locator('.studyai-subtopic-select').selectOption('0');
   await page.locator('.studyai-topic-select').selectOption('7');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('142857'),
     'decimal-expansion lesson demonstrates the one-seventh remainder cycle');
+  await page.locator('.studyai-topic-select').selectOption('8');
+  check((await page.locator('.studyai-subtopic-select option').allTextContents()).some(x=>x.includes('Zoom 1')),
+    'successive magnification has dedicated subtopic pages');
   await page.locator('.studyai-topic-select').selectOption('14');
   check(await page.locator('.studyai-next-topic').first().isDisabled(),'last topic disables Next topic');
+  check(await page.locator('.studyai-prev-page').isEnabled(),
+    'the linear reading flow can move backward across all topic pages');
 
   await page.evaluate(()=>{
     const other=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Mathematics'&&x.title==='Exploring Algebraic Identities');

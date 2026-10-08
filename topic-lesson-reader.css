@@ -1,0 +1,57 @@
+/* One topic at a time: Grade 9 CBSE Mathematics only. */
+#detailed-notes .note-section[hidden]{display:none!important}
+.studyai-lesson-reader{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:end;
+  gap:14px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:14px;
+  padding:18px;
+  margin:12px 0 24px;
+  scroll-margin-top:100px;
+}
+.studyai-lesson-label{display:flex;flex-direction:column;gap:5px;min-width:94px}
+.studyai-lesson-total{font-size:.86rem;font-weight:800;color:var(--ink)}
+.studyai-topic-select{
+  flex:1 1 220px;
+  min-width:160px;
+  max-width:100%;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:11px 12px;
+  font:inherit;
+  font-weight:700;
+  color:var(--ink);
+  background:var(--surface);
+}
+.studyai-lesson-controls{display:flex;gap:8px;flex-wrap:wrap}
+.studyai-lesson-controls .button{white-space:nowrap}
+.studyai-topic-pagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-top:1px solid var(--line);
+  margin-top:24px;
+  padding:24px 0 8px;
+}
+.studyai-topic-progress{font-size:.9rem;font-weight:800;color:var(--muted)}
+.studyai-current-topic{animation:studyai-lesson-appear .25s ease}
+@keyframes studyai-lesson-appear{
+  from{opacity:.85}
+  to{opacity:1}
+}
+@media(max-width:820px){
+  .studyai-lesson-controls{width:100%}
+  .studyai-lesson-controls .button{flex:1}
+}
+@media(max-width:550px){
+  .studyai-topic-pagination{flex-wrap:wrap}
+  .studyai-topic-pagination .button{flex:1}
+  .studyai-topic-progress{width:100%;order:-1;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){
+  .studyai-current-topic{animation:none}
+}

@@ -222,6 +222,9 @@ function renderExamples(items){
 function renderSection(section){
   return '<section class="note-section actual-note-topic"><h3>'+escapeHtml(section.title||'')+'</h3>'+
     asArray(section.paragraphs).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+
+    asArray(section.subtopics).map(part=>'<div class="studyai-lesson-subtopic"><h4>'+escapeHtml(part.title||'')+'</h4>'+
+      asArray(part.paragraphs).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+
+      renderList(part.bullets)+renderFormulas(part.formulas)+renderExamples(part.examples)+'</div>').join('')+
     renderList(section.bullets)+renderFormulas(section.formulas)+renderExamples(section.examples)+
     (section.tip?'<div class="exam-box"><h4>Exam tip</h4><p>'+escapeHtml(section.tip)+'</p></div>':'')+
     '</section>';

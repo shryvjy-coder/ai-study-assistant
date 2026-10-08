@@ -92,22 +92,20 @@ async function openEntry(page,board,grade,subject,title){
     check(text.length>=2500,title+' contains substantial exam-ready note depth ('+text.length+' chars)');
     check(!/Chapter overview|Key concepts and explanations|How to reason through this chapter|Quick revision/.test(text),title+' does not use the old generic summary headings');
     check(await page.locator('#detailed-notes .content-first-long-notes').count()===1,title+' uses the content-first long-note renderer');
-    check(await page.locator('#detailed-notes .studyai-diagram svg').count()===1,title+' renders an inline SVG learning diagram');
+    check(await page.locator('#detailed-notes .studyai-diagram svg').count()===0,title+' does not show unrelated generic diagrams');
   }
 
-  const diagramCoverage=await page.evaluate(()=>{
-    const missing=STUDY_DATA.filter(e=>!window.StudyAIDiagrams?.render?.(e)?.includes('<svg')).map(e=>e.id);
-    return {total:STUDY_DATA.length,missing};
-  });
-  check(diagramCoverage.total>0&&diagramCoverage.missing.length===0,'every StudyAI curriculum entry has a renderable original diagram');
+  const placeholderCount=await page.evaluate(()=>STUDY_DATA.filter(e=>window.StudyAIDiagrams?.render?.(e)).length);
+  check(placeholderCount===0,'generic, subject-guessed diagrams are disabled until authored replacements exist');
 
   await page.evaluate(()=>{
-    const cbse=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics');
+    const cbse=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics'&&e.title==='The World of Numbers');
     current={board:cbse.board,grade:cbse.grade,subject:cbse.subject,component:'All components',topic:cbse.title,topicId:cbse.id};
     renderFilters();openTopic(cbse.title,cbse.id);location.hash='#study';
   });
   await page.waitForSelector('#study:not([hidden])');
-  check(await page.locator('#detailed-notes .studyai-diagram svg').count()===1,'CBSE Full Notes also render the shared diagram system');
+  check(await page.locator('#detailed-notes .studyai-concept-figure svg').count()===1,'CBSE Class 9 opens with an authored signed-integers number line');
+  check(await page.locator('#detailed-notes .studyai-diagram svg').count()===0,'original accurate figure replaces the old arbitrary graph');
 
   check(errors.length===0,'Cambridge full-note and diagram rendering has no browser JavaScript errors: '+errors.join(' | '));
   console.log('TOTAL',checks,'Cambridge full-note/diagram checks passed');

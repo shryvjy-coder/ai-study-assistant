@@ -150,6 +150,23 @@ for(const section of chapter.sections){
  section.subtopics=item.subtopics;
  if(item.figureId)section.figureId=item.figureId;
 }
+// Teach concepts before applications; retain every chapter-specific lesson.
+const lessonOrder=[
+ 'Natural numbers, zero and integers',
+ 'Rational numbers',
+ 'Representing rational numbers on the number line',
+ 'Density of rational numbers',
+ 'Irrational numbers',
+ 'Why √2 is irrational',
+ 'Constructing square-root lengths',
+ 'Decimal expansions of real numbers',
+ 'Fraction to decimal and repeating decimal to fraction',
+ 'Comparing, ordering and approximating real numbers',
+ 'Simplifying radicals and operations involving irrational numbers',
+ 'Properties, inclusion and classification of number sets',
+ 'Mixed exam applications and full solutions'
+];
+chapter.sections.sort((a,b)=>lessonOrder.indexOf(a.title)-lessonOrder.indexOf(b.title));
 chapter._studyaiConceptFirst=true;
 window.STUDYAI_CONCEPT_FIRST_STATUS={
  chapter:chapter.lead,

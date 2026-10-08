@@ -180,11 +180,10 @@
 
     function show(topicIndex,subtopicIndex,focus){
       const i=Math.max(0,Math.min(Number(topicIndex)||0,topics.length-1));
-      const topicChanged=selectedTopic!==i;
       selectedTopic=i;
       const pages=pagesByTopic[i];
       selectedSubtopic=pages.length
-        ?Math.max(0,Math.min(topicChanged?0:(Number(subtopicIndex)||0),pages.length-1))
+        ?Math.max(0,Math.min(Number(subtopicIndex)||0,pages.length-1))
         :0;
 
       allSections.forEach(section=>{

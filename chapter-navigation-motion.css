@@ -34,10 +34,11 @@
   scroll-margin-top: 95px;
 }
 
-/* The inset, shrinking motion replaces the upward/outward hover elsewhere. */
+/* A recessed press-in effect with a stable hit area replaces the outward hover. */
 body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]) {
   transform-origin: center center;
   transition: transform .5s cubic-bezier(.22, 1, .36, 1),
+              filter .5s ease,
               box-shadow .5s ease,
               background-color .5s ease,
               border-color .5s ease,
@@ -45,8 +46,9 @@ body :is(button, a.button, input[type="button"], input[type="submit"], input[typ
 }
 
 body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):hover {
-  transform: translateY(1px) scale(.965) !important;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .08) !important;
+  transform: none !important;
+  filter: brightness(.97) !important;
+  box-shadow: inset 0 3px 9px rgba(0, 0, 0, .18) !important;
 }
 
 body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):active {

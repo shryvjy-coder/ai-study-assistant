@@ -104,7 +104,7 @@ async function openEntry(page,board,grade,subject,title){
     renderFilters();openTopic(cbse.title,cbse.id);location.hash='#study';
   });
   await page.waitForSelector('#study:not([hidden])');
-  check(await page.locator('#detailed-notes .studyai-concept-figure svg').count()===1,'CBSE Class 9 opens with an authored signed-integers number line');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure svg').count()===1,'CBSE Class 9 opens with an authored signed-integers number line');
   check(await page.locator('#detailed-notes .studyai-diagram svg').count()===0,'original accurate figure replaces the old arbitrary graph');
 
   check(errors.length===0,'Cambridge full-note and diagram rendering has no browser JavaScript errors: '+errors.join(' | '));

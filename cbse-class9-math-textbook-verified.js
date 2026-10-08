@@ -97,6 +97,17 @@ const decimalTopic={
 const pos=chapter.sections.findIndex(s=>s.title==='Comparing, ordering and approximating real numbers');
 chapter.sections.splice(pos>=0?pos:chapter.sections.length-1,0,decimalTopic);
 
+add('Natural numbers, zero and integers',[
+  {
+    title:'Using an absolute value and a counterexample to justify a rule',
+    paragraphs:[
+      'The absolute value |x| is the nonnegative distance of x from zero, so |−5|=5. For two number-line positions a and b, the distance between them is |a−b|. It cannot be negative. This way of interpreting absolute value gives meaning to the formula instead of just telling you to remove a minus sign.',
+      'Closure is a different type of statement. An operation is closed on a set only when every allowed pair from that set produces an answer in that same set. For integers, addition and multiplication are closed, but division is not. Although 8÷2=4 stays an integer, 7÷2=3.5 does not. The failed example is called a counterexample; one counterexample proves that a claim about every pair is false.',
+      'To explain closure in an examination, first name the set and the operation, then show the result of a specific pair and identify whether it belongs to the original set. A successful example alone cannot establish a universal property, while a counterexample can disprove it.'
+    ],
+    examples:[{title:'Worked check of a universal claim',question:'A student says every quotient of two integers is an integer. Is the claim true?',steps:['The claim says every permitted quotient stays an integer.','Choose 7 and 2: 7÷2=3.5.','3.5 is not an integer, so this pair is a counterexample.'],answer:'The claim is false: integer division is not closed.'}]
+  }
+]);
 add('Properties, inclusion and classification of number sets',[
   {
     title:'The real line is a one-to-one correspondence',

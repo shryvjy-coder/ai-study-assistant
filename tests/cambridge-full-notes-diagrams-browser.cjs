@@ -41,7 +41,9 @@ async function openEntry(page,board,grade,subject,title){
     location.hash='#study';
   },{board,grade,subject,title});
   await page.waitForSelector('#study:not([hidden])');
-  await page.waitForSelector('#reader-view:not(.hidden) .cambridge-full-notes');
+  // AS/A Physics, Chemistry and Maths use the deep-note renderer, not the
+  // IGCSE/Biology-specific cambridge-full-notes class. Both share the content-first reader.
+  await page.waitForSelector('#reader-view:not(.hidden) .content-first-long-notes');
 }
 
 (async()=>{

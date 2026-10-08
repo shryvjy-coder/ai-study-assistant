@@ -46,3 +46,16 @@
  .studyai-concept-figure figcaption{padding:12px}
  .studyai-lesson-subtopic{margin:22px 0}
 }
+.studyai-mistake-warning{
+  margin:20px 0;
+  border-left:5px solid #c76b16;
+  border-radius:8px;
+  background:rgba(199,107,22,.075);
+  padding:17px 20px;
+}
+.studyai-mistake-warning h4{
+  margin:0 0 8px;
+  font-size:1rem;
+  font-weight:800;
+}
+.studyai-mistake-warning p{margin:0;line-height:1.65}

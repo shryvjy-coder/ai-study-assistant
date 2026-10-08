@@ -19,9 +19,9 @@ const figures={
       '<text x="'+x+'" y="179" class="st" text-anchor="middle">'+(value<0?'−'+(-value):value)+'</text>';
   }).join('');
   return start('Signed integers on a number line','−2 is greater than −5 because it lies three units to the right.', 
-    '<line x1="74" y1="134" x2="620" y2="134" class="sl"/><path d="M620 134 l−10 −6 v12 z" fill="#2b4a49"/>'+
+    '<line x1="74" y1="134" x2="620" y2="134" class="sl"/><path d="M620 134 l-10 -6 v12 z" fill="#2b4a49"/>'+
     tick+'<line x1="100" y1="80" x2="304" y2="80" class="sf"/>'+
-    '<path d="M304 80 l−13 −7 v14 z" fill="#138e83"/>'+
+    '<path d="M304 80 l-13 -7 v14 z" fill="#138e83"/>'+
     '<circle cx="100" cy="134" r="7" class="dot"/><circle cx="304" cy="134" r="7" class="dot"/>'+
     '<text x="202" y="65" text-anchor="middle" class="sm">3 units right</text>'+
     '<text x="340" y="220" text-anchor="middle" class="st">Greater numbers lie to the right →</text>');
@@ -33,7 +33,7 @@ const figures={
   return start('Locating three quarters','Divide the interval from 0 to 1 into four equal lengths. The third division is exactly 3/4.',
     '<line x1="91" y1="126" x2="564" y2="126" class="sl"/>'+
     '<line x1="115" y1="93" x2="415" y2="93" class="sf"/>'+
-    '<path d="M415 93 l−13 −7 v14 z" fill="#138e83"/>'+
+    '<path d="M415 93 l-13 -7 v14 z" fill="#138e83"/>'+
     ticks+'<circle cx="415" cy="126" r="9" class="dot"/>'+
     '<text x="265" y="73" class="sm" text-anchor="middle">three equal quarter-steps</text>'+
     '<text x="345" y="223" class="st" text-anchor="middle">Each gap is exactly ¼ unit</text>');

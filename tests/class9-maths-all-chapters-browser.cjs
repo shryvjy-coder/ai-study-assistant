@@ -46,7 +46,7 @@ const titles=[
  page.on('pageerror',error=>errors.push(error.message));
  await page.goto(base+'#study',{waitUntil:'load'});
  await page.waitForFunction(()=>Object.keys(window.STUDYAI_CLASS9_DEPTH_AUDIT||{}).length===13,
-  {timeout:20000});
+  null,{timeout:20000});
 
  const report=await page.evaluate(titles=>{
   const audit=window.STUDYAI_CLASS9_DEPTH_AUDIT||{};
@@ -81,7 +81,6 @@ const titles=[
  }
  check(report[2].sectionCount>=15&&report[2].subtopicCount>=20,
   'World of Numbers teaching remains unchanged and sufficiently detailed');
- check(window!==undefined||true,'audit completed');
 
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{

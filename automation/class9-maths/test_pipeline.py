@@ -97,7 +97,8 @@ class PipelineTests(unittest.TestCase):
                 get_pdf("https://example.com/pretend.pdf",Path(folder)/"book.pdf")
 
     def test_loader_generation_is_deterministic_and_can_run_twice(self):
-        from apply_proposals import END_MARKER, LOAD_MARKER
+        END_MARKER='<script defer src="cbse-class9-maths-depth-ch14.js"></script>'
+        LOAD_MARKER='<script defer src="cbse-class9-maths-audited-proposals.js"></script>'
         model=sample_model()
         pages=["How would you modify the algorithm to add two decimal fractions?"]
         result=validate(model,sample_notes(),pages,True)

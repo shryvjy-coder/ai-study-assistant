@@ -95,6 +95,12 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   await page.locator('.studyai-next-page').click();
   check(await page.locator('.studyai-topic-select').inputValue()==='1',
     'Next moves exactly one substantial lesson, not one tiny subsection');
+  // The independent first-visit onboarding flow can open after page load.
+  // Close it before testing lesson navigation, just as a student would.
+  await page.evaluate(()=>{
+    const onboarding=document.getElementById('studyai-onboarding');
+    if(onboarding?.open)onboarding.close();
+  });
   await page.locator('.studyai-prev-page').click();
   check(await page.locator('.studyai-topic-select').inputValue()==='0',
     'Previous returns to the beginning without losing content');

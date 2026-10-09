@@ -803,7 +803,12 @@ const titles=[
     heading:opened[0]?.querySelector(':scope > h3')?.textContent.trim(),
     text:opened[0]?.textContent||'',examples:opened[0]?.querySelectorAll('.worked-box').length||0};
   });
-  const before={topics:parts.length,examples:examples.length,sections:ch.sections.length};
+  const before={
+   topics:ch.sections.flatMap(s=>s.subtopics||[]).length,
+   examples:ch.sections.flatMap(s=>s.examples||[]).length+
+    ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(p=>p.examples||[])).length,
+   sections:ch.sections.length
+  };
   // Running the full chapter script again must not append duplicate lessons.
   await new Promise((resolve,reject)=>{
    const s=document.createElement('script');

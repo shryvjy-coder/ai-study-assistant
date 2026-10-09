@@ -3,6 +3,13 @@
 'use strict'; const D=window.StudyAIClass9Depth,E=D.example;
 D.apply('Exploring Algebraic Identities',[
 ['Identity versus equation',[
+['Discovering an identity from consecutive squares',[
+'Taking the squares of three consecutive nonnegative integers gives a striking pattern. With 1, 4 and 9, the smallest plus the largest minus twice the middle is 1+9−2×4=2. With 9, 16 and 25, the same calculation gives 9+25−2×16=2. Repeating examples suggests a rule but does not prove it.',
+'Let the three consecutive integers be n−1, n and n+1, with n at least 1. Their squares are (n−1)², n² and (n+1)². Expand the outer squares using (a−b)² and (a+b)²: (n²−2n+1)+(n²+2n+1)−2n². The n² and n terms cancel, leaving 2. Therefore the pattern holds for every such triple.',
+'The equality (n−1)²+(n+1)²−2n²=2 is an algebraic identity, valid for every real n. To call the squares smallest, middle and largest in that order, use three consecutive nonnegative integers; the algebraic identity itself needs no such ordering. This is the difference between spotting a pattern and proving it.'
+],['(n−1)²+(n+1)²−2n²=2'],[
+E('Prove the consecutive-squares pattern','Prove that the sum of the first and third squares of three consecutive nonnegative integers, minus twice the middle square, is always 2.',['Write the three integers as n−1, n and n+1.','Translate the statement to (n−1)²+(n+1)²−2n².','Expand: n²−2n+1+n²+2n+1−2n².','Collect terms: (n²+n²−2n²)+(−2n+2n)+(1+1)=2.','Check with 4, 5, 6: 16+36−2×25=2.'],'The expression equals 2 for every permitted n.')
+]],
 ['Why an identity works for every value',[
 'An equation may hold only for certain inputs: x+2=7 is true only when x=5. An identity is a statement that remains true for every permitted value. For instance, 2(x+3)=2x+6 follows from the distributive law, so substituting any real x leaves both sides equal.',
 'Testing several values cannot establish an identity for all values; there are infinitely many candidates. A valid proof uses algebra, an area model or a geometric argument. One counterexample, however, is enough to disprove a claimed universal identity.'

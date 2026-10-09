@@ -4,7 +4,7 @@
 D.apply('I’m Up and Down, and Round and Round',[
 ['Circle vocabulary',[
 ['A circle is a locus, not a filled disc',[
-'A circle is the set of points at one fixed distance r from one fixed centre O. Every point on the circumference satisfies OP=r. The region inside the boundary is called a disc; the distinction matters when we discuss arcs, chords and sectors.',
+'A locus is the set of all points on a plane that satisfy a stated condition. A circle is the locus of points at one fixed distance r from one fixed centre O. Every point on its circumference satisfies OP=r, and every point satisfying OP=r lies on the circle. The region inside the boundary is called a disc, not the circle itself; this distinction matters for arcs, chords and sectors.',
 'A radius joins the centre to a point on the circumference; a diameter is a chord passing through the centre. It is the longest chord because it spans two radii on one straight line. A secant line crosses a circle at two points; a tangent touches it at one point.'
 ],['d=2r'],[E('Radius and diameter','A circle has diameter 18 cm. Determine its radius.',['A diameter consists of two equal radii.','r=d/2=18/2.'],'9 cm')]],
 ['Chords, arcs, sectors and segments',[
@@ -18,9 +18,11 @@ D.apply('I’m Up and Down, and Round and Round',[
 'An important consequence is that two radii OA and OB form an isosceles triangle OAB. Therefore its base angles at A and B are equal. This simple isosceles-triangle fact supports many proofs about chords and arcs.'
 ],['OA=OB=r','In triangle OAB, ∠OAB=∠ABO'],[E('Isosceles radii','In triangle OAB, OA=OB and ∠AOB=80°. Find each base angle.',['Triangle angle sum is 180°.','The two base angles are equal.','Each equals (180−80)/2.'],'50°')]],
 ['Locating the centre from chords',[
-'A perpendicular bisector of a chord passes through the centre. Indeed, if A and B are chord endpoints, OA=OB; the centre lies on the locus of points equidistant from A and B, which is the perpendicular bisector of AB.',
-'To determine an unknown circle centre, draw two chords whose perpendicular bisectors are not the same line, then construct their bisectors. Their intersection is the centre. One chord alone cannot identify a unique centre without further information.'
-],[],[E('Finding a centre','Two different chords AB and CD are drawn. How can you locate the circle centre?',['Construct the perpendicular bisector of AB.','Construct the perpendicular bisector of CD.','Both must pass through the centre, so their intersection determines it.'],'The intersection of the two perpendicular bisectors.')]]
+'A point is equidistant from distinct points A and B if and only if it lies on the perpendicular bisector of AB. One direction follows from equal-length radii and congruent triangles; the reverse follows because every point on the perpendicular bisector has equal distances to A and B. Thus the perpendicular bisector is the locus of all possible centres of circles through A and B.',
+'Infinitely many circles pass through two distinct points A and B: choose any centre on the perpendicular bisector of AB, then use its distance from A as the radius. The smallest circle has centre at the midpoint of AB and radius AB/2. Any other centre on the bisector is farther from A, as Pythagoras shows.',
+'For three non-collinear points A, B and C, the perpendicular bisectors of AB and AC intersect at exactly one point, the unique circle centre. No circle can pass through three distinct collinear points. To locate the centre of a drawn circle, construct the perpendicular bisectors of two different chords and use their intersection.'
+],[],[E('Finding a centre','Two different chords AB and CD are drawn. How can you locate the circle centre?',['Construct the perpendicular bisector of AB.','Construct the perpendicular bisector of CD.','Both must pass through the centre, so their intersection determines it.'],'The intersection of the two perpendicular bisectors.'),
+E('Why infinitely many circles pass through two points','Points A and B are 8 cm apart. Give the smallest possible radius of a circle through both and one different possible radius.',['Every centre lies on the perpendicular bisector of AB. The midpoint M is 4 cm from each point, so the smallest radius is 4 cm.','Choose another centre O on the perpendicular bisector with OM=3 cm.','Right triangle OMA has legs 3 cm and 4 cm, so OA=√(3²+4²)=5 cm.','The 5 cm circle also passes through B because OA=OB. More centres give more circles.'],'Smallest radius 4 cm; another possible radius 5 cm.')]]
 ]],
 ['Chords and the centre',[
 ['Why a line from the centre bisects a chord',[

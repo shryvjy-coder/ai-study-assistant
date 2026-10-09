@@ -130,7 +130,7 @@ if(audit){
  audit.subtopics=parts.length;
  audit.examples=sections.reduce((n,s)=>n+(s.examples||[]).length,0)+parts.reduce((n,s)=>n+(s.examples||[]).length,0);
  audit.paragraphs=sections.reduce((n,s)=>n+(s.paragraphs||[]).length,0)+parts.reduce((n,s)=>n+(s.paragraphs||[]).length,0);
- audit.words=[ch.lead,...sections.flatMap(s=>[...(s.paragraphs||[]),...(s.subtopics||[]).flatMap(u=>[...(u.paragraphs||[]),...(u.formulas||[]),...(u.bullets||[])])])].join(' ').trim().split(/\\s+/).length;
+ audit.words=[ch.lead,...sections.flatMap(s=>[...(s.paragraphs||[]),...(s.subtopics||[]).flatMap(u=>[...(u.paragraphs||[]),...(u.formulas||[]),...(u.bullets||[])])])].join(' ').trim().split(/\s+/).length;
  audit.reviewedSource='NCERT Ganita Manjari Part I (2026–27), Chapter 8, iemh108.pdf';
 }
 })();

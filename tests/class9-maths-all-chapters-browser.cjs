@@ -512,6 +512,109 @@ const titles=[
  check(JSON.stringify(ch08Replay.before)===JSON.stringify(ch08Replay.after),
   'Chapter 8: reloading the note script does not duplicate sections or examples');
 
+
+ // NCERT Ganita Manjari Part II (iemh201.pdf), Chapter 9: independent content & UI audit.
+ const verifiedCh09=await page.evaluate(()=>{
+  const title='Propositions and their Converses';
+  const bank=window.CBSE_CLASS9_MATH_FULL_NOTES, ch=bank?.[title];
+  if(!ch)throw Error('NCERT Chapter 9 note bank entry is absent');
+  const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+   e.subject==='Mathematics'&&e.title===title);
+  if(!entry)throw Error('NCERT Chapter 9 navigation entry is absent');
+  const excluded=new Set(['Chapter coverage','Exam application',
+   'Common traps and final checks','Mastery check']);
+  const sections=ch.sections.filter(s=>!excluded.has(s.title));
+  const parts=sections.flatMap(s=>s.subtopics||[]);
+  const examples=sections.flatMap(s=>s.examples||[]).concat(parts.flatMap(u=>u.examples||[]));
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+   component:'All components',topic:entry.title,topicId:entry.id};
+  renderFilters();openTopic(entry.title,entry.id);
+  const rendered=sections.map((s,index)=>{
+   window.StudyAILessonReader.goTo(index);
+   const visible=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(el=>!el.hidden);
+   return {title:s.title,visible:visible.length,
+    heading:visible[0]?.querySelector(':scope > h3')?.textContent.trim(),
+    length:visible[0]?.textContent?.length||0,
+    worked:visible[0]?.querySelectorAll('.worked-box').length||0};
+  });
+  window.StudyAILessonReader.goTo(0);
+  return {sectionTitles:sections.map(s=>s.title),
+   titles:parts.map(p=>p.title),examples:examples.map(e=>e.title),rendered,
+   invalid:examples.filter(ex=>!ex||typeof ex.question!=='string'||
+    !Array.isArray(ex.steps)||!ex.steps.length||
+    typeof ex.answer!=='string'||!ex.answer.trim()).length,
+   badParagraphs:parts.filter(p=>!Array.isArray(p.paragraphs)||p.paragraphs.length<2).length,
+   lessonOptions:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
+   progressCount:window.StudyAIProgress?.summary(entry.id)?.total||0,
+   audit:window.STUDYAI_CLASS9_DEPTH_AUDIT?.[title]};
+ });
+ const ch09Topics=[
+  'Four ways a statement and its converse can behave',
+  'Reversible algebraic operations: addition, even powers and odd powers',
+  'Why perfect squares have exactly an odd number of positive divisors',
+  'Exactly three or four divisors: prime squares, cubes and products',
+  'Products of squares, equal areas and prime-looking formulas',
+  'Converse of Baudhāyana–Pythagoras using an SSS construction',
+  'Coprime factors, LCM and why divisibility converses fail',
+  'Offset coprimality and the digit-sum biconditional',
+  'Equal-length diagonal sticks and the meaning of necessary',
+  'Incentre and angle-bisector lengths: a starred geometric proposition'
+ ];
+ check(ch09Topics.every(t=>verifiedCh09.titles.filter(x=>x===t).length===1),
+  'Chapter 9: 10 original, source-verified theorem and converse subtopics appear once');
+ const ch09Examples=[
+  'Both directions can be false',
+  'A square loses sign information',
+  'Divisor partners for squares and non-squares',
+  'A prime cube refutes the four-divisor converse',
+  'A false product-of-squares converse',
+  'Prove the Pythagorean converse by construction',
+  'Compare 24 with 60',
+  'Prove the three-step gcd equivalence',
+  'Build a quadrilateral from two sticks',
+  'Symmetry proves the incentre proposition',
+  'A counterexample to a tempting incentre converse (optional)'
+ ];
+ check(ch09Examples.every(t=>verifiedCh09.examples.filter(x=>x===t).length===1),
+  'Chapter 9: carefully justified worked proofs and counterexamples appear once');
+ check(verifiedCh09.invalid===0&&verifiedCh09.badParagraphs===0,
+  'Chapter 9: every worked solution and explanatory subtopic has a valid structure');
+ check(verifiedCh09.rendered.every(p=>p.visible===1&&p.heading===p.title&&
+   p.length>400&&p.worked>=1),
+  'Chapter 9: each substantial lesson renders separately with worked problems');
+ check(verifiedCh09.lessonOptions===verifiedCh09.progressCount&&
+   verifiedCh09.lessonOptions===verifiedCh09.rendered.length&&
+   verifiedCh09.audit?.sections===verifiedCh09.rendered.length&&
+   verifiedCh09.audit?.subtopics===verifiedCh09.titles.length&&
+   verifiedCh09.audit?.words>1900,
+  'Chapter 9: navigation, completion and final depth metrics agree');
+ check(verifiedCh09.audit?.reviewedSource?.includes('iemh201.pdf'),
+  'Chapter 9: verified source is NCERT Part II iemh201.pdf, not iemh109.pdf');
+ // Gemini's suggested iff converse is false: exact numeric coordinate counterexample.
+ const r=(Math.sqrt(3)-1)/2,e=2*Math.sqrt(3)-3,q=Math.sqrt(3)/(1+Math.sqrt(3));
+ const ie2=(r-e)**2+r**2,if2=2*(q-r)**2;
+ check(Math.abs(ie2-if2)<1e-11&&Math.abs(ie2-(14-8*Math.sqrt(3)))<1e-11,
+  'Chapter 9: exact 30–60–90 incentre counterexample refutes Gemini’s iff claim');
+ const ch09Replay=await page.evaluate(async()=>{
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES['Propositions and their Converses'];
+  const snapshot=()=>({sections:ch.sections.length,
+   topics:ch.sections.flatMap(s=>s.subtopics||[]).length,
+   examples:ch.sections.flatMap(s=>s.examples||[]).length+
+    ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(p=>p.examples||[])).length});
+  const before=snapshot();
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement('script');
+   script.src='/cbse-class9-maths-depth-ch09.js?studyai-reload-test=1';
+   script.onload=resolve;
+   script.onerror=()=>reject(Error('Chapter 9 script reload failed'));
+   document.head.append(script);
+  });
+  return {before,after:snapshot()};
+ });
+ check(JSON.stringify(ch09Replay.before)===JSON.stringify(ch09Replay.after),
+  'Chapter 9: second depth-script evaluation never duplicates subtopics or examples');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

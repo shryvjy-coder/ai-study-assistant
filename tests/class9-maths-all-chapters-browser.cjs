@@ -188,6 +188,9 @@ const titles=[
   const bank=window.CBSE_CLASS9_MATH_FULL_NOTES;
   const ch=bank['Measuring Space: Perimeter and Area'];
   const titles=ch.sections.map(s=>s.title);
+  const generic=new Set(['Chapter coverage','Exam application',
+   'Common traps and final checks','Mastery check']);
+  const navigableTitles=titles.filter(title=>!generic.has(title));
   const added=[
    'Pi, track staggers and perimeter puzzles',
    'Heron’s formula and triangle-side applications',
@@ -218,7 +221,7 @@ const titles=[
   };
   const browser=added.map(openLesson);
   return {
-   added,titles,concepts:parts.map(part=>part.title),
+   added,titles,navigableTitles,concepts:parts.map(part=>part.title),
    exampleNames:examples.map(ex=>ex.title),browser,
    audit:window.STUDYAI_CLASS9_DEPTH_AUDIT['Measuring Space: Perimeter and Area'],
    readerOptions:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
@@ -257,7 +260,7 @@ const titles=[
    item.title===verifiedCh06.added[i]&&item.examples>=2&&item.words>600&&item.progress>0),
   'Chapter 6: all six new lessons render with worked examples and progress tracking');
  check(verifiedCh06.readerOptions===verifiedCh06.progressCount&&
-   verifiedCh06.readerOptions===verifiedCh06.titles.length&&
+   verifiedCh06.readerOptions===verifiedCh06.navigableTitles.length&&
    verifiedCh06.audit.sections===verifiedCh06.titles.length,
   'Chapter 6: lesson navigation, completion rings and content inventory agree');
 

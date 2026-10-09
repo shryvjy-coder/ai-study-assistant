@@ -316,6 +316,26 @@ ch6topic('Composite perimeter and area','Area of a concentric annulus from a tan
   'R²−r²=7²=49.',
   'Area=(22/7)×49.'
  ],'154 cm².')]);
+
+ch6topic('Composite perimeter and area','Semicircle areas and right-triangle geometry',[
+ 'A semicircle with diameter d has radius d/2 and area (1/2)π(d/2)²=πd²/8. A right triangle with legs a and b and hypotenuse c satisfies a²+b²=c². Multiplying this equality by π/8 shows that the areas of the semicircles on the two legs add to the area of the semicircle on the hypotenuse.',
+ 'This equality is about total areas, not about the semicircular pieces having the same outlines. It is useful for NCERT figures that compare crescent-shaped regions created by semicircles and triangles.'
+ ],['Semicircle on diameter d: A=πd²/8','For a²+b²=c²: πa²/8+πb²/8=πc²/8'],[
+ E('Semicircles of a right triangle','A triangle has perpendicular legs 3 and 4 cm and hypotenuse 5 cm. Compare the areas of semicircles on its sides.',[
+  'Leg semicircles total π(3²+4²)/8=25π/8.',
+  'Hypotenuse semicircle area=π×5²/8=25π/8.',
+  'The two values are equal by Pythagoras.'
+ ],'Both areas are 25π/8 cm².')]);
+ch6topic('Composite perimeter and area','Circle grids and the four-petal exercise',[
+ 'When congruent circles of radius r are packed into a grid of square cells each of side 2r, every cell has area 4r² and contains one circle of area πr². A rectangular grid consisting of any whole number of these cells has the same occupied fraction, π/4≈78.5%. This is for square-cell packing, not every possible way circles can be packed.',
+ 'For the NCERT four-petal figure, draw four semicircles of radius 1 inward from the sides of a square of side 2. The semicircles together cover the whole square, and the four interior petals are each covered twice. Subtract the once-covered square area from the total area of the four semicircles to get 4×(π/2)−4=2π−4 square units.'
+ ],['Square-cell circle area fraction=π/4','Four petals in side-2 square: A=2π−4'],[
+ E('Twenty circles in a rectangular grid','Twenty circles of radius 2 cm occupy individual 4×4 cm square cells in a rectangular grid. What proportion of the grid is covered?',[
+  'Combined circle area=20×π×2²=80π.',
+  'Combined cell area=20×16=320.',
+  'Covered fraction=80π/320=π/4.'
+ ],'π/4, approximately 78.5%.')
+ ]);
 const mixedIndex=ch.sections.findIndex(s=>s.title==='Mixed exam applications and fully worked solutions');
 if(mixedIndex<0)throw Error('Chapter 6 textbook audit: mixed-exam lesson not found');
 ch.sections.splice(mixedIndex,0,...extra);

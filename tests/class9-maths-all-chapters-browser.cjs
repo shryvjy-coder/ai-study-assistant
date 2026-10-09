@@ -125,6 +125,64 @@ const titles=[
 
 
 
+ // Regression checks for independent NCERT Ganita Manjari reviews (Ch 2, 4, 5).
+ const review=await page.evaluate(()=>{
+  const notes=window.CBSE_CLASS9_MATH_FULL_NOTES;
+  const parts=title=>notes[title].sections.flatMap(s=>s.subtopics||[]);
+  const ch2=parts('Introduction to Linear Polynomials');
+  const ch4=parts('Exploring Algebraic Identities');
+  const ch5=parts('I’m Up and Down, and Round and Round');
+  const selectPart=(arr,title)=>arr.filter(p=>p.title===title);
+  const degree=selectPart(ch2,'Degree, coefficients and missing terms in polynomials');
+  const squares=selectPart(ch4,'Discovering an identity from consecutive squares');
+  const locus=selectPart(ch5,'A circle is a locus, not a filled disc');
+  const centres=selectPart(ch5,'Locating the centre from chords');
+  const openLesson=(title,lesson)=>{
+   const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+    e.subject==='Mathematics'&&e.title===title);
+   if(!entry)throw Error('No curriculum entry: '+title);
+   current={board:entry.board,grade:entry.grade,subject:entry.subject,
+    component:'All components',topic:entry.title,topicId:entry.id};
+   renderFilters();
+   openTopic(entry.title,entry.id);
+   const index=notes[title].sections.findIndex(s=>s.title===lesson);
+   if(index<0)throw Error('No lesson '+lesson);
+   window.StudyAILessonReader.goTo(index);
+   const opened=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(s=>!s.hidden);
+   return {count:opened.length,title:opened[0]?.querySelector(':scope > h3')?.textContent.trim(),
+    text:opened[0]?.textContent||'',examples:opened[0]?.querySelectorAll('.worked-box').length||0,
+    progress:window.StudyAIProgress?.summary(entry.id)?.total||0};
+  };
+  return {
+   ch2:degree.length===1&&degree[0].examples.length===3&&
+     degree[0].paragraphs.some(p=>p.includes('0x²'))&&
+     selectPart(ch2,'Intercepts and the zero of a polynomial').length===1,
+   ch4:squares.length===1&&squares[0].examples[0].steps.length>=4&&
+     squares[0].paragraphs.some(p=>p.includes('(n−1)²')),
+   ch5:locus.length===1&&centres.length===1&&
+     locus[0].paragraphs.some(p=>p.includes('A locus is'))&&
+     centres[0].examples.some(e=>e.answer.includes('5 cm')),
+   rendered:[
+    openLesson('Introduction to Linear Polynomials','Polynomial language'),
+    openLesson('Exploring Algebraic Identities','Identity versus equation'),
+    openLesson('I’m Up and Down, and Round and Round','Circle vocabulary'),
+    openLesson('I’m Up and Down, and Round and Round','Symmetry and determining a circle')
+   ]
+  };
+ });
+ check(review.ch2&&review.ch4&&review.ch5,
+  'NCERT Ch 2, 4, 5 additions present without duplicating prior lessons');
+ const [deg,squares,locus,centres]=review.rendered;
+ check(deg.count===1&&deg.title==='Polynomial language'&&deg.text.includes('0x²')&&deg.examples>=4,
+  'Chapter 2: signed and absent polynomial coefficients render with worked examples');
+ check(squares.count===1&&squares.title==='Identity versus equation'&&
+  squares.text.includes('consecutive')&&squares.examples>=3,
+  'Chapter 4: consecutive-square identity proof renders with worked examples');
+ check(locus.count===1&&locus.text.includes('A locus is')&&
+  centres.count===1&&centres.text.includes('Infinitely many circles')&&centres.examples>=3,
+  'Chapter 5: locus and infinitely many two-point circles render as separate lessons');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

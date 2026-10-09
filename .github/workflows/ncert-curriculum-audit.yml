@@ -1,0 +1,137 @@
+name: NCERT curriculum audit and lesson proposals
+
+# Manual, paid-API workflow. It becomes runnable after this file reaches main.
+on:
+  workflow_dispatch:
+    inputs:
+      chapter:
+        description: "Class 9 Maths chapter; start with 1 before trying all 14"
+        required: true
+        type: choice
+        default: "1"
+        options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "all"]
+      mode:
+        description: "Audit only, or generate review-only lesson proposals"
+        required: true
+        type: choice
+        default: audit
+        options: [audit, propose]
+      model:
+        description: "Gemini model ID (API usage may have costs)"
+        required: true
+        type: string
+        default: gemini-3.8-flash
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ncert-curriculum-${{ github.repository }}-${{ inputs.chapter }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout trusted automation from main
+        uses: actions/checkout@v4
+        with:
+          path: automation-repo
+          persist-credentials: false
+      - name: Checkout current unmerged Class 9 Maths notes separately
+        uses: actions/checkout@v4
+        with:
+          ref: class9-maths-all-chapters-depth
+          path: site
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install PDF and Gemini SDK
+        run: python -m pip install -r automation-repo/automation/class9-maths/requirements.txt
+      - name: Verify automation without spending API calls
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s automation-repo/automation/class9-maths -p 'test_*.py' -v
+          node automation-repo/automation/class9-maths/export-notes.cjs site > current-notes.json
+          python -c 'import json; data=json.load(open("current-notes.json")); assert len(data["chapters"]) == 14'
+      - name: Audit official NCERT PDFs with Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          REQUESTED_CHAPTER: ${{ inputs.chapter }}
+          REQUESTED_MODE: ${{ inputs.mode }}
+          GEMINI_MODEL: ${{ inputs.model }}
+        run: |
+          set -euo pipefail
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::Add GEMINI_API_KEY under Settings > Secrets and variables > Actions > New repository secret."
+            exit 1
+          fi
+          python automation-repo/automation/class9-maths/pipeline.py \
+            --manifest automation-repo/automation/class9-maths/manifest.json \
+            --notes current-notes.json \
+            --output review-artifacts \
+            --chapter "$REQUESTED_CHAPTER" \
+            --mode "$REQUESTED_MODE" \
+            --model "$GEMINI_MODEL"
+      - name: Archive citations, rejected claims and review-only proposals
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ncert-class9-maths-audit-${{ github.run_id }}
+          path: |
+            review-artifacts/audit.md
+            review-artifacts/audit.json
+            review-artifacts/candidate-lessons.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Generate isolated candidate overlay, never modify source branch
+        if: inputs.mode == 'propose'
+        env:
+          REVIEW_BRANCH: curriculum/ncert-review-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          git -C site switch -c "$REVIEW_BRANCH"
+          python automation-repo/automation/class9-maths/apply-proposals.py \
+            --site site --candidates review-artifacts/candidate-lessons.json
+          if [ -f site/cbse-class9-maths-audited-proposals.js ]; then
+            node --check site/cbse-class9-maths-audited-proposals.js
+            python -m pip install -r site/requirements.txt
+            (cd site && npm install --no-save playwright && npx playwright install --with-deps chromium)
+            (cd site && node tests/class9-maths-all-chapters-browser.cjs)
+          else
+            echo "No evidence-backed candidate changes: no PR is needed."
+          fi
+      - name: Open a DRAFT PR against the notes branch after browser tests pass
+        if: inputs.mode == 'propose'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEW_BRANCH: curriculum/ncert-review-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          if [ ! -f site/cbse-class9-maths-audited-proposals.js ]; then
+            echo "No candidate files, so no PR."
+            exit 0
+          fi
+          cd site
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html cbse-class9-maths-audited-proposals.js
+          if git diff --cached --quiet; then
+            echo "No source changes: PR not opened."
+            exit 0
+          fi
+          git commit -m 'Propose cited NCERT Class 9 Maths note improvements'
+          git push --set-upstream origin "$REVIEW_BRANCH"
+          gh pr create \
+            --draft \
+            --base class9-maths-all-chapters-depth \
+            --head "$REVIEW_BRANCH" \
+            --title "Review NCERT Class 9 Maths AI audit candidates (#$GITHUB_RUN_ID)" \
+            --body-file ../review-artifacts/audit.md
+          echo "Created draft review PR; main and PR #27 are unchanged."

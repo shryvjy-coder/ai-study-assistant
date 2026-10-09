@@ -14,6 +14,15 @@ E('Recognise a linear polynomial','Identify the linear polynomials among 7x−2,
 'Like terms have the same variable raised to the same power. The terms 3x and −2x can combine into x because they describe quantities of the same kind. But 3x and 3x² are unlike terms and cannot be combined by adding their coefficients alone.'
 ],['(ax+b)+(cx+d)=(a+c)x+(b+d)'],[
 E('Collect like terms','Simplify 3x−7+4x+5.',['Group variable terms: 3x+4x=7x.','Combine constants: −7+5=−2.'],'7x−2')]],
+['Degree, coefficients and missing terms in polynomials',[
+'First simplify like terms, then find the highest power with a nonzero coefficient. A nonzero constant such as −9 has degree 0; 4z−3 is linear (degree 1), 2x²−5x+3 is quadratic (degree 2), and y³+2y−1 is cubic (degree 3). The degree describes the highest power, not the number of terms.',
+'Every power has a coefficient even when its term is not shown. For p(x)=4x³−x+7, the missing x² term can be written 0x², so its coefficient is 0. The x term is −x=−1x, so its coefficient is −1, and the constant term is +7. Carry a minus sign with its term.',
+'An NCERT-style coefficient question may ask about x², x³, or the constant term in a polynomial whose degree is higher than 1. Read off each coefficient independently without confusing a missing term with a missing polynomial. If a leading coefficient becomes zero after simplification, that power does not determine the degree.'
+],[],[
+E('NCERT-style degree classification','State the degrees and types of 2x²−5x+3, y³+2y−1, −9, and 4z−3.',['2x²−5x+3 has highest nonzero power 2, so it is quadratic.','y³+2y−1 has highest nonzero power 3, so it is cubic.','The nonzero constant −9 has degree 0.','4z−3 has highest nonzero power 1, so it is linear.'],'Degrees: 2 (quadratic), 3 (cubic), 0 (constant), 1 (linear).'),
+E('Missing and signed coefficients','For p(x)=4x³−x+7, give the coefficients of x³, x², x, and the constant term.',['Rewrite it as 4x³+0x²−1x+7.','Read the coefficient of each power, including the absent x² term.','Check that the minus sign in −x gives coefficient −1.'],'Coefficients: 4, 0, −1, and 7.'),
+E('Extract coefficients in a larger polynomial','For q(x)=9x³+5x²−8x−10, state its degree and constant term; for r(z)=4z³+5z²−11, find the coefficient of z.',['The highest nonzero power in q is 3, so it is cubic.','The term without x in q is −10.','r has no first-power z term, so the coefficient of z is 0.'],'Degree of q: 3; constant term: −10; coefficient of z in r: 0.')
+]],
 ['Identities, expressions and equations',[
 'An expression, such as 2x+5, names a quantity. An equation, such as 2x+5=11, asks when two quantities are equal. The statement 2(x+3)=2x+6 is an identity: it remains true for every allowed value of x.',
 'A linear polynomial does not have to equal zero until we are asked to find a zero. Setting ax+b=0 gives x=−b/a, provided a≠0. This value makes the polynomial evaluate to zero and later becomes the x-intercept of its graph.'

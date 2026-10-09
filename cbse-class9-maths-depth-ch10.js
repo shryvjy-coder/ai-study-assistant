@@ -65,7 +65,7 @@ D.apply('How Quantities Combine: Understanding Data',[
 ],{
 lead:'Averages and graphs help summarise complex information, but summaries can mislead when group sizes or weights differ. These lessons derive combined and weighted means, explain mixture concentration, and distinguish stacked counts from stacked percentages. Every problem begins by asking what is being counted or weighted.',
 mixed:[
-['Mixed weighted average','A school combines a 25-student group averaging 64 with a 35-student group averaging 76. Find new mean.',['First total=25×64=1600.','Second total=35×76=2660.','Sum=4260 for 60 students.','Mean=4260/60.],'71'],
-['Mixed mixture and chart','A café combines 2 L of 20% fruit juice with 3 L of 50% juice. Find final percentage and fruit volume.',['Pure fruit quantity=2×0.2+3×0.5=0.4+1.5=1.9 L.','Total volume=5 L.','Concentration=1.9/5=0.38.],'38% fruit juice, 1.9 L fruit component.']
+['Mixed weighted average','A school combines a 25-student group averaging 64 with a 35-student group averaging 76. Find new mean.',['First total=25×64=1600.','Second total=35×76=2660.','Sum=4260 for 60 students.','Mean=4260/60.'],'71'],
+['Mixed mixture and chart','A café combines 2 L of 20% fruit juice with 3 L of 50% juice. Find final percentage and fruit volume.',['Pure fruit quantity=2×0.2+3×0.5=0.4+1.5=1.9 L.','Total volume=5 L.','Concentration=1.9/5=0.38.'],'38% fruit juice, 1.9 L fruit component.']
 ]});
 })();

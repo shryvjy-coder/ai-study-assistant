@@ -82,6 +82,49 @@ const titles=[
  check(report[2].sectionCount>=15&&report[2].subtopicCount>=20,
   'World of Numbers teaching remains unchanged and sufficiently detailed');
 
+ // Regression coverage: independent NCERT Ch. 1 review revealed exercise-level gaps
+ // not captured by the general "12+ subtopics" measure.
+ const verifiedCh01=await page.evaluate(()=>{
+  const bank=window.CBSE_CLASS9_MATH_FULL_NOTES;
+  const ch=bank?.['Orienting Yourself: The Use of Coordinates'];
+  const named=ch?.sections?.map(section=>section.title)||[];
+  const allParts=ch?.sections?.flatMap(section=>section.subtopics||[])||[];
+  const allExamples=[
+    ...(ch?.sections?.flatMap(section=>section.examples||[])||[]),
+    ...allParts.flatMap(part=>part.examples||[])
+  ];
+  return {
+    lessonTitles:named,
+    concepts:allParts.map(part=>part.title),
+    examples:allExamples.map(ex=>ex.title),
+    audited:window.STUDYAI_CLASS9_DEPTH_AUDIT?.['Orienting Yourself: The Use of Coordinates'],
+    reflections:allParts.filter(part=>part.title==='Reflection and sign changes').length
+  };
+ });
+ const chapterOneRequired=[
+  'From ancient navigation to accurate room maps',
+  'Midpoints, missing endpoints and dividing a segment',
+  'Coordinate tests for lines, triangles and squares',
+  'Circles, screens and applications of coordinates'
+ ];
+ check(chapterOneRequired.every(name=>verifiedCh01.lessonTitles.includes(name)),
+  'Chapter 1: original NCERT history, midpoint, collinearity and geometry lessons are present');
+ check(verifiedCh01.reflections===1&&verifiedCh01.examples.includes('Two successive axis reflections'),
+  'Chapter 1: original reflection topic retained and strengthened, not duplicated');
+ check([
+  'Trisection and the one-third displacement method',
+  'Area and perimeter of a plotted right triangle',
+  'Identify a square using distances and right angles',
+  'Inside, on or outside a circle',
+  'Circular icons inside a rectangular screen',
+  'When two circular regions touch or overlap'
+ ].every(name=>verifiedCh01.concepts.includes(name)),
+  'Chapter 1: textbook exercise skills include trisection, shapes and circle/screen checks');
+ check(verifiedCh01.audited.sections>=10&&verifiedCh01.audited.examples>=30,
+  'Chapter 1 audit inventory updates after new lessons and examples');
+
+
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&
@@ -117,6 +160,36 @@ const titles=[
   check(ch.displayedSubtopics>=2&&ch.bodyLength>550,
    'first lesson renders detailed original text and multiple concept sections: '+ch.title);
  }
+
+ // Verify a newly added page actually opens via the SAME lesson navigation
+ // and contains more than a source-code heading.
+ const ch01Browser=await page.evaluate(()=>{
+  const first=STUDY_DATA.find(entry=>entry.board==='CBSE'&&entry.grade==='Class 9'&&
+    entry.subject==='Mathematics'&&entry.title==='Orienting Yourself: The Use of Coordinates');
+  if(!first)throw Error('Class 9 Maths Chapter 1 entry missing');
+  current={board:first.board,grade:first.grade,subject:first.subject,
+    component:'All components',topic:first.title,topicId:first.id};
+  renderFilters();
+  openTopic(first.title,first.id);
+  const sectionTitles=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .map(section=>section.querySelector(':scope > h3')?.textContent.trim());
+  const target=sectionTitles.indexOf('Midpoints, missing endpoints and dividing a segment');
+  if(target<0)throw Error('New midpoint lesson missing from rendered pages');
+  window.StudyAILessonReader.goTo(target);
+  const opened=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(section=>!section.hidden);
+  return {
+    target,visible:opened.length,
+    title:opened[0]?.querySelector(':scope > h3')?.textContent.trim(),
+    examples:opened[0]?.querySelectorAll('.worked-box').length,
+    paragraphs:opened[0]?.querySelectorAll('.studyai-lesson-subtopic p').length,
+    hasProgress:window.StudyAIProgress?.summary(first.id)?.total>0
+  };
+ });
+ check(ch01Browser.visible===1&&ch01Browser.title==='Midpoints, missing endpoints and dividing a segment'&&
+  ch01Browser.examples>=3&&ch01Browser.paragraphs>=6&&ch01Browser.hasProgress,
+  'Chapter 1: newly added midpoint lesson renders with full examples and progress tracking');
+
  // Verify the last chapter's non-summary worked solutions are reachable.
  await page.evaluate(()=>{
   const select=document.querySelector('#detailed-notes .studyai-topic-select');

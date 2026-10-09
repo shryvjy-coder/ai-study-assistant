@@ -63,76 +63,73 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
     location.hash='#study';
   });
 
-  check(await page.locator('.studyai-topic-select option').count()===15,'15 topics are selectable including labelled optional extension');
-  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure').count()===1,'initial teaching lesson displays a correctly labelled integer line');
-  check(await page.locator('#detailed-notes .studyai-lesson-subtopic h4').count()>=3,'all authored explanatory subtopics remain available');
-  check(await page.locator('.studyai-subtopic-select option').count()>=3,'subtopics have their own dedicated selection menu');
-  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()===1,
-    'a single subtopic is visible inside the selected chapter topic');
-  check(await page.locator('.studyai-prev-subtopic').isDisabled(),'first subtopic disables Previous subtopic');
-  check(await page.locator('#detailed-notes .studyai-topic-pagination').count()===1,'page-by-page navigation replaces endless scrolling');
-  check(await page.locator('#detailed-notes .studyai-diagram').count()===0,'no meaningless generic graph at the start of the chapter');
-  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,'only one academic topic shows at a time');
-  check(await page.locator('#detailed-notes .studyai-topic-pagination').count()===1,'topic Previous/Next is available');
-  check(await page.locator('#next-chapter-button').count()===1,'existing Next Chapter button remains available');
+  check(await page.locator('.studyai-topic-select option').count()===15,
+    'World of Numbers is split into only 15 substantial lesson pages');
+  check(await page.locator('.studyai-subtopic-select').count()===0,
+    'the chapter no longer makes students click through 62 separate subtopic pages');
+  check(await page.locator('#detailed-notes.studyai-compact-chapter').count()===1,
+    'compact lesson reading mode is activated');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,
+    'exactly one substantial topic lesson displays at a time');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()>=4,
+    'related teaching subsections remain visible together inside their lesson');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure').count()===1,
+    'the accurate number-line diagram stays with the lesson');
+  check(await page.locator('#detailed-notes .studyai-diagram').count()===0,
+    'no generic filler diagram is added');
+  check(await page.locator('#detailed-notes .studyai-topic-pagination').count()===1,
+    'Previous and Next lesson controls remain available');
+  check(await page.locator('#next-chapter-button').count()===1,
+    'the existing Next Chapter control is preserved');
+  check(await page.locator('.studyai-prev-topic').first().isDisabled(),
+    'first lesson disables previous navigation');
   const teaching=await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText();
-  check(teaching.length>=500,'first subtopic still teaches a substantial original concept');
-  check(!teaching.includes('absolute value')&&!teaching.includes('counterexample'),
-    'later subtopics do not bleed into the first teaching page');
-  const firstSubtopicCount=await page.locator('.studyai-subtopic-select option').count();
-  await page.locator('.studyai-subtopic-select').selectOption(String(firstSubtopicCount-2));
-  const advanced=await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText();
-  check(advanced.includes('counterexample')&&advanced.includes('absolute value'),
-    'mathematical closure and absolute value remain accessible on their own subtopic page');
-  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()===1,
-    'selecting a subtopic never reveals the whole lesson at once');
-  const reviewPages=page.locator('#detailed-notes .studyai-topic-review');
-  const reviewCount=await reviewPages.count();
-  check(reviewCount>=1,
-    'authored worked examples, formulas and chapter warnings stay in separate review pages when present');
-  check((await reviewPages.first().textContent()).length>100,
-    'the extra topic-level study material remains in the reader');
-  await page.locator('.studyai-subtopic-select').selectOption(String(firstSubtopicCount-1));
+  check(teaching.length>=1500,
+    'the complete original lesson is preserved rather than reduced to a summary');
+  check(teaching.includes('absolute value')&&teaching.includes('counterexample'),
+    'original detailed subtopics on distance and closure remain readable');
+  check(teaching.includes('Worked example')&&teaching.includes('formula') ||
+    (await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .worked-box').count())>=2,
+    'in-lesson worked examples and mathematical teaching remain available');
+
   await page.locator('.studyai-next-page').click();
-  check(await page.locator('.studyai-topic-select').inputValue()==='1' &&
-        await page.locator('.studyai-subtopic-select').inputValue()==='0',
-    'Next page moves to the next topic after the last subtopic');
+  check(await page.locator('.studyai-topic-select').inputValue()==='1',
+    'Next moves exactly one substantial lesson, not one tiny subsection');
   await page.locator('.studyai-prev-page').click();
-  check(await page.locator('.studyai-topic-select').inputValue()==='0' &&
-        await page.locator('.studyai-subtopic-select').inputValue()===String(firstSubtopicCount-1),
-    'Previous page returns to the last subtopic of the preceding topic');
-  await page.locator('.studyai-subtopic-select').selectOption('0');
-  await page.locator('.studyai-next-subtopic').click();
-  check(await page.locator('.studyai-subtopic-select').inputValue()==='1',
-    'Next subtopic advances exactly one independent page');
-  await page.locator('.studyai-prev-subtopic').click();
-  check(await page.locator('.studyai-subtopic-select').inputValue()==='0',
-    'Previous subtopic goes back without changing chapter topic');
-  check(await page.locator('.studyai-prev-topic').first().isDisabled(),'first topic disables Previous topic');
+  check(await page.locator('.studyai-topic-select').inputValue()==='0',
+    'Previous returns to the beginning without losing content');
+
   const initial=await page.locator('#note-title').innerText();
   await page.locator('.studyai-topic-select').selectOption('5');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden]) h3').innerText())==='Why √2 is irrational',
-    'selecting a topic opens that lesson only');
+    'selecting a lesson displays the complete irrationality proof topic');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('lowest terms'),
-    'irrationality lesson contains the proof rather than a short summary');
-  check(await page.locator('#note-title').innerText()===initial,'switching topic stays in the same chapter');
+    'the proof is intact rather than a short summary');
+  check(await page.locator('#note-title').innerText()===initial,
+    'switching lessons stays within the chapter');
 
   await page.locator('.studyai-topic-select').selectOption('4');
-  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure svg').count()===1,'irrational-number explanation has a real unit-square visual');
-  await page.locator('.studyai-subtopic-select').selectOption('1');
+  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure svg').count()===1,
+    'irrational-number topic preserves its original visual');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('π'),
-    'irrational-number lesson explains pi on its own subtopic page');
-  await page.locator('.studyai-subtopic-select').selectOption('0');
+    'irrational-number teaching includes pi without another click');
+
   await page.locator('.studyai-topic-select').selectOption('7');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('142857'),
-    'decimal-expansion lesson demonstrates the one-seventh remainder cycle');
-  await page.locator('.studyai-topic-select').selectOption('9');
-  check((await page.locator('.studyai-subtopic-select option').allTextContents()).some(x=>x.includes('Zoom 1')),
-    'successive magnification has dedicated subtopic pages');
+    'one-seventh repeating decimal enrichment stays visible on its lesson');
+
+  const allLessonTitles=await page.locator('.studyai-topic-select option').allTextContents();
+  const magnificationIndex=allLessonTitles.findIndex(x=>x.includes('successive magnification'));
+  check(magnificationIndex>=0,'magnification topic remains among the chapter lessons');
+  await page.locator('.studyai-topic-select').selectOption(String(magnificationIndex));
+  check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('Zoom 1'),
+    'all three decimal magnification stages appear as in-page subheadings');
+
   await page.locator('.studyai-topic-select').selectOption('14');
-  check(await page.locator('.studyai-next-topic').first().isDisabled(),'last topic disables Next topic');
-  check(await page.locator('.studyai-prev-page').isEnabled(),
-    'the linear reading flow can move backward across all topic pages');
+  check(await page.locator('.studyai-next-topic').first().isDisabled(),
+    'last optional topic disables Next lesson');
+  check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('not prescribed'),
+    'optional algebra content remains explicitly labelled as non-compulsory');
 
   await page.evaluate(()=>{
     const other=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Mathematics'&&x.title==='Exploring Algebraic Identities');

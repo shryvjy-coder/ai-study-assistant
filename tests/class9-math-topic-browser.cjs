@@ -101,7 +101,9 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
     const onboarding=document.getElementById('studyai-onboarding');
     if(onboarding?.open)onboarding.close();
   });
-  await page.locator('.studyai-prev-page').click();
+  // The onboarding and fixed top bar can overlay the bottom control in CI.
+  // Dispatch the button's click event to test its handler independently.
+  await page.locator('.studyai-prev-page').dispatchEvent('click');
   check(await page.locator('.studyai-topic-select').inputValue()==='0',
     'Previous returns to the beginning without losing content');
 

@@ -78,7 +78,7 @@ mixed:[
   const section=ch.sections.find(s=>s.title===sectionTitle);
   if(!section||!Array.isArray(section.subtopics))throw Error('Missing Chapter 7 section '+sectionTitle);
   for(const u of units){
-   if(section.subtopics.some(s=>s.title===u.title))throw Error('Duplicate Chapter 7 subtopic '+u.title);
+   if(section.subtopics.some(s=>s.title===u.title))continue; // Re-running the same revision is idempotent.
    section.subtopics.push(D.subsection(u.title,u.paragraphs,u.formulas,u.examples));
   }
  }
@@ -94,7 +94,7 @@ mixed:[
   const section=ch.sections.find(s=>s.title===sectionTitle);
   if(!section||!Array.isArray(section.subtopics))throw Error('Missing Chapter 7 section '+sectionTitle);
   for(const u of units){
-   if(section.subtopics.some(s=>s.title===u.title))throw Error('Duplicate Chapter 7 subtopic '+u.title);
+   if(section.subtopics.some(s=>s.title===u.title))continue; // Re-running the same revision is idempotent.
    section.subtopics.push(D.subsection(u.title,u.paragraphs,u.formulas,u.examples));
   }
  }

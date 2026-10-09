@@ -287,6 +287,88 @@ const titles=[
    verifiedCh06.audit.sections===verifiedCh06.navigableTitles.length,
   'Chapter 6: lesson navigation, completion rings and content inventory agree');
 
+
+ // NCERT 2026–27 Chapter 7: real browser checks on integrated notes and navigation.
+ const verifiedCh07=await page.evaluate(()=>{
+  const title='The Mathematics of Maybe: Introduction to Probability';
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES[title];
+  if(!ch)throw Error('Chapter 7 note bank missing');
+  const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+   e.subject==='Mathematics'&&e.title===title);
+  if(!entry)throw Error('Chapter 7 navigation entry missing');
+  const sections=ch.sections.filter(s=>!new Set([
+   'Chapter coverage','Exam application','Common traps and final checks','Mastery check'
+  ]).has(s.title));
+  const subtopics=sections.flatMap(s=>s.subtopics||[]);
+  const examples=sections.flatMap(s=>s.examples||[]).concat(subtopics.flatMap(s=>s.examples||[]));
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+   component:'All components',topic:entry.title,topicId:entry.id};
+  renderFilters();openTopic(entry.title,entry.id);
+  const pages=sections.map((s,index)=>{
+   window.StudyAILessonReader.goTo(index);
+   const visible=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(el=>!el.hidden);
+   return {section:s.title,visible:visible.length,
+    heading:visible[0]?.querySelector(':scope > h3')?.textContent?.trim(),
+    text:visible[0]?.textContent||''};
+  });
+  return {
+   titles:subtopics.map(s=>s.title),examples:examples.map(e=>e.title),
+   counts:examples.filter(e=>!e||typeof e.question!=='string'||
+    !Array.isArray(e.steps)||!e.steps.length||typeof e.answer!=='string').length,
+   pages:pages.map(p=>({section:p.section,visible:p.visible,heading:p.heading,
+    textLength:p.text.length,
+    hasSampling:p.text.includes('Forecast library preferences from a sample'),
+    hasGeometric:p.text.includes('Circular target within a rectangular field'),
+    hasThreeStage:p.text.includes('Three-question guessing tree')})),
+   lessonCount:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
+   progressCount:window.StudyAIProgress?.summary(entry.id)?.total,
+   audit:window.STUDYAI_CLASS9_DEPTH_AUDIT?.[title],
+   fullSectionCount:ch.sections.length
+  };
+ });
+ const ch07Topics=[
+  'Interpreting the qualitative probability scale',
+  'Estimating whole populations from representative surveys',
+  "Streaks, independence and the gambler's fallacy",
+  'Irregular experiments and frequency-table predictions',
+  'Repeated letters are separate equally likely cards',
+  'Valid sample spaces can have unequal probabilities',
+  'Product tables, ordered choices and digit arrangements',
+  'Probability from the areas of uniform target regions',
+  'Different-colour draws through the same-colour complement',
+  'Trees with replacement and unequal branch weights',
+  'Exactly two correct answers and three-stage trees'
+ ];
+ check(ch07Topics.every(t=>verifiedCh07.titles.filter(name=>name===t).length===1),
+  'Chapter 7: eleven distinct NCERT corrections are present once each');
+ const ch07Ex=[
+  'Forecast library preferences from a sample',
+  'Does a streak change the next die roll?',
+  'Paper cup with unequal observed outcomes',
+  'Letter-card selections with repeated symbols',
+  'Count grouped outcomes rather than labels',
+  'Even four-digit numbers without repetition',
+  'Circular target within a rectangular field',
+  'Three-colour complement without replacement',
+  'Matching two pen colours with replacement',
+  'Three-question guessing tree'
+ ];
+ check(ch07Ex.every(t=>verifiedCh07.examples.filter(name=>name===t).length===1),
+  'Chapter 7: original worked examples appear once and have accessible answers');
+ check(verifiedCh07.counts===0,'Chapter 7: all worked examples have complete step-by-step solutions');
+ check(verifiedCh07.pages.every(p=>p.visible===1&&p.heading===p.section&&p.textLength>400),
+  'Chapter 7: each lesson renders as a single full-content page');
+ check(verifiedCh07.pages.some(p=>p.hasSampling)&&
+   verifiedCh07.pages.some(p=>p.hasGeometric)&&
+   verifiedCh07.pages.some(p=>p.hasThreeStage),
+  'Chapter 7: surveys, geometric probability and three-stage trees render in browser');
+ check(verifiedCh07.lessonCount===verifiedCh07.progressCount&&
+   verifiedCh07.lessonCount===verifiedCh07.pages.length&&
+   verifiedCh07.audit.sections===verifiedCh07.pages.length&&
+   verifiedCh07.audit.subtopics===verifiedCh07.titles.length,
+  'Chapter 7: reader navigation, completion tracking and depth audit remain in sync');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

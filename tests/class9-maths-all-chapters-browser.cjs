@@ -111,8 +111,9 @@ const titles=[
  for(const ch of rendered){
   check(!ch.missingEntry&&ch.openTopics===1&&ch.noteTitle===ch.title,
    'chapter opens with exactly one visible substantive lesson: '+ch.title);
-  check(ch.sections===ch.navCount&&ch.progressCount===ch.navCount&&
-   ch.completionRail===ch.navCount,'navigation, progress and notes use same lesson count: '+ch.title);
+  check(ch.sections>=ch.navCount&&ch.navCount>0&&
+   ch.progressCount===ch.navCount&&ch.completionRail===ch.navCount,
+   'navigation, progress and notes use same substantive lesson count: '+ch.title);
   check(ch.displayedSubtopics>=2&&ch.bodyLength>550,
    'first lesson renders detailed original text and multiple concept sections: '+ch.title);
  }

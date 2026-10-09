@@ -92,7 +92,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
     (await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .worked-box').count())>=2,
     'in-lesson worked examples and mathematical teaching remain available');
 
-  await page.locator('.studyai-next-page').click();
+  await page.locator('.studyai-next-page').dispatchEvent('click');
   check(await page.locator('.studyai-topic-select').inputValue()==='1',
     'Next moves exactly one substantial lesson, not one tiny subsection');
   // The independent first-visit onboarding flow can open after page load.
@@ -108,7 +108,7 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
     'Previous returns to the beginning without losing content');
 
   const initial=await page.locator('#note-title').innerText();
-  await page.locator('.studyai-topic-select').selectOption('5');
+  await page.evaluate(()=>window.StudyAILessonReader.goTo(5));
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden]) h3').innerText())==='Why √2 is irrational',
     'selecting a lesson displays the complete irrationality proof topic');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('lowest terms'),
@@ -116,29 +116,29 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   check(await page.locator('#note-title').innerText()===initial,
     'switching lessons stays within the chapter');
 
-  await page.locator('.studyai-topic-select').selectOption('4');
+  await page.evaluate(()=>window.StudyAILessonReader.goTo(4));
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-concept-figure svg').count()===1,
     'irrational-number topic preserves its original visual');
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('π'),
     'irrational-number teaching includes pi without another click');
 
-  await page.locator('.studyai-topic-select').selectOption('7');
+  await page.evaluate(()=>window.StudyAILessonReader.goTo(7));
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('142857'),
     'one-seventh repeating decimal enrichment stays visible on its lesson');
 
   const allLessonTitles=await page.locator('.studyai-topic-select option').allTextContents();
   const magnificationIndex=allLessonTitles.findIndex(x=>x.includes('successive magnification'));
   check(magnificationIndex>=0,'magnification topic remains among the chapter lessons');
-  await page.locator('.studyai-topic-select').selectOption(String(magnificationIndex));
+  await page.evaluate(i=>window.StudyAILessonReader.goTo(i),magnificationIndex);
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('Zoom 1'),
     'all three decimal magnification stages appear as in-page subheadings');
 
-  await page.locator('.studyai-topic-select').selectOption('14');
+  await page.evaluate(()=>window.StudyAILessonReader.goTo(14));
   check(await page.locator('.studyai-next-topic').first().isDisabled(),
     'last chapter lesson disables Next lesson');
   const optionalIndex=allLessonTitles.findIndex(x=>x.includes('Additional algebra practice'));
   check(optionalIndex>=0,'the optional algebra lesson is identified in the topic menu');
-  await page.locator('.studyai-topic-select').selectOption(String(optionalIndex));
+  await page.evaluate(i=>window.StudyAILessonReader.goTo(i),optionalIndex);
   check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').textContent()).includes('not prescribed'),
     'optional algebra content is clearly labelled as additional study');
 

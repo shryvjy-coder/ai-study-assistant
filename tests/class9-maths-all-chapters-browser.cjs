@@ -779,6 +779,109 @@ const titles=[
    approximate(ch10Recheck.schoolRate,259/510)&&
    approximate((30*1+60*.5)/(1+.5),40),
   'Chapter 10 re-audit: langur updates, corrections, pooled state rates and time weights match arithmetic');
+
+ // Chapter 11 NCERT Part II audit: test actual integrated curriculum, not mock objects.
+ const verifiedCh11=await page.evaluate(async()=>{
+  const title='The World of Algorithms';
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES[title];
+  const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+   e.subject==='Mathematics'&&e.title===title);
+  if(!ch||!entry)throw Error('Class 9 Chapter 11 is missing from note bank or curriculum');
+  const filtered=ch.sections.filter(s=>!new Set([
+   'Chapter coverage','Exam application','Common traps and final checks','Mastery check'
+  ]).has(s.title));
+  const parts=filtered.flatMap(s=>s.subtopics||[]);
+  const examples=filtered.flatMap(s=>s.examples||[]).concat(parts.flatMap(s=>s.examples||[]));
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+   component:'All components',topic:entry.title,topicId:entry.id};
+  renderFilters();openTopic(entry.title,entry.id);
+  const pages=filtered.map((sec,index)=>{
+   window.StudyAILessonReader.goTo(index);
+   const opened=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(el=>!el.hidden);
+   return {title:sec.title,opened:opened.length,
+    heading:opened[0]?.querySelector(':scope > h3')?.textContent.trim(),
+    text:opened[0]?.textContent||'',examples:opened[0]?.querySelectorAll('.worked-box').length||0};
+  });
+  const before={topics:parts.length,examples:examples.length,sections:ch.sections.length};
+  // Running the full chapter script again must not append duplicate lessons.
+  await new Promise((resolve,reject)=>{
+   const s=document.createElement('script');
+   s.src='/cbse-class9-maths-depth-ch11.js?ch11-reload-check=1';
+   s.onload=resolve;
+   s.onerror=()=>reject(Error('Chapter 11 reload failed'));
+   document.head.append(s);
+  });
+  const after={
+   topics:ch.sections.flatMap(s=>s.subtopics||[]).length,
+   examples:ch.sections.flatMap(s=>s.examples||[]).length+
+    ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(p=>p.examples||[])).length,
+   sections:ch.sections.length
+  };
+  window.StudyAILessonReader.goTo(0);
+  return {
+   titles:parts.map(p=>p.title),examples:examples.map(e=>e.title),
+   malformedExamples:examples.filter(e=>!e||!e.title||!e.question||
+    !Array.isArray(e.steps)||e.steps.length<2||!e.answer).length,
+   inadequateParts:parts.filter(p=>!Array.isArray(p.paragraphs)||p.paragraphs.length<2).length,
+   pages:pages.map(p=>({title:p.title,opened:p.opened,heading:p.heading,
+    length:p.text.length,examples:p.examples,
+    hasCarry:p.text.includes('The exact carry bound'),
+    hasDivisors:p.text.includes('Building the list of divisors'),
+    hasHistory:p.text.includes('Al-Khwārizmī'),
+    hasPrimality:p.text.includes('Testing primality by divisor checks')})),
+   navCount:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
+   progressCount:window.StudyAIProgress?.summary(entry.id)?.total,
+   audit:window.STUDYAI_CLASS9_DEPTH_AUDIT?.[title],
+   before,after
+  };
+ });
+ const ch11Corrections=[
+  'The exact carry bound and the forgotten final digit',
+  'Adding decimal fractions and comparing step counts',
+  'Building the list of divisors one candidate at a time',
+  'Sorted-list differences and an LCM algorithm',
+  'From two divisor scans to a single bounded scan',
+  'Reverse searches, paired factors and why order matters',
+  'Āryabhaṭa’s remainder method and Al-Khwārizmī’s legacy',
+  'Remainder traces, termination and a fair speed comparison',
+  'Using ordered lists to find one-sided differences',
+  'Testing primality by divisor checks'
+ ];
+ const ch11Examples=[
+  'Catch the missing exactly-ten rule and final carry',
+  'Trace decimal place values with carries',
+  'Trace divisor discovery and list intersection',
+  'Find list differences and least common multiple',
+  'Trace the running common-divisor variable',
+  'Reverse-scan GCD and paired divisor order',
+  'Āryabhaṭa-style division trace for an NCERT pair',
+  'Verify Euclid on 494 and 130',
+  'Execute two directional list differences',
+  'Trace a primality check and distinct prime divisors'
+ ];
+ check(ch11Corrections.every(t=>verifiedCh11.titles.filter(x=>x===t).length===1),
+  'Chapter 11: ten independently verified NCERT lessons exist exactly once');
+ check(ch11Examples.every(t=>verifiedCh11.examples.filter(x=>x===t).length===1)&&
+   verifiedCh11.malformedExamples===0&&verifiedCh11.inadequateParts===0,
+  'Chapter 11: original worked examples and explanatory paragraphs are complete');
+ check(verifiedCh11.pages.every(p=>p.opened===1&&p.heading===p.title&&p.length>550),
+  'Chapter 11: all lessons render in the one-page-at-a-time reader');
+ check(verifiedCh11.pages.some(p=>p.hasCarry)&&verifiedCh11.pages.some(p=>p.hasDivisors)&&
+   verifiedCh11.pages.some(p=>p.hasHistory)&&verifiedCh11.pages.some(p=>p.hasPrimality),
+  'Chapter 11: NCERT edge cases, factor algorithms, history and prime checks render');
+ check(verifiedCh11.navCount===verifiedCh11.progressCount&&
+   verifiedCh11.navCount===verifiedCh11.pages.length&&
+   verifiedCh11.audit.sections===verifiedCh11.pages.length&&
+   verifiedCh11.audit.subtopics===verifiedCh11.titles.length,
+  'Chapter 11: navigation, completion progress and audit inventory stay aligned');
+ check(JSON.stringify(verifiedCh11.before)===JSON.stringify(verifiedCh11.after),
+  'Chapter 11: reloading audited notes does not duplicate lessons or worked examples');
+ check(Math.floor((9+9+1)/10)===1&&
+   4586+3414===8000&&47.85+6.47===54.32&&
+   18*30/6===90&&494%130===104&&130%104===26,
+  'Chapter 11: carry edge, decimals, LCM and Euclidean remainder results are correct');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

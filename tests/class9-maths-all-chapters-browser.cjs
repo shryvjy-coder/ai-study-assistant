@@ -401,6 +401,117 @@ const titles=[
  check(JSON.stringify(ch07Replay.before)===JSON.stringify(ch07Replay.after),
   'Chapter 7: running the expanded depth file twice is idempotent');
 
+ 
+ // NCERT 2026–27 Ganita Manjari Chapter 8: verified textbook depth and real browser.
+ const verifiedCh08=await page.evaluate(()=>{
+  const title='Predicting What Comes Next: Exploring Sequences and Progressions';
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES?.[title];
+  if(!ch)throw Error('Chapter 8 notes are missing');
+  const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+   e.subject==='Mathematics'&&e.title===title);
+  if(!entry)throw Error('Chapter 8 missing from Class 9 navigation');
+  const excluded=new Set(['Chapter coverage','Exam application',
+   'Common traps and final checks','Mastery check']);
+  const sections=ch.sections.filter(s=>!excluded.has(s.title));
+  const parts=sections.flatMap(s=>s.subtopics||[]);
+  const works=sections.flatMap(s=>s.examples||[]).concat(parts.flatMap(p=>p.examples||[]));
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+   component:'All components',topic:entry.title,topicId:entry.id};
+  renderFilters();
+  openTopic(entry.title,entry.id);
+  const visiblePages=sections.map((s,i)=>{
+   window.StudyAILessonReader.goTo(i);
+   const visible=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(el=>!el.hidden);
+   return {title:s.title,number:visible.length,
+    heading:visible[0]?.querySelector(':scope > h3')?.textContent?.trim(),
+    length:visible[0]?.textContent?.length||0,
+    examples:visible[0]?.querySelectorAll('.worked-box').length||0};
+  });
+  window.StudyAILessonReader.goTo(0);
+  return {concepts:parts.map(p=>p.title),examples:works.map(w=>w.title),
+   invalid:works.filter(w=>!w||typeof w.question!=='string'||
+    !Array.isArray(w.steps)||w.steps.length===0||typeof w.answer!=='string').length,
+   original:parts.length,visiblePages,
+   audit:window.STUDYAI_CLASS9_DEPTH_AUDIT?.[title],
+   options:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
+   completedTotal:window.StudyAIProgress?.summary(entry.id)?.total||0};
+ });
+ const ch08Expected=[
+  'Finite sequences, triangular dots and square gnomons',
+  'Checking whether a value is truly a term',
+  'Virahānka–Fibonacci patterns from poetic rhythms',
+  'Recurrences using three earlier terms',
+  'Coordinate graphs and linear taxi fares',
+  'Recovering an AP and counting multiples in an interval',
+  'Āryabhaṭa, rectangular dot arrays and interval sums',
+  'Expressing 100 as consecutive natural-number sums',
+  'Graphing geometric change and modelling a bouncing ball',
+  'Sierpiński triangle: exact count and shaded-area rules',
+  'Sierpiński square carpet: counting retained squares and area',
+  'Symmetric terms for three-term APs and GPs',
+  'Prefix-sum recurrences and why doubling or Fibonacci returns'
+ ];
+ check(ch08Expected.every(x=>verifiedCh08.concepts.filter(t=>t===x).length===1),
+  'Chapter 8: 13 source-verified substantial learning subtopics each appear once');
+ const ch08ExpectedExamples=[
+  'Term membership must have an integer index',
+  'Count eight-beat poetic rhythms',
+  'Evaluate a three-step recurrence',
+  'Graph a fare progression',
+  'Recover two AP parameters',
+  'Find the sum of a consecutive interval',
+  'All consecutive natural partitions of 100',
+  'Five rebounds and the sixth ground impact',
+  'Stage four of a Sierpiński triangle',
+  'Third-stage square carpet',
+  'Solve a three-term GP from sum and product',
+  'Reduce a cumulative Virahānka recurrence'
+ ];
+ check(ch08ExpectedExamples.every(x=>verifiedCh08.examples.filter(t=>t===x).length===1),
+  'Chapter 8: numerical proofs and solved exercise models are present without duplication');
+ check(verifiedCh08.invalid===0,'Chapter 8: every solved example has valid working and answer');
+ check(verifiedCh08.visiblePages.every(p=>p.number===1&&p.title===p.heading&&
+   p.length>450&&p.examples>=1),
+  'Chapter 8: full notes render one complete lesson per page with examples');
+ check(verifiedCh08.options===verifiedCh08.completedTotal&&
+   verifiedCh08.options===verifiedCh08.visiblePages.length&&
+   verifiedCh08.audit?.sections===verifiedCh08.visiblePages.length&&
+   verifiedCh08.audit?.subtopics===verifiedCh08.original&&verifiedCh08.audit?.words>2000,
+  'Chapter 8: lesson navigation, completion progress and depth inventory stay synchronised');
+ const ch08Numbers=(()=>{
+  let ways=[];
+  for(let k=2;k*(k+1)/2<=100;k++){
+   const a=(200/k-k+1)/2;
+   if(Number.isInteger(a)&&a>=1)ways.push({length:k,start:a});
+  }
+  return ways;
+ })();
+ assert.deepEqual(ch08Numbers,[{length:5,start:18},{length:8,start:9}],
+  'All consecutive-positive partitions of 100');
+ check(Math.abs(80+2*[1,2,3,4,5].reduce((sum,k)=>sum+80*.6**k,0)-301.3376)<1e-8&&
+   3**4===81&&8**3===512&&9**3===729,
+  'Chapter 8: bounce-distance and fractal-stage numeric reference calculations agree');
+ const ch08Replay=await page.evaluate(async()=>{
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES[
+   'Predicting What Comes Next: Exploring Sequences and Progressions'];
+  const inventory=()=>({sections:ch.sections.length,
+   units:ch.sections.flatMap(s=>s.subtopics||[]).length,
+   examples:ch.sections.flatMap(s=>s.examples||[]).length+
+    ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(p=>p.examples||[])).length});
+  const before=inventory();
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement('script');
+   script.src='/cbse-class9-maths-depth-ch08.js?studyai-reload-test=1';
+   script.onload=resolve;
+   script.onerror=()=>reject(Error('Chapter 8 script reload failed'));
+   document.head.appendChild(script);
+  });
+  return {before,after:inventory()};
+ });
+ check(JSON.stringify(ch08Replay.before)===JSON.stringify(ch08Replay.after),
+  'Chapter 8: reloading the note script does not duplicate sections or examples');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

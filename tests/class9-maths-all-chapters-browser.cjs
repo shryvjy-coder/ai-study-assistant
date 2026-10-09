@@ -312,6 +312,9 @@ const titles=[
     heading:visible[0]?.querySelector(':scope > h3')?.textContent?.trim(),
     text:visible[0]?.textContent||''};
   });
+  // Leave Chapter 7 at its first lesson so subsequent all-chapter smoke checks
+  // do not inherit the final lesson selected by this targeted test.
+  window.StudyAILessonReader.goTo(0);
   return {
    titles:subtopics.map(s=>s.title),examples:examples.map(e=>e.title),
    counts:examples.filter(e=>!e||typeof e.question!=='string'||

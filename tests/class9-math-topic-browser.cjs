@@ -136,8 +136,8 @@ const check=(cond,msg)=>{assert.ok(cond,msg);console.log('PASS',msg)};
   await page.locator('.studyai-topic-select').selectOption('14');
   check(await page.locator('.studyai-next-topic').first().isDisabled(),
     'last optional topic disables Next lesson');
-  check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').innerText()).includes('not prescribed'),
-    'optional algebra content remains explicitly labelled as non-compulsory');
+  check((await page.locator('#detailed-notes .actual-note-topic:not([hidden])').textContent()).includes('not prescribed'),
+    'optional algebra lesson remains explicitly labelled as non-compulsory');
 
   await page.evaluate(()=>{
     const other=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Mathematics'&&x.title==='Exploring Algebraic Identities');

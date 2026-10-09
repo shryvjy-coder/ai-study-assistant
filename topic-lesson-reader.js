@@ -133,6 +133,92 @@
     return pages;
   }
 
+  /*
+   * The World of Numbers has a rich hierarchy of roughly 60 teaching
+   * subsections. They are headings INSIDE the 15 substantial topic pages, not
+   * 60+ separate clicks. Keep all authored content, figures and worked problems
+   * intact; paginate only the chapter's top-level topics.
+   */
+  function renderCompactWorldOfNumbers(notes,allSections,topics){
+    notes.classList.add('studyai-compact-chapter');
+    const nav=document.createElement('nav');
+    nav.className='studyai-lesson-reader studyai-compact-reader';
+    nav.setAttribute('aria-label','Lessons in The World of Numbers');
+
+    const group=document.createElement('div');
+    group.className='studyai-lesson-group';
+    const label=document.createElement('label');
+    label.className='studyai-lesson-label';
+    const kicker=document.createElement('span');
+    kicker.className='small-label';
+    kicker.textContent='Choose a lesson';
+    const count=document.createElement('span');
+    count.className='studyai-lesson-total';
+    const select=createSelect('studyai-topic-select',
+      'Choose a lesson in The World of Numbers',
+      topics.map(el=>titleOf(el.querySelector('h3'))));
+    label.append(kicker,count,select);
+
+    const controls=document.createElement('div');
+    controls.className='studyai-lesson-controls';
+    const previous=createButton('studyai-prev-topic','← Previous lesson');
+    const next=createButton('studyai-next-topic','Next lesson →','primary');
+    controls.append(previous,next);
+    group.append(label,controls);
+    nav.append(group);
+
+    const bottom=document.createElement('nav');
+    bottom.className='studyai-topic-pagination';
+    bottom.setAttribute('aria-label','Lesson page navigation');
+    const bottomPrevious=createButton('studyai-prev-page','← Previous lesson');
+    const progress=document.createElement('span');
+    progress.className='studyai-topic-progress';
+    progress.setAttribute('aria-live','polite');
+    const bottomNext=createButton('studyai-next-page','Next lesson →','primary');
+    bottom.append(bottomPrevious,progress,bottomNext);
+
+    const prose=notes.querySelector('.note-prose');
+    if(!prose)return;
+    notes.insertBefore(nav,prose);
+    notes.append(bottom);
+    const show=(index,focus)=>{
+      const n=Math.max(0,Math.min(topics.length-1,Number(index)||0));
+      selectedTopic=n;
+      selectedSubtopic=0;
+      allSections.forEach(section=>{
+        section.hidden=true;
+        section.classList.remove('studyai-current-topic');
+      });
+      const active=topics[n];
+      active.hidden=false;
+      active.classList.add('studyai-current-topic');
+      // Nested pedagogical subtopics remain visible headings, not extra pages.
+      active.querySelectorAll('.studyai-lesson-subtopic').forEach(part=>{
+        part.hidden=false;
+        part.classList.remove('studyai-current-subtopic');
+      });
+      select.value=String(n);
+      count.textContent='Lesson '+(n+1)+' of '+topics.length;
+      progress.textContent='Lesson '+(n+1)+' of '+topics.length;
+      previous.disabled=bottomPrevious.disabled=n===0;
+      next.disabled=bottomNext.disabled=n===topics.length-1;
+      if(focus){
+        const heading=active.querySelector('h3');
+        if(heading){
+          heading.setAttribute('tabindex','-1');
+          heading.focus({preventScroll:true});
+        }
+        nav.scrollIntoView({behavior:'auto',block:'start'});
+      }
+    };
+    select.addEventListener('change',()=>show(Number(select.value),true));
+    previous.addEventListener('click',()=>show(selectedTopic-1,true));
+    next.addEventListener('click',()=>show(selectedTopic+1,true));
+    bottomPrevious.addEventListener('click',()=>show(selectedTopic-1,true));
+    bottomNext.addEventListener('click',()=>show(selectedTopic+1,true));
+    show(selectedTopic,false);
+  }
+
   renderReaderContent=function(entry){
     const result=oldRender.apply(this,arguments);
     const notes=document.getElementById('detailed-notes');
@@ -161,6 +247,12 @@
       selectedSubtopic=0;
     }
     selectedTopic=Math.max(0,Math.min(selectedTopic,topics.length-1));
+
+    notes.classList.remove('studyai-compact-chapter');
+    if(entry.title==='The World of Numbers'){
+      renderCompactWorldOfNumbers(notes,allSections,topics);
+      return result;
+    }
 
     const pagesByTopic=topics.map(prepareSubtopicPages);
     const ui=makeNavigation();

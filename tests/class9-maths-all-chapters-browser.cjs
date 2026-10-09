@@ -256,6 +256,29 @@ const titles=[
   'Two nonoverlapping wipers'
  ].every(t=>verifiedCh06.exampleNames.includes(t)),
   'Chapter 6: NCERT-specific solved examples are reachable');
+
+ const followupConcepts=[
+  'Geometric hexagon bounds on pi',
+  'Thin parallelograms and area-preserving shear',
+  'Archimedes’ perimeter-times-radius area argument',
+  'Ninety-degree circular segments',
+  'Area of a concentric annulus from a tangent chord',
+  'Semicircle areas and right-triangle geometry',
+  'Circle grids and the four-petal exercise'
+ ];
+ check(followupConcepts.every(title=>verifiedCh06.concepts.filter(t=>t===title).length===1),
+  'Chapter 6 follow-up: seven verified concepts appear exactly once');
+ const followupExamples=[
+  'Hexagons bounding pi',
+  'Outside-base altitude',
+  'Circular area from circumference',
+  'Quarter-circle segment',
+  'Tangent chord determines ring area',
+  'Semicircles of a right triangle',
+  'Twenty circles in a rectangular grid'
+ ];
+ check(followupExamples.every(title=>verifiedCh06.exampleNames.filter(t=>t===title).length===1),
+  'Chapter 6 follow-up: worked proofs and area applications are present exactly once');
  check(verifiedCh06.browser.every((item,i)=>item.visible===1&&
    item.title===verifiedCh06.added[i]&&item.examples>=2&&item.words>600&&item.progress>0),
   'Chapter 6: all six new lessons render with worked examples and progress tracking');

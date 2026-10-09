@@ -265,6 +265,57 @@ extra.splice(2,0,{
   ])
  ]
 });
+
+const ch6topic=(section,title,paragraphs,formulas,examples)=>{
+ const s=ch.sections.find(s=>s.title===section);
+ if(!s)throw Error('Chapter 6 follow-up missing '+section);
+ if(s.subtopics.some(u=>u.title===title))throw Error('Duplicate '+title);
+ s.subtopics.push(S(title,paragraphs,formulas,examples));
+};
+ch6topic('Perimeter and circumference','Geometric hexagon bounds on pi',[
+ 'NCERT Section 6.2 compares the perimeter of a circle with regular polygons inside and outside it. For radius r, a regular inscribed hexagon has side r and perimeter 6r. A circumscribed regular hexagon has side 2r/√3 and perimeter 4√3r. Since 6r<2πr<4√3r, dividing by 2r gives 3<π<2√3.',
+ 'Archimedes tightened these bounds using polygons with 96 sides, obtaining 223/71<π<22/7. These are bounds and approximations, never equalities. The historical thread continues with Āryabhaṭa, Zu Chongzhi and Mādhava.'
+],['3<π<2√3','223/71<π<22/7'],[
+ E('Hexagons bounding pi','An inscribed regular hexagon and circumscribed regular hexagon surround a circle of radius 7 cm. Give their perimeters and deduce bounds for π.',[
+  'Inscribed perimeter=6×7=42 cm.',
+  'Circumscribed perimeter=4√3×7=28√3 cm.',
+  '42<14π<28√3; divide by 14.'
+ ],'3<π<2√3.')]);
+ch6topic('Area of rectangles and parallelograms','Thin parallelograms and area-preserving shear',[
+ 'A familiar cut-and-paste proof of parallelogram area assumes that the chosen perpendicular meets the base segment. In a very slanted parallelogram it may meet the extended base instead. The standard single-cut diagram is then insufficient, but the area formula still holds.',
+ 'Slide the top edge parallel to the fixed base while preserving its perpendicular separation: equal-area triangular slivers are removed and added on opposite sides. Once the top edge is less offset, the usual rearrangement into a rectangle works. Therefore the area of any parallelogram is base times perpendicular height, not base times slant side.',
+ 'Two parallelograms can have side lengths 8 cm and 6 cm yet areas 48 cm² and 24 cm² if their perpendicular heights to the 8 cm base are 6 cm and 3 cm respectively.'
+ ],['A=base×perpendicular height'],[
+ E('Outside-base altitude','A parallelogram has base 8 cm and perpendicular height 3 cm. Its altitude meets an extension of the base. Find its area.',[
+  'The perpendicular distance between the parallel lines is 3 cm even when its foot lies outside the side.',
+  'Area=8×3.'
+ ],'24 cm².')]);
+ch6topic('Area of a circle and sector','Archimedes’ perimeter-times-radius area argument',[
+ 'For a regular polygon, joining its centre to its vertices divides the region into triangles with the same perpendicular height h to each side. Adding the triangle areas gives polygon area=(perimeter×h)/2.',
+ 'As the regular polygons gain more sides and approach the circle, the perimeter approaches C and h approaches radius r. This motivates circle area A=Cr/2=πr². It also explains why the ratio C²/A=4π does not depend on the radius.'
+ ],['A=Cr/2=πr²','C²/A=4π'],[
+ E('Circular area from circumference','A circle has circumference 20π cm. Calculate its area.',[
+  'C=2πr gives r=10 cm.',
+  'A=Cr/2=(20π×10)/2.'
+ ],'100π cm².')]);
+ch6topic('Area of a circle and sector','Ninety-degree circular segments',[
+ 'For a chord subtending 90° at the centre, the minor segment equals the quarter-circle sector minus the right-angled isosceles triangle between the two radii. The sector has area πr²/4 while the triangle has area r²/2.',
+ 'Thus the segment has area r²(π/4−1/2). The major segment is the full disc minus this minor segment. This method needs only the triangle area formula, not trigonometry.'
+ ],['90° minor segment=r²(π/4−1/2)'],[
+ E('Quarter-circle segment','Find the area of a 90° minor segment in a circle of radius 10 cm using π=3.14.',[
+  'Sector area=3.14×100/4=78.5 cm².',
+  'Triangle area=10×10/2=50 cm².',
+  'Segment area=78.5−50.'
+ ],'28.5 cm².')]);
+ch6topic('Composite perimeter and area','Area of a concentric annulus from a tangent chord',[
+ 'The region between two concentric circles of radii R and r has area π(R²−r²). Suppose a chord of the outer circle of length l just touches the inner circle. A radius drawn to the point of tangency is perpendicular to and bisects the chord.',
+ 'By Pythagoras in the right triangle, R²−r²=(l/2)². Consequently the annulus area is πl²/4, which depends only on the chord length.'
+ ],['Annulus area=π(R²−r²)=πl²/4'],[
+ E('Tangent chord determines ring area','A tangent chord to an inner concentric circle has length 14 cm. Find the annulus area using π=22/7.',[
+  'Half chord length=7 cm.',
+  'R²−r²=7²=49.',
+  'Area=(22/7)×49.'
+ ],'154 cm².')]);
 const mixedIndex=ch.sections.findIndex(s=>s.title==='Mixed exam applications and fully worked solutions');
 if(mixedIndex<0)throw Error('Chapter 6 textbook audit: mixed-exam lesson not found');
 ch.sections.splice(mixedIndex,0,...extra);

@@ -109,7 +109,7 @@ mixed:[
  const audit=window.STUDYAI_CLASS9_DEPTH_AUDIT?.['The World of Algorithms'];
  if(audit){
   const sections=ch.sections,subtopics=sections.flatMap(s=>s.subtopics||[]);
-  audit.sections=sections.length;
+  audit.sections=sections.filter(s=>!['Chapter coverage','Exam application','Common traps and final checks','Mastery check'].includes(s.title)).length;
   audit.subtopics=subtopics.length;
   audit.examples=sections.reduce((n,s)=>n+(s.examples||[]).length,0)+subtopics.reduce((n,s)=>n+(s.examples||[]).length,0);
   audit.paragraphs=sections.reduce((n,s)=>n+(s.paragraphs||[]).length,0)+subtopics.reduce((n,s)=>n+(s.paragraphs||[]).length,0);

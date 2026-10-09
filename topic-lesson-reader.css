@@ -1,0 +1,134 @@
+/* CBSE Grade 9 Mathematics: one academic topic and one subtopic page at a time. */
+#detailed-notes .note-section[hidden],
+#detailed-notes .studyai-lesson-subtopic[hidden],
+#detailed-notes .studyai-subtopic-nav[hidden]{
+  display:none!important;
+}
+.studyai-lesson-reader{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,315px),1fr));
+  gap:14px;
+  padding:18px;
+  margin:14px 0 24px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:14px;
+  scroll-margin-top:110px;
+}
+.studyai-lesson-group,.studyai-subtopic-nav{
+  min-width:0;
+  display:grid;
+  align-content:start;
+  gap:12px;
+}
+.studyai-subtopic-nav{
+  border-left:1px solid var(--line);
+  padding-left:18px;
+}
+.studyai-lesson-label{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:7px;
+  min-width:0;
+}
+.studyai-lesson-total{
+  font-size:.86rem;
+  font-weight:800;
+  color:var(--ink);
+}
+.studyai-topic-select,.studyai-subtopic-select{
+  display:block;
+  width:100%;
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:12px 13px;
+  font:inherit;
+  font-weight:650;
+  color:var(--ink);
+  background:var(--surface);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.studyai-lesson-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.studyai-lesson-controls .button{
+  flex:1;
+  min-width:min(100%,125px);
+}
+#detailed-notes .studyai-current-topic .studyai-lesson-subtopic{
+  margin:0;
+  border:0;
+  padding:6px 0 12px;
+}
+#detailed-notes .studyai-current-topic .studyai-lesson-subtopic > h4{
+  font-size:clamp(1.15rem,2vw,1.38rem);
+  margin:0 0 20px;
+  line-height:1.3;
+}
+#detailed-notes .studyai-current-topic > h3{
+  margin-bottom:20px;
+}
+.studyai-topic-pagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-top:1px solid var(--line);
+  margin-top:24px;
+  padding:24px 0 8px;
+}
+.studyai-topic-progress{
+  font-size:.9rem;
+  font-weight:800;
+  color:var(--muted);
+  text-align:center;
+}
+.studyai-current-topic,.studyai-current-subtopic{
+  animation:studyai-lesson-appear .2s ease;
+}
+@keyframes studyai-lesson-appear{from{opacity:.8}to{opacity:1}}
+@media(max-width:760px){
+  .studyai-lesson-reader{grid-template-columns:minmax(0,1fr)}
+  .studyai-subtopic-nav{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:14px}
+}
+@media(max-width:550px){
+  .studyai-topic-pagination{flex-wrap:wrap}
+  .studyai-topic-pagination .button{flex:1}
+  .studyai-topic-progress{width:100%;order:-1}
+}
+@media(prefers-reduced-motion:reduce){
+  .studyai-current-topic,.studyai-current-subtopic{animation:none}
+}
+
+/* World of Numbers: only major lessons are paginated; their authored
+ * subsections form a readable, uninterrupted teaching page. */
+#detailed-notes.studyai-compact-chapter .studyai-lesson-reader{
+  grid-template-columns:minmax(0,1fr);
+}
+#detailed-notes.studyai-compact-chapter .studyai-lesson-group{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:16px;
+}
+#detailed-notes.studyai-compact-chapter .studyai-lesson-subtopic{
+  margin:26px 0 32px;
+  padding:18px 0 0;
+  border-top:1px solid var(--line);
+}
+#detailed-notes.studyai-compact-chapter .studyai-lesson-subtopic > h4{
+  font-size:clamp(1.1rem,2vw,1.3rem);
+  margin:0 0 15px;
+}
+#detailed-notes.studyai-compact-chapter .studyai-topic-select{
+  max-width:680px;
+}
+@media(max-width:760px){
+  #detailed-notes.studyai-compact-chapter .studyai-lesson-group{
+    grid-template-columns:minmax(0,1fr);
+  }
+}

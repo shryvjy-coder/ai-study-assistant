@@ -140,7 +140,8 @@ function enrichClass9Math(){
   for(const entry of curriculum){
     if(entry.board!=='CBSE'||entry.grade!=='Class 9'||entry.subject!=='Mathematics')continue;
     const full=bank[entry.title];
-    if(!full||full._studyaiLongForm)continue;
+    // Fully authored topic lessons should not receive generic length-padding sections.
+    if(!full||full._studyaiLongForm||full._studyaiTopicFirst)continue;
     full._studyaiLongForm=true;
     const keyPoints=unique(entry.keyPoints);
     full.sections=asArray(full.sections).map((section,index)=>{
@@ -221,7 +222,12 @@ function renderExamples(items){
 function renderSection(section){
   return '<section class="note-section actual-note-topic"><h3>'+escapeHtml(section.title||'')+'</h3>'+
     asArray(section.paragraphs).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+
+    (section.figureId?window.StudyAIConceptFigures?.render?.(section.figureId)||'':'')+
+    asArray(section.subtopics).map(part=>'<div class="studyai-lesson-subtopic"><h4>'+escapeHtml(part.title||'')+'</h4>'+
+      asArray(part.paragraphs).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+
+      renderList(part.bullets)+renderFormulas(part.formulas)+renderExamples(part.examples)+'</div>').join('')+
     renderList(section.bullets)+renderFormulas(section.formulas)+renderExamples(section.examples)+
+    (section.exam_warning?'<div class="studyai-mistake-warning" role="note"><h4>Common mistake</h4><p>'+escapeHtml(section.exam_warning)+'</p></div>':'')+
     (section.tip?'<div class="exam-box"><h4>Exam tip</h4><p>'+escapeHtml(section.tip)+'</p></div>':'')+
     '</section>';
 }

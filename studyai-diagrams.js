@@ -120,31 +120,11 @@ function conceptMap(e){
  );
 }
 
+/* A generic graph is not educational content. Do not silently invent one for
+ * every topic. Approved, topic-specific visuals live in authored note modules.
+ */
 function render(e){
- const key=lower(e);
- const subject=String(e?.subject||'').toLowerCase();
- if(/mathematics|maths/.test(subject)){
-  if(/geometry|circle|mensuration|trigon|vector|coordinate/.test(key))return geometry();
-  return axes(e?.title||'relationship');
- }
- if(/physics/.test(subject)){
-  if(/wave|oscillation|superposition|sound|light|optics/.test(key))return wave();
-  if(/electric|circuit|capacit|alternating current|magnetic/.test(key))return circuit();
-  return force();
- }
- if(/chemistry/.test(subject)){
-  if(/electrochem|electrolysis/.test(key))return particles('electrolysis');
-  if(/energetic|enthalpy|gibbs|entropy|kinetics/.test(key))return energy();
-  return particles('matter');
- }
- if(/biology/.test(subject)){
-  if(/cell|membrane|organi[sz]ation|microscop/.test(key))return cell();
-  if(/inherit|genetic|variation|selection|evolution/.test(key))return genetics();
-  if(/ecosystem|environment|ecolog|biodiversity|conservation|food/.test(key))return ecology();
-  return biologyFlow(e?.title||'Biological process');
- }
- if(/computer|informatics/.test(subject))return biologyFlow('Information flow');
- return conceptMap(e);
+ return '';
 }
 
 window.StudyAIDiagrams={render};

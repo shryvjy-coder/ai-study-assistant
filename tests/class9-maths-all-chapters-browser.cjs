@@ -615,6 +615,136 @@ const titles=[
  check(JSON.stringify(ch09Replay.before)===JSON.stringify(ch09Replay.after),
   'Chapter 9: second depth-script evaluation never duplicates subtopics or examples');
 
+
+ // Official NCERT Ganita Manjari Part II, iemh202.pdf: Chapter 10 in live UI.
+ const verifiedCh10=await page.evaluate(()=>{
+  const title='How Quantities Combine: Understanding Data';
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES?.[title];
+  if(!ch)throw Error('Chapter 10 notes are missing');
+  const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+    e.subject==='Mathematics'&&e.title===title);
+  if(!entry)throw Error('Chapter 10 navigation entry is missing');
+  const excluded=new Set(['Chapter coverage','Exam application',
+    'Common traps and final checks','Mastery check']);
+  const sections=ch.sections.filter(s=>!excluded.has(s.title));
+  const parts=sections.flatMap(s=>s.subtopics||[]);
+  const examples=sections.flatMap(s=>s.examples||[]).concat(
+    parts.flatMap(p=>p.examples||[]));
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+    component:'All components',topic:entry.title,topicId:entry.id};
+  renderFilters();openTopic(entry.title,entry.id);
+  const pages=sections.map((s,index)=>{
+    window.StudyAILessonReader.goTo(index);
+    const open=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+      .filter(element=>!element.hidden);
+    return {title:s.title,open:open.length,
+      heading:open[0]?.querySelector(':scope > h3')?.textContent.trim(),
+      length:open[0]?.textContent?.length||0,
+      worked:open[0]?.querySelectorAll('.worked-box').length||0};
+  });
+  window.StudyAILessonReader.goTo(0);
+  const text=JSON.stringify(ch.sections);
+  return {parts:parts.map(p=>p.title),examples:examples.map(e=>e.title),
+    invalid:examples.filter(e=>!e||typeof e.title!=='string'||
+      typeof e.question!=='string'||!Array.isArray(e.steps)||
+      e.steps.length<2||typeof e.answer!=='string').length,
+    thin:parts.filter(p=>!Array.isArray(p.paragraphs)||p.paragraphs.length<2).length,
+    pages,chapterText:text,
+    options:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
+    progress:window.StudyAIProgress?.summary(entry.id)?.total||0,
+    audit:window.STUDYAI_CLASS9_DEPTH_AUDIT?.[title]};
+ });
+ const expectedCh10=[
+  'Pooling any number of groups and the equal-size exception',
+  'Finding missing group sizes and updating a running mean',
+  'Reverse cost averaging and how purchases change the mean',
+  'What weights mean: different marks denominators and safe domains',
+  'Brahmagupta, Śrīdharācārya and weighted gold purity',
+  'Scaling every weight versus adding to every weight',
+  'Different components in one mixture: salt, sugar and total',
+  'Dilution with pure water and which target concentrations are possible',
+  'Solving for an unknown third batch and comparing equal-quantity blends',
+  'Designing and interpreting a custom ratings system',
+  'Choosing clustered versus stacked charts for a purpose',
+  'Two-way tables can produce different valid stacked charts',
+  'Why 100% stacked bars cannot reveal group totals',
+  'Electricity categories: compare shares and absolute usage separately',
+  'Twenty-four-hour time-use charts and hidden subgroup variation',
+  'Changing population shares even when every count falls'
+ ];
+ check(expectedCh10.every(name=>verifiedCh10.parts.filter(p=>p===name).length===1),
+  'Chapter 10: all 16 NCERT-targeted, explanatory subtopics appear exactly once');
+ const expectedCh10Examples=[
+  'Three months of daily rainfall',
+  'Recover the langur counts from averages',
+  'Find how many lower-priced shares were bought',
+  'Weight percentages, not unlike raw marks',
+  'Mean depth of a historic segmented pool',
+  'Compare weight multiplication with weight addition',
+  'Salt and sugar have different mixture percentages',
+  'Water to reduce spiced water to three-quarters strength',
+  'Find an unknown batch of brass',
+  'Restaurant rating from three aspects',
+  'Calculate totals of three stacked expense bars',
+  'Re-orient wickets data into stacks',
+  'A percentage winner need not have more items',
+  'Build both electricity percentage stacks',
+  'Translate time-use segments into hours',
+  'Animal counts all shrink but some shares grow'
+ ];
+ check(expectedCh10Examples.every(name=>
+   verifiedCh10.examples.filter(e=>e===name).length===1),
+  'Chapter 10: complete textbook-style worked answers are present without duplication');
+ check(verifiedCh10.invalid===0&&verifiedCh10.thin===0,
+  'Chapter 10: examples have solution steps and every subtopic has thorough explanations');
+ check(verifiedCh10.pages.every(p=>p.open===1&&p.title===p.heading&&
+   p.length>550&&p.worked>=1),
+  'Chapter 10: every substantial lesson renders as a separate worked-example page');
+ check(verifiedCh10.options===verifiedCh10.progress&&
+   verifiedCh10.options===verifiedCh10.pages.length&&
+   verifiedCh10.audit?.sections===verifiedCh10.pages.length&&
+   verifiedCh10.audit?.subtopics===verifiedCh10.parts.length&&
+   verifiedCh10.audit?.words>2500,
+  'Chapter 10: navigation, lesson completion and audit inventory are in sync');
+ check(verifiedCh10.audit?.reviewedSource?.includes('iemh202.pdf'),
+  'Chapter 10: correct source is NCERT Part II iemh202.pdf');
+ check(!/Simpson.s Paradox|The Rule of Alligation|Harmonic Rate/.test(
+   verifiedCh10.parts.join(' | ')),
+  'Chapter 10: invented Gemini-only curriculum sections were not injected');
+ const approximate=(a,b)=>Math.abs(a-b)<1e-7;
+ const n10=(()=>{
+   const male=60*(14.925-13.8)/(16.5-13.8);
+   const diluted=0.8/.06-10;
+   const newCost=(25*150+10*30)/35;
+   const familyA=[1940,1700,1280,1200,1770,535].reduce((a,b)=>a+b,0);
+   const familyB=[1750,1546,1500,1280,1210,0].reduce((a,b)=>a+b,0);
+   const familyC=[950,1700,1540,1400,1300,150].reduce((a,b)=>a+b,0);
+   return {male,diluted,newCost,familyA,familyB,familyC};
+ })();
+ check(approximate(n10.male,25)&&approximate(n10.diluted,10/3)&&
+   approximate(n10.newCost,4050/35)&&
+   n10.familyA===8425&&n10.familyB===7286&&n10.familyC===7040,
+  'Chapter 10: NCERT langur, dilution, stocks and family-total arithmetic verified');
+ const ch10Replay=await page.evaluate(async()=>{
+  const title='How Quantities Combine: Understanding Data';
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES[title];
+  const counts=()=>({sections:ch.sections.length,
+    subtopics:ch.sections.flatMap(s=>s.subtopics||[]).length,
+    examples:ch.sections.flatMap(s=>s.examples||[]).length+
+      ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(p=>p.examples||[])).length});
+  const before=counts();
+  await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='/cbse-class9-maths-depth-ch10.js?ch10-reload-check=1';
+    script.onload=resolve;
+    script.onerror=()=>reject(Error('Chapter 10 depth patch reload failed'));
+    document.head.appendChild(script);
+  });
+  return {before,after:counts()};
+ });
+ check(JSON.stringify(ch10Replay.before)===JSON.stringify(ch10Replay.after),
+  'Chapter 10: repeating source script creates no duplicate sections or examples');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

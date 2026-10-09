@@ -49,6 +49,7 @@ jobs:
           node --check tests/cambridge-full-notes-diagrams-browser.cjs
           node --check tests/chapter-navigation-hover-browser.cjs
           node --check tests/class9-math-topic-browser.cjs
+          node --check tests/class9-lesson-progress-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -87,6 +88,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Class 9 chapter topic-page pilot
         run: node tests/class9-math-topic-browser.cjs
+      - name: Class 9 checkable lessons and progress rings
+        run: node tests/class9-lesson-progress-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

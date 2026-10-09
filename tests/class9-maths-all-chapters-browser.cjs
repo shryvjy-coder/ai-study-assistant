@@ -191,6 +191,7 @@ const titles=[
   const added=[
    'Pi, track staggers and perimeter puzzles',
    'Heron’s formula and triangle-side applications',
+   'Circle-based triangle areas and Brahmagupta’s formula',
    'Equal-area proofs and quadrilateral applications',
    'Squaring a rectangle by construction',
    'Circular segments, sector applications and scaling'
@@ -225,13 +226,15 @@ const titles=[
   };
  });
  check(verifiedCh06.added.every(t=>verifiedCh06.titles.filter(title=>title===t).length===1),
-  'Chapter 6: five distinct textbook lessons are present without duplicates');
+  'Chapter 6: six distinct textbook lessons are present without duplicates');
  check([
   'Estimating the circumference-to-diameter ratio',
   'Why pi is irrational and why fractions are approximations',
   'Track-lane stagger and wheel revolutions',
   'Why surprising semicircle paths can be equally long',
   'Apply Heron’s formula carefully',
+  'Brahmagupta’s formula and its connection to Heron',
+  'Triangle area from the inradius or circumradius',
   'Equal areas from the same base and parallel lines',
   'Baudhāyana’s compass-and-straightedge construction',
   'Minor and major sectors, segments and triangle subtraction',
@@ -242,6 +245,8 @@ const titles=[
   'Estimate pi with thread',
   'Three small semicircles or one large?',
   'Triangle with two sides and perimeter',
+  'Verify Brahmagupta on a rectangle',
+  'Incircle and circumcircle for a 3–4–5 triangle',
   'Find the height of a trapezium',
   'Explain why the compass construction works',
   'A sixty-degree circular segment',
@@ -250,7 +255,7 @@ const titles=[
   'Chapter 6: NCERT-specific solved examples are reachable');
  check(verifiedCh06.browser.every((item,i)=>item.visible===1&&
    item.title===verifiedCh06.added[i]&&item.examples>=2&&item.words>600&&item.progress>0),
-  'Chapter 6: all five new lessons render with worked examples and progress tracking');
+  'Chapter 6: all six new lessons render with worked examples and progress tracking');
  check(verifiedCh06.readerOptions===verifiedCh06.progressCount&&
    verifiedCh06.readerOptions===verifiedCh06.titles.length&&
    verifiedCh06.audit.sections===verifiedCh06.titles.length,

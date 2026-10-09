@@ -372,6 +372,35 @@ const titles=[
    verifiedCh07.audit.subtopics===verifiedCh07.titles.length,
   'Chapter 7: reader navigation, completion tracking and depth audit remain in sync');
 
+
+ // Reloading Chapter 7's audited depth patch must not duplicate any topics.
+ const ch07Replay=await page.evaluate(async()=>{
+  const title='The Mathematics of Maybe: Introduction to Probability';
+  const ch=window.CBSE_CLASS9_MATH_FULL_NOTES[title];
+  const before={
+   sections:ch.sections.length,
+   topics:ch.sections.flatMap(s=>s.subtopics||[]).length,
+   examples:ch.sections.flatMap(s=>s.examples||[]).length+
+    ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(u=>u.examples||[])).length
+  };
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement('script');
+   script.src='/cbse-class9-maths-depth-ch07.js?duplicate-check=1';
+   script.onload=resolve;
+   script.onerror=()=>reject(Error('Chapter 7 patch reload failed'));
+   document.head.append(script);
+  });
+  const after={
+   sections:ch.sections.length,
+   topics:ch.sections.flatMap(s=>s.subtopics||[]).length,
+   examples:ch.sections.flatMap(s=>s.examples||[]).length+
+    ch.sections.flatMap(s=>(s.subtopics||[]).flatMap(u=>u.examples||[])).length
+  };
+  return {before,after};
+ });
+ check(JSON.stringify(ch07Replay.before)===JSON.stringify(ch07Replay.after),
+  'Chapter 7: running the expanded depth file twice is idempotent');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

@@ -261,7 +261,7 @@ const titles=[
   'Chapter 6: all six new lessons render with worked examples and progress tracking');
  check(verifiedCh06.readerOptions===verifiedCh06.progressCount&&
    verifiedCh06.readerOptions===verifiedCh06.navigableTitles.length&&
-   verifiedCh06.audit.sections===verifiedCh06.titles.length,
+   verifiedCh06.audit.sections===verifiedCh06.navigableTitles.length,
   'Chapter 6: lesson navigation, completion rings and content inventory agree');
 
  // Check live integration, not only source data. Each chapter must open.

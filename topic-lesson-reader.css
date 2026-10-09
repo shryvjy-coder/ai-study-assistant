@@ -104,3 +104,31 @@
 @media(prefers-reduced-motion:reduce){
   .studyai-current-topic,.studyai-current-subtopic{animation:none}
 }
+
+/* World of Numbers: only major lessons are paginated; their authored
+ * subsections form a readable, uninterrupted teaching page. */
+#detailed-notes.studyai-compact-chapter .studyai-lesson-reader{
+  grid-template-columns:minmax(0,1fr);
+}
+#detailed-notes.studyai-compact-chapter .studyai-lesson-group{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:16px;
+}
+#detailed-notes.studyai-compact-chapter .studyai-lesson-subtopic{
+  margin:26px 0 32px;
+  padding:18px 0 0;
+  border-top:1px solid var(--line);
+}
+#detailed-notes.studyai-compact-chapter .studyai-lesson-subtopic > h4{
+  font-size:clamp(1.1rem,2vw,1.3rem);
+  margin:0 0 15px;
+}
+#detailed-notes.studyai-compact-chapter .studyai-topic-select{
+  max-width:680px;
+}
+@media(max-width:760px){
+  #detailed-notes.studyai-compact-chapter .studyai-lesson-group{
+    grid-template-columns:minmax(0,1fr);
+  }
+}

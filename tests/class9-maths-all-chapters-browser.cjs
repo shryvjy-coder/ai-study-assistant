@@ -183,6 +183,79 @@ const titles=[
   centres.count===1&&centres.text.includes('Infinitely many circles')&&centres.examples>=3,
   'Chapter 5: locus and infinitely many two-point circles render as separate lessons');
 
+ // NCERT Ganita Manjari Chapter 6 independent textbook regression coverage.
+ const verifiedCh06=await page.evaluate(()=>{
+  const bank=window.CBSE_CLASS9_MATH_FULL_NOTES;
+  const ch=bank['Measuring Space: Perimeter and Area'];
+  const titles=ch.sections.map(s=>s.title);
+  const added=[
+   'Pi, track staggers and perimeter puzzles',
+   'Heron’s formula and triangle-side applications',
+   'Equal-area proofs and quadrilateral applications',
+   'Squaring a rectangle by construction',
+   'Circular segments, sector applications and scaling'
+  ];
+  const parts=ch.sections.flatMap(s=>s.subtopics||[]);
+  const examples=parts.flatMap(p=>p.examples||[]);
+  const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+   e.subject==='Mathematics'&&e.title==='Measuring Space: Perimeter and Area');
+  if(!entry)throw Error('Chapter 6 missing from navigation');
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+   component:'All components',topic:entry.title,topicId:entry.id};
+  renderFilters();
+  openTopic(entry.title,entry.id);
+  const openLesson=title=>{
+   const index=ch.sections.findIndex(s=>s.title===title);
+   if(index<0)throw Error('Missing Chapter 6 lesson: '+title);
+   window.StudyAILessonReader.goTo(index);
+   const visible=[...document.querySelectorAll('#detailed-notes .note-section.actual-note-topic')]
+    .filter(section=>!section.hidden);
+   return {visible:visible.length,title:visible[0]?.querySelector(':scope > h3')?.textContent.trim(),
+    examples:visible[0]?.querySelectorAll('.worked-box').length||0,
+    words:visible[0]?.textContent?.length||0,
+    progress:window.StudyAIProgress?.summary(entry.id)?.total||0};
+  };
+  const browser=added.map(openLesson);
+  return {
+   added,titles,concepts:parts.map(part=>part.title),
+   exampleNames:examples.map(ex=>ex.title),browser,
+   audit:window.STUDYAI_CLASS9_DEPTH_AUDIT['Measuring Space: Perimeter and Area'],
+   readerOptions:document.querySelectorAll('#detailed-notes .studyai-topic-select option').length,
+   progressCount:window.StudyAIProgress?.summary(entry.id)?.total||0
+  };
+ });
+ check(verifiedCh06.added.every(t=>verifiedCh06.titles.filter(title=>title===t).length===1),
+  'Chapter 6: five distinct textbook lessons are present without duplicates');
+ check([
+  'Estimating the circumference-to-diameter ratio',
+  'Why pi is irrational and why fractions are approximations',
+  'Track-lane stagger and wheel revolutions',
+  'Why surprising semicircle paths can be equally long',
+  'Apply Heron’s formula carefully',
+  'Equal areas from the same base and parallel lines',
+  'Baudhāyana’s compass-and-straightedge construction',
+  'Minor and major sectors, segments and triangle subtraction',
+  'Inscribed polygons as fractions of circle area'
+ ].every(t=>verifiedCh06.concepts.includes(t)),
+  'Chapter 6: NCERT perimeter, area, construction and circle concepts covered');
+ check([
+  'Estimate pi with thread',
+  'Three small semicircles or one large?',
+  'Triangle with two sides and perimeter',
+  'Find the height of a trapezium',
+  'Explain why the compass construction works',
+  'A sixty-degree circular segment',
+  'Two nonoverlapping wipers'
+ ].every(t=>verifiedCh06.exampleNames.includes(t)),
+  'Chapter 6: NCERT-specific solved examples are reachable');
+ check(verifiedCh06.browser.every((item,i)=>item.visible===1&&
+   item.title===verifiedCh06.added[i]&&item.examples>=2&&item.words>600&&item.progress>0),
+  'Chapter 6: all five new lessons render with worked examples and progress tracking');
+ check(verifiedCh06.readerOptions===verifiedCh06.progressCount&&
+   verifiedCh06.readerOptions===verifiedCh06.titles.length&&
+   verifiedCh06.audit.sections===verifiedCh06.titles.length,
+  'Chapter 6: lesson navigation, completion rings and content inventory agree');
+
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

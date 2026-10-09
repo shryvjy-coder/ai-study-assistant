@@ -875,7 +875,6 @@ const titles=[
  check(verifiedCh11.pages.some(p=>p.hasCarry)&&verifiedCh11.pages.some(p=>p.hasDivisors)&&
    verifiedCh11.pages.some(p=>p.hasHistory)&&verifiedCh11.pages.some(p=>p.hasPrimality),
   'Chapter 11: NCERT edge cases, factor algorithms, history and prime checks render');
- console.log('CHAPTER 11 DEBUG COUNTS',JSON.stringify({navCount:verifiedCh11.navCount,progressCount:verifiedCh11.progressCount,pageCount:verifiedCh11.pages.length,auditSections:verifiedCh11.audit?.sections,auditSubtopics:verifiedCh11.audit?.subtopics,subtopicCount:verifiedCh11.titles.length}));
  check(verifiedCh11.navCount===verifiedCh11.progressCount&&
    verifiedCh11.navCount===verifiedCh11.pages.length&&
    verifiedCh11.audit.sections===verifiedCh11.pages.length&&

@@ -745,6 +745,40 @@ const titles=[
  check(JSON.stringify(ch10Replay.before)===JSON.stringify(ch10Replay.after),
   'Chapter 10: repeating source script creates no duplicate sections or examples');
 
+
+ // Re-audit 2026-10-09: the later Gemini Chapter 10 patch repeats earlier work,
+ // but the source reveals two gaps and an incorrect sentence about weighted speed.
+ const ch10FollowupTitles=[
+  'Updating subgroup means after additions, removals and corrected entries',
+  'Infographics and nationwide percentages need the underlying counts'
+ ];
+ const ch10FollowupExamples=[
+  'Langur means after admission, release and weight change',
+  'Correct misrecorded values in a pooled class',
+  'Why averaging state playground percentages fails',
+  "Why a state's percentage does not determine its count"
+ ];
+ check(ch10FollowupTitles.every(t=>verifiedCh10.parts.filter(p=>p===t).length===1),
+  'Chapter 10 re-audit: remaining NCERT reasoning lessons exist exactly once');
+ check(ch10FollowupExamples.every(t=>verifiedCh10.examples.filter(p=>p===t).length===1),
+  'Chapter 10 re-audit: corrected-data and playground examples exist exactly once');
+ check(verifiedCh10.chapterText.includes('Σ(timeᵢ×speedᵢ)/Σtimeᵢ')&&
+   !verifiedCh10.chapterText.includes('does not generally give overall speed when distances differ'),
+  'Chapter 10 re-audit: time-weighted speed statement is mathematically corrected');
+ const ch10Recheck={
+  females:(35*13.8+15.2)/36,
+  malesAfterRelease:(25*16.5-16.9-16.1)/23,
+  malesAfterLoss:(25*16.5-16.9-16.1-1)/23,
+  corrected:(30*65+20*75+(70-40)+(82-52)+(60-90))/50,
+  schoolRate:(.9*1000+.5*50000)/(1000+50000)
+ };
+ check(approximate(ch10Recheck.females,498.2/36)&&
+   approximate(ch10Recheck.malesAfterRelease,16.5)&&
+   approximate(ch10Recheck.malesAfterLoss,378.5/23)&&
+   approximate(ch10Recheck.corrected,69.6)&&
+   approximate(ch10Recheck.schoolRate,259/510)&&
+   approximate((30*1+60*.5)/(1+.5),40),
+  'Chapter 10 re-audit: langur updates, corrections, pooled state rates and time weights match arithmetic');
  // Check live integration, not only source data. Each chapter must open.
  const rendered=await page.evaluate(names=>{
   const entries=STUDY_DATA.filter(e=>e.board==='CBSE'&&

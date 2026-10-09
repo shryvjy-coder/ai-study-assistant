@@ -236,6 +236,35 @@ const extra=[
  ]
 }
 ];
+// Chapter 6 also introduces circle-based triangle formulas and Brahmagupta's
+// area formula for cyclic four-sided figures. These require separate instruction.
+extra.splice(2,0,{
+ title:'Circle-based triangle areas and Brahmagupta’s formula',
+ paragraphs:[
+  'The textbook compares Heron’s formula with two formulas involving the incircle and circumcircle of a triangle, then introduces Brahmagupta’s formula for cyclic quadrilaterals. These are connections between area, shape and special geometric conditions.',
+  'The restriction cyclic is essential: four side lengths alone do not determine the area of an arbitrary quadrilateral. The positions of its vertices and angles can still vary.'
+ ],
+ subtopics:[
+  S('Triangle area from the inradius or circumradius',[
+   'Let a,b,c be triangle side lengths, r the radius of its incircle, R the radius of its circumcircle, and K its area. Joining the incenter to the three vertices divides the triangle into three triangles each of height r, giving K=(1/2)ar+(1/2)br+(1/2)cr=rs, where s=(a+b+c)/2.',
+   'Another standard formula stated in the textbook is K=abc/(4R). It can be used to calculate the circumradius from a known area: R=abc/(4K). For a right-angled triangle, the circumradius is half the hypotenuse, which checks this relationship in the 3–4–5 case.'
+  ],['K=rs, s=(a+b+c)/2','K=abc/(4R)'],[
+   E('Incircle and circumcircle for a 3–4–5 triangle','A triangle has sides 3, 4, 5 and area 6 square units. Find its inradius and circumradius.',['Semiperimeter s=(3+4+5)/2=6.','From K=rs, r=6/6=1 unit.','From K=abc/(4R), R=(3×4×5)/(4×6)=60/24=2.5 units.','The circumradius matches half the hypotenuse 5/2.'],'Inradius 1 unit; circumradius 2.5 units.')
+  ]),
+  S('Why four sides do not determine an arbitrary quadrilateral area',[
+   'Two four-sided figures may have exactly the same side lengths but different areas. For example, a square with all sides 3 cm has area 9 cm², while a non-square rhombus with the same sides has area 3×3×sin θ, which is less than 9 cm² when its interior angle θ is not 90°. The different angles change the perpendicular height.',
+   'If a quadrilateral is cyclic, all four vertices lie on one circle. Cyclicity is an extra geometric condition, allowing a formula that depends only on the four side lengths. Without that condition or other geometric information, Brahmagupta’s formula must not be applied.'
+  ],[],[
+   E('Same sides do not guarantee same area','Two rhombi have all four sides 3 cm. One is a square and the other has a 30° interior angle. Compare their areas.',['The square has area 3×3=9 cm².','The second has base 3 cm and height 3 sin 30°=1.5 cm.','Its area is 3×1.5=4.5 cm².'],'Areas differ: 9 cm² versus 4.5 cm².')
+  ]),
+  S('Brahmagupta’s formula and its connection to Heron',[
+   'For a cyclic quadrilateral with consecutive side lengths a,b,c,d, let s=(a+b+c+d)/2. Brahmagupta’s formula is K=√[(s−a)(s−b)(s−c)(s−d)]. It is a cyclic-quadrilateral formula, not a general quadrilateral formula.',
+   'A rectangle is cyclic, so if its side lengths alternate a,b,a,b, then s=a+b. Substitution gives K=√[b×a×b×a]=ab, agreeing with rectangular area. Formally, letting the fourth side length tend to zero and two vertices merge makes the formula approach √[s(s−a)(s−b)(s−c)], exactly Heron’s formula for a triangle.'
+  ],['For cyclic quadrilateral: K=√[(s−a)(s−b)(s−c)(s−d)]','s=(a+b+c+d)/2'],[
+   E('Verify Brahmagupta on a rectangle','A rectangle has side lengths 6 cm, 4 cm, 6 cm, 4 cm. Use Brahmagupta’s formula to confirm its area.',['The rectangle is cyclic; s=(6+4+6+4)/2=10 cm.','The four factors are 10−6=4, 10−4=6, 10−6=4, 10−4=6.','K=√(4×6×4×6)=√576=24 cm².','The rectangular formula 6×4 gives the same result.'],'24 cm².')
+  ])
+ ]
+});
 const mixedIndex=ch.sections.findIndex(s=>s.title==='Mixed exam applications and fully worked solutions');
 if(mixedIndex<0)throw Error('Chapter 6 textbook audit: mixed-exam lesson not found');
 ch.sections.splice(mixedIndex,0,...extra);

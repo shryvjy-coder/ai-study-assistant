@@ -139,7 +139,7 @@ def main():
             not isinstance(record.get("chapter_title"),str) or
             type(record.get("chapter_number")) is not int or
             not isinstance(record.get("lessons"),list) or
-            len(record["lessons"])>2):
+            len(record["lessons"])>4):
             parser.error("Invalid chapter candidate payload")
         for p in record["lessons"]:
             if not isinstance(p,dict) or not all(k in p for k in (

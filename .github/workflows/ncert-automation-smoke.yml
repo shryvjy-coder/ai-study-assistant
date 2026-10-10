@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'automation/class9-maths/**'
+      - '.github/workflows/ncert-class9-batch.yml'
       - '.github/workflows/ncert-curriculum-audit.yml'
       - '.github/workflows/ncert-automation-smoke.yml'
 
@@ -38,3 +39,16 @@ jobs:
         run: |
           node automation/class9-maths/export-notes.cjs site > notes.json
           python -c 'import json; x=json.load(open("notes.json")); assert len(x["chapters"]) == 14; print("All 14 actual course chapters successfully exported")'
+      - name: Verify previously approved Chapter 1 content survives export
+        run: |
+          python - <<'PY'
+          import json
+          chapters=json.load(open("notes.json",encoding="utf-8"))["chapters"]
+          assert len(chapters)==14
+          ch1=chapters[0]
+          parts=[sub.get("title","") for section in ch1["sections"]
+                 for sub in section.get("subtopics",[])]
+          assert parts.count("Determining Triangle Vertices from Side Midpoints")==1, (
+              "Reviewed Chapter 1 midpoint lesson was lost or duplicated")
+          print("Export includes prior reviewed overlay exactly once")
+          PY

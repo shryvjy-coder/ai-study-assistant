@@ -204,6 +204,32 @@ class DeepAuditTests(unittest.TestCase):
         self.assertTrue(any("Critical" in item for item in report["rejected_claims"]))
         self.assertEqual(calls[-1], "closure")
 
+    def test_bad_numeric_step_withholds_notes_but_keeps_audit_matrix(self):
+        def ask(stage, prompt):
+            if stage == "coverage":
+                return inventory()
+            if stage == "challenge":
+                return challenge()
+            if stage == "draft":
+                proposed = draft()
+                proposed["proposals"][0]["examples"][0]["steps"][1] = (
+                    "This false numerical claim is 3*4=13 square units.")
+                return proposed
+            if stage == "math":
+                return math_review()
+            if stage == "closure":
+                return closure()
+            self.fail("Unexpected request stage")
+        report = review_chapter(Path("fake.pdf"), sample_chapter(),
+                                sample_chapter(), sample_pages(), "mock",
+                                request=ask, normal=normal, validate=validate,
+                                retry=generate_with_transient_retries)
+        self.assertEqual(len(report["coverage"]), 6)
+        self.assertEqual(report["candidate_lessons"], [])
+        self.assertEqual(report["final_decisions"][0]["verdict"], "unresolved")
+        self.assertTrue(any("numerical contradiction" in flag.lower()
+                            for flag in report["rejected_claims"]))
+
     def test_numeric_checker_rejects_false_and_accepts_exact_fractions(self):
         c = draft()["proposals"]
         c[0]["examples"][0]["steps"] = [

@@ -68,6 +68,34 @@ def pdf_pages(path: Path) -> list[str]:
         raise ValueError("PDF text cannot be independently verified; stop rather than trust model quotes")
     return pages
 
+def generate_with_transient_retries(request, *, attempts: int = 4, sleep=time.sleep):
+    """Retry only temporary Gemini API errors, never authentication or bad model IDs."""
+    for attempt in range(1, attempts + 1):
+        try:
+            return request()
+        except Exception as exc:
+            code = getattr(exc, "code", None)
+            if code is None:
+                code = getattr(exc, "status_code", None)
+            try:
+                code = int(code)
+            except (TypeError, ValueError):
+                code = None
+            if code not in (429, 500, 502, 503, 504):
+                raise
+            if attempt == attempts:
+                raise RuntimeError(
+                    f"Gemini API unavailable after {attempts} attempts "
+                    f"(last HTTP {code}). Wait and retry the workflow later, "
+                    "or choose another available supported Gemini model. "
+                    "No audit results were generated for this chapter."
+                ) from exc
+            delay = min(10 * (2 ** (attempt - 1)), 40)
+            print(f"  Gemini API HTTP {code} (temporary): "
+                  f"retry {attempt + 1}/{attempts} in {delay}s.", flush=True)
+            sleep(delay)
+
+
 def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool) -> dict:
     from google import genai
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
@@ -104,10 +132,12 @@ def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool) -
     )
     uploaded = client.files.upload(file=str(pdf))
     try:
-        response = client.models.generate_content(
-            model=model,
-            contents=[prompt, uploaded],
-            config={"response_mime_type": "application/json", "temperature": 0.1}
+        response = generate_with_transient_retries(
+            lambda: client.models.generate_content(
+                model=model,
+                contents=[prompt, uploaded],
+                config={"response_mime_type": "application/json", "temperature": 0.1}
+            )
         )
         raw = response.text or ""
         if not raw or len(raw) > MAX_RESPONSE_CHARS:

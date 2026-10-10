@@ -11,13 +11,16 @@ const scripts=[
  'cbse-class9-math-full-notes-b.js',
  'cbse-class9-math-full-notes-c.js',
  'cbse-class9-maths-depth-engine.js',
- ...Array.from({length:14},(_,i)=>'cbse-class9-maths-depth-ch'+String(i+1).padStart(2,'0')+'.js')
+ ...Array.from({length:14},(_,i)=>'cbse-class9-maths-depth-ch'+String(i+1).padStart(2,'0')+'.js'),
+ // Previously approved lessons must be included before Gemini compares notes.
+ 'cbse-class9-maths-audited-proposals.js'
 ];
 const w={};
 const ctx=vm.createContext({window:w,console:{log(){},warn(){}}});
 for(const file of scripts){
  const full=path.join(site,file);
  if(!fs.existsSync(full)){
+  if(file==='cbse-class9-maths-audited-proposals.js')continue; // Optional until first approval.
   if(file==='cbse-class9-maths-depth-ch03.js')continue; // Chapter 3 has full notes already.
   throw Error('The source branch is missing a required depth script: '+file);
  }

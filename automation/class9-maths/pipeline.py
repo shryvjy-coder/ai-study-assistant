@@ -343,6 +343,12 @@ def render_report(reports: list[dict], model: str, mode: str) -> str:
                     result.append(
                         f"| {item['page']} | {fmt(item['concept'])} | {fmt(item['status'])} | "
                         f"{fmt(verdicts.get(item['id'],'not reviewed'))} | {fmt(lesson)} |")
+                if r.get("final_decisions"):
+                    result.extend(["", "### Final independent coverage verdicts"])
+                    verdict_counts={}
+                    for d in r["final_decisions"]:
+                        verdict_counts[d["verdict"]]=verdict_counts.get(d["verdict"],0)+1
+                    result.append(", ".join(f"{k}: {v}" for k,v in sorted(verdict_counts.items())))
                 if r.get("math_decisions"):
                     result.extend(["", "### Independent mathematics review"])
                     for d in r["math_decisions"]:

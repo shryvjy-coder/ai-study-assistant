@@ -19,6 +19,25 @@ def normal(value: object) -> str:
     value = unicodedata.normalize("NFKD", str(value)).casefold()
     return re.sub(r"[\W_]+", "", value, flags=re.UNICODE)
 
+def select_chapters(spec: str, available: list[int]) -> list[int]:
+    """Select one chapter, 'all', or an inclusive contiguous range like '4-14'."""
+    approved=sorted(available)
+    if spec=="all":
+        return approved
+    if re.fullmatch(r"[1-9][0-9]*",spec):
+        selected=[int(spec)]
+    elif re.fullmatch(r"[1-9][0-9]*-[1-9][0-9]*",spec):
+        start,end=map(int,spec.split("-",1))
+        if start>end:
+            raise ValueError("Chapter range must be ascending")
+        selected=list(range(start,end+1))
+    else:
+        raise ValueError("Chapter selector must be a number, 'all', or ascending range such as 4-14")
+    if any(number not in approved for number in selected):
+        raise ValueError("Selected chapters must exist in the verified manifest")
+    return selected
+
+
 def get_pdf(url: str, target: Path) -> None:
     if not re.fullmatch(r"https://ncert\.nic\.in/textbook/pdf/iemh[12]\d\d\.pdf", url):
         raise ValueError("Source is not an allowlisted official NCERT Class 9 PDF")
@@ -112,10 +131,14 @@ def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool) -
         "a paraphrase), rationale, and status ('missing' or 'partial'). "
         "Choose at most 6 important true gaps, and omit unsupported assertions. "
         "A proposal has section (EXACT existing section title), title, "
+        "optional merge_into (EXACT title of a related existing subtopic WITHIN "
+        "that section, or null if a genuinely new subtopic is necessary), "
         "paragraphs (2 or 3 substantial original teaching paragraphs), formulas "
         "(array of plain UTF-8 maths strings), examples (1 or 2 objects, each "
         "with title, question, steps [at least 3 fully worked explanation strings], "
         "answer), and evidence_ids (zero-based indices into gaps). "
+        "Prefer merge_into to enrich an existing relevant lesson; create a "
+        "new subtopic only when the topic needs an independent lesson. "
         "Explain reasoning carefully in grade-appropriate language. "
         "Do not copy textbook prose into proposed lessons or examples. "
         "Avoid duplicate lessons or unnecessary extra sections. "
@@ -215,6 +238,15 @@ def validate(source: dict, chapter: dict, pages: list[str], allow_propose: bool)
         refs = item.get("evidence_ids")
         if section not in existing_sections:
             reject("not an exact existing chapter section"); continue
+        merge_into=item.get("merge_into")
+        if merge_into is not None:
+            subtopics=existing_sections[section].get("subtopics",[])
+            if not isinstance(merge_into,str) or not merge_into.strip():
+                reject("merge_into must be an existing subtopic title"); continue
+            matching=[s.get("title") for s in subtopics
+                      if isinstance(s,dict) and s.get("title")==merge_into]
+            if not matching:
+                reject("merge_into is not a subtopic in the chosen section"); continue
         if (not isinstance(title, str) or not 12 <= len(title) <= 110
                 or normal(title) in existing_titles):
             reject("duplicate or invalid lesson title"); continue
@@ -243,12 +275,15 @@ def validate(source: dict, chapter: dict, pages: list[str], allow_propose: bool)
         if bad:
             reject("incomplete worked example schema"); continue
         # Keep all AI output in JSON fields; never execute or import AI-written code.
-        accepted.append({
+        lesson={
             "section":section,"title":title,"paragraphs":paragraphs,"formulas":formulas,
             "examples":[{k:ex[k] for k in ("title","question","steps","answer")}
                         for ex in examples],
             "evidence":[checked[idx] for idx in refs],
-        })
+        }
+        if merge_into is not None:
+            lesson["merge_into"]=merge_into
+        accepted.append(lesson)
         existing_titles.add(normal(title))
     return {
         "chapter_number":number,"chapter_title":chapter["title"],
@@ -307,9 +342,10 @@ def main() -> int:
         parser.error("Manifest and exported notes must both contain all 14 chapters")
     if any(expected[i]["title"]!=bank[i]["title"] for i in expected):
         parser.error("Manifest titles do not agree with the loaded note bank")
-    chosen=range(1,15) if args.chapter=="all" else [int(args.chapter)]
-    if any(i not in expected for i in chosen):
-        parser.error("Chapter number must be between 1 and 14")
+    try:
+        chosen=select_chapters(args.chapter,list(expected))
+    except ValueError as exc:
+        parser.error(str(exc))
     args.output.mkdir(parents=True,exist_ok=True)
     reports=[]
     work=args.output/"pdf-working"

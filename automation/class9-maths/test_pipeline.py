@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import unittest
 
-from pipeline import normal, validate, get_pdf, generate_with_transient_retries
+from pipeline import normal, validate, get_pdf, generate_with_transient_retries, select_chapters
 from importlib.machinery import SourceFileLoader
 
 proposal_module = SourceFileLoader('studyai_apply_proposals', str(Path(__file__).resolve().parent/'apply-proposals.py')).load_module()
@@ -48,6 +48,29 @@ def sample_model():
     }
 
 class PipelineTests(unittest.TestCase):
+    def test_batch_chapter_range_selection(self):
+        available=list(range(1,15))
+        self.assertEqual(select_chapters("4-14",available),list(range(4,15)))
+        self.assertEqual(select_chapters("3",available),[3])
+        self.assertEqual(select_chapters("all",available),available)
+        for value in ("0","15","14-4","4,14","1-15","-3","3-",""):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                select_chapters(value,available)
+
+    def test_reviewed_merge_target_must_exist_in_exact_section(self):
+        notes=sample_notes()
+        candidate=sample_model()
+        candidate["proposals"][0]["merge_into"]="Place value explains carrying"
+        pages=["How would you modify the algorithm to add two decimal fractions?"]
+        accepted=validate(candidate,notes,pages,True)["candidate_lessons"]
+        self.assertEqual(len(accepted),1)
+        self.assertEqual(accepted[0]["merge_into"],"Place value explains carrying")
+        candidate["proposals"][0]["merge_into"]="An invented lesson"
+        rejected=validate(candidate,notes,pages,True)
+        self.assertFalse(rejected["candidate_lessons"])
+        self.assertTrue(any("merge_into" in reason for reason in rejected["rejected_claims"]))
+
+
     def test_gemini_temporary_high_demand_then_success(self):
         class APIError(Exception):
             code=503

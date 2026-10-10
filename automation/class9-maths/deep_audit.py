@@ -114,6 +114,7 @@ def reconcile_coverage(response: dict, chapter: dict, coverage: list[dict],
     _chapter_number(response, chapter, "adversarial comparison")
     decisions = _expect_sequence(response.get("decisions"), "review decisions", len(coverage), len(coverage))
     by_id = {}
+    flags = []
     notes_sections = {s["title"]: s for s in notes["sections"] if isinstance(s, dict) and "title" in s}
     for d in decisions:
         d = _expect_dict(d, "review decision")
@@ -122,17 +123,37 @@ def reconcile_coverage(response: dict, chapter: dict, coverage: list[dict],
             raise ValueError("Adversarial review omitted or duplicated a coverage identifier")
         if verdict not in ("covered", "partial", "missing", "uncertain"):
             raise ValueError(f"Invalid adversarial verdict for item {idx}")
-        section, topic = d.get("existing_section"), d.get("existing_subtopic")
-        if section is not None and section not in notes_sections:
-            raise ValueError(f"Adversarial review invented section {section!r}")
-        if topic is not None:
-            if section is None or topic not in [
-                x.get("title") for x in notes_sections[section].get("subtopics", []) if isinstance(x, dict)
-            ]:
-                raise ValueError(f"Adversarial review invented subtopic {topic!r}")
-        by_id[idx] = {"id": idx, "verdict": verdict, "reason": str(d.get("reason", ""))[:650],
+        # Gemini commonly returns an empty string instead of JSON null when no
+        # existing lesson is applicable. Treat both as "not identified".
+        raw_section, raw_topic = d.get("existing_section"), d.get("existing_subtopic")
+        if raw_section is not None and not isinstance(raw_section, str):
+            raise ValueError(f"Adversarial review invalid section type for item {idx}")
+        if raw_topic is not None and not isinstance(raw_topic, str):
+            raise ValueError(f"Adversarial review invalid subtopic type for item {idx}")
+        section = (raw_section or "").strip() or None
+        topic = (raw_topic or "").strip() or None
+        reason = str(d.get("reason", ""))[:650]
+        # Missing and partial findings need no existing lesson target. For an
+        # asserted "covered" verdict, an exact existing lesson reference is
+        # necessary so we don't silently discard genuine textbook gaps.
+        invalid_target = (
+            (section is not None and section not in notes_sections)
+            or (topic is not None and (
+                section not in notes_sections
+                or topic not in [
+                    x.get("title") for x in notes_sections[section].get("subtopics", [])
+                    if isinstance(x, dict)
+                ]))
+        )
+        if invalid_target:
+            flags.append(f"Adversarial item {idx}: invalid existing lesson reference; needs manual review")
+            section, topic, verdict = None, None, "uncertain"
+        elif verdict == "covered" and section is None:
+            flags.append(f"Adversarial item {idx}: covered claim lacks exact existing section; needs manual review")
+            verdict = "uncertain"
+        by_id[idx] = {"id": idx, "verdict": verdict, "reason": reason,
                       "existing_section": section or "", "existing_subtopic": topic or ""}
-    accepted, flags = [], []
+    accepted = []
     decisions_out = []
     for item in coverage:
         decision = by_id[item["id"]]

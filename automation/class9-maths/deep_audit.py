@@ -192,7 +192,7 @@ def check_numeric_equalities(lessons: list[dict]) -> tuple[int, list[str]]:
     # to 'prove' symbolic expressions by guessing at natural-language tokens.
     pattern = re.compile(
         r"(?<![\w.])(-?\d+(?:\.\d+)?(?:\s*[+\-*/]\s*-?\d+(?:\.\d+)?)+)\s*"
-        r"=\s*(-?\d+(?:\.\d+)?)(?![\w.])"
+        r"=\s*(-?\d+(?:\.\d+)?(?:/\d+)?)(?![\w./])"
     )
     tested, errors = 0, []
     for item in lessons:

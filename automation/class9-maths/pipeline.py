@@ -87,8 +87,33 @@ def pdf_pages(path: Path) -> list[str]:
         raise ValueError("PDF text cannot be independently verified; stop rather than trust model quotes")
     return pages
 
+def _gemini_quota_guidance(exc: Exception) -> tuple[str, bool]:
+    """Explain quota errors without printing possibly sensitive SDK payloads.
+
+    Only explicit zero quotas or daily quota exhaustion are treated as hard
+    failures; ambiguous 429s can recover with bounded backoff.
+    """
+    detail = str(exc).lower()
+    hard_limit = ("limit: 0" in detail or "limit:0" in detail
+                  or "perday" in detail or "per_day" in detail
+                  or "requests per day" in detail or "per day" in detail
+                  or "daily quota" in detail)
+    if hard_limit:
+        return ("Gemini project quota appears exhausted or disabled for this "
+                "model. Check Google AI Studio usage and rate limits, including "
+                "requests/tokens per day and billing tier. Repeated immediate "
+                "retries will not resolve a daily or zero quota."), True
+    if ("token" in detail or "tokens" in detail):
+        return ("Gemini token-rate quota may be exceeded by the full textbook "
+                "and notes. Check tokens per minute for the selected model; "
+                "waiting or reducing the input size may be necessary."), False
+    return ("Gemini returned 429 (rate limit / resource exhausted). Check your "
+            "project's requests per minute, tokens per minute, requests per day "
+            "and billing tier in Google AI Studio."), False
+
+
 def generate_with_transient_retries(request, *, attempts: int = 4, sleep=time.sleep):
-    """Retry only temporary Gemini API errors, never authentication or bad model IDs."""
+    """Retry temporary overload or rate limiting, not hard project quotas."""
     for attempt in range(1, attempts + 1):
         try:
             return request()
@@ -102,16 +127,18 @@ def generate_with_transient_retries(request, *, attempts: int = 4, sleep=time.sl
                 code = None
             if code not in (429, 500, 502, 503, 504):
                 raise
+            guidance, is_hard = _gemini_quota_guidance(exc) if code == 429 else ("Gemini service temporarily overloaded.", False)
+            if is_hard:
+                raise RuntimeError(guidance + " No audit results were generated.") from exc
             if attempt == attempts:
                 raise RuntimeError(
                     f"Gemini API unavailable after {attempts} attempts "
-                    f"(last HTTP {code}). Wait and retry the workflow later, "
-                    "or choose another available supported Gemini model. "
+                    f"(last HTTP {code}). {guidance} "
                     "No audit results were generated for this chapter."
                 ) from exc
             delay = min(10 * (2 ** (attempt - 1)), 40)
-            print(f"  Gemini API HTTP {code} (temporary): "
-                  f"retry {attempt + 1}/{attempts} in {delay}s.", flush=True)
+            print(f"  Gemini API HTTP {code}: {guidance} "
+                  f"Retry {attempt + 1}/{attempts} in {delay}s.", flush=True)
             sleep(delay)
 
 

@@ -157,7 +157,7 @@ class DeepAuditTests(unittest.TestCase):
                                 sample_chapter(), sample_pages(), "mock",
                                 request=ask, normal=normal, validate=validate,
                                 retry=generate_with_transient_retries)
-        self.assertEqual(stages, ["coverage", "challenge", "draft", "math"])
+        self.assertEqual(stages, ["coverage", "challenge", "draft", "math", "closure"])
         self.assertEqual(report["candidate_lessons"], [])
         self.assertEqual(report["math_decisions"][0]["verdict"], "reject")
 

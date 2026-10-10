@@ -173,6 +173,42 @@ def validate_math_review(response: dict, chapter: dict, candidates: list[dict]) 
     return approved, [by_idx[i] for i in range(len(candidates))]
 
 
+def validate_final_coverage(response: dict, chapter: dict, coverage: list[dict],
+                            proposed: list[dict], normal: Callable) -> tuple[list[dict], list[str], list[str]]:
+    """Independently reconcile textbook inventory after the proposed edits."""
+    _chapter_number(response, chapter, "final coverage review")
+    decisions = _expect_sequence(response.get("decisions"), "final coverage decisions",
+                                 len(coverage), len(coverage))
+    by_id, flags = {}, []
+    evidence = {(e["page"], normal(e["quote"])) for p in proposed for e in p["evidence"]}
+    for decision in decisions:
+        d = _expect_dict(decision, "final coverage decision")
+        index, verdict, reason = d.get("id"), d.get("verdict"), d.get("reason")
+        if type(index) is not int or index not in range(len(coverage)) or index in by_id:
+            raise ValueError("Final review omitted or duplicated a textbook item")
+        if verdict not in ("covered", "addressed", "unresolved", "uncertain"):
+            raise ValueError("Final review returned invalid coverage verdict")
+        if not isinstance(reason, str) or len(reason.strip()) < 15:
+            raise ValueError("Final coverage review needs a substantive reason")
+        source = coverage[index]
+        linked = (source["page"], normal(source["quote"])) in evidence
+        if verdict == "addressed" and not linked:
+            flags.append(f"Unsubstantiated final coverage claim: {source['concept']} marked addressed without accepted lesson")
+            verdict = "unresolved"
+        if verdict in ("unresolved", "uncertain"):
+            flags.append(f"Final textbook coverage still {verdict}: {source['concept']} (PDF p.{source['page']})")
+        by_id[index] = {"id": index, "verdict": verdict, "reason": reason[:650]}
+    missed = _expect_sequence(response.get("missed_areas", []), "possible extra omissions", 0, 8)
+    for item in missed:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError("Final review returned a malformed extra omission")
+        flags.append("Extra potential omission (requires PDF evidence): " + item[:200])
+    critical = _expect_sequence(response.get("critical_errors", []), "critical maths errors", 0, 8)
+    if not all(isinstance(s, str) and len(s.strip()) >= 15 for s in critical):
+        raise ValueError("Final review gave malformed critical error descriptions")
+    return [by_id[x["id"]] for x in coverage], flags, critical
+
+
 def _arithmetic_ast(node: ast.AST) -> Fraction:
     if isinstance(node, ast.Expression):
         return _arithmetic_ast(node.body)
@@ -338,6 +374,34 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                     if decision["verdict"] != "pass":
                         flags.append("Maths review did not approve candidate "
                                      f"{decision['id']}: {decision['reason']}")
+        # PASS 5: final independent curriculum coverage challenge followed by
+        # deterministic traceability, exact rational checks and browser CI.
+        closure_prompt = base + (
+            "\nPASS 5 — FINAL curriculum examiner. Re-scan the attached textbook "
+            "from beginning to end and compare the original notes plus the "
+            "mathematically accepted improvements below. For EVERY inventory "
+            "item, report a final verdict: covered (already taught), addressed "
+            "(an accepted lesson fixes it), unresolved, or uncertain. "
+            "Only say addressed when an accepted proposal cites the same "
+            "PDF evidence. Identify exercise families or topics the first "
+            "inventory may have overlooked under missed_areas, with cautious "
+            "descriptions that still need independent PDF verification. "
+            "If any accepted proposal has a serious uncorrected mathematical "
+            "error, include it in critical_errors; these candidates will be "
+            "withheld from the PR. Return JSON {chapter_number,"
+            "decisions:[{id,verdict,reason}],missed_areas:[],critical_errors:[]}. "
+            "Every inventory identifier is mandatory. "
+            "\nVerified inventory:\n" + json.dumps(coverage, ensure_ascii=False)
+            + "\nAccepted proposals:\n" + json.dumps(proposed, ensure_ascii=False)
+        )
+        closure = _expect_dict(request("closure", closure_prompt), "final curriculum QA")
+        final_decisions, closure_flags, critical_errors = validate_final_coverage(
+            closure, entry, coverage, proposed, normal)
+        flags.extend(closure_flags)
+        if critical_errors:
+            flags.extend("Critical final maths objection: " + msg for msg in critical_errors)
+            proposed = []
+            flags.append("All chapter proposals withheld pending critical mathematical review")
         # PASS 5: source-to-candidate traceability, exact rational checks
         # and CI browser tests in the GitHub Actions workflow.
         addressed = {(item["page"], normal(item["quote"]))
@@ -361,12 +425,14 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
             "independent_decisions": decisions,
             "verified_gaps": gaps,
             "math_decisions": math_decisions,
+            "final_decisions": final_decisions,
             "candidate_lessons": proposed,
             "rejected_claims": flags,
             "qa": {"source_inventory": len(coverage),
                    "confirmed_gaps": len(gaps),
                    "candidates_passed_independent_math_review": len(proposed),
                    "exact_numeric_equalities_checked": checked,
+                   "final_review_items": len(final_decisions),
                    "unresolved_flags": len(flags),
                    "browser_checks": "scheduled in GitHub Actions; not a maths proof"}
         }

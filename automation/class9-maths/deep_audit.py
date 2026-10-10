@@ -94,10 +94,17 @@ def valid_coverage(response: dict, chapter: dict, pages: list[str], normal: Call
             "existing_subtopic": topic or "",
             "rationale": str(item.get("rationale", ""))[:650]
         })
-    if len(checked) < min(MIN_COVERAGE, max(3, len(pages) // 3)):
-        raise ValueError(f"Coverage inventory too sparse: {len(checked)} PDF-verified concepts")
+    minimum = 8 if len(pages) >= 16 else 6 if len(pages) >= 8 else 3
+    if len(checked) < minimum:
+        raise ValueError(f"Coverage inventory too sparse: {len(checked)} PDF-verified concepts; minimum {minimum}")
     if len({item["page"] for item in checked}) < min(3, len(pages)):
         raise ValueError("Coverage inventory lacks evidence from multiple PDF pages")
+    if len(pages) >= 10:
+        first_third = len(pages) // 3
+        last_third = 2 * len(pages) // 3 + 1
+        if (not any(x["page"] <= first_third for x in checked)
+                or not any(x["page"] >= last_third for x in checked)):
+            raise ValueError("Coverage inventory ignored the beginning or end of the textbook chapter")
     return checked, rejected
 
 
@@ -331,7 +338,15 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                     if decision["verdict"] != "pass":
                         flags.append("Maths review did not approve candidate "
                                      f"{decision['id']}: {decision['reason']}")
-        # PASS 5: deterministic exact rational checks plus CI browser tests in workflow.
+        # PASS 5: source-to-candidate traceability, exact rational checks
+        # and CI browser tests in the GitHub Actions workflow.
+        addressed = {(item["page"], normal(item["quote"]))
+                     for lesson in proposed for item in lesson["evidence"]}
+        missing_links = [gap["concept"] for gap in gaps
+                         if (gap["page"], normal(gap["quote"])) not in addressed]
+        if missing_links:
+            flags.append("Confirmed gaps remain unaddressed by accepted proposals: " +
+                         "; ".join(missing_links[:12]))
         checked, errors = check_numeric_equalities(proposed)
         if errors:
             flags.extend(errors)

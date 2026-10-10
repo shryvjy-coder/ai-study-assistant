@@ -45,6 +45,10 @@ jobs:
           import json
           chapters=json.load(open("notes.json",encoding="utf-8"))["chapters"]
           assert len(chapters)==14
+          ch3=chapters[2]
+          assert len(ch3["sections"])>=15, "Chapter 3 export omitted its detailed lesson sections"
+          lessons=sum(len(section.get("subtopics",[])) for section in ch3["sections"])
+          assert lessons>=20, "Chapter 3 export omitted its detailed subtopics"
           ch1=chapters[0]
           parts=[sub.get("title","") for section in ch1["sections"]
                  for sub in section.get("subtopics",[])]

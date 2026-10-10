@@ -2,6 +2,22 @@
 
 A manual, review-first Gemini audit for all 14 chapters in the 2026–27 NCERT *Ganita Manjari* course. This workflow compares each official PDF against the actual assembled StudyAI notes, checks textbook citations locally, and optionally proposes original worked lessons. Nothing is merged or deployed automatically.
 
+## One-click bulk review (recommended for Chapters 4–14)
+
+After the new workflow is reviewed and merged into `main`, open **Actions → NCERT Class 9 Maths — one-click batch review → Run workflow**. Defaults are **start_chapter=4, end_chapter=14, model=gemini-3.8-flash**. Click **Run workflow once**. The workflow runs **propose mode**, which already includes a textbook-grounded audit, so **do not run separate audits first**.
+
+For the chosen inclusive chapter range, the workflow:
+1. Exports all existing note pages **including the previously accepted NCERT review overlay**, so previously fixed gaps are not re-reported.
+2. Audits each NCERT chapter PDF, validates quoted evidence against the PDF text, and asks Gemini for at most two high-value proposals per chapter.
+3. Encourages `merge_into` targeting existing subtopics, with exact-section checks, to avoid dozens of duplicate lessons.
+4. Retains previous accepted chapter revisions and creates one cumulative draft patch covering the range.
+5. Runs offline regression checks, JS syntax, 14-chapter browser coverage, curriculum and lesson-progress browser checks.
+6. Creates **one draft PR against `class9-maths-all-chapters-depth`** with the complete chapter-by-chapter audit in the PR description. The same reports are available in the GitHub Actions run summary and artifact: **no downloading/uploading audit.md to ChatGPT**.
+
+If any chapter is blocked (NCERT/Gemini outage, unextractable PDF), the batch reports the blocker and fails rather than silently declaring the chapter complete. GitHub Actions artifacts preserve available results. Gemini API and GitHub Actions limits apply; 11 chapters may take time, incur charges, or hit rate limits. Use a smaller range to retry when appropriate.
+
+**A successful job is not proof of mathematical accuracy.** Human/independent maths review of generated derivations and worked examples remains necessary before merging. Nothing is merged or deployed automatically. The pipeline does not yet support other grades/subjects/boards: each needs verified textbook manifests, appropriate note exporters, and subject-specific validation before reusing this workflow.
+
 ## Owner setup (required before using Gemini)
 
 1. Review and manually merge the automation-only PR into the default branch, main. This does NOT merge the separate notes Draft PR #27.

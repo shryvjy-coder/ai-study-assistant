@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import unittest
 
-from pipeline import normal, validate, get_pdf
+from pipeline import normal, validate, get_pdf, generate_with_transient_retries
 
 HERE=Path(__file__).resolve().parent
 
@@ -44,6 +44,45 @@ def sample_model():
     }
 
 class PipelineTests(unittest.TestCase):
+    def test_gemini_temporary_high_demand_then_success(self):
+        class APIError(Exception):
+            code=503
+        count=[]
+        delays=[]
+        def request():
+            count.append(1)
+            if len(count)<3:
+                raise APIError("High demand")
+            return {"ok":True}
+        self.assertEqual(
+            generate_with_transient_retries(request, sleep=delays.append),
+            {"ok":True}
+        )
+        self.assertEqual(len(count),3)
+        self.assertEqual(delays,[10,20])
+
+    def test_gemini_bad_auth_is_not_retried(self):
+        class APIError(Exception):
+            code=401
+        count=[]
+        def request():
+            count.append(1)
+            raise APIError("Invalid API key")
+        with self.assertRaises(APIError):
+            generate_with_transient_retries(request, sleep=lambda _:None)
+        self.assertEqual(len(count),1)
+
+    def test_gemini_exhaustion_is_bounded(self):
+        class APIError(Exception):
+            code=503
+        count=[]
+        def request():
+            count.append(1)
+            raise APIError("High demand")
+        with self.assertRaisesRegex(RuntimeError,"after 4 attempts"):
+            generate_with_transient_retries(request, sleep=lambda _:None)
+        self.assertEqual(len(count),4)
+
     def test_manifest_has_complete_verified_chapter_sequence(self):
         data=json.loads((HERE/"manifest.json").read_text(encoding="utf-8"))
         self.assertEqual([x["number"] for x in data["chapters"]],list(range(1,15)))

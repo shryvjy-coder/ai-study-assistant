@@ -32,6 +32,19 @@ for(const record of proposals){
  for(const p of record.lessons){
   const section=chapter.sections.find(s=>s.title===p.section&&!generic.has(s.title));
   if(!section)throw Error('Curriculum proposal target section missing: '+p.section);
+  if(p.merge_into){
+   const target=safe(section.subtopics).find(s=>norm(s.title)===norm(p.merge_into));
+   if(!target)throw Error('Curriculum enrichment target missing: '+p.merge_into);
+   const paragraphs=safe(target.paragraphs);
+   target.paragraphs=paragraphs.concat(p.paragraphs.filter(x=>!paragraphs.includes(x)));
+   const formulas=safe(target.formulas);
+   target.formulas=formulas.concat(p.formulas.filter(x=>!formulas.includes(x)));
+   const examples=safe(target.examples);
+   const existingTitles=new Set(examples.map(x=>norm(x.title)));
+   target.examples=examples.concat(p.examples.filter(x=>!existingTitles.has(norm(x.title)))
+    .map(x=>({title:x.title,question:x.question,steps:x.steps.slice(),answer:x.answer})));
+   continue;
+  }
   if(seen.has(norm(p.title)))continue;
   if(!Array.isArray(section.subtopics))section.subtopics=[];
   section.subtopics.push({
@@ -63,6 +76,50 @@ for(const record of proposals){
 }
 })();
 """
+
+
+def read_existing_proposals(output: Path) -> list:
+    """Recover reviewed lesson data from the existing, trusted overlay.
+
+    Never interpret or execute JS: accept only the JSON between the known
+    generator markers, or fail closed rather than overwriting accepted work.
+    """
+    if not output.exists():
+        return []
+    source=output.read_text(encoding="utf-8")
+    start="const proposals = "
+    end=";\nconst bank=window.CBSE_CLASS9_MATH_FULL_NOTES"
+    if source.count(start)!=1 or source.count(end)!=1:
+        raise ValueError("Cannot safely read reviewed proposals; refusing to overwrite overlay")
+    data=json.loads(source.split(start,1)[1].split(end,1)[0])
+    if not isinstance(data,list):
+        raise ValueError("Existing overlay proposals must be an array")
+    return data
+
+
+def combine_proposals(previous: list, incoming: list) -> list:
+    """Preserve accepted lessons and append only genuinely new lesson titles."""
+    combined=json.loads(json.dumps(previous,ensure_ascii=False))
+    by_chapter={}
+    for record in combined:
+        key=(record["chapter_number"],record["chapter_title"])
+        if key in by_chapter:
+            raise ValueError("Duplicate chapter in existing overlay")
+        by_chapter[key]=record
+    for record in incoming:
+        key=(record["chapter_number"],record["chapter_title"])
+        if key not in by_chapter:
+            by_chapter[key]=json.loads(json.dumps(record,ensure_ascii=False))
+            combined.append(by_chapter[key])
+            continue
+        current=by_chapter[key]
+        existing={str(x["title"]).strip().casefold() for x in current["lessons"]}
+        for lesson in record["lessons"]:
+            title=str(lesson["title"]).strip().casefold()
+            if title not in existing:
+                current["lessons"].append(json.loads(json.dumps(lesson,ensure_ascii=False)))
+                existing.add(title)
+    return combined
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -97,13 +154,19 @@ def main():
     if old.count(END_MARKER)!=1:
         parser.error("Could not find the expected final depth-script anchor exactly once")
     patched=old if LOAD_MARKER in old else old.replace(END_MARKER,END_MARKER+"\n"+LOAD_MARKER)
-    generated=LOADER_START+json.dumps(proposals,ensure_ascii=False,indent=2)+LOADER_END
     output=site/"cbse-class9-maths-audited-proposals.js"
+    existing=read_existing_proposals(output)
+    combined=combine_proposals(existing,proposals)
+    generated=LOADER_START+json.dumps(combined,ensure_ascii=False,indent=2)+LOADER_END
+    # Do not regenerate identical content or erase reviewer-approved edits.
+    if output.exists() and generated==output.read_text(encoding="utf-8"):
+        print("All candidate lessons are already included; preserving reviewed overlay.")
+        return
     output.write_text(generated,encoding="utf-8")
     subprocess.run(["node","--check",str(output)],check=True)
     index.write_text(patched,encoding="utf-8")
-    print(f"Generated {lesson_count} candidate lessons from {len(proposals)} chapters. "
-          "Human review and browser tests are required before merging.")
+    print(f"Preserved {len(existing)} reviewed chapters; combined {len(combined)} chapters "
+          f"with {lesson_count} incoming candidate lessons. Human review is required.")
 
 if __name__=="__main__":
     main()

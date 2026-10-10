@@ -1,0 +1,40 @@
+name: NCERT automation offline smoke
+on:
+  push:
+    branches: [feature/ncert-curriculum-automation]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'automation/class9-maths/**'
+      - '.github/workflows/ncert-curriculum-audit.yml'
+      - '.github/workflows/ncert-automation-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-safety-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out latest unmerged Class 9 Mathematics lessons for real export
+        uses: actions/checkout@v4
+        with:
+          ref: class9-maths-all-chapters-depth
+          path: site
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax and offline guardrails (no API key required)
+        run: |
+          set -euo pipefail
+          python -m py_compile automation/class9-maths/pipeline.py automation/class9-maths/apply-proposals.py automation/class9-maths/test_pipeline.py
+          node --check automation/class9-maths/export-notes.cjs
+          python -m unittest discover -s automation/class9-maths -p 'test_*.py' -v
+      - name: Load the actual Class 9 notes into audit-ready JSON
+        run: |
+          node automation/class9-maths/export-notes.cjs site > notes.json
+          python -c 'import json; x=json.load(open("notes.json")); assert len(x["chapters"]) == 14; print("All 14 actual course chapters successfully exported")'

@@ -176,7 +176,7 @@ def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool) -
         except Exception:
             pass
 
-def validate(source: dict, chapter: dict, pages: list[str], allow_propose: bool) -> dict:
+def validate(source: dict, chapter: dict, pages: list[str], allow_propose: bool, *, max_proposals: int = MAX_PROPOSALS_PER_CHAPTER) -> dict:
     """Reject unsupported gaps/proposals. This is NOT a proof of mathematical accuracy."""
     reasons: list[str] = []
     number = chapter["number"]
@@ -222,7 +222,9 @@ def validate(source: dict, chapter: dict, pages: list[str], allow_propose: bool)
     if not isinstance(proposals, list) or len(proposals) > 8:
         raise ValueError("Invalid or oversized proposal list")
     accepted: list[dict] = []
-    for i, item in enumerate(proposals[:MAX_PROPOSALS_PER_CHAPTER]):
+    if not 1 <= max_proposals <= 4:
+        raise ValueError('Invalid maximum lesson proposal count')
+    for i, item in enumerate(proposals[:max_proposals]):
         def reject(message: str):
             reasons.append(f"Proposal {i}: {message}")
         if not allow_propose:
@@ -320,6 +322,45 @@ def render_report(reports: list[dict], model: str, mode: str) -> str:
                               f"in {lesson['section']}")
             for reason in r.get("rejected_claims",[]):
                 result.append("- Rejected: "+reason)
+            if r.get("depth")=="deep":
+                qa=r.get("qa",{})
+                result.append(
+                    f"Deep audit: {qa.get('source_inventory',0)} verified textbook concepts | "
+                    f"{qa.get('confirmed_gaps',0)} corroborated gaps | "
+                    f"{qa.get('candidates_passed_independent_math_review',0)} maths-reviewed proposals | "
+                    f"{qa.get('exact_numeric_equalities_checked',0)} deterministic numeric checks | "
+                    f"{qa.get('unresolved_flags',0)} issues flagged")
+                result.extend([
+                    "", "### Textbook concept-by-concept coverage",
+                    "| PDF page | NCERT concept | Inventory | Independent check | Existing StudyAI lesson |",
+                    "|---|---|---|---|---|"
+                ])
+                verdicts={d["id"]:d["verdict"] for d in r.get("independent_decisions",[])}
+                for item in r.get("coverage",[]):
+                    # Escape model text in markdown tables and avoid repeating PDF quotes.
+                    fmt=lambda x:str(x or "—").replace("|","/").replace("\\n"," ")[:145]
+                    lesson=item.get("existing_subtopic") or item.get("existing_section") or "Not identified"
+                    result.append(
+                        f"| {item['page']} | {fmt(item['concept'])} | {fmt(item['status'])} | "
+                        f"{fmt(verdicts.get(item['id'],'not reviewed'))} | {fmt(lesson)} |")
+                if r.get("final_decisions"):
+                    result.extend(["", "### Final independent coverage verdicts"])
+                    verdict_counts={}
+                    for d in r["final_decisions"]:
+                        verdict_counts[d["verdict"]]=verdict_counts.get(d["verdict"],0)+1
+                    result.append(", ".join(f"{k}: {v}" for k,v in sorted(verdict_counts.items())))
+                if r.get("math_decisions"):
+                    result.extend(["", "### Independent mathematics review"])
+                    for d in r["math_decisions"]:
+                        result.append(f"- Candidate {d['id']+1}: **{d['verdict']}** — "
+                                      +str(d['reason']).replace("\\n"," ")[:350])
+                if r.get("rejected_claims"):
+                    result.extend(["", "### Unresolved issues / disputed evidence"])
+                    for item in r["rejected_claims"]:
+                        result.append("- "+str(item).replace("\\n"," ")[:350])
+                result.append(
+                    "\n*Coverage and maths reviews are model assessments, not guarantees. "
+                    "Browser CI checks site behaviour, not every equation.*")
         result.append("")
     return "\n".join(result)
 
@@ -331,6 +372,8 @@ def main() -> int:
     parser.add_argument("--chapter",default="all")
     parser.add_argument("--mode",choices=["audit","propose"],default="audit")
     parser.add_argument("--model",default="gemini-3.8-flash")
+    parser.add_argument("--depth",choices=["standard","deep"],default="standard",
+                        help="Deep: four independent Gemini checks plus deterministic QA")
     args=parser.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
         parser.error("GEMINI_API_KEY is missing: add it as a GitHub Actions repository secret")
@@ -357,8 +400,16 @@ def main() -> int:
         try:
             get_pdf(entry["pdf"],pdf)
             pages=pdf_pages(pdf)
-            candidate=ask_gemini(pdf,entry,bank[i],args.model,args.mode=="propose")
-            verified=validate(candidate,bank[i],pages,args.mode=="propose")
+            if args.depth=="deep":
+                if args.mode!="propose":
+                    raise ValueError("Deep mode needs proposal mode for full verification")
+                from deep_audit import review_chapter
+                verified=review_chapter(pdf,entry,bank[i],pages,args.model,
+                                        normal=normal,validate=validate,
+                                        retry=generate_with_transient_retries)
+            else:
+                candidate=ask_gemini(pdf,entry,bank[i],args.model,args.mode=="propose")
+                verified=validate(candidate,bank[i],pages,args.mode=="propose")
             verified["status"]="processed"
             reports.append(verified)
             print(f"  {len(verified['verified_gaps'])} PDF citations confirmed; "

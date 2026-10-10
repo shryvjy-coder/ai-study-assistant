@@ -2,9 +2,27 @@
 
 A manual, review-first Gemini audit for all 14 chapters in the 2026–27 NCERT *Ganita Manjari* course. This workflow compares each official PDF against the actual assembled StudyAI notes, checks textbook citations locally, and optionally proposes original worked lessons. Nothing is merged or deployed automatically.
 
+## Deep Audit Mode (recommended default for Chapters 4–14)
+
+The **one-click batch** now defaults to **review_depth=deep**. There is no artificial one-hour delay: additional time is spent on genuine work and independent validation. The same Actions button starts the entire chosen range, and nothing merges or deploys automatically.
+
+**Five stages, each with independently checkable outputs:**
+
+1. **PDF-grounded coverage inventory:** Gemini reads the official chapter PDF and all assembled StudyAI lessons (including approved overlays). It lists 8–40 significant concepts, the exact source page/short excerpt, existing lesson matches, and covered/partial/missing/uncertain assessments. Python verifies PDF citations and rejects sparse reports or reports that omit the chapter beginning/end.
+2. **Adversarial gap review:** A separate Gemini request tries to disprove every suspected omission by checking existing explanations, worked problems, and alternate topic names. Every inventory ID must receive a verdict. Reviewer disagreements/uncertainty are flagged and never silently counted as confirmed gaps.
+3. **Concept-first lesson drafting:** Only corroborated omissions may produce drafts. At most **four** substantial proposals per chapter, preferably folded into existing subtopics via validated `merge_into` targets. The system verifies the source evidence locally and rejects incomplete examples, invented target sections, and duplicate titles.
+4. **Independent mathematics challenge:** Another distinct Gemini request attempts to recalculate every worked solution, formula and proof. `reject` or `uncertain` verdicts prevent that candidate from entering the generated draft overlay, and reasons are recorded.
+5. **Independent final coverage and website QA:** A further separate Gemini request challenges whether every textbook inventory concept is already taught, fixed by accepted proposals, or still unresolved. Unsupported closure claims are flagged, and critical mathematical objections withhold the chapter's proposals. Conservative exact-rational arithmetic spot checks and GitHub Actions curriculum, progress-tracking and browser tests complete the review before creating one consolidated DRAFT PR.
+
+**Reports:** `audit.md` contains a per-chapter coverage matrix, independent gap decisions, proposal verdicts, unresolved findings and stage counts. `audit.json` contains the full machine-readable details; evidence and proposals are archived in the run artifact and a condensed text report is included in the PR description. The workflow does not require manually downloading any audit files.
+
+**Safety and limitations:** Two Gemini responses are not truly independent sources of truth. Mathematical checks cannot prove every possible theorem or example; the deterministic arithmetic checker only handles a narrow subset of purely numeric expressions. A matching PDF quote proves source provenance, not that a claimed gap is real. **Review the draft before merging, especially unverified mathematical steps, ambiguous conclusions and textbook coverage.** Deep mode uses three to five Gemini requests per chapter and can cost significantly more than standard mode; with eleven chapters a full batch may exceed 1–2 hours and API quota limits. The GitHub job timeout has been increased to six hours; this is a ceiling, not a promise that every batch will finish. Where a PDF/model stage fails, the chapter is marked blocked rather than treated as complete.
+
+The `standard` review_depth remains available for quick historical comparison; its single-pass audits are not a substitute for deep mode.
+
 ## One-click bulk review (recommended for Chapters 4–14)
 
-After the new workflow is reviewed and merged into `main`, open **Actions → NCERT Class 9 Maths — one-click batch review → Run workflow**. Defaults are **start_chapter=4, end_chapter=14, model=gemini-3.8-flash**. Click **Run workflow once**. The workflow runs **propose mode**, which already includes a textbook-grounded audit, so **do not run separate audits first**.
+After the new workflow is reviewed and merged into `main`, open **Actions → NCERT Class 9 Maths — one-click batch review → Run workflow**. Defaults are **start_chapter=4, end_chapter=14, review_depth=deep, model=gemini-3.8-flash**. Click **Run workflow once**. The workflow runs **propose mode**, which already includes a textbook-grounded audit, so **do not run separate audits first**.
 
 For the chosen inclusive chapter range, the workflow:
 1. Exports all existing note pages **including the previously accepted NCERT review overlay**, so previously fixed gaps are not re-reported.
@@ -49,9 +67,11 @@ The generated overlay contains AI-written prose strictly as serialized JSON data
 
 - automation/class9-maths/manifest.json — chapter names and 14 official NCERT PDFs
 - automation/class9-maths/export-notes.cjs — actual chapter exporter
-- automation/class9-maths/pipeline.py — PDF analysis, Gemini API, evidence gating and reports
+- automation/class9-maths/pipeline.py — PDF analysis, standard Gemini review, evidence gating and reports
+- automation/class9-maths/deep_audit.py — multi-stage coverage inventory, adversarial gap checks, mathematical review, numeric QA
 - automation/class9-maths/apply-proposals.py — safe and idempotent lesson overlay
-- automation/class9-maths/test_pipeline.py — offline regression tests; no API key
+- automation/class9-maths/test_pipeline.py — standard offline regression tests; no API key
+- automation/class9-maths/test_deep_audit.py — deep mode adversarial and maths review regression tests
 - .github/workflows/ncert-curriculum-audit.yml — manual API workflow
 - .github/workflows/ncert-automation-smoke.yml — CI without API charges
 

@@ -17,6 +17,12 @@ on:
         type: choice
         default: "14"
         options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
+      review_depth:
+        description: "Standard single pass or deep multi-pass with maths challenge (extra Gemini cost)"
+        required: true
+        type: choice
+        default: deep
+        options: [deep, standard]
       model:
         description: "Gemini model ID; API quotas/pricing apply"
         required: true
@@ -34,7 +40,7 @@ concurrency:
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     steps:
       - name: Checkout trusted automation from main
         uses: actions/checkout@v4
@@ -61,12 +67,13 @@ jobs:
           python -m unittest discover -s automation-repo/automation/class9-maths -p 'test_*.py' -v
           node automation-repo/automation/class9-maths/export-notes.cjs site > current-notes.json
           python -c 'import json; x=json.load(open("current-notes.json")); assert len(x["chapters"]) == 14'
-      - name: Audit and propose every selected chapter in one Gemini batch
+      - name: Deep textbook coverage, adversarial gap review, draft proposals and independent maths check
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIRST: ${{ inputs.start_chapter }}
           LAST: ${{ inputs.end_chapter }}
           MODEL_ID: ${{ inputs.model }}
+          REVIEW_DEPTH: ${{ inputs.review_depth }}
         run: |
           set -euo pipefail
           if [ -z "$GEMINI_API_KEY" ]; then
@@ -79,6 +86,7 @@ jobs:
             --output review-artifacts \
             --chapter "$FIRST-$LAST" \
             --mode propose \
+            --depth "$REVIEW_DEPTH" \
             --model "$MODEL_ID"
       - name: Attach batch report and source evidence to run
         if: always()

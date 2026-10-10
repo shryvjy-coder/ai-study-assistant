@@ -22,12 +22,41 @@ def normal(value: object) -> str:
 def get_pdf(url: str, target: Path) -> None:
     if not re.fullmatch(r"https://ncert\.nic\.in/textbook/pdf/iemh[12]\d\d\.pdf", url):
         raise ValueError("Source is not an allowlisted official NCERT Class 9 PDF")
-    request = Request(url, headers={"User-Agent": "StudyAI-Curriculum-Audit/1.0"})
-    with urlopen(request, timeout=50) as response:
-        raw = response.read(MAX_PDF_BYTES + 1)
-    if len(raw) > MAX_PDF_BYTES or not raw.startswith(b"%PDF"):
-        raise ValueError("NCERT returned an invalid or oversized PDF")
-    target.write_bytes(raw)
+    # NCERT sometimes resets connections from hosted GitHub runners.
+    # Retry transient network errors only; never substitute an unverified textbook.
+    from urllib.error import HTTPError, URLError
+    attempts = 4
+    for attempt in range(1, attempts + 1):
+        request = Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; StudyAI-Curriculum-Audit/1.0)",
+            "Accept": "application/pdf,*/*;q=0.8",
+            "Connection": "close",
+        })
+        try:
+            print(f"  Downloading official NCERT PDF (attempt {attempt}/{attempts})", flush=True)
+            with urlopen(request, timeout=45) as response:
+                raw = response.read(MAX_PDF_BYTES + 1)
+            if len(raw) > MAX_PDF_BYTES or not raw.startswith(b"%PDF"):
+                raise ValueError("NCERT returned an invalid or oversized PDF")
+            target.write_bytes(raw)
+            return
+        except (URLError, ConnectionError, TimeoutError, OSError, HTTPError) as exc:
+            # A missing textbook (404) or forbidden request (403) is not transient.
+            if isinstance(exc, HTTPError) and exc.code in (400, 401, 403, 404):
+                raise ValueError(
+                    f"NCERT HTTP {exc.code} for {url}; retrying will not help. "
+                    "Check the official textbook source."
+                ) from exc
+            if attempt == attempts:
+                raise ConnectionError(
+                    f"Official NCERT download failed after {attempts} attempts: {exc}. "
+                    "The GitHub runner may be blocked or NCERT may be temporarily "
+                    "unavailable. No AI audit was performed; do not treat this as a "
+                    "curriculum finding."
+                ) from exc
+            delay = min(5 * (2 ** (attempt - 1)), 20)
+            print(f"  NCERT connection failed: {exc}; retrying in {delay}s.", flush=True)
+            time.sleep(delay)
 
 def pdf_pages(path: Path) -> list[str]:
     from pypdf import PdfReader

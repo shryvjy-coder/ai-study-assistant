@@ -89,6 +89,17 @@ def draft():
     ]}
 
 
+def closure(reviewed=True, critical=False):
+    return {"chapter_number": 4, "decisions": [
+        {"id": i, "verdict": "addressed" if i == 0 and reviewed else
+            "unresolved" if i == 0 else "covered",
+         "reason": "The revised or existing lessons were checked against the full textbook."}
+        for i in range(6)
+    ], "missed_areas": [],
+       "critical_errors": (["This proposed proof contains an independently detected serious error."]
+                           if critical else [])}
+
+
 def math_review(verdict="pass"):
     return {"chapter_number": 4, "decisions": [
         {"id": 0, "verdict": verdict,
@@ -111,6 +122,8 @@ class DeepAuditTests(unittest.TestCase):
                 return draft()
             if stage == "math":
                 return math_review(math_verdict)
+            if stage == "closure":
+                return closure(reviewer_verdict=="partial" and math_verdict=="pass")
             self.fail("Unexpected request stage: " + stage)
         return ask, requested
 
@@ -120,7 +133,7 @@ class DeepAuditTests(unittest.TestCase):
                                 sample_chapter(), sample_pages(), "mock-model",
                                 request=ask, normal=normal, validate=validate,
                                 retry=generate_with_transient_retries)
-        self.assertEqual(stages, ["coverage", "challenge", "draft", "math"])
+        self.assertEqual(stages, ["coverage", "challenge", "draft", "math", "closure"])
         self.assertEqual(report["depth"], "deep")
         self.assertEqual(len(report["coverage"]), 6)
         self.assertEqual(len(report["verified_gaps"]), 1)
@@ -134,7 +147,7 @@ class DeepAuditTests(unittest.TestCase):
                                 sample_chapter(), sample_pages(), "mock",
                                 request=ask, normal=normal, validate=validate,
                                 retry=generate_with_transient_retries)
-        self.assertEqual(stages, ["coverage", "challenge"])
+        self.assertEqual(stages, ["coverage", "challenge", "closure"])
         self.assertFalse(report["candidate_lessons"])
         self.assertTrue(any("Disputed" in issue for issue in report["rejected_claims"]))
 
@@ -167,6 +180,29 @@ class DeepAuditTests(unittest.TestCase):
         d["decisions"][0]["reason"] = "ok"
         with self.assertRaisesRegex(ValueError, "substantive reason"):
             validate_math_review(d, sample_chapter(), draft()["proposals"])
+
+    def test_final_coverage_cannot_claim_unlinked_gap_is_addressed(self):
+        from deep_audit import validate_final_coverage
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        rows, flags, critical = validate_final_coverage(
+            closure(reviewed=True), sample_chapter(), items, [], normal)
+        self.assertEqual(rows[0]["verdict"], "unresolved")
+        self.assertTrue(any("Unsubstantiated" in msg for msg in flags))
+        self.assertEqual(critical, [])
+
+    def test_critical_final_objection_withholds_all_draft_material(self):
+        calls = []
+        def ask(stage, prompt):
+            calls.append(stage)
+            return {"coverage": inventory, "challenge": challenge, "draft": draft,
+                    "math": math_review, "closure": lambda: closure(True, True)}[stage]()
+        report = review_chapter(Path("fake.pdf"), sample_chapter(),
+                                sample_chapter(), sample_pages(), "mock",
+                                request=ask, normal=normal, validate=validate,
+                                retry=generate_with_transient_retries)
+        self.assertFalse(report["candidate_lessons"])
+        self.assertTrue(any("Critical" in item for item in report["rejected_claims"]))
+        self.assertEqual(calls[-1], "closure")
 
     def test_numeric_checker_rejects_false_and_accepts_exact_fractions(self):
         c = draft()["proposals"]

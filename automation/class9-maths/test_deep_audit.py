@@ -175,6 +175,41 @@ class DeepAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "omitted or duplicated"):
             reconcile_coverage(d, sample_chapter(), data, sample_chapter())
 
+    def test_empty_section_and_subtopic_are_treated_as_no_reference(self):
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        decision = challenge()
+        decision["decisions"][0]["existing_section"] = ""
+        decision["decisions"][0]["existing_subtopic"] = ""
+        confirmed, decisions, flags = reconcile_coverage(
+            decision, sample_chapter(), items, sample_chapter())
+        self.assertEqual(len(confirmed), 1)
+        self.assertEqual(decisions[0]["existing_section"], "")
+        self.assertEqual(decisions[0]["verdict"], "partial")
+        self.assertEqual(flags, [])
+
+    def test_unreferenced_covered_claim_is_not_trusted(self):
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        decision = challenge()
+        decision["decisions"][0]["verdict"] = "covered"
+        decision["decisions"][0]["existing_section"] = ""
+        decision["decisions"][0]["existing_subtopic"] = ""
+        confirmed, decisions, flags = reconcile_coverage(
+            decision, sample_chapter(), items, sample_chapter())
+        self.assertEqual(confirmed, [])
+        self.assertEqual(decisions[0]["verdict"], "uncertain")
+        self.assertTrue(any("lacks exact existing section" in flag for flag in flags))
+
+    def test_invented_section_becomes_flagged_uncertainty_not_false_coverage(self):
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        decision = challenge()
+        decision["decisions"][0]["existing_section"] = "Fictional existing lesson"
+        decision["decisions"][0]["existing_subtopic"] = ""
+        confirmed, decisions, flags = reconcile_coverage(
+            decision, sample_chapter(), items, sample_chapter())
+        self.assertEqual(confirmed, [])
+        self.assertEqual(decisions[0]["verdict"], "uncertain")
+        self.assertTrue(any("invalid existing lesson reference" in flag for flag in flags))
+
     def test_math_verdict_must_have_substantive_reason(self):
         d = math_review()
         d["decisions"][0]["reason"] = "ok"

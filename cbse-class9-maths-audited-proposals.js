@@ -1,6 +1,5 @@
 /* Review-only, textbook-cited StudyAI curriculum proposals.
- * Generated from evidence-backed proposals and human-refined.
- * Keeps previously accepted chapters; integrates overlapping lessons.
+ * Generated deterministically by automation/class9-maths/apply-proposals.py.
  * AI-written content is JSON data: never use eval or Function on this data.
  */
 (() => {
@@ -167,6 +166,53 @@ const proposals = [
         "merge_into": "Why a linear polynomial graphs as a line"
       }
     ]
+  },
+  {
+    "chapter_number": 3,
+    "chapter_title": "The World of Numbers",
+    "lessons": [
+      {
+        "section": "Representing rational numbers on the number line",
+        "title": "Absolute Value and Distance on the Number Line",
+        "paragraphs": [
+          "Every rational number occupies a distinct point on the number line. The absolute value of a rational number x, written as |x|, measures its geometric distance from the origin 0. Because distance cannot be negative, |x| is always greater than or equal to 0. For any positive rational number, |x| = x; for zero, |0| = 0; and for any negative rational number, its absolute value is its positive opposite, |-x| = x.",
+          "This geometric interpretation extends naturally to the distance between any two rational points on the number line. Given two rational numbers a and b, the distance between them is given by |a - b|. Because |a - b| = |b - a|, the distance remains identical regardless of which endpoint is taken as the starting point."
+        ],
+        "formulas": [
+          "|x| ≥ 0",
+          "\\text{Distance}(a, b) = |a - b| = |b - a|"
+        ],
+        "examples": [
+          {
+            "title": "Finding absolute value and coordinate distance",
+            "question": "Find the absolute value of -7/4 and calculate the distance between -7/4 and 3/2 on the number line.",
+            "steps": [
+              "The absolute value represents the distance of -7/4 from 0: |-7/4| = 7/4.",
+              "Apply the distance formula |a - b| with a = -7/4 and b = 3/2: Distance = |-7/4 - 3/2|.",
+              "Express the terms with a common denominator of 4: 3/2 = 6/4, giving |-7/4 - 6/4| = |-13/4|.",
+              "Take the absolute value of the difference: |-13/4| = 13/4 = 3¼."
+            ],
+            "answer": "The absolute value is 7/4, and the distance between -7/4 and 3/2 is 13/4 (or 3.25)."
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Absolute value of a rational number on the number line",
+            "page": 11,
+            "quote": "The absolute value of a rational number x, written as |x|, represents \nits distance from 0 on the number line.",
+            "rationale": "The existing section on number line representation omits the definition of absolute value |x| as distance from 0 and its essential property |x| ≥ 0.",
+            "status": "missing"
+          },
+          {
+            "concept": "Distance between two rational numbers on the number line",
+            "page": 12,
+            "quote": "For two rational numbers a and b, the distance between them on \nthe number line is given by |a – b|.",
+            "rationale": "The existing notes cover plotting rational numbers and density, but omit the metric formula |a - b| used to calculate the geometric distance between two points.",
+            "status": "missing"
+          }
+        ]
+      }
+    ]
   }
 ];
 const bank=window.CBSE_CLASS9_MATH_FULL_NOTES||{};
@@ -183,8 +229,6 @@ for(const record of proposals){
  for(const p of record.lessons){
   const section=chapter.sections.find(s=>s.title===p.section&&!generic.has(s.title));
   if(!section)throw Error('Curriculum proposal target section missing: '+p.section);
-  // Reviewer-approved enrichment: extend an existing lesson rather than
-  // creating a duplicate subtopic merely because a concept needed more depth.
   if(p.merge_into){
    const target=safe(section.subtopics).find(s=>norm(s.title)===norm(p.merge_into));
    if(!target)throw Error('Curriculum enrichment target missing: '+p.merge_into);
@@ -193,8 +237,8 @@ for(const record of proposals){
    const formulas=safe(target.formulas);
    target.formulas=formulas.concat(p.formulas.filter(x=>!formulas.includes(x)));
    const examples=safe(target.examples);
-   const existingExampleTitles=new Set(examples.map(x=>norm(x.title)));
-   target.examples=examples.concat(p.examples.filter(x=>!existingExampleTitles.has(norm(x.title)))
+   const existingTitles=new Set(examples.map(x=>norm(x.title)));
+   target.examples=examples.concat(p.examples.filter(x=>!existingTitles.has(norm(x.title)))
     .map(x=>({title:x.title,question:x.question,steps:x.steps.slice(),answer:x.answer})));
    continue;
   }

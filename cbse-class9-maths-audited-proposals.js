@@ -1,5 +1,6 @@
 /* Review-only, textbook-cited StudyAI curriculum proposals.
- * Generated deterministically by automation/class9-maths/apply-proposals.py.
+ * Generated from evidence-backed proposals and human-refined.
+ * Keeps previously accepted chapters; integrates overlapping lessons.
  * AI-written content is JSON data: never use eval or Function on this data.
  */
 (() => {
@@ -84,80 +85,6 @@ const proposals = [
             "status": "missing"
           }
         ]
-      },
-      {
-        "section": "Midpoints, missing endpoints and dividing a segment",
-        "title": "Recovering triangle vertices from side midpoints",
-        "paragraphs": [
-          "When the midpoints of all three sides of a triangle are known, we can reconstruct the original vertices by translating the geometric relationships into a system of linear equations. Let the unknown vertices be A(x₁, y₁), B(x₂, y₂), and C(x₃, y₃). If D, E, and F are the midpoints of sides AB, BC, and CA respectively, each midpoint gives an average of coordinates: (x₁ + x₂)/2 = x_D, (x₂ + x₃)/2 = x_E, and (x₃ + x₁)/2 = x_F. Multiplying each equation by 2 and summing all three produces 2(x₁ + x₂ + x₃) = 2(x_D + x_E + x_F), which simplifies to x₁ + x₂ + x₃ = x_D + x_E + x_F. An identical relationship holds for the y-coordinates.",
-          "Once the sum of all three vertex coordinates is established, isolating each vertex is straightforward. Subtracting the known sum of two vertices, x₂ + x₃ = 2x_E, from the total sum yields x₁ = (x_D + x_E + x_F) − 2x_E = x_D + x_F − x_E. Geometrically, this formula corresponds to the parallelogram law: because the segment joining midpoints D and F is parallel and equal in length to segment BE, quadrilateral ADFE forms a parallelogram whose opposite sides represent equal displacement vectors.",
-          "This algebraic and vector approach prevents guess-and-check errors and works consistently regardless of which quadrants the vertices occupy. After determining the coordinates of A, B, and C, students should always verify their results by averaging each adjacent pair of calculated vertices to confirm that they reproduce the original midpoint coordinates D, E, and F."
-        ],
-        "formulas": [
-          "x_D = (x_A + x_B)/2, y_D = (y_A + y_B)/2",
-          "x_A + x_B + x_C = x_D + x_E + x_F",
-          "x_A = x_D + x_F - x_E, y_A = y_D + y_F - y_E",
-          "x_B = x_D + x_E - x_F, y_B = y_D + y_E - y_F",
-          "x_C = x_E + x_F - x_D, y_C = y_E + y_F - y_D"
-        ],
-        "examples": [
-          {
-            "title": "Find triangle vertices from three given midpoints",
-            "question": "The midpoints of the sides of triangle ABC are D(5, 1), E(6, 5), and F(0, 3), where D is the midpoint of AB, E is the midpoint of BC, and F is the midpoint of CA. Find the coordinates of vertices A, B, and C.",
-            "steps": [
-              "Write the midpoint equations for the x-coordinates: x_A + x_B = 2(5) = 10, x_B + x_C = 2(6) = 12, and x_C + x_A = 2(0) = 0. Adding these three equations gives 2(x_A + x_B + x_C) = 22, so x_A + x_B + x_C = 11.",
-              "Subtract each pairwise sum to find the x-coordinates: x_A = 11 − (x_B + x_C) = 11 − 12 = −1; x_B = 11 − (x_C + x_A) = 11 − 0 = 11; x_C = 11 − (x_A + x_B) = 11 − 10 = 1.",
-              "Write the midpoint equations for the y-coordinates: y_A + y_B = 2(1) = 2, y_B + y_C = 2(5) = 10, and y_C + y_A = 2(3) = 6. Adding these gives 2(y_A + y_B + y_C) = 18, so y_A + y_B + y_C = 9.",
-              "Subtract each pairwise sum to find the y-coordinates: y_A = 9 − (y_B + y_C) = 9 − 10 = −1; y_B = 9 − (y_C + y_A) = 9 − 6 = 3; y_C = 9 − (y_A + y_B) = 9 − 2 = 7.",
-              "Verify by recalculating midpoints: midpoint of A(−1, −1) and B(11, 3) is ((−1+11)/2, (−1+3)/2) = (5, 1) = D; midpoint of B and C is ((11+1)/2, (3+7)/2) = (6, 5) = E; midpoint of C and A is ((1−1)/2, (7−1)/2) = (0, 3) = F."
-            ],
-            "answer": "A(−1, −1), B(11, 3), and C(1, 7)"
-          }
-        ],
-        "evidence": [
-          {
-            "concept": "Recovering the vertices of a triangle given the midpoints of its three sides",
-            "page": 13,
-            "quote": "The midpoints of the sides of triangle ABC are the points D, E, and F.",
-            "rationale": "The textbook includes an advanced starred exercise (Problem 13) requiring students to determine the three vertices of triangle ABC given the coordinates of the midpoints of its sides. While the existing notes cover the midpoint of a single line segment and finding one missing endpoint, they lack the conceptual framework and multi-step method for solving the simultaneous system of three midpoints to recover an entire triangle.",
-            "status": "missing"
-          }
-        ]
-      },
-      {
-        "section": "The Cartesian plane",
-        "title": "Equality of ordered pairs and the line x = y",
-        "paragraphs": [
-          "An ordered pair uses position to assign geometric meaning: the first component always denotes horizontal displacement along the x-axis, and the second component denotes vertical displacement along the y-axis. Two ordered pairs (a, b) and (c, d) designate the exact same point in the plane if and only if both coordinates match simultaneously, meaning a = c and b = d. If either coordinate differs, the pairs locate two distinct points.",
-          "This rule leads directly to the textbook's biconditional criterion for reversed pairs: (x, y) = (y, x) if and only if x = y. Whenever x ≠ y, reversing the coordinates reflects the point across the main diagonal line of the plane. For instance, (4, 1) and (1, 4) have identical absolute numbers but represent entirely different locations in Quadrant I. The only points that remain unchanged when their coordinates are reversed are those where the horizontal and vertical values are equal, such as (0, 0), (2, 2), or (−5, −5).",
-          "Recognising this condition is essential when solving algebraic coordinate problems where two points are defined by variable expressions. Establishing whether points coincide requires solving the two component equations simultaneously. If the resulting values satisfy x = y, the point lies on the line of symmetry bisecting Quadrants I and III."
-        ],
-        "formulas": [
-          "(a, b) = (c, d) ⇔ a = c and b = d",
-          "(x, y) = (y, x) ⇔ x = y"
-        ],
-        "examples": [
-          {
-            "title": "Testing ordered pair equality and finding coincidence",
-            "question": "Given the points P(2k − 1, 5) and Q(5, k + 2), determine the value of k for which P and Q represent the same point, and check whether their coordinates satisfy (x, y) = (y, x).",
-            "steps": [
-              "Two points P(x₁, y₁) and Q(x₂, y₂) coincide if and only if x₁ = x₂ and y₁ = y₂. Equate the horizontal coordinates: 2k − 1 = 5, which gives 2k = 6, so k = 3.",
-              "Substitute k = 3 into the vertical coordinate of Q: y_Q = k + 2 = 3 + 2 = 5. Compare this with the vertical coordinate of P, which is also 5.",
-              "Since both conditions x_P = x_Q = 5 and y_P = y_Q = 5 hold simultaneously for k = 3, the two points coincide at (5, 5).",
-              "Because x = 5 and y = 5 are equal, reversing the coordinates gives (5, 5), confirming the rule that (x, y) = (y, x) if and only if x = y."
-            ],
-            "answer": "k = 3, giving the coincident point (5, 5) where x = y."
-          }
-        ],
-        "evidence": [
-          {
-            "concept": "Condition for equality of reversed coordinate pairs",
-            "page": 15,
-            "quote": "If x = y, then (x, y) = (y, x). If x ≠ y, then (x, y) ≠ (y, x).",
-            "rationale": "The textbook summary and 'Think and Reflect' section explicitly highlight the biconditional rule governing when swapped coordinates represent identical or distinct points ((x, y) = (y, x) if and only if x = y). The current notes state that coordinates cannot generally be swapped, but omit the formal algebraic condition and its geometric locus on the line x = y.",
-            "status": "partial"
-          }
-        ]
       }
     ]
   },
@@ -240,6 +167,83 @@ const proposals = [
         "merge_into": "Why a linear polynomial graphs as a line"
       }
     ]
+  },
+  {
+    "chapter_number": 3,
+    "chapter_title": "The World of Numbers",
+    "lessons": [
+      {
+        "section": "Irrational numbers",
+        "title": "Mādhava's infinite series for π",
+        "merge_into": "Another irrational number: π",
+        "paragraphs": [
+          "Mādhava studied infinite sums that approximate π. An example is π/4 = 1 − 1/3 + 1/5 − 1/7 + …, so π = 4(1 − 1/3 + 1/5 − 1/7 + …). Every finite partial sum is rational, because it combines finitely many fractions. But as the number of terms increases, these approximations approach π, which is irrational. An infinite limiting process can therefore describe an irrational number even though none of its finite partial sums is exactly π.",
+          "This series gives an important contrast between an exact expression and an approximation. Its early sums alternate above and below π and converge slowly. A finite sum is not a proof that π is rational. Nor must all irrational numbers be written as infinite sums: symbols such as √2 and π can denote exact irrational values directly. The series illustrates a historical method, rather than a compulsory method for writing every irrational number."
+        ],
+        "formulas": [
+          "π = 4(1 − 1/3 + 1/5 − 1/7 + …)",
+          "First three partial sums: 4, 8/3, 52/15"
+        ],
+        "examples": [
+          {
+            "title": "Estimate π with successive partial sums",
+            "question": "For π = 4(1 − 1/3 + 1/5 − …), compute the first three partial sums and explain why none is exactly π.",
+            "steps": [
+              "The first partial sum is S₁=4(1)=4.",
+              "Using two terms, S₂=4(1−1/3)=4×2/3=8/3≈2.667.",
+              "Using three terms, S₃=4(1−1/3+1/5)=4×13/15=52/15≈3.467.",
+              "These are rational approximations that alternately lie above and below π≈3.142. The exact equality with π describes the limit of infinitely many terms, not a finite partial sum."
+            ],
+            "answer": "S₁=4, S₂=8/3 and S₃=52/15; each is only an approximation to π."
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Mādhava's infinite series representation of irrational numbers",
+            "page": 16,
+            "quote": "to express an irrational number, you cannot use a single fraction; you must use an infinite sum.",
+            "status": "missing",
+            "rationale": "The audit identifies the history of approximating π using an infinite series. The revision adds the concrete series, explains rational partial sums and the irrational limit, and avoids suggesting every irrational number must be written as a series."
+          }
+        ]
+      },
+      {
+        "section": "Decimal expansions of real numbers",
+        "title": "Alternative decimal representations and repeating nines",
+        "merge_into": "Why denominators containing only 2 and 5 terminate",
+        "paragraphs": [
+          "Decimal expansions are not always unique. The real number 1 has both 1.000… and 0.999… as decimal representations, and 0.5 can be written as 0.4999… when the nines continue forever. A finite string of nines such as 0.999 or 0.4999 is still strictly smaller than 1 or 0.5. Equality holds only for the infinite repeating tail, whose finite truncations approach the same limit.",
+          "To justify the equality, let x=0.999… . Then 10x=9.999… . Subtracting gives 9x=9, so x=1. Therefore 0.0999…=0.1 and 0.4999…=0.4+0.0999…=0.5. This does not make every decimal expansion a repeating decimal: for example √2 has a non-terminating, non-repeating decimal expansion."
+        ],
+        "formulas": [
+          "0.999… = 1",
+          "0.4999… = 0.5",
+          "0.0999… = 0.1"
+        ],
+        "examples": [
+          {
+            "title": "Why a recurring-nine decimal equals a terminating decimal",
+            "question": "Prove that 0.999…=1 and use this result to show 0.4999…=0.5.",
+            "steps": [
+              "Let x=0.999… , where the 9s continue without end.",
+              "Multiplying by 10 gives 10x=9.999… . Subtract the original x to cancel the common repeating tail: 9x=9.",
+              "Divide by 9: x=1. So 0.999… and 1 are exactly equal.",
+              "Dividing the equality 0.999…=1 by 10 gives 0.0999…=0.1. Therefore 0.4999…=0.4+0.0999…=0.4+0.1=0.5."
+            ],
+            "answer": "0.999…=1 and 0.4999…=0.5; infinite recurring nines can represent an otherwise terminating decimal."
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Non-uniqueness of decimal representations",
+            "page": 22,
+            "quote": "Any terminating decimal has an alternative with repeating 9s",
+            "status": "missing",
+            "rationale": "The audit flagged alternative repeating-nine notation. The revision demonstrates two examples and distinguishes an infinite repeating tail from a finite approximation."
+          }
+        ]
+      }
+    ]
   }
 ];
 const bank=window.CBSE_CLASS9_MATH_FULL_NOTES||{};
@@ -256,6 +260,8 @@ for(const record of proposals){
  for(const p of record.lessons){
   const section=chapter.sections.find(s=>s.title===p.section&&!generic.has(s.title));
   if(!section)throw Error('Curriculum proposal target section missing: '+p.section);
+  // Reviewer-approved enrichment: extend an existing lesson rather than
+  // creating a duplicate subtopic merely because a concept needed more depth.
   if(p.merge_into){
    const target=safe(section.subtopics).find(s=>norm(s.title)===norm(p.merge_into));
    if(!target)throw Error('Curriculum enrichment target missing: '+p.merge_into);
@@ -264,8 +270,8 @@ for(const record of proposals){
    const formulas=safe(target.formulas);
    target.formulas=formulas.concat(p.formulas.filter(x=>!formulas.includes(x)));
    const examples=safe(target.examples);
-   const existingTitles=new Set(examples.map(x=>norm(x.title)));
-   target.examples=examples.concat(p.examples.filter(x=>!existingTitles.has(norm(x.title)))
+   const existingExampleTitles=new Set(examples.map(x=>norm(x.title)));
+   target.examples=examples.concat(p.examples.filter(x=>!existingExampleTitles.has(norm(x.title)))
     .map(x=>({title:x.title,question:x.question,steps:x.steps.slice(),answer:x.answer})));
    continue;
   }

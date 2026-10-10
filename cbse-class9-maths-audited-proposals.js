@@ -167,6 +167,83 @@ const proposals = [
         "merge_into": "Why a linear polynomial graphs as a line"
       }
     ]
+  },
+  {
+    "chapter_number": 3,
+    "chapter_title": "The World of Numbers",
+    "lessons": [
+      {
+        "section": "Irrational numbers",
+        "title": "Mādhava's infinite series for π",
+        "merge_into": "Another irrational number: π",
+        "paragraphs": [
+          "Mādhava studied infinite sums that approximate π. An example is π/4 = 1 − 1/3 + 1/5 − 1/7 + …, so π = 4(1 − 1/3 + 1/5 − 1/7 + …). Every finite partial sum is rational, because it combines finitely many fractions. But as the number of terms increases, these approximations approach π, which is irrational. An infinite limiting process can therefore describe an irrational number even though none of its finite partial sums is exactly π.",
+          "This series gives an important contrast between an exact expression and an approximation. Its early sums alternate above and below π and converge slowly. A finite sum is not a proof that π is rational. Nor must all irrational numbers be written as infinite sums: symbols such as √2 and π can denote exact irrational values directly. The series illustrates a historical method, rather than a compulsory method for writing every irrational number."
+        ],
+        "formulas": [
+          "π = 4(1 − 1/3 + 1/5 − 1/7 + …)",
+          "First three partial sums: 4, 8/3, 52/15"
+        ],
+        "examples": [
+          {
+            "title": "Estimate π with successive partial sums",
+            "question": "For π = 4(1 − 1/3 + 1/5 − …), compute the first three partial sums and explain why none is exactly π.",
+            "steps": [
+              "The first partial sum is S₁=4(1)=4.",
+              "Using two terms, S₂=4(1−1/3)=4×2/3=8/3≈2.667.",
+              "Using three terms, S₃=4(1−1/3+1/5)=4×13/15=52/15≈3.467.",
+              "These are rational approximations that alternately lie above and below π≈3.142. The exact equality with π describes the limit of infinitely many terms, not a finite partial sum."
+            ],
+            "answer": "S₁=4, S₂=8/3 and S₃=52/15; each is only an approximation to π."
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Mādhava's infinite series representation of irrational numbers",
+            "page": 16,
+            "quote": "to express an irrational number, you cannot use a single fraction; you must use an infinite sum.",
+            "status": "missing",
+            "rationale": "The audit identifies the history of approximating π using an infinite series. The revision adds the concrete series, explains rational partial sums and the irrational limit, and avoids suggesting every irrational number must be written as a series."
+          }
+        ]
+      },
+      {
+        "section": "Decimal expansions of real numbers",
+        "title": "Alternative decimal representations and repeating nines",
+        "merge_into": "Why denominators containing only 2 and 5 terminate",
+        "paragraphs": [
+          "Decimal expansions are not always unique. The real number 1 has both 1.000… and 0.999… as decimal representations, and 0.5 can be written as 0.4999… when the nines continue forever. A finite string of nines such as 0.999 or 0.4999 is still strictly smaller than 1 or 0.5. Equality holds only for the infinite repeating tail, whose finite truncations approach the same limit.",
+          "To justify the equality, let x=0.999… . Then 10x=9.999… . Subtracting gives 9x=9, so x=1. Therefore 0.0999…=0.1 and 0.4999…=0.4+0.0999…=0.5. This does not make every decimal expansion a repeating decimal: for example √2 has a non-terminating, non-repeating decimal expansion."
+        ],
+        "formulas": [
+          "0.999… = 1",
+          "0.4999… = 0.5",
+          "0.0999… = 0.1"
+        ],
+        "examples": [
+          {
+            "title": "Why a recurring-nine decimal equals a terminating decimal",
+            "question": "Prove that 0.999…=1 and use this result to show 0.4999…=0.5.",
+            "steps": [
+              "Let x=0.999… , where the 9s continue without end.",
+              "Multiplying by 10 gives 10x=9.999… . Subtract the original x to cancel the common repeating tail: 9x=9.",
+              "Divide by 9: x=1. So 0.999… and 1 are exactly equal.",
+              "Dividing the equality 0.999…=1 by 10 gives 0.0999…=0.1. Therefore 0.4999…=0.4+0.0999…=0.4+0.1=0.5."
+            ],
+            "answer": "0.999…=1 and 0.4999…=0.5; infinite recurring nines can represent an otherwise terminating decimal."
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Non-uniqueness of decimal representations",
+            "page": 22,
+            "quote": "Any terminating decimal has an alternative with repeating 9s",
+            "status": "missing",
+            "rationale": "The audit flagged alternative repeating-nine notation. The revision demonstrates two examples and distinguishes an infinite repeating tail from a finite approximation."
+          }
+        ]
+      }
+    ]
   }
 ];
 const bank=window.CBSE_CLASS9_MATH_FULL_NOTES||{};

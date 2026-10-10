@@ -7,6 +7,10 @@ import tempfile
 import unittest
 
 from pipeline import normal, validate, get_pdf, generate_with_transient_retries
+from importlib.machinery import SourceFileLoader
+
+proposal_module = SourceFileLoader('studyai_apply_proposals', str(Path(__file__).resolve().parent/'apply-proposals.py')).load_module()
+
 
 HERE=Path(__file__).resolve().parent
 
@@ -134,6 +138,86 @@ class PipelineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaises(ValueError):
                 get_pdf("https://example.com/pretend.pdf",Path(folder)/"book.pdf")
+
+
+    def test_cumulative_proposals_keep_reviewed_chapters_and_merges(self):
+        previous=[{"chapter_number":1,"chapter_title":"Chapter One","lessons":[{
+            "section":"Coordinates","title":"Signed distances","merge_into":"Ordered pairs",
+            "paragraphs":["Reviewed teaching"],"formulas":["d=|x|"],
+            "examples":[{"title":"Reviewed example","question":"?", "steps":["Step"],"answer":"A"}],
+            "evidence":[{"page":1,"quote":"Evidence"}]
+        }]}]
+        incoming=[{"chapter_number":2,"chapter_title":"Chapter Two","lessons":[{
+            "section":"Graphs","title":"Parallel lines","paragraphs":["New teaching"],
+            "formulas":["y=ax+b"],"examples":[{"title":"Check","question":"?",
+            "steps":["Step"],"answer":"B"}],"evidence":[{"page":2,"quote":"Evidence"}]
+        }]}]
+        combined=proposal_module.combine_proposals(previous,incoming)
+        self.assertEqual([r["chapter_number"] for r in combined],[1,2])
+        self.assertEqual(combined[0]["lessons"][0]["merge_into"],"Ordered pairs")
+        self.assertEqual(proposal_module.combine_proposals(combined,incoming),combined)
+        self.assertEqual(len(previous),1) # no mutation of the reviewed source
+
+    def test_existing_overlay_is_not_discarded_and_unrecognised_format_fails_closed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output=Path(folder)/"cbse-class9-maths-audited-proposals.js"
+            records=[{"chapter_number":1,"chapter_title":"Chapter One","lessons":[]}]
+            output.write_text(proposal_module.LOADER_START+
+                json.dumps(records)+proposal_module.LOADER_END,encoding="utf-8")
+            self.assertEqual(proposal_module.read_existing_proposals(output),records)
+            output.write_text("window.unrecognisedOverlay=true;",encoding="utf-8")
+            with self.assertRaisesRegex(ValueError,"refusing to overwrite"):
+                proposal_module.read_existing_proposals(output)
+
+    def test_multi_chapter_overlay_enriches_without_duplicate_topics(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            end_marker='<script defer src="cbse-class9-maths-depth-ch14.js"></script>'
+            (root/"index.html").write_text("<html>"+end_marker+"</html>",encoding="utf-8")
+            def lesson(section,title,merge_into=None):
+                result={"section":section,"title":title,"paragraphs":["Explainer one","Explainer two"],
+                        "formulas":["x+1"],"examples":[{"title":title+" example",
+                        "question":"Find x.","steps":["Check."],"answer":"2"}],
+                        "evidence":[{"concept":title,"page":1,"quote":"Evidence"}]}
+                if merge_into:
+                    result["merge_into"]=merge_into
+                return result
+            first=[{"chapter_number":1,"chapter_title":"Chapter One","lessons":[
+                lesson("Coordinates","Distances","Ordered pairs"),
+                lesson("Midpoints","Recover triangle")]}]
+            second=[{"chapter_number":2,"chapter_title":"Chapter Two","lessons":[
+                lesson("Graphs","Slope","Line graphs")]}]
+            candidate=root/"candidate.json"
+            command=["python3",str(HERE/"apply-proposals.py"),
+                    "--site",str(root),"--candidates",str(candidate)]
+            candidate.write_text(json.dumps(first),encoding="utf-8")
+            subprocess.run(command,check=True,capture_output=True)
+            candidate.write_text(json.dumps(second),encoding="utf-8")
+            subprocess.run(command,check=True,capture_output=True)
+            overlay=root/"cbse-class9-maths-audited-proposals.js"
+            combined=proposal_module.read_existing_proposals(overlay)
+            self.assertEqual(len(combined),2)
+            contents=overlay.read_text(encoding="utf-8")
+            subprocess.run(command,check=True,capture_output=True)
+            self.assertEqual(overlay.read_text(encoding="utf-8"),contents)
+            fixture={"CBSE_CLASS9_MATH_FULL_NOTES":{
+              "Chapter One":{"sections":[
+                {"title":"Coordinates","subtopics":[{"title":"Ordered pairs",
+                 "paragraphs":["Original"],"examples":[],"formulas":[]}]},
+                {"title":"Midpoints","subtopics":[]}]},
+              "Chapter Two":{"sections":[{"title":"Graphs","subtopics":[
+                {"title":"Line graphs","paragraphs":["Original"],"examples":[],"formulas":[]}]}]}
+            }}
+            script=("global.window="+json.dumps(fixture)+";"
+                "const fs=require('fs'),vm=require('vm');"
+                "const code=fs.readFileSync(process.argv[1],'utf8');"
+                "vm.runInThisContext(code);vm.runInThisContext(code);"
+                "const bank=window.CBSE_CLASS9_MATH_FULL_NOTES;"
+                "if(bank['Chapter One'].sections[0].subtopics.length!==1)process.exit(2);"
+                "if(bank['Chapter One'].sections[1].subtopics.length!==1)process.exit(3);"
+                "if(bank['Chapter Two'].sections[0].subtopics.length!==1)process.exit(4);"
+                "if(bank['Chapter Two'].sections[0].subtopics[0].examples.length!==1)process.exit(5);")
+            subprocess.run(["node","-e",script,str(overlay)],check=True,capture_output=True)
 
     def test_loader_generation_is_deterministic_and_can_run_twice(self):
         END_MARKER='<script defer src="cbse-class9-maths-depth-ch14.js"></script>'

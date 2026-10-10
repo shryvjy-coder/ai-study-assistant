@@ -402,6 +402,10 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
             flags.extend("Critical final maths objection: " + msg for msg in critical_errors)
             proposed = []
             flags.append("All chapter proposals withheld pending critical mathematical review")
+            for d in final_decisions:
+                if d["verdict"] == "addressed":
+                    d["verdict"] = "unresolved"
+                    d["reason"] = "Original proposal withheld by final mathematical quality gate."
         # PASS 5: source-to-candidate traceability, exact rational checks
         # and CI browser tests in the GitHub Actions workflow.
         addressed = {(item["page"], normal(item["quote"]))
@@ -413,9 +417,13 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                          "; ".join(missing_links[:12]))
         checked, errors = check_numeric_equalities(proposed)
         if errors:
-            flags.extend(errors)
-            raise ValueError("Deterministic arithmetic verification found contradictions: " +
-                             "; ".join(errors[:3]))
+            flags.extend("Deterministic numerical contradiction: " + err for err in errors)
+            proposed = []
+            flags.append("All chapter proposals withheld by deterministic arithmetic quality gate")
+            for d in final_decisions:
+                if d["verdict"] == "addressed":
+                    d["verdict"] = "unresolved"
+                    d["reason"] = "Proposed improvement withheld by arithmetic quality gate."
         return {
             "chapter_number": entry["number"], "chapter_title": entry["title"],
             "status": "processed", "depth": "deep",

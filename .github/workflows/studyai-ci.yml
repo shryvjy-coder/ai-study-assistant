@@ -50,6 +50,7 @@ jobs:
           node --check tests/chapter-navigation-hover-browser.cjs
           node --check tests/class9-math-topic-browser.cjs
           node --check tests/class9-lesson-progress-browser.cjs
+          node --check tests/class9-maths-all-chapters-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -90,6 +91,8 @@ jobs:
         run: node tests/class9-math-topic-browser.cjs
       - name: Class 9 checkable lessons and progress rings
         run: node tests/class9-lesson-progress-browser.cjs
+      - name: Complete CBSE Class 9 mathematics lesson coverage
+        run: node tests/class9-maths-all-chapters-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

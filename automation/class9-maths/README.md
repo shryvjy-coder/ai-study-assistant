@@ -84,3 +84,52 @@ The exact same mechanism can later be adapted to Classes 10–12 and other board
 For local tests:
     python -m unittest discover -s automation/class9-maths -p 'test_*.py' -v
     node automation/class9-maths/export-notes.cjs /path/to/notes-checkout > notes.json
+
+## Resumable, quota-aware Deep Audit v2 (manual batch workflow)
+
+The **NCERT Class 9 Maths — one-click batch review** workflow now starts conservatively
+with Chapter 4 only, **at most six Gemini generate attempts per run**, and at least
+25 seconds between attempts (including failed retry attempts). The API allowance
+is a per-run safety cap, **not a guarantee of remaining Google quota**. Other
+applications, projects or recent runs may already have used part of the daily
+allowance. Google enforces token-per-minute independently; pacing alone cannot
+guarantee there will be no 429 errors.
+
+**First run:** Actions > NCERT Class 9 Maths — one-click batch review > Run workflow.
+Select branch `main`, start chapter `4`, end chapter `4`, review depth `deep`,
+the supported Gemini model available in your API project, leave `resume_run_id`
+empty, and set the maximum attempts and spacing for your own current quota.
+The workflow runs only when you click Run workflow. Do not run all 14 chapters
+until you have reviewed the pilot and know your quota.
+
+**If the run pauses or fails:** open the run's Actions page. Even when the audit
+fails (and therefore cannot create a draft PR), the **Preserve validated checkpoints**
+step uploads an artifact named `ncert-class9-checkpoints-<run-id>` with its validated
+stage outputs. Download and retain a copy if you want; Actions artifacts expire
+after **30 days**. To resume, manually dispatch the **same** workflow, on the
+**same revision of notes**, with exactly the **same model and chapter range**.
+Fill in `resume_run_id` with the previous Actions run's numeric ID. The workflow
+downloads that run's artifact, and Python independently verifies PDF bytes,
+notes, model, code fingerprint and exact stage prompts. A validated stage is
+replayed without another Gemini generate request; a partially completed or
+malformed stage must be retried. If sources or code changed, an existing
+checkpoint is **rejected**, not quietly mixed with new material. Start fresh
+(or re-run against matching source revisions) if that happens.
+
+A paused chapter deliberately returns a failed workflow status, retaining
+the report plus checkpoints and **skipping draft PR creation**. Resume from
+the latest run ID (each resumed run creates its own snapshot artifact).
+All mathematically uncertain, malformed or rejected proposals remain withheld.
+The final browser/static tests are unchanged and must pass before creating a
+draft PR. Stage outputs are review data, not authoritative facts or safe code.
+Artifacts may contain your exported notes and model responses, so avoid
+reposting them publicly or adding secrets to your notes.
+
+**Caveats:** The existing single-job GitHub Actions upload executes on normal
+exit and ordinary failures via `if: always()`; a runner disappearing or being
+force-killed can prevent artifact upload. Gemini Files API uploads are not
+counted in the `max_api_requests` generate-attempt cap, and Google's actual
+billing and quota accounting govern. Cache replay of the PDF and source notes
+is rejected if their bytes change (including updates to the textbook server).
+Completed reports must still be read and mathematically checked by a human.
+This workflow never schedules itself for the next day and never auto-merges.

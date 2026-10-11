@@ -109,6 +109,16 @@ def _reports():
                 raise ValueError("Invalid or repeated chapter number")
             if record.get("status") not in {"processed", "paused", "blocked"}:
                 raise ValueError("Unrecognised report status")
+            if not isinstance(record.get("qa") or {}, dict):
+                raise ValueError("Malformed quality-assurance report")
+            for field in ("coverage", "verified_gaps", "final_decisions",
+                          "candidate_lessons", "math_decisions", "rejected_claims"):
+                values = record.get(field) or []
+                if not isinstance(values, list):
+                    raise ValueError("Malformed report field: " + field)
+                if field != "rejected_claims" and any(
+                        not isinstance(value, dict) for value in values):
+                    raise ValueError("Malformed report evidence: " + field)
             by_chapter[number] = record
         stamp = datetime.fromtimestamp(report_file.stat().st_mtime, timezone.utc).isoformat()
         return by_chapter, None, stamp

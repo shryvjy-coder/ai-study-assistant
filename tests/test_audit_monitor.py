@@ -88,6 +88,22 @@ class AuditMonitorTests(unittest.TestCase):
         self.assertEqual(data["automated_reports_loaded"], 0)
         self.assertIn("invalid", data["report_error"].lower())
 
+    def test_malformed_evidence_arrays_fail_closed(self):
+        with TemporaryDirectory() as temp:
+            artifact = Path(temp) / "audit.json"
+            artifact.write_text(json.dumps([{
+                "chapter_number": 5,
+                "status": "processed",
+                "coverage": "fabricated content instead of an inventory array",
+            }]), encoding="utf-8")
+            with patch.dict(os.environ, {"NCERT_AUDIT_REPORT_JSON": str(artifact)}):
+                with patch.object(audit_monitor, "controller_snapshot",
+                                  return_value=(CONTROLLER, None)):
+                    data = audit_monitor.build_snapshot(MANIFEST)
+        self.assertIsNotNone(data["report_error"])
+        self.assertEqual(data["automated_reports_loaded"], 0)
+        self.assertEqual(data["human_approvals_recorded"], 0)
+
     def test_flask_routes_reject_anonymous_or_unlisted_accounts(self):
         import app as server
         client = server.app.test_client()

@@ -293,6 +293,7 @@ function bind(){
   window.addEventListener('studyai:lesson-changed',event=>{
     const topicId=event.detail?.entryId;
     const index=event.detail?.index;
+    if(event.detail?.userInitiated===false)return;
     if(!Number.isInteger(index)||index<0||!STUDY_DATA.some(e=>e.id===topicId&&
         e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics'))return;
     if(state.studyaiLastLesson?.topicId===topicId&&state.studyaiLastLesson.index===index)return;

@@ -97,6 +97,7 @@ jobs:
           node automation-repo/automation/class9-maths/export-notes.cjs site > current-notes.json
           python -c 'import json; x=json.load(open("current-notes.json")); assert len(x["chapters"]) == 14'
       - name: Restore validated checkpoints from a previous manual run (optional)
+        id: restore-checkpoints
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RESUME_RUN: ${{ inputs.resume_run_id }}
@@ -114,7 +115,9 @@ jobs:
           fi
           RUN_PATH="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.path')"
           RUN_EVENT="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.event')"
-          if [[ "$RUN_PATH" != .github/workflows/ncert-class9-batch.yml@* || "$RUN_EVENT" != workflow_dispatch ]]; then
+          RUN_BRANCH="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.head_branch')"
+          RUN_SHA="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.head_sha')"
+          if [[ "$RUN_PATH" != ".github/workflows/ncert-class9-batch.yml" || "$RUN_EVENT" != workflow_dispatch || "$RUN_BRANCH" != main || ! "$RUN_SHA" =~ ^[0-9a-f]{40}$ ]]; then
             echo "::error::Resume run must be a manual run of this NCERT batch workflow"
             exit 1
           fi
@@ -122,7 +125,15 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --name "ncert-class9-checkpoints-$RESUME_RUN" \
             --dir review-artifacts/checkpoints
+          echo "old_sha=$RUN_SHA" >> "$GITHUB_OUTPUT"
           echo "Restored checkpoints from run $RESUME_RUN. Pipeline verifies sources, model and prompts before replay."
+      - name: Checkout exact previous trusted audit code for source-bound checkpoint migration
+        if: ${{ inputs.resume_run_id != '' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.restore-checkpoints.outputs.old_sha }}
+          path: previous-automation
+          persist-credentials: false
       - name: Deep textbook coverage, adversarial gap review, draft proposals and independent maths check
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -143,6 +154,9 @@ jobs:
           EXTRA_ARGS=()
           if [ "$RESTART_STAGE" != "none" ]; then
             EXTRA_ARGS=(--restart-stage "$RESTART_STAGE" --restart-chapter "$RESTART_CHAPTER")
+          fi
+          if [ -d previous-automation ]; then
+            EXTRA_ARGS+=(--previous-review-code-dir previous-automation)
           fi
           python automation-repo/automation/class9-maths/pipeline.py \
             --manifest automation-repo/automation/class9-maths/manifest.json \

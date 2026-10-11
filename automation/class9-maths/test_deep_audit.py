@@ -253,6 +253,45 @@ class DeepAuditTests(unittest.TestCase):
         self.assertTrue(any("Missing independent mathematical decision" in flag
                             for flag in report["rejected_claims"]))
 
+    def test_structured_extra_omission_is_flagged_not_published(self):
+        from deep_audit import validate_final_coverage
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        response = closure(reviewed=False)
+        response["missed_areas"] = [
+            {"concept": "Potential overlooked exercise type", "page": 17,
+             "quote": "Unverified model quote"},
+            {"unknown": "unexpected shape"},
+            "", 42
+        ]
+        decisions, flags, critical = validate_final_coverage(
+            response, sample_chapter(), items, [], normal)
+        self.assertEqual(len(decisions), len(items))
+        self.assertFalse(critical)
+        self.assertTrue(any("Potential overlooked exercise type" in x
+                            and "UNVERIFIED" in x for x in flags))
+        self.assertTrue(any("Malformed extra omission" in x for x in flags))
+
+    def test_structured_extra_omission_does_not_hide_math_error(self):
+        from deep_audit import validate_final_coverage
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        response = closure(reviewed=False, critical=True)
+        response["missed_areas"] = [{"description": "Possibly missing example"}]
+        decisions, flags, critical = validate_final_coverage(
+            response, sample_chapter(), items, [], normal)
+        self.assertEqual(len(critical), 1)
+        self.assertTrue(any("UNVERIFIED" in x for x in flags))
+        self.assertEqual(len(decisions), len(items))
+
+    def test_extra_omission_format_overflow_is_flagged_not_lost(self):
+        from deep_audit import validate_final_coverage
+        items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)
+        response = closure(reviewed=False)
+        response["missed_areas"] = [{"topic": f"Extra {i}"} for i in range(10)]
+        _, flags, _ = validate_final_coverage(
+            response, sample_chapter(), items, [], normal)
+        self.assertTrue(any("exceeded the review cap" in x for x in flags))
+        self.assertEqual(sum("Extra potential omission" in x for x in flags), 8)
+
     def test_final_coverage_cannot_claim_unlinked_gap_is_addressed(self):
         from deep_audit import validate_final_coverage
         items, _ = valid_coverage(inventory(), sample_chapter(), sample_pages(), normal)

@@ -403,6 +403,8 @@ def main() -> int:
                         help="Deep: four independent Gemini checks plus deterministic QA")
     parser.add_argument("--checkpoint-dir",type=Path,
                         help="Persistent per-chapter validated stage checkpoints for deep audits")
+    parser.add_argument("--previous-review-code-dir",type=Path,
+                        help="Verified checkout of the exact trusted code used by the previous run")
     parser.add_argument("--request-budget",type=int,
                         help="Hard upper bound on Gemini generate API attempts in this run (1–20)")
     parser.add_argument("--min-request-seconds",type=float,default=25.0,
@@ -460,7 +462,17 @@ def main() -> int:
                 audit_files = [Path(__file__), Path(__file__).with_name("deep_audit.py"),
                                Path(__file__).with_name("resumable.py")]
                 fingerprint = build_fingerprint(pdf, bank[i], entry, args.model, audit_files)
-                checkpoint = StageCheckpoints(checkpoint_dir, i, fingerprint)
+                previous_fingerprint = None
+                if args.previous_review_code_dir is not None:
+                    prior = args.previous_review_code_dir / "automation" / "class9-maths"
+                    legacy_sources = [prior / source.name for source in audit_files]
+                    if not all(source.is_file() for source in legacy_sources):
+                        raise ValueError("Previous trusted audit code snapshot is incomplete")
+                    previous_fingerprint = build_fingerprint(
+                        pdf, bank[i], entry, args.model, legacy_sources)
+                checkpoint = StageCheckpoints(
+                    checkpoint_dir, i, fingerprint,
+                    previous_code_fingerprint=previous_fingerprint)
                 if args.restart_stage and i == args.restart_chapter:
                     checkpoint.restart_from(args.restart_stage)
                 verified=review_chapter(pdf,entry,bank[i],pages,args.model,

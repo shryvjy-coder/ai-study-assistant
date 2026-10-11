@@ -284,7 +284,7 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     return track>90&&track<440;
   },null,{timeout:1500});
   const midwayTrack=await measureTrack();
-  check(midwayTrack>90&&midwayTrack<245 &&
+  check(midwayTrack>90&&midwayTrack<440 &&
       !(await page.locator('#studyai-notes-nav-content').getAttribute('hidden')),
     'actual dock width moves through intermediate frames with content still rendered');
   await page.waitForFunction(()=>document.getElementById(

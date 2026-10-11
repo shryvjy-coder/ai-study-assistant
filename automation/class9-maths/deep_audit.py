@@ -311,7 +311,7 @@ def _prompt_base(entry: dict, notes: dict) -> str:
 
 def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                    *, normal: Callable, validate: Callable, retry: Callable,
-                   request: Callable | None = None) -> dict:
+                   request: Callable | None = None, checkpoint=None) -> dict:
     """Run four independent AI stages, then deterministic QA, without auto-publishing.
 
     A request(stage,prompt) injection supports genuinely offline regression tests.
@@ -322,10 +322,22 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
         from google import genai
         import os
         client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-        uploaded = client.files.upload(file=str(pdf))
 
         def request(stage, prompt):
+            nonlocal uploaded
+            # Upload the PDF lazily: replaying every validated stage uses no
+            # Files API or generate requests at all.
+            if uploaded is None:
+                uploaded = client.files.upload(file=str(pdf))
             return _json_stage(stage, prompt, uploaded, client, model, retry)
+    if checkpoint is not None:
+        original_request = request
+
+        def request(stage, prompt):
+            return checkpoint.fetch(stage, prompt, original_request)
+    def save_stage(stage):
+        if checkpoint is not None:
+            checkpoint.commit(stage)
     base = _prompt_base(entry, notes)
     flags = []
     try:
@@ -345,6 +357,7 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
         inventory = _expect_dict(request("coverage", coverage_prompt), "coverage")
         coverage, rejected = valid_coverage(inventory, entry, pages, normal)
         flags.extend(rejected)
+        save_stage("coverage")
         challenge_prompt = base + (
             "\nPASS 2 — adversarially DISPROVE suspected omissions. Read ALL the "
             "existing lesson paragraphs, examples and formulas again. Review EVERY "
@@ -360,6 +373,7 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
         independent = _expect_dict(request("challenge", challenge_prompt), "challenge")
         confirmed, decisions, disagreements = reconcile_coverage(independent, entry, coverage, notes)
         flags.extend(disagreements)
+        save_stage("challenge")
         gaps = [
             {"concept": x["concept"], "page": x["page"], "quote": x["quote"],
              "status": x["status"] if x["status"] in ("missing", "partial") else "partial",
@@ -395,6 +409,7 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
             flags.extend(validated["rejected_claims"])
             if len(proposed) != len(raw_proposals):
                 flags.append("Some written proposals failed local evidence/content validation")
+            save_stage("draft")
             if proposed:
                 math_prompt = base + (
                     "\nPASS 4 — independent mathematical examiner. Treat every "
@@ -414,6 +429,7 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                 )
                 judged = _expect_dict(request("math", math_prompt), "math")
                 proposed, math_decisions = validate_math_review(judged, entry, proposed)
+                save_stage("math")
                 for decision in math_decisions:
                     if decision["verdict"] != "pass":
                         flags.append("Maths review did not approve candidate "
@@ -442,6 +458,7 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
         final_decisions, closure_flags, critical_errors = validate_final_coverage(
             closure, entry, coverage, proposed, normal)
         flags.extend(closure_flags)
+        save_stage("closure")
         if critical_errors:
             flags.extend("Critical final maths objection: " + msg for msg in critical_errors)
             proposed = []

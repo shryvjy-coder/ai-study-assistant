@@ -142,7 +142,7 @@ def generate_with_transient_retries(request, *, attempts: int = 4, sleep=time.sl
             sleep(delay)
 
 
-def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool) -> dict:
+def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool, *, retry=generate_with_transient_retries) -> dict:
     from google import genai
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     prompt = (
@@ -182,7 +182,7 @@ def ask_gemini(pdf: Path, entry: dict, notes: dict, model: str, propose: bool) -
     )
     uploaded = client.files.upload(file=str(pdf))
     try:
-        response = generate_with_transient_retries(
+        response = retry(
             lambda: client.models.generate_content(
                 model=model,
                 contents=[prompt, uploaded],
@@ -401,6 +401,17 @@ def main() -> int:
     parser.add_argument("--model",default="gemini-3.8-flash")
     parser.add_argument("--depth",choices=["standard","deep"],default="standard",
                         help="Deep: four independent Gemini checks plus deterministic QA")
+    parser.add_argument("--checkpoint-dir",type=Path,
+                        help="Persistent per-chapter validated stage checkpoints for deep audits")
+    parser.add_argument("--request-budget",type=int,
+                        help="Hard upper bound on Gemini generate API attempts in this run (1–20)")
+    parser.add_argument("--min-request-seconds",type=float,default=25.0,
+                        help="Minimum seconds between Gemini requests/retries (default: 25)")
+    parser.add_argument("--restart-stage",
+                        choices=["coverage","challenge","draft","math","closure"],
+                        help="Manually redo this stage and all later stages")
+    parser.add_argument("--restart-chapter",type=int,
+                        help="Chapter to redo without deleting earlier accepted stages")
     args=parser.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
         parser.error("GEMINI_API_KEY is missing: add it as a GitHub Actions repository secret")
@@ -416,7 +427,20 @@ def main() -> int:
         chosen=select_chapters(args.chapter,list(expected))
     except ValueError as exc:
         parser.error(str(exc))
+    if bool(args.restart_stage) != bool(args.restart_chapter):
+        parser.error("--restart-stage and --restart-chapter must be supplied together")
+    if args.restart_chapter is not None and args.restart_chapter not in chosen:
+        parser.error("--restart-chapter must be among the selected chapters")
+    if args.restart_stage and args.depth != "deep":
+        parser.error("Manual stage restart requires deep review mode")
     args.output.mkdir(parents=True,exist_ok=True)
+    if args.request_budget is not None:
+        from resumable import RequestPacer
+        pacer = RequestPacer(args.request_budget, args.min_request_seconds)
+        def quota_retry(send):
+            return generate_with_transient_retries(lambda: pacer(send))
+    else:
+        quota_retry = generate_with_transient_retries
     reports=[]
     work=args.output/"pdf-working"
     work.mkdir(exist_ok=True)
@@ -431,22 +455,39 @@ def main() -> int:
                 if args.mode!="propose":
                     raise ValueError("Deep mode needs proposal mode for full verification")
                 from deep_audit import review_chapter
+                from resumable import StageCheckpoints, build_fingerprint
+                checkpoint_dir = args.checkpoint_dir or (args.output / "checkpoints")
+                audit_files = [Path(__file__), Path(__file__).with_name("deep_audit.py"),
+                               Path(__file__).with_name("resumable.py")]
+                fingerprint = build_fingerprint(pdf, bank[i], entry, args.model, audit_files)
+                checkpoint = StageCheckpoints(checkpoint_dir, i, fingerprint)
+                if args.restart_stage and i == args.restart_chapter:
+                    checkpoint.restart_from(args.restart_stage)
                 verified=review_chapter(pdf,entry,bank[i],pages,args.model,
                                         normal=normal,validate=validate,
-                                        retry=generate_with_transient_retries)
+                                        retry=quota_retry,checkpoint=checkpoint)
             else:
-                candidate=ask_gemini(pdf,entry,bank[i],args.model,args.mode=="propose")
+                candidate=ask_gemini(pdf,entry,bank[i],args.model,
+                                     args.mode=="propose",retry=quota_retry)
                 verified=validate(candidate,bank[i],pages,args.mode=="propose")
             verified["status"]="processed"
             reports.append(verified)
             print(f"  {len(verified['verified_gaps'])} PDF citations confirmed; "
                   f"{len(verified['candidate_lessons'])} draft lessons retained.")
         except Exception as exc:
-            message=str(exc).replace("\n"," ")[:260]
-            print(f"  Chapter {i} blocked: {message}",file=sys.stderr)
+            from resumable import RequestBudgetExhausted
+            message=str(exc).replace("\n"," ")[:500]
+            paused = isinstance(exc, RequestBudgetExhausted) or (
+                "Gemini API unavailable" in message or
+                "Gemini project quota" in message)
+            status = "paused" if paused else "blocked"
+            print(f"  Chapter {i} {status}: {message}",file=sys.stderr)
             reports.append({"chapter_number":i,"chapter_title":entry["title"],
-                            "status":"blocked","error":message,
+                            "status":status,"error":message,
                             "verified_gaps":[],"candidate_lessons":[]})
+            if paused:
+                print("  Stopping batch now to protect the remaining Gemini quota.",flush=True)
+                break
         finally:
             pdf.unlink(missing_ok=True)
     work.rmdir()
@@ -461,7 +502,7 @@ def main() -> int:
     ]
     (args.output/"candidate-lessons.json").write_text(
         json.dumps(additions,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    blocked=sum(r["status"]=="blocked" for r in reports)
+    blocked=sum(r["status"]!="processed" for r in reports)
     print(f"Finished {len(reports)} chapters: {blocked} blocked; "
           f"{sum(len(r.get('candidate_lessons',[])) for r in reports)} proposed lessons.")
     return 1 if blocked else 0

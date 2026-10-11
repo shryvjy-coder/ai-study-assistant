@@ -781,8 +781,14 @@ for(const record of proposals){
   throw Error('Curriculum proposal chapter missing: '+record.chapter_title);
  const seen=new Set(chapter.sections.flatMap(s=>safe(s.subtopics).map(p=>norm(p.title))));
  for(const p of record.lessons){
-  const section=chapter.sections.find(s=>s.title===p.section&&!generic.has(s.title));
-  if(!section)throw Error('Curriculum proposal target section missing: '+p.section);
+  // Some textbook section headings differ from the existing lesson bank.
+  // Keep these reviewed candidates accessible in a clearly named section
+  // rather than aborting all Class 9 enrichment in the browser.
+  let section=chapter.sections.find(s=>s.title===p.section&&!generic.has(s.title));
+  if(!section){
+   section={title:p.section,paragraphs:[],subtopics:[]};
+   chapter.sections.push(section);
+  }
   if(p.merge_into){
    const target=safe(section.subtopics).find(s=>norm(s.title)===norm(p.merge_into));
    if(!target)throw Error('Curriculum enrichment target missing: '+p.merge_into);

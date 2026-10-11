@@ -93,6 +93,13 @@ def claim_day(state: dict, *, run_id: int, today: str, current_notes_sha: str) -
     check_sha(current_notes_sha)
     if not state["enabled"]:
         return state, False, "Batch not armed. Manually dispatch operation=start first."
+    if state["inflight_run_id"] is not None:
+        # A prior scheduled run failed to finalize its checkpoint pointer.
+        # Do not automatically replay and potentially repay for its stages.
+        state["enabled"] = False
+        state["status"] = "needs_attention"
+        return state, False, ("A previous scheduled review never finalized; "
+                              "stopped to avoid repeating untracked Gemini calls.")
     if state["notes_sha"] != current_notes_sha:
         state["enabled"] = False
         state["status"] = "needs_attention"

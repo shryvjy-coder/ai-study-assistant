@@ -31,6 +31,8 @@ class MultiDayTests(unittest.TestCase):
                     ".github/workflows/ncert-class9-multiday.yml").read_text()
         self.assertIn('options: [status, start, stop]', workflow)
         self.assertIn('cron: "15 9 * * *"', workflow)
+        self.assertIn('default: "18"', workflow)
+        self.assertIn('"18"', workflow)
         self.assertIn("if: steps.control.outputs.run == 'true'", workflow)
         self.assertIn("if: steps.notes-base.outcome == 'success'", workflow)
         self.assertIn("steps.review.outputs.exit_code == '0'", workflow)
@@ -48,6 +50,9 @@ class MultiDayTests(unittest.TestCase):
         self.assertIsNone(s["last_attempt_utc_day"])
         self.assertIsNone(s["resume_run_id"])
         self.assertEqual(s["daily_budget"], 6)
+        self.assertEqual(new_state(code_sha=MAIN_SHA, notes_sha=NOTES_SHA,
+                                   model="gemini-3.8-flash", budget=18,
+                                   run_id=101)["daily_budget"], 18)
 
     def test_start_rejects_untrusted_settings(self):
         bad = [
@@ -66,6 +71,74 @@ class MultiDayTests(unittest.TestCase):
                     "model": "gemini-3.8-flash", "budget": 6,
                     "run_id": 100, **patch_value,
                 })
+
+    def test_armed_schedule_upgrades_to_18_after_safe_claim(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            original = state()
+            config = Namespace(
+                repo="example/studyai", event="schedule", operation="status",
+                commit_sha=OTHER_SHA, model="gemini-3.8-flash",
+                budget=18, run_id=201, output=root/"outputs",
+                summary=root/"summary",
+            )
+            written = []
+            with patch("multiday_state.load", return_value=(original, "etag")), \
+                 patch("multiday_state.branch_sha", return_value=NOTES_SHA), \
+                 patch("multiday_state.save", side_effect=lambda repo, new, **kwargs: written.append(new)):
+                prepare(config)
+            upgraded = written[-1]
+            self.assertEqual(upgraded["daily_budget"], 18)
+            self.assertEqual(upgraded["inflight_run_id"], 201)
+            self.assertEqual(upgraded["last_run_id"], 201)
+            self.assertEqual(upgraded["automation_sha"], MAIN_SHA)
+            self.assertEqual(upgraded["notes_sha"], NOTES_SHA)
+            self.assertEqual(upgraded["started_by_run_id"], 100)
+            self.assertEqual(upgraded["progress_stage_count"], 0)
+            self.assertIn("run=true", config.output.read_text())
+            self.assertIn("budget=18", config.output.read_text())
+            self.assertIn("code_sha="+MAIN_SHA, config.output.read_text())
+
+    def test_existing_resume_run_does_not_silently_change_saved_budget(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            previous = state()
+            previous["status"] = "paused"
+            previous["last_run_id"] = 200
+            previous["resume_run_id"] = 200
+            config = Namespace(
+                repo="example/studyai", event="schedule", operation="status",
+                commit_sha=OTHER_SHA, model="gemini-3.8-flash",
+                budget=18, run_id=201, output=root/"outputs",
+                summary=root/"summary",
+            )
+            writes=[]
+            with patch("multiday_state.load", return_value=(previous, "etag")), \
+                 patch("multiday_state.branch_sha", return_value=NOTES_SHA), \
+                 patch("multiday_state.save", side_effect=lambda repo, new, **kwargs: writes.append(new)):
+                prepare(config)
+            self.assertEqual(writes[-1]["daily_budget"], 6)
+            self.assertEqual(writes[-1]["resume_run_id"], 200)
+            self.assertIn("budget=6", config.output.read_text())
+
+    def test_failed_scheduled_claim_cannot_increase_budget(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            previous = state()
+            config = Namespace(
+                repo="example/studyai", event="schedule", operation="status",
+                commit_sha=OTHER_SHA, model="gemini-3.8-flash",
+                budget=18, run_id=201, output=root/"outputs",
+                summary=root/"summary",
+            )
+            changes=[]
+            with patch("multiday_state.load", return_value=(previous, "etag")), \
+                 patch("multiday_state.branch_sha", return_value=OTHER_SHA), \
+                 patch("multiday_state.save", side_effect=lambda repo, new, **kwargs: changes.append(new)):
+                prepare(config)
+            self.assertEqual(changes[-1]["daily_budget"], 6)
+            self.assertEqual(changes[-1]["status"], "needs_attention")
+            self.assertIn("run=false", config.output.read_text())
 
     def test_daily_claim_is_at_most_one_run_per_day(self):
         s, go, _ = claim_day(

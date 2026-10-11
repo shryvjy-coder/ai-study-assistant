@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="chapter-navigation-motion.css" />
   <link rel="stylesheet" href="topic-lesson-reader.css" />
   <link rel="stylesheet" href="studyai-lesson-progress.css" />
+  <link rel="stylesheet" href="notes-reader-ui.css" />
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -130,12 +131,22 @@
     </div>
     <div class="curriculum-notice" id="curriculum-notice"></div>
     <div class="reader-layout">
-      <aside class="chapter-rail">
-        <div class="rail-head"><div><span class="small-label">Topics</span><strong id="chapter-count">0</strong></div><button class="quiet-button" id="collapse-chapters" type="button">Hide</button></div>
-        <div id="chapter-list" class="chapter-list"></div>
+      <aside class="studyai-notes-nav" aria-label="Notes contents">
+        <div class="studyai-notes-nav-top">
+          <div class="studyai-notes-nav-heading"><span class="small-label">StudyAI Notes</span><strong>Contents</strong></div>
+          <button id="toggle-notes-nav" class="studyai-notes-nav-toggle" type="button" aria-controls="studyai-notes-nav-content" aria-expanded="true" aria-label="Minimize notes contents" title="Minimize notes contents">‹</button>
+        </div>
+        <div id="studyai-notes-nav-content" class="studyai-notes-nav-content">
+          <section class="chapter-rail" aria-label="Chapters and topics">
+            <div class="rail-head"><div><span class="small-label">Topics</span><strong id="chapter-count">0</strong></div><button class="quiet-button" id="collapse-chapters" type="button">Hide</button></div>
+            <div id="chapter-list" class="chapter-list"></div>
+          </section>
+          <div class="studyai-lessons-slot"></div>
+        </div>
+        <span class="studyai-notes-mini-label" aria-hidden="true">Contents</span>
       </aside>
       <article class="reader">
-        <div id="reader-empty" class="reader-empty"><span class="folio">StudyAI Notes</span><h3>Choose a topic from the left.</h3><p>Your full revision note will open here.</p></div>
+        <div id="reader-empty" class="reader-empty"><span class="folio">StudyAI Notes</span><h3>Choose a chapter from the contents panel.</h3><p>Your full revision note will open here.</p></div>
         <div id="reader-view" class="reader-view hidden">
           <header class="article-head">
             <div><p class="kicker" id="note-breadcrumb"></p><h2 id="note-title"></h2><p class="article-intro" id="note-summary"></p></div>
@@ -447,5 +458,6 @@
 <script defer src="chapter-navigation.js"></script>
 <script defer src="topic-lesson-reader.js"></script>
 <script defer src="studyai-lesson-progress.js"></script>
+<script defer src="notes-reader-ui.js"></script>
 </body>
 </html>

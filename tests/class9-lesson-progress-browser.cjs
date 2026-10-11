@@ -53,12 +53,29 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
 
   check(await page.locator('#study.studyai-progress-active').count()===1,
     'chapter checklist layout activates only for CBSE Class 9 Maths');
-  check(await page.locator('#study .chapter-rail').count()===1 &&
-      await page.locator('#study .studyai-lesson-rail').count()===1,
-    'left-side chapter list and adjacent subtopic list exist');
+  check(await page.locator('#study .studyai-notes-nav .chapter-rail').count()===1 &&
+      await page.locator('#study .studyai-notes-nav .studyai-lesson-rail').count()===1,
+    'chapter list and lesson checklist share a single notes contents panel');
   check((await page.evaluate(()=>getComputedStyle(document.querySelector(
-    '#study .reader-layout')).gridTemplateColumns.split(' ').length))===3,
-    'desktop presents three separate columns');
+    '#study .reader-layout')).gridTemplateColumns.split(' ').length))===2,
+    'desktop uses a contents panel and a wide notes column');
+  const toggle=page.locator('#toggle-notes-nav');
+  const widthBefore=await page.evaluate(()=>getComputedStyle(document.querySelector(
+    '#study .reader-layout')).gridTemplateColumns.split(' ').map(Number.parseFloat)[1]);
+  await toggle.click();
+  check(await toggle.getAttribute('aria-expanded')==='false' &&
+      await page.locator('#studyai-notes-nav-content').isHidden(),
+    'minimize hides chapter and lesson lists with an accessible toggle');
+  const widthAfter=await page.evaluate(()=>getComputedStyle(document.querySelector(
+    '#study .reader-layout')).gridTemplateColumns.split(' ').map(Number.parseFloat)[1]);
+  check(widthAfter>widthBefore+150,
+    'minimizing returns the contents column width to the lesson');
+  check(await page.evaluate(()=>localStorage.getItem('studyai-notes-contents-minimized-v1'))==='1',
+    'minimized preference is saved locally');
+  await toggle.click();
+  check(await toggle.getAttribute('aria-expanded')==='true' &&
+      await page.locator('#studyai-notes-nav-content').isVisible(),
+    'contents panel reopens without losing chapters or lessons');
   check((await page.evaluate(()=>document.querySelector('#study>.shell').getBoundingClientRect().width))>1400,
     'notes use almost the full desktop width rather than the old narrow centered shell');
   check(await rows.count()===15,'World of Numbers has 15 selectable main subtopics, not 62');
@@ -149,8 +166,13 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
 
   await page.setViewportSize({width:570,height:840});
   check((await page.evaluate(()=>getComputedStyle(document.querySelector(
-    '#study .reader-layout')).gridTemplateColumns.split(' ').length))===1,
-    'small screens stack the chapter list, lessons and notes in reading order');
+    '#study .reader-layout')).display))==='block',
+    'small screens stack the combined contents panel above the notes');
+  await toggle.click();
+  check(await page.locator('#studyai-notes-nav-content').isHidden() &&
+      await page.locator('#study .reader').isVisible(),
+    'mobile readers can minimize the contents while keeping the note visible');
+  await toggle.click();
   await page.setViewportSize({width:1600,height:900});
 
   await page.evaluate(()=>{

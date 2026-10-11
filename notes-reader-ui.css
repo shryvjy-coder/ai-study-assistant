@@ -1,0 +1,302 @@
+/* StudyAI notes reader: a calm, collapsible contents dock.
+ * Scoped to #study so the rest of the website is not modified.
+ * Chapter completion and lesson checkboxes retain their existing behavior.
+ */
+#study > .shell,
+#study.studyai-progress-active > .shell{
+  width:min(1620px,calc(100% - 26px));
+  max-width:none;
+}
+#study .section-head{margin-bottom:20px}
+#study .section-head h2{font-size:clamp(1.85rem,3vw,2.75rem);line-height:1.16}
+#study .section-head p:not(.kicker){font-size:.94rem;max-width:66ch}
+#study .curriculum-controls{margin-bottom:12px}
+#study .curriculum-notice{margin-bottom:22px}
+#study .reader-layout,
+#study.studyai-progress-active .reader-layout{
+  display:grid;
+  grid-template-columns:minmax(252px,300px) minmax(0,1fr);
+  align-items:start;
+  gap:clamp(14px,2vw,28px);
+}
+#study.studyai-nav-collapsed .reader-layout,
+#study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+  grid-template-columns:52px minmax(0,1fr);
+}
+#study .studyai-notes-nav{
+  position:sticky;
+  top:83px;
+  align-self:start;
+  min-width:0;
+  height:auto;
+  max-height:calc(100dvh - 100px);
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface);
+  box-shadow:0 5px 22px rgba(18,31,58,.045);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:12;
+}
+#study .studyai-notes-nav-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:15px 13px 13px 18px;
+  border-bottom:1px solid var(--line);
+  min-height:68px;
+}
+#study .studyai-notes-nav-heading{
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+#study .studyai-notes-nav-heading strong{
+  color:var(--ink);
+  font-size:1.12rem;
+  letter-spacing:-.025em;
+  line-height:1.15;
+}
+#study .studyai-notes-nav-toggle{
+  display:grid;
+  place-items:center;
+  flex:0 0 35px;
+  width:35px;
+  height:35px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:1.65rem;
+  line-height:1;
+  cursor:pointer;
+}
+#study .studyai-notes-nav-toggle:hover{background:var(--blue-soft)}
+#study .studyai-notes-nav-toggle:focus-visible,
+#study .chapter-item:focus-visible{
+  outline:3px solid var(--teal);
+  outline-offset:2px;
+}
+#study .studyai-notes-mini-label{display:none}
+#study .studyai-notes-nav-content{
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  overscroll-behavior:contain;
+}
+#study .studyai-notes-nav-content[hidden]{display:none!important}
+#study .studyai-notes-nav .chapter-rail,
+#study.studyai-progress-active .studyai-notes-nav .chapter-rail,
+#study .studyai-notes-nav .studyai-lesson-rail,
+#study.studyai-progress-active .studyai-notes-nav .studyai-lesson-rail{
+  position:static;
+  top:auto;
+  max-height:none;
+  overflow:visible;
+  min-width:0;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+}
+#study .studyai-notes-nav .chapter-rail .rail-head,
+#study.studyai-progress-active .studyai-notes-nav .chapter-rail .rail-head{
+  min-height:auto;
+  padding:12px 15px 7px;
+  border-bottom:0;
+  background:transparent;
+  color:var(--muted);
+}
+#study .studyai-notes-nav .rail-head .small-label{
+  font-size:.76rem;
+  text-transform:none;
+  letter-spacing:.01em;
+}
+#study .studyai-notes-nav .rail-head strong{
+  display:inline;
+  margin-left:7px;
+  font:inherit;
+  color:var(--muted);
+  font-weight:750;
+}
+#study .studyai-notes-nav #collapse-chapters{display:none}
+#study .studyai-notes-nav .chapter-list{
+  max-height:min(37vh,350px);
+  overflow-y:auto;
+  scrollbar-width:thin;
+  padding:4px 9px 13px;
+}
+#study .studyai-notes-nav .chapter-item,
+#study.studyai-progress-active .studyai-notes-nav .chapter-item{
+  padding:9px 10px;
+  min-height:44px;
+  font-size:.86rem;
+  gap:9px;
+  border-radius:9px;
+  line-height:1.35;
+}
+#study .studyai-notes-nav .chapter-item.active{
+  background:var(--blue-soft);
+  color:var(--teal-dark);
+}
+#study .studyai-notes-nav .studyai-progress-ring{
+  width:34px;
+  height:34px;
+  flex-basis:34px;
+}
+#study .studyai-notes-nav .studyai-progress-ring::before{
+  width:26px;
+  height:26px;
+}
+#study .studyai-notes-nav .studyai-progress-number{font-size:.58rem}
+#study .studyai-lessons-slot:empty{display:none}
+#study .studyai-lessons-slot:not(:empty){
+  border-top:1px solid var(--line);
+}
+#study .studyai-notes-nav .studyai-side-head{
+  padding:14px 16px;
+  background:var(--surface);
+}
+#study .studyai-notes-nav .studyai-rail-title{
+  font-size:.98rem;
+  margin:5px 0 5px;
+}
+#study .studyai-notes-nav .studyai-rail-count{margin:0 0 10px}
+#study .studyai-notes-nav .studyai-lesson-list{gap:1px;padding:7px}
+#study .studyai-notes-nav .studyai-lesson-link{
+  font-size:.81rem;
+  padding:9px 6px 9px 10px;
+}
+#study .studyai-notes-nav .studyai-lesson-row{border-radius:8px}
+#study .studyai-notes-nav .studyai-lesson-toggle{
+  flex-basis:23px;
+  width:23px;
+  height:23px;
+  margin-right:7px;
+}
+#study .reader,
+#study.studyai-progress-active .reader{
+  grid-column:auto;
+  min-width:0;
+  width:100%;
+  max-width:1160px;
+  margin:0 auto;
+}
+#study .reader-view,
+#study .reader-empty,
+#study.studyai-progress-active .reader-view,
+#study.studyai-progress-active .reader-empty{
+  padding:clamp(20px,3vw,42px);
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--surface);
+  box-shadow:none;
+}
+#study .article-head,
+#study.studyai-progress-active .article-head{
+  gap:14px;
+  padding-bottom:17px;
+}
+#study .article-head h2,
+#study.studyai-progress-active .article-head h2{
+  font-size:clamp(1.7rem,3.1vw,2.55rem);
+  line-height:1.18;
+  margin-bottom:9px;
+}
+#study .article-intro,
+#study.studyai-progress-active .article-intro{
+  font-size:.97rem;
+  line-height:1.7;
+}
+#study .article-tabs{
+  margin-bottom:20px;
+  padding-top:8px;
+}
+#study .article-tabs button{font-size:.88rem;padding:11px 13px}
+#study .note-prose,
+#study.studyai-progress-active #detailed-notes .note-prose{
+  max-width:92ch;
+  width:100%;
+}
+#study .note-prose p{line-height:1.72}
+#study .note-section{padding:22px 0}
+#study .note-section h3{font-size:clamp(1.3rem,2.1vw,1.75rem)}
+#study .studyai-nav-collapsed{min-width:0}
+#study.studyai-nav-collapsed .studyai-notes-nav{
+  width:52px;
+  border-radius:0 12px 12px 0;
+  margin-left:-13px;
+  overflow:visible;
+}
+#study.studyai-nav-collapsed .studyai-notes-nav-top{
+  padding:7px;
+  border:0;
+  min-height:52px;
+}
+#study.studyai-nav-collapsed .studyai-notes-nav-heading{display:none}
+#study.studyai-nav-collapsed .studyai-notes-nav-toggle{width:36px;height:36px;flex-basis:36px}
+#study.studyai-nav-collapsed .studyai-notes-mini-label{
+  display:block;
+  writing-mode:vertical-rl;
+  text-transform:uppercase;
+  font-size:.68rem;
+  letter-spacing:.14em;
+  font-weight:850;
+  color:var(--muted);
+  margin:10px auto 17px;
+  user-select:none;
+}
+@media(max-width:1000px){
+  #study .reader-layout,
+  #study.studyai-progress-active .reader-layout{
+    grid-template-columns:252px minmax(0,1fr);
+    gap:14px;
+  }
+  #study.studyai-nav-collapsed .reader-layout,
+  #study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+    grid-template-columns:52px minmax(0,1fr);
+  }
+  #study .reader-view,
+  #study.studyai-progress-active .reader-view{padding:22px}
+}
+@media(max-width:760px){
+  #study > .shell,
+  #study.studyai-progress-active > .shell{width:calc(100% - 20px)}
+  #study .reader-layout,
+  #study.studyai-progress-active .reader-layout,
+  #study.studyai-nav-collapsed .reader-layout,
+  #study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+    display:block;
+  }
+  #study .studyai-notes-nav{
+    position:relative;
+    top:auto;
+    width:100%;
+    max-height:min(58vh,460px);
+    margin-bottom:14px;
+  }
+  #study.studyai-nav-collapsed .studyai-notes-nav{
+    position:relative;
+    width:52px;
+    margin-left:-10px;
+    max-height:none;
+  }
+  #study .studyai-notes-nav .chapter-list{max-height:22vh}
+  #study .reader,
+  #study.studyai-progress-active .reader{
+    grid-column:auto;
+    max-width:none;
+  }
+  #study .reader-view,
+  #study.studyai-progress-active .reader-view{padding:20px 16px}
+  #study .article-head h2,
+  #study.studyai-progress-active .article-head h2{font-size:clamp(1.55rem,6vw,2.15rem)}
+}
+@media(prefers-reduced-motion:reduce){
+  #study .studyai-notes-nav-toggle{transition:none}
+}

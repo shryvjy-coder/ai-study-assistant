@@ -1,6 +1,6 @@
 /* StudyAI — progress-aware chapter/lesson navigation for CBSE Class 9 Mathematics.
  *
- * Layout: Chapters | Lesson checklist | Full-width teaching note
+ * Layout: Collapsible contents (chapters and lesson checklist) | Teaching note
  * The chapter ring shows completed substantial lessons (not every small h4
  * heading). Completion is stored in the existing StudyAI account state so it
  * survives reloads and syncs through the existing authenticated state API.
@@ -107,10 +107,16 @@
       return;
     }
     sideRail=one('#study .studyai-lesson-rail');
+    const slot=layout.querySelector('.studyai-lessons-slot');
     if(!sideRail){
       sideRail=document.createElement('aside');
       sideRail.className='studyai-lesson-rail';
       sideRail.setAttribute('aria-label','Subtopics for the selected chapter');
+    }
+    // Keep chapter selection and lesson checkboxes in one scrollable contents
+    // drawer instead of allocating a separate middle column.
+    if(slot && sideRail.parentElement!==slot)slot.appendChild(sideRail);
+    else if(!slot && !sideRail.isConnected){
       const reader=layout.querySelector('.reader');
       if(reader)layout.insertBefore(sideRail,reader);
     }

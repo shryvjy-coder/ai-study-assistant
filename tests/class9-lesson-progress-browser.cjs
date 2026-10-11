@@ -229,12 +229,57 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
       progress:getComputedStyle(bar).transitionDuration
     };
   });
-  check(durations.layout.includes('0.5s') &&
+  check(durations.layout.includes('0.55s') &&
       durations.button.includes('0.75s') &&
       durations.row.includes('0.41s') &&
       durations.progress.includes('0.45s'),
-    'existing notes transitions are lengthened by 250 ms; dock resize lasts 500 ms');
+    'existing notes transitions remain lengthened; dock resize lasts 550 ms');
+
+  // Assert MOVEMENT at intermediate frames, not merely an animation property
+  // being defined. The earlier test passed despite the panel visually snapping.
+  const measureTrack=()=>page.evaluate(()=>parseFloat(getComputedStyle(
+    document.querySelector('#study .reader-layout')).gridTemplateColumns));
+  const expandedTrack=await measureTrack();
+  check(expandedTrack>250,'expanded contents dock occupies a readable width');
+  await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
+  await page.waitForFunction(()=>{
+    const track=parseFloat(getComputedStyle(document.querySelector(
+      '#study .reader-layout')).gridTemplateColumns);
+    return track>90&&track<245;
+  },null,{timeout:1500});
+  const midwayTrack=await measureTrack();
+  check(midwayTrack>90&&midwayTrack<245 &&
+      !(await page.locator('#studyai-notes-nav-content').getAttribute('hidden')),
+    'actual dock width moves through intermediate frames with content still rendered');
+  await page.waitForFunction(()=>document.getElementById(
+    'studyai-notes-nav-content').hidden,null,{timeout:2000});
+  await page.waitForFunction(()=>parseFloat(getComputedStyle(
+    document.querySelector('#study .reader-layout')).gridTemplateColumns)<54,
+    null,{timeout:2000});
+  await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
+  await page.waitForFunction(()=>{
+    const track=parseFloat(getComputedStyle(document.querySelector(
+      '#study .reader-layout')).gridTemplateColumns);
+    return track>90&&track<245;
+  },null,{timeout:1500});
+  check(await page.locator('#studyai-notes-nav-content').isVisible(),
+    'opening dock animates through intermediate widths rather than snapping');
+  await page.waitForFunction(()=>parseFloat(getComputedStyle(
+    document.querySelector('#study .reader-layout')).gridTemplateColumns)>295,
+    null,{timeout:2000});
+  await page.waitForFunction(()=>document.querySelector('#studyai-notes-nav-content')
+    .getAnimations().length===0,null,{timeout:2000});
+
+  const expandedChapterHeight=await page.locator('#chapter-list').evaluate(
+    element=>element.getBoundingClientRect().height);
   await page.evaluate(()=>document.getElementById('collapse-chapters').click());
+  await page.waitForFunction(fullHeight=>{
+    const element=document.getElementById('chapter-list');
+    const height=element.getBoundingClientRect().height;
+    return height>5&&height<fullHeight-5;
+  },expandedChapterHeight,{timeout:1500});
+  check(!(await page.locator('#chapter-list').getAttribute('hidden')),
+    'chapter row remains rendered and visibly shrinks mid-animation');
   const chapterMotion=await page.evaluate(()=>document.getElementById('chapter-list')
     .getAnimations().some(animation=>animation.effect?.getTiming().duration===500));
   check(chapterMotion,'chapters minimize with a 500 ms height-and-opacity animation');

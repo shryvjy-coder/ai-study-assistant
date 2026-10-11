@@ -1,9 +1,56 @@
-/* StudyAI notes: a study-only contents dock that can be minimized.
- * Does not create a permanent site-wide navigation rail.
+/* StudyAI notes: collapsible contents dock and independent chapter/lesson rows.
+ * Interaction durations are intentionally increased, never replaced with 0.25s.
+ * Respects reduced-motion accessibility preferences.
  */
 (() => {
   'use strict';
   const KEY='studyai-notes-contents-minimized-v1';
+  // The rows previously snapped instantly; a 500 ms transition gives them
+  // a natural expand/collapse without changing any lesson or progress data.
+  const PANEL_DURATION_MS=500;
+  const PANEL_EASING='cubic-bezier(.22, 1, .36, 1)';
+  const running=new WeakMap();
+  const reducedMotion=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animateRow(content,collapse){
+    const active=running.get(content);
+    const interruptedHeight=active?content.getBoundingClientRect().height:null;
+    const interruptedOpacity=active?Number(getComputedStyle(content).opacity):null;
+    if(active){active.cancel();running.delete(content);}
+
+    if(reducedMotion()||typeof content.animate!=='function'){
+      content.hidden=collapse;
+      content.inert=collapse;
+      content.style.overflow='';
+      return;
+    }
+
+    // A hidden attribute uses display:none and cannot animate. Only apply it
+    // after the closing motion has finished. Expanding first reveals a
+    // measurable layout box and animates it from zero height.
+    content.hidden=false;
+    content.inert=collapse;
+    const expandedHeight=content.getBoundingClientRect().height;
+    const startHeight=interruptedHeight===null
+      ?(collapse?expandedHeight:0):interruptedHeight;
+    const endHeight=collapse?0:expandedHeight;
+    const startOpacity=interruptedOpacity===null?(collapse?1:0):interruptedOpacity;
+    const endOpacity=collapse?0:1;
+    content.style.overflow='hidden';
+    const animation=content.animate([
+      {height:startHeight+'px',opacity:startOpacity},
+      {height:endHeight+'px',opacity:endOpacity}
+    ],{duration:PANEL_DURATION_MS,easing:PANEL_EASING,fill:'both'});
+    running.set(content,animation);
+    animation.addEventListener('finish',()=>{
+      if(running.get(content)!==animation)return;
+      running.delete(content);
+      content.hidden=collapse;
+      content.inert=collapse;
+      content.style.overflow='';
+      animation.cancel();
+    });
+  }
 
   function setup(){
     const study=document.getElementById('study');
@@ -13,7 +60,7 @@
 
     let saved=null;
     try{saved=localStorage.getItem(KEY)}catch(_){}
-    // Start compact on phones, but never override a learner's explicit choice.
+    // Keep the prior default on phones, without overriding a saved choice.
     let minimized=saved==='1'||(saved===null&&
       window.matchMedia('(max-width: 760px)').matches);
 
@@ -32,8 +79,7 @@
     });
     apply();
 
-    // Chapters and subtopics are separate stacked sections. Collapsing
-    // either one does not change the other or the whole contents dock.
+    // Chapters and subtopics each retain their own saved minimize state.
     const setupRow=(buttonId,contentId,storageKey,label)=>{
       const rowButton=document.getElementById(buttonId);
       const rowContent=document.getElementById(contentId);
@@ -41,23 +87,25 @@
       let savedValue=null;
       try{savedValue=localStorage.getItem(storageKey)}catch(_){}
       let rowMinimized=savedValue==='1';
-      const update=()=>{
-        rowContent.hidden=rowMinimized;
+      const updateButton=()=>{
         rowButton.setAttribute('aria-expanded',String(!rowMinimized));
         rowButton.setAttribute('aria-label',
           (rowMinimized?'Expand ':'Minimize ')+label.toLowerCase());
         rowButton.title=(rowMinimized?'Expand ':'Minimize ')+label.toLowerCase();
         rowButton.textContent=rowMinimized?'⌄':'⌃';
       };
-      // The original chapter button is wired with onclick in script.js.
-      // Replace that handler so aria state, visibility and saved preference
-      // always stay synchronized.
+      // Initial hydration is immediate, so a saved collapsed panel doesn't
+      // flash open while the browser first renders the page.
+      rowContent.hidden=rowMinimized;
+      rowContent.inert=rowMinimized;
+      updateButton();
+      // script.js attaches the old chapter Hide handler first.
       rowButton.onclick=()=>{
         rowMinimized=!rowMinimized;
         try{localStorage.setItem(storageKey,rowMinimized?'1':'0')}catch(_){}
-        update();
+        updateButton();
+        animateRow(rowContent,rowMinimized);
       };
-      update();
     };
     setupRow('collapse-chapters','chapter-list',
       'studyai-notes-chapters-minimized-v1','Chapters');

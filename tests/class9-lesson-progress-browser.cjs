@@ -214,6 +214,48 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await toggle.click();
   await page.setViewportSize({width:1600,height:900});
 
+  // The normal-motion experience is slower by 250ms; reduced-motion checks
+  // above still confirm immediate accessibility-friendly state changes.
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  const durations=await page.evaluate(()=>{
+    const layout=document.querySelector('#study .reader-layout');
+    const navButton=document.getElementById('collapse-chapters');
+    const row=document.querySelector('#study .studyai-lesson-row');
+    const bar=document.querySelector('#study .studyai-rail-progress-fill');
+    return {
+      layout:getComputedStyle(layout).transitionDuration,
+      button:getComputedStyle(navButton).transitionDuration,
+      row:getComputedStyle(row).transitionDuration,
+      progress:getComputedStyle(bar).transitionDuration
+    };
+  });
+  check(durations.layout.includes('0.5s') &&
+      durations.button.includes('0.75s') &&
+      durations.row.includes('0.41s') &&
+      durations.progress.includes('0.45s'),
+    'existing notes transitions are lengthened by 250 ms; dock resize lasts 500 ms');
+  await page.evaluate(()=>document.getElementById('collapse-chapters').click());
+  const chapterMotion=await page.evaluate(()=>document.getElementById('chapter-list')
+    .getAnimations().some(animation=>animation.effect?.getTiming().duration===500));
+  check(chapterMotion,'chapters minimize with a 500 ms height-and-opacity animation');
+  await page.waitForFunction(()=>document.getElementById('chapter-list').hidden);
+  await page.evaluate(()=>document.getElementById('collapse-chapters').click());
+  await page.waitForFunction(()=>{
+    const element=document.getElementById('chapter-list');
+    return !element.hidden && element.getAnimations().length===0;
+  });
+  await page.evaluate(()=>document.getElementById('collapse-subtopics').click());
+  const subtopicMotion=await page.evaluate(()=>document.getElementById('studyai-subtopics-content')
+    .getAnimations().some(animation=>animation.effect?.getTiming().duration===500));
+  check(subtopicMotion,'subtopics independently minimize with a 500 ms animation');
+  await page.waitForFunction(()=>document.getElementById('studyai-subtopics-content').hidden);
+  await page.evaluate(()=>document.getElementById('collapse-subtopics').click());
+  await page.waitForFunction(()=>{
+    const element=document.getElementById('studyai-subtopics-content');
+    return !element.hidden && element.getAnimations().length===0;
+  });
+  await page.emulateMedia({reducedMotion:'reduce'});
+
   await page.evaluate(()=>{
     const e=STUDY_DATA.find(x=>x.board==='Cambridge IGCSE'&&
       x.subject==='Mathematics');

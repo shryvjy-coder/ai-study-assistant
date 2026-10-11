@@ -415,3 +415,53 @@
   #study .studyai-notes-nav .chapter-list{max-height:28vh}
   #study .studyai-notes-nav .studyai-lesson-list{max-height:28vh}
 }
+
+
+/* Smoother notes motion: existing 160/200/500 ms transitions gain 250 ms.
+ * Sections that previously snapped open/closed gain a 500 ms transition.
+ */
+#study .reader-layout,
+#study.studyai-progress-active .reader-layout{
+  transition:grid-template-columns .5s cubic-bezier(.22,1,.36,1);
+}
+#study .studyai-notes-nav{
+  transition:width .5s cubic-bezier(.22,1,.36,1),
+    margin-left .5s cubic-bezier(.22,1,.36,1),
+    border-radius .5s cubic-bezier(.22,1,.36,1);
+}
+#study .studyai-notes-nav .chapter-item,
+#study.studyai-progress-active .studyai-notes-nav .chapter-item{
+  transition:background-color .41s ease,color .41s ease,border-color .41s ease;
+}
+#study .studyai-notes-nav .studyai-lesson-row,
+#study.studyai-progress-active .studyai-notes-nav .studyai-lesson-row{
+  transition:background-color .41s ease,border-color .41s ease;
+}
+#study .studyai-notes-nav .studyai-rail-progress-fill,
+#study.studyai-progress-active .studyai-notes-nav .studyai-rail-progress-fill{
+  transition:width .45s ease;
+}
+/* The existing site-wide notes button motion is 0.50s. Raise it to 0.75s
+ * only inside the contents dock; don't change unrelated website controls. */
+#study .studyai-notes-nav button{
+  transition:transform .75s cubic-bezier(.22,1,.36,1),
+    filter .75s ease,
+    box-shadow .75s ease,
+    background-color .75s ease,
+    border-color .75s ease,
+    color .75s ease !important;
+}
+@media(prefers-reduced-motion:reduce){
+  #study .reader-layout,
+  #study.studyai-progress-active .reader-layout,
+  #study .studyai-notes-nav,
+  #study .studyai-notes-nav .chapter-item,
+  #study.studyai-progress-active .studyai-notes-nav .chapter-item,
+  #study .studyai-notes-nav .studyai-lesson-row,
+  #study.studyai-progress-active .studyai-notes-nav .studyai-lesson-row,
+  #study .studyai-notes-nav .studyai-rail-progress-fill,
+  #study.studyai-progress-active .studyai-notes-nav .studyai-rail-progress-fill,
+  #study .studyai-notes-nav button{
+    transition:none!important;
+  }
+}

@@ -170,6 +170,7 @@ jobs:
           if [ -f review-artifacts/audit.md ]; then cat review-artifacts/audit.md >> "$GITHUB_STEP_SUMMARY"; fi
 
       - name: Check that notes branch has not moved before publishing
+        id: notes-base
         if: steps.control.outputs.run == 'true' && steps.review.outputs.exit_code == '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -182,7 +183,7 @@ jobs:
             exit 1
           fi
       - name: Apply consolidated notes only when all 10 chapters passed
-        if: steps.control.outputs.run == 'true' && steps.review.outputs.exit_code == '0'
+        if: steps.notes-base.outcome == 'success'
         id: patch
         env:
           REVIEW_BRANCH: curriculum/ncert-multiday-${{ github.run_id }}

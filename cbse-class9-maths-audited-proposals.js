@@ -1,6 +1,5 @@
 /* Review-only, textbook-cited StudyAI curriculum proposals.
- * Generated from evidence-backed proposals and human-refined.
- * Keeps previously accepted chapters; integrates overlapping lessons.
+ * Generated deterministically by automation/class9-maths/apply-proposals.py.
  * AI-written content is JSON data: never use eval or Function on this data.
  */
 (() => {
@@ -244,6 +243,173 @@ const proposals = [
         ]
       }
     ]
+  },
+  {
+    "chapter_number": 4,
+    "chapter_title": "Exploring Algebraic Identities",
+    "lessons": [
+      {
+        "section": "Square identities",
+        "title": "Square of a trinomial",
+        "paragraphs": [
+          "Extending binomial squaring to three terms requires evaluating (a + b + c)². By grouping the last two terms as a single compound quantity d = b + c, we can apply the familiar expansion: (a + d)² = a² + 2ad + d². Substituting b + c back for d produces a² + 2a(b + c) + (b + c)², which expands via distributivity to a² + 2ab + 2ca + b² + 2bc + c². Arranging terms symmetrically gives the standard identity (a + b + c)² = a² + b² + c² + 2ab + 2bc + 2ca. Geometrically, this represents a large square of side length a + b + c partitioned into three smaller squares of areas a², b², and c², alongside six rectangular strips consisting of three conjugate pairs with areas ab, bc, and ca.",
+          "This identity simplifies squaring three-digit numbers mentally by splitting them into round base components. For example, 119² can be expressed as (100 + 10 + 9)², decomposing the calculation into simple powers of ten and basic products: 10000 + 100 + 81 + 2000 + 1800 + 180 = 14161. When terms involve negative signs, such as (3x - 2y + 4z)², parentheses should enclose negative coefficients so that sign changes in the cross-terms are tracked systematically. Furthermore, comparing binomial squares shows that (a + b)² - (a² + b²) = 2ab. Therefore, (a + b)² is greater than a² + b² when ab > 0, smaller when ab < 0, and equal precisely when ab = 0."
+        ],
+        "formulas": [
+          "(a+b+c)² = a² + b² + c² + 2ab + 2bc + 2ca",
+          "(a+b)² - (a²+b²) = 2ab"
+        ],
+        "examples": [
+          {
+            "title": "Expand a trinomial with mixed signs",
+            "question": "Expand (3x - 2y + 4z)² using the trinomial square identity.",
+            "steps": [
+              "Identify the three terms: a = 3x, b = -2y, and c = 4z.",
+              "Square each term: a² = (3x)² = 9x², b² = (-2y)² = 4y², c² = (4z)² = 16z².",
+              "Compute the cross-products: 2ab = 2(3x)(-2y) = -12xy, 2bc = 2(-2y)(4z) = -16yz, and 2ca = 2(4z)(3x) = 24zx.",
+              "Combine all six terms: 9x² + 4y² + 16z² - 12xy - 16yz + 24zx."
+            ],
+            "answer": "9x² + 4y² + 16z² - 12xy - 16yz + 24zx"
+          },
+          {
+            "title": "Evaluate a three-digit square mentally",
+            "question": "Calculate 119² by expressing it as the square of a trinomial.",
+            "steps": [
+              "Decompose 119 into round, convenient components: 119 = 100 + 10 + 9.",
+              "Apply the identity with a = 100, b = 10, and c = 9.",
+              "Compute the square terms: 100² = 10000, 10² = 100, 9² = 81.",
+              "Compute the double products: 2(100)(10) = 2000, 2(100)(9) = 1800, 2(10)(9) = 180.",
+              "Sum the components: 10000 + 100 + 81 + 2000 + 1800 + 180 = 14161."
+            ],
+            "answer": "14161"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Comparison of (a+b)² with a²+b² based on the cross-term 2ab",
+            "page": 4,
+            "quote": "What term will decide which is larger? Use the expansion of (a + b)2 to decide.",
+            "rationale": "The textbook explicitly poses investigation into when (a+b)² > a²+b², (a+b)² < a²+b², or (a+b)² = a²+b² depending on the sign of ab, which is omitted in current notes.",
+            "status": "missing"
+          },
+          {
+            "concept": "Square of a trinomial: (a+b+c)² expansion and geometric representation",
+            "page": 8,
+            "quote": "What will happen if we want to find the square of the sum of three numbers a, b and c, that is, (a + b + c)2?",
+            "rationale": "The trinomial square formula (a+b+c)² = a² + b² + c² + 2ab + 2bc + 2ca and its geometric dissection into 3 squares and 6 rectangles are completely missing from the existing notes.",
+            "status": "missing"
+          }
+        ]
+      },
+      {
+        "section": "Building and discovering identities",
+        "title": "Sum, difference, and three-variable cubic identities",
+        "paragraphs": [
+          "Beyond binomial cubes, expanding products of linear binomials and quadratic trinomials yields the factored forms for sums and differences of cubes. Multiplying (x - y)(x² + xy + y²) gives x(x² + xy + y²) - y(x² + xy + y²) = x³ + x²y + xy² - x²y - xy² - y³ = x³ - y³. Similarly, replacing y with -y yields (x + y)(x² - xy + y²) = x³ + y³. These identities show that x - y is always an algebraic factor of xⁿ - yⁿ. Unlike the trinomial in a perfect square expansion, the quadratic factor has a middle coefficient of 1 rather than 2, with a sign opposite to that of the linear factor.",
+          "A broader three-variable identity arises from multiplying the trinomial x + y + z by the symmetric expression x² + y² + z² - xy - yz - zx. Expanding completely and cancelling matching cross-terms leaves x³ + y³ + z³ - 3xyz. This identity allows cubic sums of three variables to be computed efficiently when elementary sums and pairwise products are known. An important deduction is that whenever x + y + z = 0, the entire right-hand side vanishes, leading directly to the conditional result x³ + y³ + z³ = 3xyz."
+        ],
+        "formulas": [
+          "x³ - y³ = (x - y)(x² + xy + y²)",
+          "x³ + y³ = (x + y)(x² - xy + y²)",
+          "x³ + y³ + z³ - 3xyz = (x + y + z)(x² + y² + z² - xy - yz - zx)"
+        ],
+        "examples": [
+          {
+            "title": "Factorise sum and difference of cubes",
+            "question": "Factorise 64y³ + (1/125)z³ completely.",
+            "steps": [
+              "Express each term as a perfect cube: 64y³ = (4y)³ and (1/125)z³ = (z/5)³.",
+              "Apply the identity A³ + B³ = (A + B)(A² - AB + B²) with A = 4y and B = z/5.",
+              "Compute A² = 16y², AB = (4/5)yz, and B² = z²/25.",
+              "Write the factored form: (4y + z/5)(16y² - (4/5)yz + z²/25)."
+            ],
+            "answer": "(4y + z/5)(16y² - (4/5)yz + z²/25)"
+          },
+          {
+            "title": "Evaluate cubic sum using three variables",
+            "question": "Find x³ + y³ + z³ if x + y + z = 10, x² + y² + z² = 38, and xyz = 25.",
+            "steps": [
+              "Use (x + y + z)² = x² + y² + z² + 2(xy + yz + zx) to find the pairwise sum: 10² = 38 + 2(xy + yz + zx).",
+              "Solve for xy + yz + zx: (100 - 38)/2 = 62/2 = 31.",
+              "Substitute into the cubic identity: x³ + y³ + z³ - 3xyz = (x + y + z)(x² + y² + z² - (xy + yz + zx)).",
+              "Evaluate the right side: 10 × (38 - 31) = 10 × 7 = 70.",
+              "Add 3xyz to both sides: x³ + y³ + z³ = 70 + 3(25) = 70 + 75 = 145."
+            ],
+            "answer": "145"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Sum and difference of cubes identities: x³ - y³ and x³ + y³",
+            "page": 18,
+            "quote": "Thus (x – y)(x2 + xy + y2) = x3 – y3. This is also an identity!",
+            "rationale": "The factored forms x³ - y³ = (x - y)(x² + xy + y²) and x³ + y³ = (x + y)(x² - xy + y²) are featured in the textbook text and exercises but omitted in the current notes.",
+            "status": "missing"
+          },
+          {
+            "concept": "Three-variable cubic identity: x³ + y³ + z³ - 3xyz",
+            "page": 18,
+            "quote": "So, (x + y + z) (x2 + y2 + z2 – xy – xz – yz) = x3 + y3 + z3 – 3xyz. This is yet another identity.",
+            "rationale": "The identity x³ + y³ + z³ - 3xyz = (x + y + z)(x² + y² + z² - xy - yz - zx) and its applications are a major core topic in Section 4.7, completely missing from current notes.",
+            "status": "missing"
+          }
+        ]
+      },
+      {
+        "section": "Mixed exam applications and fully worked solutions",
+        "title": "Cuboid volume factorisation and divisibility proofs",
+        "paragraphs": [
+          "Algebraic factorisation serves as a key tool for solving geometric dimensional problems. Just as the area of a rectangle factors into two linear binomial dimensions representing length and breadth, the polynomial expression for the volume of a cuboid must be factorised into three linear dimensions representing length, breadth, and height: V = l × b × h. The standard approach begins by extracting common numerical and variable monomials across all terms, after which the remaining quadratic expression can be factored using splitting the middle term or difference of squares.",
+          "Factoring expressions also provides algebraic proofs for divisibility properties in number theory. Consider the expression n³ - n for any natural number n. Factoring out n yields n(n² - 1), which further decomposes via the difference of two squares into (n - 1)n(n + 1). This product represents three consecutive integers. In any set of three consecutive integers, at least one must be a multiple of 2 and exactly one must be a multiple of 3. Because 2 and 3 are coprime, their product is always divisible by 2 × 3 = 6, proving that n³ - n is divisible by 6 for all natural numbers n."
+        ],
+        "formulas": [
+          "V = l × b × h",
+          "n³ - n = (n - 1)n(n + 1)"
+        ],
+        "examples": [
+          {
+            "title": "Find dimensions of a cuboid from volume",
+            "question": "Find possible expressions for the dimensions of a cuboid whose volume is given by 3ps² - 15ps + 12p.",
+            "steps": [
+              "Identify the greatest common factor across all terms: 3p.",
+              "Factor out 3p: 3p(s² - 5s + 4).",
+              "Factor the quadratic factor by splitting the middle term: find numbers summing to -5 and multiplying to 4, which are -1 and -4.",
+              "Write the complete factorisation: 3p(s - 1)(s - 4).",
+              "Assign the three linear factors as length, breadth, and height."
+            ],
+            "answer": "Possible dimensions are 3p, (s - 1), and (s - 4)"
+          },
+          {
+            "title": "Divisibility proof for consecutive integers",
+            "question": "Prove that n³ - n is always divisible by 6 for every natural number n.",
+            "steps": [
+              "Factor out the common factor n: n³ - n = n(n² - 1).",
+              "Apply the difference of squares identity to n² - 1: n(n - 1)(n + 1).",
+              "Rearrange in ascending order: (n - 1)n(n + 1), which represents three consecutive natural numbers.",
+              "Among any three consecutive integers, at least one is divisible by 2 (even) and exactly one is divisible by 3.",
+              "Since gcd(2, 3) = 1, their product must be divisible by 2 × 3 = 6."
+            ],
+            "answer": "n³ - n = (n - 1)n(n + 1), being the product of three consecutive integers, is always divisible by 6"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Factoring volume polynomials to determine dimensions of a cuboid",
+            "page": 22,
+            "quote": "Find possible expressions for the length, breadth, and heights of each of the following cuboids whose volumes are given",
+            "rationale": "Exercise Set question type on expressing cubic or quadratic expressions as three linear factors representing length, breadth, and height of a cuboid is omitted.",
+            "status": "missing"
+          },
+          {
+            "concept": "Factoring n³ - n to prove divisibility by 6 for all natural numbers",
+            "page": 23,
+            "quote": "By factoring the expression, check that n3 – n is always divisible by 6 for all natural numbers n. Give reasons.",
+            "rationale": "Factoring n³ - n into (n-1)n(n+1) as the product of three consecutive integers to establish divisibility by 6 is an explicit higher-order exercise missing from the notes.",
+            "status": "missing"
+          }
+        ]
+      }
+    ]
   }
 ];
 const bank=window.CBSE_CLASS9_MATH_FULL_NOTES||{};
@@ -260,8 +426,6 @@ for(const record of proposals){
  for(const p of record.lessons){
   const section=chapter.sections.find(s=>s.title===p.section&&!generic.has(s.title));
   if(!section)throw Error('Curriculum proposal target section missing: '+p.section);
-  // Reviewer-approved enrichment: extend an existing lesson rather than
-  // creating a duplicate subtopic merely because a concept needed more depth.
   if(p.merge_into){
    const target=safe(section.subtopics).find(s=>norm(s.title)===norm(p.merge_into));
    if(!target)throw Error('Curriculum enrichment target missing: '+p.merge_into);
@@ -270,8 +434,8 @@ for(const record of proposals){
    const formulas=safe(target.formulas);
    target.formulas=formulas.concat(p.formulas.filter(x=>!formulas.includes(x)));
    const examples=safe(target.examples);
-   const existingExampleTitles=new Set(examples.map(x=>norm(x.title)));
-   target.examples=examples.concat(p.examples.filter(x=>!existingExampleTitles.has(norm(x.title)))
+   const existingTitles=new Set(examples.map(x=>norm(x.title)));
+   target.examples=examples.concat(p.examples.filter(x=>!existingTitles.has(norm(x.title)))
     .map(x=>({title:x.title,question:x.question,steps:x.steps.slice(),answer:x.answer})));
    continue;
   }

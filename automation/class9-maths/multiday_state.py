@@ -56,6 +56,7 @@ def new_state(*, code_sha: str, notes_sha: str, model: str, budget: int, run_id:
         "inflight_run_id": None,
         "last_attempt_utc_day": None,
         "consecutive_pauses": 0,
+        "progress_stage_count": 0,
         "last_run_id": None,
         "started_by_run_id": run_id,
         "completed_run_id": None,
@@ -80,6 +81,9 @@ def validate_state(state: dict) -> dict:
         val = state.get(key)
         if val is not None and (type(val) is not int or val < 1):
             raise ValueError("Invalid run identifier: " + key)
+    progress = state.get("progress_stage_count", 0)
+    if type(progress) is not int or progress < 0 or progress > 100:
+        raise ValueError("Invalid checkpoint progress count")
     return state
 
 
@@ -127,7 +131,7 @@ def report_state(reports, *, exit_code: int, publish_ok: bool) -> str:
 
 
 def advance(state: dict, *, run_id: int, result: str, artifact_uploaded: bool,
-            draft_pr_url: str | None = None) -> dict:
+            checkpoint_count: int, draft_pr_url: str | None = None) -> dict:
     state = validate_state(dict(state))
     if state.get("inflight_run_id") != run_id:
         raise ValueError("Refusing stale or foreign run state update")
@@ -140,6 +144,12 @@ def advance(state: dict, *, run_id: int, result: str, artifact_uploaded: bool,
         state["enabled"] = False
         state["status"] = "needs_attention"
         return state
+    if type(checkpoint_count) is not int or checkpoint_count < state.get("progress_stage_count", 0):
+        state["enabled"] = False
+        state["status"] = "needs_attention"
+        return state
+    progressed = checkpoint_count > state.get("progress_stage_count", 0)
+    state["progress_stage_count"] = checkpoint_count
     state["resume_run_id"] = run_id
     if result == "complete":
         state["enabled"] = False
@@ -151,7 +161,7 @@ def advance(state: dict, *, run_id: int, result: str, artifact_uploaded: bool,
         state["enabled"] = False
         state["status"] = "needs_attention"
     else:
-        state["consecutive_pauses"] += 1
+        state["consecutive_pauses"] = (0 if progressed else state["consecutive_pauses"] + 1)
         if state["consecutive_pauses"] >= MAX_CONSECUTIVE_PAUSES:
             state["enabled"] = False
             state["status"] = "needs_attention"
@@ -290,6 +300,7 @@ def finalize(args: argparse.Namespace) -> None:
     previous_state = dict(state)
     next_state = advance(state, run_id=args.run_id, result=result,
                          artifact_uploaded=(args.artifact_uploaded == "true"),
+                         checkpoint_count=args.checkpoint_count,
                          draft_pr_url=(args.draft_url if args.draft_url else None))
     if previous_state != next_state:
         save(args.repo, next_state, file_sha=etag, base_sha=args.commit_sha)
@@ -317,6 +328,7 @@ def main() -> int:
     parser.add_argument("--exit-code", type=int, default=1)
     parser.add_argument("--publish-ok", default="false")
     parser.add_argument("--artifact-uploaded", default="false")
+    parser.add_argument("--checkpoint-count", type=int, default=0)
     parser.add_argument("--draft-url", default="")
     args = parser.parse_args()
     if not REPO.fullmatch(args.repo):

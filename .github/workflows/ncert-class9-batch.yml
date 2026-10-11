@@ -12,10 +12,10 @@ on:
         default: "4"
         options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
       end_chapter:
-        description: "Last chapter to review (inclusive)"
+        description: "Last chapter to review (inclusive; start with Chapter 4 pilot)"
         required: true
         type: choice
-        default: "14"
+        default: "4"
         options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
       review_depth:
         description: "Standard single pass or deep multi-pass with maths challenge (extra Gemini cost)"
@@ -28,10 +28,28 @@ on:
         required: true
         type: string
         default: gemini-3.8-flash
+      resume_run_id:
+        description: "Optional prior batch Actions run ID to resume validated checkpoints (leave empty for fresh)"
+        required: false
+        type: string
+        default: ""
+      max_api_requests:
+        description: "Maximum Gemini generate attempts this run INCLUDING failed retries"
+        required: true
+        type: choice
+        default: "6"
+        options: ["1", "2", "3", "4", "5", "6", "8", "10"]
+      min_request_seconds:
+        description: "Minimum seconds between API attempts, to protect RPM/TPM"
+        required: true
+        type: choice
+        default: "25"
+        options: ["15", "25", "35", "60"]
 
 permissions:
   contents: write
   pull-requests: write
+  actions: read
 
 concurrency:
   group: ncert-class9-maths-batch-${{ github.repository }}
@@ -67,6 +85,33 @@ jobs:
           python -m unittest discover -s automation-repo/automation/class9-maths -p 'test_*.py' -v
           node automation-repo/automation/class9-maths/export-notes.cjs site > current-notes.json
           python -c 'import json; x=json.load(open("current-notes.json")); assert len(x["chapters"]) == 14'
+      - name: Restore validated checkpoints from a previous manual run (optional)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESUME_RUN: ${{ inputs.resume_run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review-artifacts/checkpoints
+          if [ -z "$RESUME_RUN" ]; then
+            echo "Fresh review; no previous checkpoint run selected."
+            exit 0
+          fi
+          if [[ ! "$RESUME_RUN" =~ ^[0-9]+$ ]]; then
+            echo "::error::resume_run_id must be a numeric GitHub Actions run ID"
+            exit 1
+          fi
+          RUN_PATH="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.path')"
+          RUN_EVENT="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.event')"
+          if [[ "$RUN_PATH" != .github/workflows/ncert-class9-batch.yml@* || "$RUN_EVENT" != workflow_dispatch ]]; then
+            echo "::error::Resume run must be a manual run of this NCERT batch workflow"
+            exit 1
+          fi
+          gh run download "$RESUME_RUN" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "ncert-class9-checkpoints-$RESUME_RUN" \
+            --dir review-artifacts/checkpoints
+          echo "Restored checkpoints from run $RESUME_RUN. Pipeline verifies sources, model and prompts before replay."
       - name: Deep textbook coverage, adversarial gap review, draft proposals and independent maths check
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -74,6 +119,8 @@ jobs:
           LAST: ${{ inputs.end_chapter }}
           MODEL_ID: ${{ inputs.model }}
           REVIEW_DEPTH: ${{ inputs.review_depth }}
+          MAX_API_REQUESTS: ${{ inputs.max_api_requests }}
+          MIN_REQUEST_SECONDS: ${{ inputs.min_request_seconds }}
         run: |
           set -euo pipefail
           if [ -z "$GEMINI_API_KEY" ]; then
@@ -87,7 +134,18 @@ jobs:
             --chapter "$FIRST-$LAST" \
             --mode propose \
             --depth "$REVIEW_DEPTH" \
-            --model "$MODEL_ID"
+            --model "$MODEL_ID" \
+            --checkpoint-dir review-artifacts/checkpoints \
+            --request-budget "$MAX_API_REQUESTS" \
+            --min-request-seconds "$MIN_REQUEST_SECONDS"
+      - name: Preserve validated checkpoints even if audit pauses or fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ncert-class9-checkpoints-${{ github.run_id }}
+          path: review-artifacts/checkpoints/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Attach batch report and source evidence to run
         if: always()
         uses: actions/upload-artifact@v4

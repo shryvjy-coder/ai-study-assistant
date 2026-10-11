@@ -249,6 +249,18 @@ class ResumableAuditTests(unittest.TestCase):
         self.assertEqual(pacer.attempts, 2)
         self.assertEqual(len(calls), 1)
 
+    def test_eighteen_attempts_are_a_hard_cap_including_failures(self):
+        pacer = RequestPacer(18, 0, clock=lambda: 1.0)
+        for i in range(18):
+            if i % 3 == 0:
+                with self.assertRaisesRegex(RuntimeError, "failed request"):
+                    pacer(lambda: (_ for _ in ()).throw(RuntimeError("failed request")))
+            else:
+                self.assertEqual(pacer(lambda: "ok"), "ok")
+        self.assertEqual(pacer.attempts, 18)
+        with self.assertRaises(RequestBudgetExhausted):
+            pacer(lambda: self.fail("never send request number 19"))
+
     def test_invalid_budget_is_rejected(self):
         for invalid in (0, 21, -1, 1.5):
             with self.assertRaises(ValueError):

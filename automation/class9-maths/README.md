@@ -167,8 +167,8 @@ This workflow never schedules itself for the next day and never auto-merges.
 
 **Only after reviewing and merging the automation PR:** Open GitHub **Actions >
 NCERT Class 9 Maths — opt-in multi-day Deep Audit > Run workflow**. Choose
-operation **start**, model `gemini-3.8-flash`, and a conservative daily cap
-(default **6 generate attempts**). **Start arms the following scheduled run**;
+operation **start**, model `gemini-3.8-flash`, and the requested daily cap
+(default **18 generate attempts**, counting every retry). **Start arms the following scheduled run**;
 the start run itself does not call Gemini or spend API quota. GitHub's daily
 schedule runs at **09:15 UTC (14:45 IST)**, after the Gemini daily quota's
 Pacific-time reset. Scheduled GitHub Actions may start late or be skipped
@@ -185,6 +185,17 @@ prints the state without making model calls. To continue after a stopped or
 attention-required run, a new manual start is required; starting anew does
 **not automatically inherit prior batch checkpoints**.
 
+**Budget upgrade of the already armed batch:** After this change is
+reviewed and merged, the next eligible scheduled run can upgrade the existing
+armed six-attempt batch to 18 attempts as part of its normal once-daily claim.
+This is guarded to run only when the batch is still armed with no previous
+scheduled run, the saved budget is six, and the source-pinning checks pass.
+The original start identifier, pinned code and notes, checkpoint pointers,
+state branch and 14:45 IST schedule are preserved. It does not create an
+extra run or call Gemini on its own. If the batch has already started,
+the controller preserves its existing six-attempt cap rather than silently
+changing a mid-batch configuration. No workflow or PR is automatically merged.
+
 **Daily behaviour**:
 1. The scheduled workflow reads `.ncert-class9-multiday-state.json`
    from the dedicated `automation/ncert-class9-multiday-state` branch.
@@ -198,9 +209,11 @@ attention-required run, a new manual start is required; starting anew does
    Audit v2), then reviews the whole Chapter 5–14 range. Earlier completed
    model stages are replayed without more Gemini generate calls.
 4. Each day is capped at `daily_budget` actual **generate attempts,
-   including temporary 503/429 retries**. A minimum 35-second interval
-   spaces requests. Token and project-wide limits are external and may still
-   trigger 429; this is a safety cap, not a guarantee of quota.
+   including temporary 503/429 retries**. The maximum is now 18, with a
+   minimum 35-second interval between attempts. Token and project-wide limits
+   are external and may still trigger 429; this is a safety cap, not a
+   guarantee of quota. The 18-attempt cap may consume most of a 20-request
+   project daily quota if that is still the applicable Google limit.
 5. After the run, an Actions artifact captures checkpoints and a report
    even when the pipeline pauses. The state points to the newest checkpoint
    run only after GitHub confirms the artifact upload.
@@ -221,8 +234,10 @@ model calls are required unless sources became incompatible.
 
 **Duration:** the full Deep Audit typically involves approximately 3–5
 model requests per chapter, or 30–50 model calls for Chapters 5–14.
-With six attempts allowed per day, plan for **at least 5–9 scheduled days**
-plus retries, outages, remaining quota and human checks. Daily GitHub
+With 18 attempts allowed per day, the ideal lower bound for the 30–50 calls
+is **2–3 scheduled days**, but retries, outages, remaining quota and human
+checks may extend the schedule. It is not guaranteed to finish three chapters
+per day. Daily GitHub
 artifacts expire after 30 days; download reports if you need longer retention.
 The state branch remains after completion for status/history; it is not a
 secret store. Human reviewers must still verify the teaching and mathematical

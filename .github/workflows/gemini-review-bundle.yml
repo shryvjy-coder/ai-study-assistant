@@ -1,0 +1,46 @@
+name: Gemini Maths Review Bundle
+
+on:
+  push:
+    branches:
+      - class9-maths-all-chapters-depth
+    paths:
+      - "scripts/package_gemini_review.py"
+      - "cbse-class9-math-*.js"
+      - "cbse-class9-maths-depth-*.js"
+      - "studyai-long-notes.js"
+      - "index.html"
+      - ".github/workflows/gemini-review-bundle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build 14-chapter Gemini audit ZIP
+        run: python scripts/package_gemini_review.py
+      - name: Check archive contents
+        run: |
+          python - <<'PY'
+          import zipfile
+          p = "dist/StudyAI_Class9_Maths_Gemini_Review.zip"
+          with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None
+              assert sum(n.endswith("/UPLOAD_GUIDE.txt") for n in z.namelist()) == 14
+              assert any(n.endswith("/GEMINI_AUDIT_PROMPT.txt") for n in z.namelist())
+              print("Verified: 14 chapter folders and independent audit instructions")
+          PY
+      - name: Upload Gemini review bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: StudyAI_Class9_Maths_Gemini_Review
+          path: dist/StudyAI_Class9_Maths_Gemini_Review.zip
+          if-no-files-found: error
+          retention-days: 90

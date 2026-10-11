@@ -410,7 +410,7 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                     "you cannot independently confirm. Provide a substantive "
                     "reason for each, not generic reassurance. "
                     "Return {chapter_number, decisions:[...]}. "
-                    "\nProposals:\n" + json.dumps(proposed, ensure_ascii=False)
+                    "\nProposals:\n" + json.dumps([{"id": i, "proposal": p} for i, p in enumerate(proposed)], ensure_ascii=False)
                 )
                 judged = _expect_dict(request("math", math_prompt), "math")
                 proposed, math_decisions = validate_math_review(judged, entry, proposed)

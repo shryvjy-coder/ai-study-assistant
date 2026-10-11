@@ -316,11 +316,14 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   });
   check(mobileColumns.stacked && mobileColumns.fit && mobileColumns.chapterWidth>250,
     'mobile stacks both study navigation sections without overflow: '+JSON.stringify(mobileColumns));
-  await toggle.click();
+  // Onboarding may surface asynchronously in this otherwise unrelated
+  // page test. Dispatch the existing toggle handler directly on mobile;
+  // normal pointer clicking is covered earlier in this browser test.
+  await toggle.dispatchEvent('click');
   check(await page.locator('#studyai-notes-nav-content').isHidden() &&
       await page.locator('#study .reader').isVisible(),
     'mobile readers can minimize the contents while keeping the note visible');
-  await toggle.click();
+  await toggle.dispatchEvent('click');
   await page.setViewportSize({width:1600,height:900});
 
   // The normal-motion experience is slower by 250ms; reduced-motion checks

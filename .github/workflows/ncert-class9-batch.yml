@@ -117,7 +117,7 @@ jobs:
           RUN_EVENT="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.event')"
           RUN_BRANCH="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.head_branch')"
           RUN_SHA="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.head_sha')"
-          if [[ "$RUN_PATH" != .github/workflows/ncert-class9-batch.yml@* || "$RUN_EVENT" != workflow_dispatch || "$RUN_BRANCH" != main || ! "$RUN_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+          if [[ "$RUN_PATH" != ".github/workflows/ncert-class9-batch.yml" || "$RUN_EVENT" != workflow_dispatch || "$RUN_BRANCH" != main || ! "$RUN_SHA" =~ ^[0-9a-f]{40}$ ]]; then
             echo "::error::Resume run must be a manual run of this NCERT batch workflow"
             exit 1
           fi

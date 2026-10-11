@@ -95,7 +95,8 @@ def _write_atomic(path: Path, data) -> None:
 class StageCheckpoints:
     """One tightly source-bound checkpoint directory per numbered chapter."""
 
-    def __init__(self, root: Path, chapter: int, fingerprint: str):
+    def __init__(self, root: Path, chapter: int, fingerprint: str,
+                 *, previous_code_fingerprint: str | None = None):
         if type(chapter) is not int or not 1 <= chapter <= 14:
             raise ValueError("Invalid chapter for checkpoint")
         self.path = root / f"chapter-{chapter:02}"
@@ -109,12 +110,25 @@ class StageCheckpoints:
             except (ValueError, UnicodeError) as exc:
                 raise ValueError("Unreadable existing checkpoint manifest; refusing to resume") from exc
             if existing != expected:
-                raise ValueError(
-                    "Checkpoint source/model/audit-code fingerprint mismatch. "
-                    "Do not replay stages generated from a different textbook, "
-                    "notes revision, model or pipeline version. Start with an empty "
-                    "checkpoint directory, or explicitly restore the matching inputs."
-                )
+                previous = {"schema": SCHEMA, "chapter": chapter,
+                            "fingerprint": previous_code_fingerprint}
+                if previous_code_fingerprint is not None and existing == previous:
+                    # The workflow checks out the exact prior trusted code SHA.
+                    # The old full fingerprint ALSO binds textbook bytes, notes,
+                    # model, manifest entry and all review scripts. Every saved
+                    # stage must still pass its unchanged prompt hash and today's
+                    # deterministic validators before it can be reused.
+                    _write_atomic(self.meta_path, expected)
+                    print("  Revalidated source identity against prior trusted "
+                          "code; allowing stage-by-stage checkpoint replay.",
+                          flush=True)
+                else:
+                    raise ValueError(
+                        "Checkpoint source/model/audit-code fingerprint mismatch. "
+                        "Cannot reuse stages from different textbook, notes or "
+                        "model. To migrate a code-only change, provide the exact "
+                        "previous run ID and original trusted code snapshot."
+                    )
         else:
             if self.path.exists() and any(self.path.iterdir()):
                 raise ValueError("Checkpoint stage files exist without a manifest")

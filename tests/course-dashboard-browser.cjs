@@ -87,6 +87,47 @@ async function dismissFirstRun(page){
 
   await page.evaluate(()=>location.hash='#today');
   await page.waitForSelector('#today:not([hidden])');
+
+  // The Class 9 Maths dashboard counts lessons from the same persisted
+  // checkbox state that renders the chapter progress rings.
+  await page.waitForFunction(()=>{
+    const topic=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics');
+    return window.StudyAIProgress?.summary?.(topic.id)?.total>1;
+  });
+  const progressSetup=await page.evaluate(()=>{
+    const topic=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics');
+    const record=window.CBSE_CLASS9_MATH_FULL_NOTES[topic.title];
+    const ignored=new Set(['Chapter coverage','Exam application','Common traps and final checks','Mastery check']);
+    const lessons=record.sections.filter(s=>s.title&&!ignored.has(s.title.trim()));
+    state.completed=[];
+    state.studyaiLessonProgress={...(state.studyaiLessonProgress||{}),[topic.id]:[lessons[0].title.trim()]};
+    state.lastTopic=topic.id;
+    state.studyaiLastLesson={topicId:topic.id,index:1};
+    save();
+    return {title:lessons[1].title,total:lessons.length};
+  });
+  await page.waitForFunction(total=>
+    document.querySelector('#my-course-grid .course-card .course-card-stats')?.textContent.includes('1 / '+total),
+    progressSetup.total);
+  check((await page.locator('#my-course-grid .course-card').first().locator('.course-card-stats').textContent()).includes('1 / '+progressSetup.total),
+    'course completion uses persisted lesson checkboxes rather than only finished chapters');
+  check((await page.locator('#dashboard-next-topic').textContent()).includes(progressSetup.title),
+    'continue panel identifies the precise recent lesson');
+  check(await page.locator('#dashboard-study-suggestions .dashboard-focus-item').count()>0,
+    'dashboard recommendations use unfinished selected-course material');
+  await page.locator('#dashboard-continue').click();
+  await page.waitForSelector('#study:not([hidden])');
+  check(await page.evaluate(()=>window.StudyAILessonReader?.activeIndex()===1),
+    'Continue Studying opens the saved lesson, not merely its chapter');
+  await page.evaluate(()=>location.hash='#today');
+  await page.waitForSelector('#today:not([hidden])');
+
+  await page.setViewportSize({width:390,height:780});
+  check(await page.locator('#my-course-grid .course-card').count()===2&&
+    await page.locator('#dashboard-study-suggestions .dashboard-focus-item').count()>0,
+    'small-screen dashboard keeps courses and next-study actions usable');
+  await page.setViewportSize({width:1280,height:900});
+
   await page.locator('#my-course-grid .course-card').first().locator('[data-remove-course]').click();
   await page.waitForFunction(()=>document.querySelectorAll('#my-course-grid .course-card').length===1);
   check(await page.evaluate(()=>state.selectedCourses.length===1),'courses can be removed from My Courses');

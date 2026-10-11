@@ -75,8 +75,8 @@ function progressForEntries(entries){
 function nextDestination(entries=entriesForSelected()){
   if(!entries.length)return null;
   const recent=state.studyaiLastLesson;
-  const last=entries.find(e=>e.id===recent?.topicId)||
-    entries.find(e=>e.id===state.lastTopic);
+  const last=entries.find(e=>e.id===state.lastTopic)||
+    entries.find(e=>e.id===recent?.topicId);
   const target=(last&&entryProgress(last).done<entryProgress(last).total?last:null)||
     entries.find(e=>entryProgress(e).done<entryProgress(e).total)||
     last||entries[0];

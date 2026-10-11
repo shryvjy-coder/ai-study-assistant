@@ -495,3 +495,137 @@
   #study.studyai-progress-active .reader-layout,
   #study .studyai-notes-nav{transition:none!important}
 }
+
+
+/* Parallel study navigation: two independent, vertical course columns.
+   Keep one outer dock so its far-left minimize/reopen control remains intact.
+   The reading column occupies all the remaining room. */
+#study.studyai-progress-active:not(.studyai-nav-collapsed) .reader-layout{
+  grid-template-columns:548px minmax(0,1fr);
+}
+#study.studyai-progress-active:not(.studyai-nav-collapsed) .studyai-notes-nav-content{
+  grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);
+  align-items:start;
+  gap:10px;
+}
+#study.studyai-progress-active .studyai-notes-nav .chapter-rail.studyai-contents-section,
+#study.studyai-progress-active .studyai-notes-nav .studyai-subtopics-group.studyai-contents-section{
+  min-height:0;
+  min-width:0;
+  align-self:start;
+}
+#study.studyai-progress-active .studyai-notes-nav .chapter-list{
+  max-height:min(58vh,610px);
+}
+#study.studyai-progress-active .studyai-notes-nav .studyai-lesson-list{
+  max-height:min(52vh,550px);
+}
+/* A minimized section becomes its own narrow tab, instead of reserving an
+   empty full-sized column. The other section can stay independently open. */
+#study.studyai-progress-active.studyai-chapters-minimized:not(.studyai-subtopics-minimized):not(.studyai-nav-collapsed) .reader-layout,
+#study.studyai-progress-active.studyai-subtopics-minimized:not(.studyai-chapters-minimized):not(.studyai-nav-collapsed) .reader-layout{
+  grid-template-columns:366px minmax(0,1fr);
+}
+#study.studyai-progress-active.studyai-chapters-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav-content{
+  grid-template-columns:48px minmax(0,1fr);
+}
+#study.studyai-progress-active.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav-content{
+  grid-template-columns:minmax(0,1fr) 48px;
+}
+#study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .reader-layout{
+  grid-template-columns:140px minmax(0,1fr);
+}
+#study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav-content{
+  grid-template-columns:48px 48px;
+}
+#study.studyai-progress-active.studyai-chapters-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav .chapter-rail .rail-head,
+#study.studyai-progress-active.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav .studyai-subtopics-heading{
+  justify-content:center;
+  padding:8px 4px;
+}
+#study.studyai-progress-active.studyai-chapters-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav .chapter-rail .rail-head>div,
+#study.studyai-progress-active.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav .studyai-subtopics-heading>.small-label{
+  display:none;
+}
+#study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized .studyai-notes-nav-heading .small-label{
+  display:none;
+}
+#study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized .studyai-notes-nav-heading strong{
+  font-size:.86rem;
+}
+#study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized .studyai-notes-nav-top{
+  padding:9px 7px;
+  gap:3px;
+}
+/* Both inner columns animate their width while the notes dock resizes. */
+#study.studyai-progress-active .studyai-notes-nav-content{
+  transition:grid-template-columns .55s cubic-bezier(.22,.82,.27,1);
+}
+#study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+  grid-template-columns:52px minmax(0,1fr);
+}
+@media(max-width:1250px) and (min-width:761px){
+  #study.studyai-progress-active:not(.studyai-nav-collapsed):not(.studyai-chapters-minimized):not(.studyai-subtopics-minimized) .reader-layout{
+    grid-template-columns:464px minmax(0,1fr);
+  }
+  #study.studyai-progress-active:not(.studyai-nav-collapsed):is(.studyai-chapters-minimized,.studyai-subtopics-minimized):not(.studyai-chapters-minimized.studyai-subtopics-minimized) .reader-layout{
+    grid-template-columns:328px minmax(0,1fr);
+  }
+  #study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .reader-layout{
+    grid-template-columns:140px minmax(0,1fr);
+  }
+  #study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+    grid-template-columns:52px minmax(0,1fr);
+  }
+}
+@media(max-width:760px){
+  /* Stack the two independent sections on phones, avoiding two cramped
+     120px columns. Their own minimize buttons still work normally. */
+  #study.studyai-progress-active .reader-layout,
+  #study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+    display:block;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content,
+  #study.studyai-progress-active.studyai-chapters-minimized .studyai-notes-nav-content,
+  #study.studyai-progress-active.studyai-subtopics-minimized .studyai-notes-nav-content,
+  #study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized .studyai-notes-nav-content{
+    /* Override the more specific desktop :not(.studyai-nav-collapsed)
+       column selectors so neither section can remain cramped on phones. */
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  #study.studyai-progress-active.studyai-chapters-minimized .studyai-notes-nav .chapter-rail .rail-head,
+  #study.studyai-progress-active.studyai-subtopics-minimized .studyai-notes-nav .studyai-subtopics-heading{
+    justify-content:space-between;
+    padding:10px 11px 10px 14px;
+  }
+  #study.studyai-progress-active.studyai-chapters-minimized .studyai-notes-nav .chapter-rail .rail-head>div,
+  #study.studyai-progress-active.studyai-subtopics-minimized .studyai-notes-nav .studyai-subtopics-heading>.small-label{
+    display:block;
+  }
+  #study.studyai-progress-active .studyai-notes-nav .chapter-list,
+  #study.studyai-progress-active .studyai-notes-nav .studyai-lesson-list{
+    max-height:28vh;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content{
+    /* The dock itself is height-constrained on phones. Ordinary document
+       flow avoids auto-grid rows being compressed and overlapping. */
+    display:block!important;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content[hidden]{
+    /* Respect outer minimize even though mobile stacking needs display:block. */
+    display:none!important;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content>.studyai-contents-section{
+    display:block;
+    width:100%;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content>.studyai-contents-section+
+  .studyai-contents-section{
+    margin-top:9px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #study.studyai-progress-active .studyai-notes-nav-content{
+    transition:none!important;
+  }
+}

@@ -90,6 +90,35 @@ class ResumableAuditTests(unittest.TestCase):
             self.assertEqual(resumed_calls, ["math", "closure"])
             self.assertEqual(len(final["candidate_lessons"]), 1)
 
+    def test_manual_math_restart_retains_earlier_stages(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            saved = self.checkpoint(root)
+            def ask(stage, prompt):
+                return self.responses(stage)
+            review_chapter(root / "chapter.pdf", sample_chapter(),
+                           sample_chapter(), sample_pages(), "mock-model",
+                           normal=normal, validate=validate,
+                           retry=generate_with_transient_retries,
+                           request=ask, checkpoint=saved)
+            saved.restart_from("math")
+            self.assertTrue((saved.path / "coverage.json").exists())
+            self.assertTrue((saved.path / "challenge.json").exists())
+            self.assertTrue((saved.path / "draft.json").exists())
+            self.assertFalse((saved.path / "math.json").exists())
+            self.assertFalse((saved.path / "closure.json").exists())
+            resumed = self.checkpoint(root)
+            calls = []
+            def retry_later(stage, prompt):
+                calls.append(stage)
+                return self.responses(stage)
+            review_chapter(root / "chapter.pdf", sample_chapter(),
+                           sample_chapter(), sample_pages(), "mock-model",
+                           normal=normal, validate=validate,
+                           retry=generate_with_transient_retries,
+                           request=retry_later, checkpoint=resumed)
+            self.assertEqual(calls, ["math", "closure"])
+
     def test_changed_model_notes_or_pdf_refuses_checkpoint(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

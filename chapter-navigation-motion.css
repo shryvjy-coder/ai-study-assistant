@@ -34,25 +34,35 @@
   scroll-margin-top: 95px;
 }
 
-/* A recessed press-in effect with a stable hit area replaces the outward hover. */
-body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]) {
+/* A gentle physical press on hover, and a firmer, faster press on click.
+ * The original 0.50s hover transitions are lengthened by +0.25s to 0.75s.
+ * Exclude the flip-card and absolutely positioned password control so their
+ * own transforms and interactions remain intact.
+ */
+body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard) {
   transform-origin: center center;
-  transition: transform .5s cubic-bezier(.22, 1, .36, 1),
-              filter .5s ease,
-              box-shadow .5s ease,
-              background-color .5s ease,
-              border-color .5s ease,
-              color .5s ease !important;
+  transition: transform .75s cubic-bezier(.2, .75, .26, 1),
+              filter .75s cubic-bezier(.2, .75, .26, 1),
+              box-shadow .75s cubic-bezier(.2, .75, .26, 1),
+              background-color .75s ease,
+              border-color .75s ease,
+              color .75s ease !important;
 }
 
-body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):hover {
-  transform: none !important;
-  filter: brightness(.97) !important;
-  box-shadow: inset 0 3px 9px rgba(0, 0, 0, .18) !important;
+body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):not(:disabled):not([aria-disabled="true"]):hover {
+  /* Gradually settle into the surface instead of jumping upward. */
+  transform: translateY(2px) scale(.985) !important;
+  filter: brightness(.975) !important;
+  box-shadow: inset 0 3px 9px rgba(0, 0, 0, .18),
+              inset 0 1px 2px rgba(0, 0, 0, .09) !important;
 }
 
-body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(:disabled):not([aria-disabled="true"]):active {
-  transform: translateY(2px) scale(.945) !important;
+body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):not(:disabled):not([aria-disabled="true"]):active {
+  transform: translateY(3px) scale(.97) !important;
+  filter: brightness(.95) !important;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, .23) !important;
+  /* Downstroke responds quickly; releasing returns smoothly over 0.75s. */
+  transition-duration: .18s !important;
 }
 
 @media (max-width: 680px) {
@@ -66,7 +76,13 @@ body :is(button, a.button, input[type="button"], input[type="submit"], input[typ
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]) {
+  /* Match or exceed the normal rule's specificity. Both declarations use
+   * !important, so a weaker accessibility selector would lose the cascade. */
+  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard),
+  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):not(:disabled):not([aria-disabled="true"]):is(:hover,:active) {
     transition: none !important;
+  }
+  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):not(:disabled):not([aria-disabled="true"]):is(:hover,:active) {
+    transform: none !important;
   }
 }

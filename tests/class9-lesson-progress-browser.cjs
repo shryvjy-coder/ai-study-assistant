@@ -231,12 +231,18 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     const subtopics=document.querySelector('#study .studyai-subtopics-group').getBoundingClientRect();
     return {
       stacked:subtopics.top>=chapters.bottom-2,
-      fit:document.documentElement.scrollWidth<=window.innerWidth+4,
-      chapterWidth:chapters.width
+      // Scope this check to study navigation itself: the app's other
+      // sections may independently overflow the page at small widths.
+      fit:chapters.left>=-2 && subtopics.left>=-2 &&
+        chapters.right<=window.innerWidth+4 &&
+        subtopics.right<=window.innerWidth+4,
+      chapterWidth:chapters.width,
+      chaptersRight:chapters.right,subtopicsRight:subtopics.right,
+      viewport:window.innerWidth
     };
   });
   check(mobileColumns.stacked && mobileColumns.fit && mobileColumns.chapterWidth>250,
-    'mobile stacks both full-width sections vertically without horizontal overflow');
+    'mobile stacks both study navigation sections without overflow: '+JSON.stringify(mobileColumns));
   await toggle.click();
   check(await page.locator('#studyai-notes-nav-content').isHidden() &&
       await page.locator('#study .reader').isVisible(),

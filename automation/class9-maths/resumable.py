@@ -120,6 +120,15 @@ class StageCheckpoints:
                 raise ValueError("Checkpoint stage files exist without a manifest")
             _write_atomic(self.meta_path, expected)
 
+    def restart_from(self, stage: str) -> None:
+        """Explicit manual re-review: discard chosen stage and all later stages."""
+        if stage not in STAGES:
+            raise ValueError("Invalid restart stage")
+        for name in STAGES[STAGES.index(stage):]:
+            (self.path / (name + ".json")).unlink(missing_ok=True)
+            self.pending.pop(name, None)
+        print(f"  Manually restarting deep review from: {stage}", flush=True)
+
     def fetch(self, stage: str, prompt: str, request):
         if stage not in STAGES:
             raise ValueError("Unknown deep audit stage")

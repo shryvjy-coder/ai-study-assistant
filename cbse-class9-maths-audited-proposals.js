@@ -791,7 +791,16 @@ for(const record of proposals){
   }
   if(p.merge_into){
    const target=safe(section.subtopics).find(s=>norm(s.title)===norm(p.merge_into));
-   if(!target)throw Error('Curriculum enrichment target missing: '+p.merge_into);
+   if(!target){
+    // Missing legacy subtopic: add the cited lesson as a new subtopic.
+    section.subtopics= safe(section.subtopics);
+    section.subtopics.push({title:p.merge_into,paragraphs:p.paragraphs.slice(),
+     formulas:p.formulas.slice(),examples:p.examples.map(x=>({
+      title:x.title,question:x.question,steps:x.steps.slice(),answer:x.answer})),
+     bullets:[],tip:'AI review candidate; mathematical verification required.'});
+    seen.add(norm(p.merge_into));
+    continue;
+   }
    const paragraphs=safe(target.paragraphs);
    target.paragraphs=paragraphs.concat(p.paragraphs.filter(x=>!paragraphs.includes(x)));
    const formulas=safe(target.formulas);

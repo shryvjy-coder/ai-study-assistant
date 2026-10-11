@@ -15,7 +15,7 @@
 #study .reader-layout,
 #study.studyai-progress-active .reader-layout{
   display:grid;
-  grid-template-columns:minmax(252px,300px) minmax(0,1fr);
+  grid-template-columns:300px minmax(0,1fr);
   align-items:start;
   gap:clamp(14px,2vw,28px);
 }
@@ -28,6 +28,7 @@
   top:83px;
   align-self:start;
   min-width:0;
+  width:100%;
   height:auto;
   max-height:calc(100dvh - 100px);
   border:1px solid var(--line);
@@ -464,4 +465,33 @@
   #study .studyai-notes-nav button{
     transition:none!important;
   }
+}
+
+/* Keep interpolated tracks in the same shape so the dock truly slides.
+ * 300px -> 52px is animatable; minmax(...) -> 52px was discrete.
+ */
+#study .reader-layout,
+#study.studyai-progress-active .reader-layout{
+  transition:grid-template-columns .55s cubic-bezier(.22,.82,.27,1);
+}
+#study .studyai-notes-nav{
+  transition:width .55s cubic-bezier(.22,.82,.27,1),
+    margin-left .55s cubic-bezier(.22,.82,.27,1),
+    border-radius .55s cubic-bezier(.22,.82,.27,1);
+}
+/* Prevent old progress-mode and mobile styles from replacing animation tracks. */
+@media(max-width:1000px) and (min-width:761px){
+  #study .reader-layout,
+  #study.studyai-progress-active .reader-layout{
+    grid-template-columns:252px minmax(0,1fr);
+  }
+  #study.studyai-nav-collapsed .reader-layout,
+  #study.studyai-progress-active.studyai-nav-collapsed .reader-layout{
+    grid-template-columns:52px minmax(0,1fr);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #study .reader-layout,
+  #study.studyai-progress-active .reader-layout,
+  #study .studyai-notes-nav{transition:none!important}
 }

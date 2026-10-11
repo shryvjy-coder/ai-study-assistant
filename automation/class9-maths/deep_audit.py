@@ -175,21 +175,41 @@ def reconcile_coverage(response: dict, chapter: dict, coverage: list[dict],
 
 
 def validate_math_review(response: dict, chapter: dict, candidates: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Fail closed per candidate on malformed Gemini identifiers, not per chapter.
+
+    Never infer a mathematical pass from an unmatchable review decision.
+    The full textbook coverage audit can continue even when all candidates
+    are withheld for human review.
+    """
     _chapter_number(response, chapter, "independent mathematics review")
     decisions = _expect_sequence(response.get("decisions"), "mathematical review decisions",
-                                 len(candidates), len(candidates))
-    by_idx = {}
+                                 0, max(len(candidates) * 2, len(candidates)))
+    grouped = {i: [] for i in range(len(candidates))}
     for decision in decisions:
         d = _expect_dict(decision, "mathematics decision")
         idx, verdict = d.get("id"), d.get("verdict")
-        if type(idx) is not int or idx not in range(len(candidates)) or idx in by_idx:
-            raise ValueError("Maths review omitted/duplicated a proposal identifier")
+        if type(idx) is not int or idx not in grouped:
+            # A mismatched identifier cannot be mapped to a lesson safely.
+            # Leave all unreviewed lessons uncertain instead of blocking the
+            # coverage audit or assigning a verdict to the wrong lesson.
+            continue
+        reason = d.get("reason")
         if verdict not in ("pass", "reject", "uncertain"):
-            raise ValueError("Maths review returned an invalid verdict")
-        explanation = d.get("reason")
-        if not isinstance(explanation, str) or len(explanation.strip()) < 20:
-            raise ValueError("Maths reviewer must supply a substantive reason for every verdict")
-        by_idx[idx] = {"id": idx, "verdict": verdict, "reason": explanation[:900]}
+            verdict = "uncertain"
+            reason = "Invalid mathematical reviewer verdict; manual review required."
+        elif not isinstance(reason, str) or len(reason.strip()) < 20:
+            verdict = "uncertain"
+            reason = "Insufficient mathematical reasoning; manual review required."
+        grouped[idx].append({"id": idx, "verdict": verdict, "reason": reason[:900]})
+    by_idx = {}
+    for idx, matches in grouped.items():
+        if len(matches) == 1:
+            by_idx[idx] = matches[0]
+        else:
+            reason = ("Missing independent mathematical decision" if not matches else
+                      "Duplicate independent mathematical decisions")
+            by_idx[idx] = {"id": idx, "verdict": "uncertain",
+                           "reason": reason + "; candidate withheld for manual review."}
     approved = [candidates[i] for i in range(len(candidates)) if by_idx[i]["verdict"] == "pass"]
     return approved, [by_idx[i] for i in range(len(candidates))]
 
@@ -381,8 +401,11 @@ def review_chapter(pdf, entry: dict, notes: dict, pages: list[str], model: str,
                     "proposed formula, derivation, proof, unit, domain and worked "
                     "step as possibly wrong. RECOMPUTE each example without trusting "
                     "the writer's answer. Flag wrong, unsupported, too advanced or "
-                    "duplicated claims. For EVERY proposal index output one "
-                    "{id,verdict,reason}. verdict must be pass, reject or uncertain. "
+                    "duplicated claims. For EVERY proposal output exactly one "
+                    "{id,verdict,reason}, using the INTEGER id from the explicit "
+                    "proposal records below, not the textbook coverage evidence_ids. "
+                    "IDs are ZERO-BASED: 0, 1, 2, ...; do not renumber or repeat. "
+                    "verdict must be pass, reject or uncertain. "
                     "Reject on material arithmetic/proof errors; mark uncertain if "
                     "you cannot independently confirm. Provide a substantive "
                     "reason for each, not generic reassurance. "

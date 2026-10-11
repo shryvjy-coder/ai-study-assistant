@@ -93,7 +93,7 @@
       prev.disabled=footerPrev.disabled=n===0;
       next.disabled=footerNext.disabled=n===sections.length-1;
       window.dispatchEvent(new CustomEvent('studyai:lesson-changed',{
-        detail:{entryId:entry.id,index:n,title:textOf(section.querySelector(':scope > h3'))}
+        detail:{entryId:entry.id,index:n,title:textOf(section.querySelector(':scope > h3')),userInitiated:!!scroll}
       }));
       if(scroll){
         const heading=section.querySelector('h3');

@@ -253,6 +253,6 @@ jobs:
           python control-repo/automation/class9-maths/multiday_state.py finalize \
             --repo "$GITHUB_REPOSITORY" --commit-sha "$GITHUB_SHA" \
             --run-id "$GITHUB_RUN_ID" --summary "$GITHUB_STEP_SUMMARY" \
-            --report review-artifacts/audit.json --exit-code "\${PIPELINE_EXIT:-1}" \
+            --report review-artifacts/audit.json --exit-code "${PIPELINE_EXIT:-1}" \
             --publish-ok "$READY" --artifact-uploaded "$HAS_ARTIFACT" \
             --checkpoint-count "$STAGES" --draft-url "$DRAFT_URL"

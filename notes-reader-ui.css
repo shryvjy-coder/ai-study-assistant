@@ -611,6 +611,10 @@
        flow avoids auto-grid rows being compressed and overlapping. */
     display:block!important;
   }
+  #study.studyai-progress-active .studyai-notes-nav-content[hidden]{
+    /* Respect outer minimize even though mobile stacking needs display:block. */
+    display:none!important;
+  }
   #study.studyai-progress-active .studyai-notes-nav-content>.studyai-contents-section{
     display:block;
     width:100%;

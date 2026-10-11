@@ -252,7 +252,7 @@ const proposals = [
         "section": "Square identities",
         "title": "Square of a trinomial",
         "paragraphs": [
-          "Extending binomial squaring to three terms requires evaluating (a + b + c)². By grouping the last two terms as a single compound quantity d = b + c, we can apply the familiar expansion: (a + d)² = a² + 2ad + d². Substituting b + c back for d produces a² + 2a(b + c) + (b + c)², which expands via distributivity to a² + 2ab + 2ca + b² + 2bc + c². Arranging terms symmetrically gives the standard identity (a + b + c)² = a² + b² + c² + 2ab + 2bc + 2ca. Geometrically, this represents a large square of side length a + b + c partitioned into three smaller squares of areas a², b², and c², alongside six rectangular strips consisting of three conjugate pairs with areas ab, bc, and ca.",
+          "Extending binomial squaring to three terms requires evaluating (a + b + c)². By grouping the last two terms as a single compound quantity d = b + c, we can apply the familiar expansion: (a + d)² = a² + 2ad + d². Substituting b + c back for d produces a² + 2a(b + c) + (b + c)², which expands via distributivity to a² + 2ab + 2ca + b² + 2bc + c². Arranging terms symmetrically gives the standard identity (a + b + c)² = a² + b² + c² + 2ab + 2bc + 2ca. Geometrically, this represents a large square of side length a + b + c partitioned into three smaller squares of areas a², b², and c², and six rectangles: two of area ab, two of area bc, and two of area ca. That physical diagram assumes non-negative lengths; the algebraic identity holds for all real a, b and c.",
           "This identity simplifies squaring three-digit numbers mentally by splitting them into round base components. For example, 119² can be expressed as (100 + 10 + 9)², decomposing the calculation into simple powers of ten and basic products: 10000 + 100 + 81 + 2000 + 1800 + 180 = 14161. When terms involve negative signs, such as (3x - 2y + 4z)², parentheses should enclose negative coefficients so that sign changes in the cross-terms are tracked systematically. Furthermore, comparing binomial squares shows that (a + b)² - (a² + b²) = 2ab. Therefore, (a + b)² is greater than a² + b² when ab > 0, smaller when ab < 0, and equal precisely when ab = 0."
         ],
         "formulas": [
@@ -305,7 +305,7 @@ const proposals = [
         "section": "Building and discovering identities",
         "title": "Sum, difference, and three-variable cubic identities",
         "paragraphs": [
-          "Beyond binomial cubes, expanding products of linear binomials and quadratic trinomials yields the factored forms for sums and differences of cubes. Multiplying (x - y)(x² + xy + y²) gives x(x² + xy + y²) - y(x² + xy + y²) = x³ + x²y + xy² - x²y - xy² - y³ = x³ - y³. Similarly, replacing y with -y yields (x + y)(x² - xy + y²) = x³ + y³. These identities show that x - y is always an algebraic factor of xⁿ - yⁿ. Unlike the trinomial in a perfect square expansion, the quadratic factor has a middle coefficient of 1 rather than 2, with a sign opposite to that of the linear factor.",
+          "Beyond binomial cubes, expanding products of linear binomials and quadratic trinomials yields the factored forms for sums and differences of cubes. Multiplying (x - y)(x² + xy + y²) gives x(x² + xy + y²) - y(x² + xy + y²) = x³ + x²y + xy² - x²y - xy² - y³ = x³ - y³. Similarly, replacing y with -y yields (x + y)(x² - xy + y²) = x³ + y³. For every positive integer n, x − y is a factor of xⁿ − yⁿ; this extends the difference-of-powers pattern discussed in NCERT. Unlike the trinomial in a perfect square expansion, the quadratic factor has a middle coefficient of 1 rather than 2, with a sign opposite to that of the linear factor.",
           "A broader three-variable identity arises from multiplying the trinomial x + y + z by the symmetric expression x² + y² + z² - xy - yz - zx. Expanding completely and cancelling matching cross-terms leaves x³ + y³ + z³ - 3xyz. This identity allows cubic sums of three variables to be computed efficiently when elementary sums and pairwise products are known. An important deduction is that whenever x + y + z = 0, the entire right-hand side vanishes, leading directly to the conditional result x³ + y³ + z³ = 3xyz."
         ],
         "formulas": [
@@ -359,8 +359,8 @@ const proposals = [
         "section": "Mixed exam applications and fully worked solutions",
         "title": "Cuboid volume factorisation and divisibility proofs",
         "paragraphs": [
-          "Algebraic factorisation serves as a key tool for solving geometric dimensional problems. Just as the area of a rectangle factors into two linear binomial dimensions representing length and breadth, the polynomial expression for the volume of a cuboid must be factorised into three linear dimensions representing length, breadth, and height: V = l × b × h. The standard approach begins by extracting common numerical and variable monomials across all terms, after which the remaining quadratic expression can be factored using splitting the middle term or difference of squares.",
-          "Factoring expressions also provides algebraic proofs for divisibility properties in number theory. Consider the expression n³ - n for any natural number n. Factoring out n yields n(n² - 1), which further decomposes via the difference of two squares into (n - 1)n(n + 1). This product represents three consecutive integers. In any set of three consecutive integers, at least one must be a multiple of 2 and exactly one must be a multiple of 3. Because 2 and 3 are coprime, their product is always divisible by 2 × 3 = 6, proving that n³ - n is divisible by 6 for all natural numbers n."
+          "To find possible cuboid dimensions from a polynomial volume, use V = length × breadth × height. First extract a common numerical or variable factor, then factor the remaining quadratic using middle-term splitting or a square identity. The resulting three factors provide possible dimensions, but not necessarily the only set. To describe an actual cuboid rather than merely a formal algebraic product, all three selected dimensions must be strictly positive; record restrictions on any variables.",
+          "Factorisation also proves divisibility statements. For any natural number n, n³ − n = n(n² − 1) = (n − 1)n(n + 1), the product of three consecutive INTEGERS. If n = 1, these integers are 0, 1 and 2; the product is still divisible by 6. In each set of three consecutive integers one is a multiple of 3 and at least one is even. Because 2 and 3 have no common factor greater than 1, the whole product is divisible by 6. Numerical checks alone would not establish this claim for all n."
         ],
         "formulas": [
           "V = l × b × h",
@@ -375,9 +375,9 @@ const proposals = [
               "Factor out 3p: 3p(s² - 5s + 4).",
               "Factor the quadratic factor by splitting the middle term: find numbers summing to -5 and multiplying to 4, which are -1 and -4.",
               "Write the complete factorisation: 3p(s - 1)(s - 4).",
-              "Assign the three linear factors as length, breadth, and height."
+              "Choose 3p, s − 1 and s − 4 as possible dimensions, provided p > 0 and s > 4 so every dimension is positive."
             ],
-            "answer": "Possible dimensions are 3p, (s - 1), and (s - 4)"
+            "answer": "Possible dimensions: 3p, s − 1, s − 4, with p > 0 and s > 4."
           },
           {
             "title": "Divisibility proof for consecutive integers",
@@ -385,11 +385,11 @@ const proposals = [
             "steps": [
               "Factor out the common factor n: n³ - n = n(n² - 1).",
               "Apply the difference of squares identity to n² - 1: n(n - 1)(n + 1).",
-              "Rearrange in ascending order: (n - 1)n(n + 1), which represents three consecutive natural numbers.",
+              "Reorder the factors into three consecutive integers (n − 1)n(n + 1); at n = 1 the first is 0.",
               "Among any three consecutive integers, at least one is divisible by 2 (even) and exactly one is divisible by 3.",
               "Since gcd(2, 3) = 1, their product must be divisible by 2 × 3 = 6."
             ],
-            "answer": "n³ - n = (n - 1)n(n + 1), being the product of three consecutive integers, is always divisible by 6"
+            "answer": "(n − 1)n(n + 1) contains an even integer and a multiple of 3, so it is divisible by 6 for every natural n."
           }
         ],
         "evidence": [
@@ -406,6 +406,362 @@ const proposals = [
             "quote": "By factoring the expression, check that n3 – n is always divisible by 6 for all natural numbers n. Give reasons.",
             "rationale": "Factoring n³ - n into (n-1)n(n+1) as the product of three consecutive integers to establish divisibility by 6 is an explicit higher-order exercise missing from the notes.",
             "status": "missing"
+          }
+        ]
+      },
+      {
+        "section": "Square identities",
+        "title": "Geometric subtraction proof of (a − b)²",
+        "merge_into": "Square of a difference",
+        "paragraphs": [
+          "Take a large square of side a and mark length b along two neighbouring sides, with 0 ≤ b ≤ a. The smaller corner square has side a − b. To obtain its area without double-counting, first remove a vertical strip of width b and height a (area ab) from the large square. Then remove a horizontal strip with width a − b and height b (area b(a − b)) from the remaining region. The strips do not overlap, so the corner square has area a² − ab − b(a − b).",
+          "Expand the final subtraction carefully: a² − ab − ab + b² = a² − 2ab + b². This shows why the last term is PLUS b²; the second rectangular strip includes the quantity −b² when its product is expanded, and subtracting that product restores b². The geometric argument needs positive lengths, but (a − b)(a − b) proves the same identity by distributivity for any real a and b. Do not confuse (a − b)² with a² − b²."
+        ],
+        "formulas": [
+          "(a − b)² = a² − ab − b(a − b) = a² − 2ab + b²"
+        ],
+        "examples": [
+          {
+            "title": "Derive an area by removing strips",
+            "question": "A 12 cm square loses a strip 5 cm wide and then a 5 cm strip across the remaining 7 cm. Find the remaining square's area.",
+            "steps": [
+              "The large square has area 12² = 144 cm².",
+              "Remove the first 12 × 5 rectangle: 144 − 60 = 84 cm².",
+              "Remove the second 7 × 5 rectangle (only from the remainder): 84 − 35 = 49 cm².",
+              "The remaining side is 12 − 5 = 7 cm, so its area is 7² = 49 cm².",
+              "The formula confirms 12² − 2(12)(5) + 5² = 49 cm²."
+            ],
+            "answer": "49 cm²"
+          },
+          {
+            "title": "Apply the identity with variables",
+            "question": "Expand (4x − 3y)².",
+            "steps": [
+              "Identify A = 4x and B = 3y.",
+              "Square both: A² = 16x² and B² = 9y².",
+              "Calculate the cross-term: −2AB = −2(4x)(3y) = −24xy.",
+              "Combine as A² − 2AB + B² = 16x² − 24xy + 9y²."
+            ],
+            "answer": "16x² − 24xy + 9y²"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Area dissection for square of a difference",
+            "page": 7,
+            "quote": "The area of the big square is a2 square units. The small square has an area of (a – b)2 square units.",
+            "rationale": "NCERT Section 4.3, Fig. 4.3 uses two subtracted rectangles to prove the square-of-a-difference identity.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Difference of two squares",
+        "title": "Shridharacharya's rearranged square identity",
+        "merge_into": "Mental arithmetic using nearby squares",
+        "paragraphs": [
+          "The conjugate identity (a + b)(a − b) = a² − b² can be rearranged to a² = (a + b)(a − b) + b². NCERT associates this useful square-calculation form with Śhrīdharāchārya. To square a number near a convenient multiple of ten, choose b so that both a + b and a − b are easy to multiply. After multiplying the nearby factors, add the small square b² to restore the value of a².",
+          "The reasoning is exact: expanding the right side gives a² − b² + b² = a². This is a proof for all real a and b, not a coincidence limited to numbers ending in five. A common error is to stop at (a + b)(a − b), which is too small by b² when b is not zero. For a geometric illustration, choose lengths 0 ≤ b ≤ a; for algebraic calculations no such restriction is needed."
+        ],
+        "formulas": [
+          "a² = (a + b)(a − b) + b²"
+        ],
+        "examples": [
+          {
+            "title": "Square 85 without long multiplication",
+            "question": "Use the historical rearranged identity to calculate 85².",
+            "steps": [
+              "Take a = 85 and b = 5, making a + b = 90 and a − b = 80.",
+              "Apply a² = (a + b)(a − b) + b².",
+              "Multiply 90 × 80 = 7200 and compute 5² = 25.",
+              "Add 7200 + 25 = 7225."
+            ],
+            "answer": "7225"
+          },
+          {
+            "title": "Why add the correction square?",
+            "question": "Calculate 105² using factors 110 and 100.",
+            "steps": [
+              "Choose a = 105 and b = 5.",
+              "The nearby factors give 110 × 100 = 11000 = 105² − 5².",
+              "Add the correction: 11000 + 5² = 11000 + 25.",
+              "Therefore 105² = 11025."
+            ],
+            "answer": "11025"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Shridharacharya's identity for square calculations",
+            "page": 10,
+            "quote": "In 750 CE, this identity was proposed by Śhrīdharāchārya as a method to quickly compute the squares of numbers.",
+            "rationale": "NCERT Section 4.4 teaches the rearranged difference-of-squares identity as a mental-arithmetic tool.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Factorisation",
+        "title": "Algebra tiles for rectangular factorisation",
+        "paragraphs": [
+          "Algebra tiles give a physical meaning to quadratic expressions. One large x-by-x square represents x²; a narrow x-by-1 rectangle represents x; and a unit square represents 1. Arrange the pieces into one complete rectangle, without gaps or overlaps. Its side lengths supply the factorisation: if the outer sides are x + a and x + b, its area is both (x + a)(x + b) and x² + (a + b)x + ab.",
+          "For x² + 7x + 12, put the x² tile at a corner. Arrange three x-tiles alongside one edge, four along the other, and a 3-by-4 block of twelve unit tiles in the remaining corner. The completed rectangle has side lengths x + 3 and x + 4. This picture explains BOTH factor tests: the groups of x-tiles must add to 7, and the unit-square corner must have exactly 12 tiles. Splitting as 2 and 5 matches the middle coefficient but gives only 10 corner tiles, so it is wrong.",
+          "Geometry with positive physical tiles represents positive areas, usually with x ≥ 0. If expressions include negative terms, signed tiles are possible, but factorisation by middle-term splitting and distributivity is generally clearer. Never treat a decorative tile drawing as an algebraic proof unless its areas and complete rectangular outline are accounted for."
+        ],
+        "formulas": [
+          "x² + (a + b)x + ab = (x + a)(x + b)"
+        ],
+        "examples": [
+          {
+            "title": "Build a rectangle from 30 unit tiles",
+            "question": "Use an area-tile arrangement to factor x² + 11x + 30.",
+            "steps": [
+              "Represent x² with one large square, 11x with eleven long rectangles and 30 with unit squares.",
+              "Find two nonnegative integers adding to 11 and multiplying to 30; use 5 and 6.",
+              "Place five x-rectangles along one side of the x² square and six along the other side.",
+              "Fill the 5 × 6 corner with all 30 unit squares; the rectangle now has sides x + 5 and x + 6.",
+              "Verify by distributing: (x + 5)(x + 6) = x² + 11x + 30."
+            ],
+            "answer": "(x + 5)(x + 6)"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Quadratic factorisation with algebra tiles",
+            "page": 12,
+            "quote": "helps to visualise the product of x + 3 and x + 4 using algebra tiles. The expression x + 3 is represented using an x-tile and three unit tiles.",
+            "rationale": "NCERT Section 4.5, Fig. 4.7 uses the tiled rectangle to relate polynomial area and linear factors.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Square identities",
+        "title": "General linear binomial products",
+        "merge_into": "Multiplication of two nearby binomials",
+        "paragraphs": [
+          "For unlike linear brackets, such as (2x + 3)(3x + 1), the leading coefficient of x is different in each factor. Use distributivity rather than treating both factors as x + a. In general, (px + a)(qx + b) gives four products: pqx², pbx, aqx and ab. After combining the middle terms, the identity becomes pqx² + (pb + aq)x + ab. The x² coefficient is pq, the constant is ab, and the x coefficient is the SUM of the crossed products.",
+          "The identity runs backward to factor non-monic quadratics. For 6x² + 11x + 3, find two contributions to the middle term that add to 11x and allow a common bracket. Splitting 11x into 9x + 2x gives 3x(2x + 3) + 1(2x + 3) = (3x + 1)(2x + 3). Expand the proposed answer to verify the leading, middle and constant terms; guessing the factors from the constant alone does not suffice."
+        ],
+        "formulas": [
+          "(px + a)(qx + b) = pqx² + (pb + aq)x + ab"
+        ],
+        "examples": [
+          {
+            "title": "Expand two unlike binomials",
+            "question": "Expand (3x − 2)(2x + 5).",
+            "steps": [
+              "Multiply 3x by both terms in the second bracket: 6x² + 15x.",
+              "Multiply −2 by both terms: −4x − 10.",
+              "Add all four products: 6x² + 15x − 4x − 10.",
+              "Collect like terms to obtain 6x² + 11x − 10."
+            ],
+            "answer": "6x² + 11x − 10"
+          },
+          {
+            "title": "Reverse the expansion",
+            "question": "Factorise 6x² + 11x + 3.",
+            "steps": [
+              "Find numbers adding to 11 and multiplying to 18 = 6 × 3; choose 9 and 2.",
+              "Rewrite as 6x² + 9x + 2x + 3.",
+              "Factor each group: 3x(2x + 3) + (2x + 3).",
+              "Take out the common bracket: (3x + 1)(2x + 3).",
+              "Check: the expansion gives 6x² + 11x + 3."
+            ],
+            "answer": "(3x + 1)(2x + 3)"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "General product of unequal linear binomials",
+            "page": 13,
+            "quote": "Fill in the blanks with the appropriate expressions to make the equation true.",
+            "rationale": "NCERT Section 4.5 generalises (px+a)(qx+b), then asks for a distributive-law verification.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Building and discovering identities",
+        "title": "Cube dissection: two cubes and six cuboids",
+        "merge_into": "Cubes as products of three factors",
+        "paragraphs": [
+          "Picture a solid cube with edge a + b, where a and b are nonnegative lengths. Split EACH of the three edge directions into lengths a and b. This makes 2 × 2 × 2 = 8 non-overlapping solids. One small cube has dimensions a × a × a and volume a³; another has dimensions b × b × b and volume b³. The six remaining solids are rectangular cuboids, not squares, and their volumes must be measured in cubic units.",
+          "Three cuboids have dimensions a × a × b, each volume a²b. The other three have dimensions a × b × b, each volume ab². Add their contributions: (a + b)³ = a³ + 3a²b + 3ab² + b³. The coefficients 1,3,3,1 count the numbers of ways to choose which dimensions use b. Distributive multiplication proves the same rule for real variables, even when the physical length model is not applicable. Substituting b with −b yields (a − b)³ = a³ − 3a²b + 3ab² − b³."
+        ],
+        "formulas": [
+          "(a + b)³ = a³ + 3a²b + 3ab² + b³",
+          "(a − b)³ = a³ − 3a²b + 3ab² − b³"
+        ],
+        "examples": [
+          {
+            "title": "Check all eight pieces",
+            "question": "A 5 cm cube is split into edge lengths 3 cm and 2 cm along all directions. Add the smaller volumes.",
+            "steps": [
+              "The two cube volumes are 3³ = 27 cm³ and 2³ = 8 cm³.",
+              "Three a²b cuboids contribute 3(3²)(2) = 54 cm³.",
+              "Three ab² cuboids contribute 3(3)(2²) = 36 cm³.",
+              "Add 27 + 54 + 36 + 8 = 125 cm³.",
+              "Compare the outside cube's volume: (3 + 2)³ = 5³ = 125 cm³."
+            ],
+            "answer": "125 cm³"
+          },
+          {
+            "title": "Apply the pattern algebraically",
+            "question": "Expand (2x + 1)³.",
+            "steps": [
+              "Set a = 2x and b = 1.",
+              "Calculate a³ = 8x³ and b³ = 1.",
+              "Compute the cross-volumes: 3a²b = 12x² and 3ab² = 6x.",
+              "Add all terms: 8x³ + 12x² + 6x + 1."
+            ],
+            "answer": "8x³ + 12x² + 6x + 1"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Three-dimensional cube model for (a+b)³",
+            "page": 16,
+            "quote": "Notice that the larger cube can be split into two cubes and six cuboids. The cubes have volumes, a3 and b3 cubic units, respectively.",
+            "rationale": "NCERT Section 4.7, Fig. 4.10 illustrates the eight-component volume identity.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Building and discovering identities",
+        "title": "Cubic identities under a given linear condition",
+        "merge_into": "Sum, difference, and three-variable cubic identities",
+        "paragraphs": [
+          "A final-chapter exercise may give only a sum such as x + y = −4 rather than the values of x and y separately. Recognise the cube of a sum: (x + y)³ = x³ + y³ + 3xy(x + y). Rearranging gives x³ + y³ = (x + y)³ − 3xy(x + y). Substituting the known sum first often makes every remaining xy term cancel; this is a deliberate use of an identity, not a trick that guesses values for unknowns.",
+          "Similarly, treat x³ − 8y³ as x³ + (−2y)³. Applying the cube-of-a-sum identity gives x³ − 8y³ = (x − 2y)³ + 6xy(x − 2y). If x − 2y is supplied as 6, this becomes 216 + 36xy. Algebraic substitutions must preserve the sign of negative terms, and the final simplification should work for every pair satisfying the condition."
+        ],
+        "formulas": [
+          "x³ + y³ = (x + y)³ − 3xy(x + y)",
+          "x³ − 8y³ = (x − 2y)³ + 6xy(x − 2y)"
+        ],
+        "examples": [
+          {
+            "title": "Use only the given sum",
+            "question": "Find x³ + y³ − 12xy + 64 when x + y = −4.",
+            "steps": [
+              "Use x³ + y³ = (x + y)³ − 3xy(x + y).",
+              "Substitute x + y = −4: x³ + y³ = −64 + 12xy.",
+              "Place this in the expression: (−64 + 12xy) − 12xy + 64.",
+              "Cancel like terms to get 0; no separate x and y are needed."
+            ],
+            "answer": "0"
+          },
+          {
+            "title": "Use a given difference",
+            "question": "Evaluate x³ − 8y³ − 36xy − 216 when x = 2y + 6.",
+            "steps": [
+              "Rearrange the condition to x − 2y = 6.",
+              "Use x³ − 8y³ = (x − 2y)³ + 6xy(x − 2y).",
+              "Replace x − 2y by 6: 216 + 36xy.",
+              "Subtract 36xy and 216 to obtain 0."
+            ],
+            "answer": "0"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Conditional cubic expressions in NCERT end exercises",
+            "page": 23,
+            "quote": "Find the value of",
+            "rationale": "NCERT Chapter 4 end-of-chapter Exercise 13 asks for two cubic expressions given x+y=−4 or x=2y+6.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Factorisation",
+        "title": "Given linear factors and unknown quadratic coefficients",
+        "paragraphs": [
+          "Suppose a polynomial P(x) contains x − k as a factor. Then P(x) = (x − k)Q(x) for another polynomial Q, so putting x = k makes P(k) = 0. This follows immediately from multiplication: a zero factor forces a zero product. NCERT uses this observation in a starred exercise involving two stated linear factors and two unknown coefficients in a quadratic.",
+          "For P(x) = px² + 5x + r, the stated factors x − 2 and x − 1/2 imply P(2) = 0 and P(1/2) = 0. They provide TWO equations: 4p + 10 + r = 0, and p/4 + 5/2 + r = 0. Subtraction gives (15/4)p + 15/2 = 0, hence p = −2 and r = −2. As an independent check, −2(x − 2)(x − 1/2) expands to −2x² + 5x − 2. The final verification matters more than simply claiming the two coefficients are equal."
+        ],
+        "formulas": [
+          "If x − k is a factor of P(x), then P(k) = 0"
+        ],
+        "examples": [
+          {
+            "title": "NCERT starred coefficient proof",
+            "question": "If x − 2 and x − 1/2 are factors of px² + 5x + r, show p = r.",
+            "steps": [
+              "Write P(x) = px² + 5x + r. From P(2) = 0, obtain 4p + 10 + r = 0.",
+              "From P(1/2) = 0, obtain p/4 + 5/2 + r = 0.",
+              "Subtract the second equation from the first: 15p/4 + 15/2 = 0.",
+              "Multiply by 4: 15p + 30 = 0, so p = −2.",
+              "Substitute back: 4(−2) + 10 + r = 0, giving r = −2.",
+              "Verify P(x) = −2(x − 2)(x − 1/2)."
+            ],
+            "answer": "p = r = −2"
+          },
+          {
+            "title": "Find new quadratic coefficients",
+            "question": "If x − 1 and x + 3 are factors of ax² + 4x + b, find a and b.",
+            "steps": [
+              "Write ax² + 4x + b = k(x − 1)(x + 3).",
+              "Expand the factor product: (x − 1)(x + 3) = x² + 2x − 3.",
+              "Compare the x coefficients: 2k = 4, so k = 2.",
+              "Therefore a = 2 and b = −3(2) = −6.",
+              "Expand 2(x − 1)(x + 3) to check 2x² + 4x − 6."
+            ],
+            "answer": "a = 2, b = −6"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Given-factor proof for unknown coefficients",
+            "page": 23,
+            "quote": "If both x – 2 and x – 1",
+            "rationale": "NCERT Chapter 4 end-of-chapter starred Exercise 10 requires a proof that p=r using specified linear factors.",
+            "status": "partial"
+          }
+        ]
+      },
+      {
+        "section": "Mixed exam applications and fully worked solutions",
+        "title": "Area of an outer border around a square",
+        "paragraphs": [
+          "For a square playground with side L and a path of uniform width s OUTSIDE every edge, the new outer side measures L + 2s: add s on the left AND s on the right. The path's area is not the perimeter and not the area of the larger square alone. Subtract the original L² square from the outer (L + 2s)² square. This area-difference method prevents overlaps at the four corners.",
+          "Use A_path = (L + 2s)² − L² = 4Ls + 4s² = 4s(L + s). The same conclusion follows directly from difference of squares: [(L + 2s) − L][(L + 2s) + L] = (2s)(2L + 2s). State that L > 0 and s ≥ 0, use square metres for areas, and distinguish an outside path from a strip built INSIDE the original boundary."
+        ],
+        "formulas": [
+          "A_path = (L + 2s)² − L² = 4s(L + s), for an outside path"
+        ],
+        "examples": [
+          {
+            "title": "Square playground border",
+            "question": "A 40 m square playground has an outside path of uniform width s m. Express the path's area.",
+            "steps": [
+              "The original playground area is 40² = 1600 m².",
+              "The outer square has side 40 + 2s metres.",
+              "Subtract: A_path = (40 + 2s)² − 1600.",
+              "Expand to 1600 + 160s + 4s² − 1600 = 160s + 4s².",
+              "Factor, if desired: A_path = 4s(40 + s) square metres."
+            ],
+            "answer": "4s² + 160s m²"
+          },
+          {
+            "title": "Check the border formula",
+            "question": "A square 30 m across has a 2 m outside path. Find the path area.",
+            "steps": [
+              "The outer square side is 30 + 2(2) = 34 m.",
+              "Subtract areas: 34² − 30² = 1156 − 900 = 256 m².",
+              "Check by factorisation: 4s(L + s) = 4(2)(30 + 2) = 256 m²."
+            ],
+            "answer": "256 m²"
+          }
+        ],
+        "evidence": [
+          {
+            "concept": "Outer path area from algebraic identities",
+            "page": 23,
+            "quote": "A path of width s metres is created around the playground for people to walk.",
+            "rationale": "NCERT Chapter 4 end-of-chapter Exercise 7 asks for a formula for the path area around a square playground.",
+            "status": "partial"
           }
         ]
       }

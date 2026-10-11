@@ -213,8 +213,45 @@ class DeepAuditTests(unittest.TestCase):
     def test_math_verdict_must_have_substantive_reason(self):
         d = math_review()
         d["decisions"][0]["reason"] = "ok"
-        with self.assertRaisesRegex(ValueError, "substantive reason"):
-            validate_math_review(d, sample_chapter(), draft()["proposals"])
+        approved, decisions = validate_math_review(d, sample_chapter(), draft()["proposals"])
+        self.assertEqual(approved, [])
+        self.assertEqual(decisions[0]["verdict"], "uncertain")
+
+    def test_missing_math_id_withholds_candidate_without_blocking_chapter(self):
+        d = math_review()
+        d["decisions"][0]["id"] = 99
+        approved, decisions = validate_math_review(d, sample_chapter(), draft()["proposals"])
+        self.assertEqual(approved, [])
+        self.assertEqual(decisions[0]["verdict"], "uncertain")
+        self.assertIn("Missing", decisions[0]["reason"])
+
+    def test_duplicate_math_id_withholds_candidate(self):
+        d = math_review()
+        d["decisions"].append(copy.deepcopy(d["decisions"][0]))
+        approved, decisions = validate_math_review(d, sample_chapter(), draft()["proposals"])
+        self.assertEqual(approved, [])
+        self.assertIn("Duplicate", decisions[0]["reason"])
+
+    def test_bad_math_ids_still_produce_coverage_report(self):
+        calls = []
+        def ask(stage, prompt):
+            calls.append(stage)
+            if stage == "math":
+                self.assertIn('"id": 0', prompt)
+                d = math_review()
+                d["decisions"][0]["id"] = 1
+                return d
+            return {"coverage": inventory, "challenge": challenge,
+                    "draft": draft, "closure": lambda: closure(False)}[stage]()
+        report = review_chapter(Path("fake.pdf"), sample_chapter(),
+                                sample_chapter(), sample_pages(), "mock",
+                                request=ask, normal=normal, validate=validate,
+                                retry=generate_with_transient_retries)
+        self.assertEqual(calls, ["coverage", "challenge", "draft", "math", "closure"])
+        self.assertEqual(len(report["coverage"]), 6)
+        self.assertEqual(report["candidate_lessons"], [])
+        self.assertTrue(any("Missing independent mathematical decision" in flag
+                            for flag in report["rejected_claims"]))
 
     def test_final_coverage_cannot_claim_unlinked_gap_is_addressed(self):
         from deep_audit import validate_final_coverage

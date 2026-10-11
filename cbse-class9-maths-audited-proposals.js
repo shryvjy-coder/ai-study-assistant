@@ -307,7 +307,7 @@ const proposals = [
         "title": "Sum, difference, and three-variable cubic identities",
         "paragraphs": [
           "Beyond binomial cubes, expanding products of linear binomials and quadratic trinomials yields the factored forms for sums and differences of cubes. Multiplying (x - y)(x² + xy + y²) gives x(x² + xy + y²) - y(x² + xy + y²) = x³ + x²y + xy² - x²y - xy² - y³ = x³ - y³. Similarly, replacing y with -y yields (x + y)(x² - xy + y²) = x³ + y³. For every positive integer n, x − y is a factor of xⁿ − yⁿ; this extends the difference-of-powers pattern discussed in NCERT. Unlike the trinomial in a perfect square expansion, the quadratic factor has a middle coefficient of 1 rather than 2, with a sign opposite to that of the linear factor.",
-          "A broader three-variable identity arises from multiplying the trinomial x + y + z by the symmetric expression x² + y² + z² - xy - yz - zx. Expanding completely and cancelling matching cross-terms leaves x³ + y³ + z³ - 3xyz. This identity allows cubic sums of three variables to be computed efficiently when elementary sums and pairwise products are known. An important deduction is that whenever x + y + z = 0, the entire right-hand side vanishes, leading directly to the conditional result x³ + y³ + z³ = 3xyz."
+          "A broader three-variable identity arises from multiplying the trinomial x + y + z by the symmetric expression x² + y² + z² - xy - yz - zx. Expanding completely and cancelling matching cross-terms leaves x³ + y³ + z³ - 3xyz. This identity allows cubic sums of three variables to be computed efficiently when elementary sums and pairwise products are known. An important deduction is that whenever x + y + z = 0, the entire right-hand side vanishes, leading directly to the conditional result x³ + y³ + z³ = 3xyz. In worked examples, the stated sums and products should also be mutually consistent; the numbers 2, 3 and 5, for instance, have sum 10, sum of squares 38 and product 30."
         ],
         "formulas": [
           "x³ - y³ = (x - y)(x² + xy + y²)",
@@ -328,15 +328,15 @@ const proposals = [
           },
           {
             "title": "Evaluate cubic sum using three variables",
-            "question": "Find x³ + y³ + z³ if x + y + z = 10, x² + y² + z² = 38, and xyz = 25.",
+            "question": "Find x³ + y³ + z³ if x + y + z = 10, x² + y² + z² = 38, and xyz = 30.",
             "steps": [
               "Use (x + y + z)² = x² + y² + z² + 2(xy + yz + zx) to find the pairwise sum: 10² = 38 + 2(xy + yz + zx).",
               "Solve for xy + yz + zx: (100 - 38)/2 = 62/2 = 31.",
               "Substitute into the cubic identity: x³ + y³ + z³ - 3xyz = (x + y + z)(x² + y² + z² - (xy + yz + zx)).",
               "Evaluate the right side: 10 × (38 - 31) = 10 × 7 = 70.",
-              "Add 3xyz to both sides: x³ + y³ + z³ = 70 + 3(25) = 70 + 75 = 145."
+              "Add 3xyz to both sides: x³ + y³ + z³ = 70 + 3(30) = 70 + 90 = 160."
             ],
-            "answer": "145"
+            "answer": "160"
           }
         ],
         "evidence": [

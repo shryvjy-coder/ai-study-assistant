@@ -607,7 +607,17 @@
     max-height:28vh;
   }
   #study.studyai-progress-active .studyai-notes-nav-content{
-    grid-template-columns:minmax(0,1fr)!important;
+    /* The dock itself is height-constrained on phones. Ordinary document
+       flow avoids auto-grid rows being compressed and overlapping. */
+    display:block!important;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content>.studyai-contents-section{
+    display:block;
+    width:100%;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content>.studyai-contents-section+
+  .studyai-contents-section{
+    margin-top:9px;
   }
 }
 @media(prefers-reduced-motion:reduce){

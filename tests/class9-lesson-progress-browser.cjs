@@ -76,6 +76,40 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check(await toggle.getAttribute('aria-expanded')==='true' &&
       await page.locator('#studyai-notes-nav-content').isVisible(),
     'contents panel reopens without losing chapters or lessons');
+  const chapterToggle=page.locator('#collapse-chapters');
+  const subtopicToggle=page.locator('#collapse-subtopics');
+  const chapterBody=page.locator('#chapter-list');
+  const subtopicBody=page.locator('#studyai-subtopics-content');
+  check(await chapterToggle.count()===1 && await subtopicToggle.count()===1,
+    'chapters and subtopics have distinct minimize controls');
+  const sectionLayout=await page.evaluate(()=>{
+    const chapters=document.querySelector('#study .chapter-rail').getBoundingClientRect();
+    const subtopics=document.querySelector('#study .studyai-subtopics-group').getBoundingClientRect();
+    return {stacked:subtopics.top>=chapters.bottom,
+      aligned:Math.abs(chapters.left-subtopics.left)<3};
+  });
+  check(sectionLayout.stacked && sectionLayout.aligned,
+    'chapters and subtopics appear as separate stacked rows');
+  await chapterToggle.dispatchEvent('click');
+  check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
+      await chapterBody.isHidden() && await subtopicBody.isVisible(),
+    'minimizing chapters leaves subtopics expanded and visible');
+  check(await rows.count()===15,
+    'minimizing chapters preserves every lesson checkbox');
+  await subtopicToggle.dispatchEvent('click');
+  check(await subtopicToggle.getAttribute('aria-expanded')==='false' &&
+      await subtopicBody.isHidden() && await chapterBody.isHidden(),
+    'subtopics can minimize independently of chapters');
+  await chapterToggle.dispatchEvent('click');
+  check(await chapterBody.isVisible() && await subtopicBody.isHidden(),
+    'expanding chapters does not unexpectedly expand subtopics');
+  await subtopicToggle.dispatchEvent('click');
+  check(await chapterBody.isVisible() && await subtopicBody.isVisible(),
+    'both rows restore independently with lesson controls intact');
+  check(await page.evaluate(()=>localStorage.getItem(
+      'studyai-notes-chapters-minimized-v1')==='0' &&
+      localStorage.getItem('studyai-notes-subtopics-minimized-v1')==='0'),
+    'each row saves its independent state');
   check((await page.evaluate(()=>document.querySelector('#study>.shell').getBoundingClientRect().width))>1400,
     'notes use almost the full desktop width rather than the old narrow centered shell');
   check(await rows.count()===15,'World of Numbers has 15 selectable main subtopics, not 62');
@@ -138,9 +172,14 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     return saved.studyaiLessonProgress[id]?.length===14;
   },entryId),'per-lesson checks persist in existing StudyAI local state');
 
+  await chapterToggle.dispatchEvent('click');
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>window.StudyAIProgress&&
     document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length===15);
+  check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
+      await chapterBody.isHidden() && await subtopicBody.isVisible(),
+    'independent chapter collapse persists across a full browser reload');
+  await chapterToggle.dispatchEvent('click');
   check((await progress()).done===14,'completion survives a full browser reload');
   check((await page.locator('#chapter-list .chapter-item[data-id="'+entryId+'"] .studyai-progress-ring')
     .getAttribute('aria-label')).includes('14 of 15'),

@@ -33,6 +33,17 @@ on:
         required: false
         type: string
         default: ""
+      restart_stage:
+        description: "Optional: redo a problematic deep review stage and all later stages"
+        required: true
+        type: choice
+        default: none
+        options: [none, coverage, challenge, draft, math, closure]
+      restart_chapter:
+        description: "Chapter number for optional stage retry (must be in selected range)"
+        required: false
+        type: string
+        default: "4"
       max_api_requests:
         description: "Maximum Gemini generate attempts this run INCLUDING failed retries"
         required: true
@@ -121,11 +132,17 @@ jobs:
           REVIEW_DEPTH: ${{ inputs.review_depth }}
           MAX_API_REQUESTS: ${{ inputs.max_api_requests }}
           MIN_REQUEST_SECONDS: ${{ inputs.min_request_seconds }}
+          RESTART_STAGE: ${{ inputs.restart_stage }}
+          RESTART_CHAPTER: ${{ inputs.restart_chapter }}
         run: |
           set -euo pipefail
           if [ -z "$GEMINI_API_KEY" ]; then
             echo "::error::Missing GEMINI_API_KEY GitHub Actions secret"
             exit 1
+          fi
+          EXTRA_ARGS=()
+          if [ "$RESTART_STAGE" != "none" ]; then
+            EXTRA_ARGS=(--restart-stage "$RESTART_STAGE" --restart-chapter "$RESTART_CHAPTER")
           fi
           python automation-repo/automation/class9-maths/pipeline.py \
             --manifest automation-repo/automation/class9-maths/manifest.json \
@@ -137,7 +154,8 @@ jobs:
             --model "$MODEL_ID" \
             --checkpoint-dir review-artifacts/checkpoints \
             --request-budget "$MAX_API_REQUESTS" \
-            --min-request-seconds "$MIN_REQUEST_SECONDS"
+            --min-request-seconds "$MIN_REQUEST_SECONDS" \
+            "${EXTRA_ARGS[@]}"
       - name: Preserve validated checkpoints even if audit pauses or fails
         if: always()
         uses: actions/upload-artifact@v4

@@ -415,19 +415,3 @@ html[data-theme="dark"] .hero-summary,html[data-theme="dark"] .reader-view,html[
   text-transform:uppercase;
 }
 .chapter-book-label:first-child{margin-top:2px;padding-top:0;border-top:0}
-
-
-/* Study reader: full-width notes with a compact chapter selector, no left sidebar. */
-.reader-layout{display:block;min-width:0}
-.chapter-rail{position:static;top:auto;max-height:none;overflow:visible;margin-bottom:18px;border-radius:12px}
-.chapter-list{display:flex;flex-wrap:wrap;gap:7px;padding:12px}
-.chapter-book-label{flex-basis:100%;width:100%}
-.chapter-item{display:inline-flex;align-items:center;width:auto;max-width:100%;border:1px solid var(--line);background:var(--surface);padding:10px 13px}
-.chapter-item.active{border-color:var(--teal)}
-.reader{width:100%;min-width:0}
-@media(max-width:760px){
-  .reader-layout{display:block}
-  .chapter-rail{max-height:none;position:static}
-  .chapter-list{gap:6px;padding:9px}
-  .chapter-item{font-size:.85rem;padding:9px 10px}
-}

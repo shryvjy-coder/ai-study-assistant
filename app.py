@@ -257,6 +257,32 @@ def logout():
     return jsonify({'ok': True})
 
 
+@app.get('/internal/ncert-audit')
+def ncert_audit_page():
+    from audit_monitor import reviewer_allowed
+    user = current_user()
+    if not user:
+        return jsonify({'ok': False, 'error': 'Sign in required'}), 401
+    if not reviewer_allowed(user):
+        return jsonify({'ok': False, 'error': 'Reviewer access required'}), 403
+    response = send_from_directory(BASE_DIR, 'audit-review.html')
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response
+
+
+@app.get('/api/internal/ncert-audit')
+def ncert_audit_api():
+    from audit_monitor import build_snapshot, reviewer_allowed
+    user = current_user()
+    if not user:
+        return jsonify({'ok': False, 'error': 'Sign in required'}), 401
+    if not reviewer_allowed(user):
+        return jsonify({'ok': False, 'error': 'Reviewer access required'}), 403
+    response = jsonify(build_snapshot(BASE_DIR / 'automation/class9-maths/manifest.json'))
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response
+
+
 @app.get('/api/state')
 @login_required
 def get_state():

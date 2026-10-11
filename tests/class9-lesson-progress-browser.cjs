@@ -60,12 +60,14 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     '#study .reader-layout')).gridTemplateColumns.split(' ').length))===2,
     'desktop uses a contents panel and a wide notes column');
   const toggle=page.locator('#toggle-notes-nav');
-  const widthBefore=await page.locator('#study .reader').evaluate(el=>el.getBoundingClientRect().width);
+  const widthBefore=await page.evaluate(()=>getComputedStyle(document.querySelector(
+    '#study .reader-layout')).gridTemplateColumns.split(' ').map(Number.parseFloat)[1]);
   await toggle.click();
   check(await toggle.getAttribute('aria-expanded')==='false' &&
       await page.locator('#studyai-notes-nav-content').isHidden(),
     'minimize hides chapter and lesson lists with an accessible toggle');
-  const widthAfter=await page.locator('#study .reader').evaluate(el=>el.getBoundingClientRect().width);
+  const widthAfter=await page.evaluate(()=>getComputedStyle(document.querySelector(
+    '#study .reader-layout')).gridTemplateColumns.split(' ').map(Number.parseFloat)[1]);
   check(widthAfter>widthBefore+150,
     'minimizing returns the contents column width to the lesson');
   check(await page.evaluate(()=>localStorage.getItem('studyai-notes-contents-minimized-v1'))==='1',

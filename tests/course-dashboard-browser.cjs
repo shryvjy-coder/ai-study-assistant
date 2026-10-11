@@ -104,7 +104,9 @@ async function dismissFirstRun(page){
     state.lastTopic=topic.id;
     state.studyaiLastLesson={topicId:topic.id,index:1};
     save();
-    return {title:lessons[1].title,total:lessons.length};
+    const courseUnits=STUDY_DATA.filter(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics')
+      .reduce((sum,e)=>sum+(window.StudyAIProgress.summary(e.id)?.total||1),0);
+    return {title:lessons[1].title,total:courseUnits};
   });
   await page.waitForFunction(total=>
     document.querySelector('#my-course-grid .course-card .course-card-stats')?.textContent.includes('1 / '+total),

@@ -115,12 +115,8 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     });
   });
   for (const item of css) {
-    // Chapter buttons are within the study contents dock, whose existing
-    // 0.50s hover motion was lengthened by 0.25s. Other website buttons keep
-    // their original half-second interactions.
-    const expected=item.selector==='.chapter-item'?.75:.5;
-    check(Math.abs(parseFloat(item.duration)-expected)<.001,
-      item.selector+' has a '+expected.toFixed(2)+'-second hover transition');
+    check(Math.abs(parseFloat(item.duration)-.75)<.001,
+      item.selector+' has a smooth 0.75-second hover transition (+0.25s)');
   }
   // Inspect the loaded CSS rule directly. Long-page auto-scrolling can make a
   // Playwright pointer hover unreliable even when the rule is present and valid.
@@ -142,8 +138,67 @@ async function openCourse(page, board, grade, subject, component = 'All componen
   check(hoverRule&&hoverRule.important==='important','inward hover rule overrides older outward hover effects');
   check(hoverRule.shadow.includes('inset')&&hoverRule.shadow.includes('rgba(0, 0, 0'),
     'inward hover applies a recessed shadow');
-  check(hoverRule.transform==='none','inward hover keeps clickable button hitbox stable');
-  check(Number.parseFloat(hoverRule.filter.slice(hoverRule.filter.indexOf('(')+1))<1, 'inward hover subtly darkens the button');
+  check(hoverRule.transform.includes('translateY(2px)') &&
+      hoverRule.transform.includes('scale('),
+    'hover applies a gentle downward press and slight scale instead of no movement');
+  check(Number.parseFloat(hoverRule.filter.slice(hoverRule.filter.indexOf('(')+1))<1,
+    'inward hover subtly darkens the button');
+
+  // Test the actual computed animation halfway through, not merely CSS rules:
+  // we had previously shipped duration declarations that looked unchanged.
+  await page.evaluate(()=>{
+    document.querySelectorAll('dialog[open]').forEach(d=>d.close());
+    const probe=document.createElement('button');
+    probe.id='button-motion-probe';
+    probe.type='button';
+    probe.className='button primary';
+    probe.textContent='Press animation test';
+    Object.assign(probe.style,{
+      position:'fixed',left:'38%',top:'42%',zIndex:'2147483646',
+      padding:'16px 24px'
+    });
+    document.body.appendChild(probe);
+  });
+  const probe=page.locator('#button-motion-probe');
+  const readTransform=()=>page.evaluate(()=>{
+    const style=getComputedStyle(document.getElementById('button-motion-probe'));
+    const matrix=new DOMMatrixReadOnly(style.transform);
+    return {y:matrix.m42,scale:matrix.m11,duration:style.transitionDuration};
+  });
+  const rest=await readTransform();
+  check(Math.abs(rest.y)<.01&&Math.abs(rest.scale-1)<.001,
+    'test button begins at its original resting position');
+  await probe.hover();
+  await page.waitForTimeout(180);
+  const midway=await readTransform();
+  await page.waitForTimeout(720);
+  const pressed=await readTransform();
+  check(midway.y>.08&&midway.y<pressed.y-.03 &&
+      pressed.y>1.8&&pressed.y<2.1,
+    'hover visibly eases through intermediate positions into a 2px press');
+  check(midway.scale<1&&midway.scale>pressed.scale &&
+      pressed.scale>.98&&pressed.scale<.99,
+    'button gradually compresses slightly on hover');
+  await page.mouse.down();
+  await page.waitForTimeout(260);
+  const down=await readTransform();
+  check(down.y>2.8&&down.scale<.975,
+    'mouse-down adds a firmer, quick physical press');
+  await page.mouse.up();
+  await page.mouse.move(20,20);
+  await page.waitForTimeout(840);
+  const released=await readTransform();
+  check(Math.abs(released.y)<.06&&Math.abs(released.scale-1)<.005,
+    'button softly returns to its resting position on mouse leave');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await probe.hover();
+  const reduced=await readTransform();
+  check(Math.abs(reduced.y)<.01 &&
+      Math.abs(reduced.scale-1)<.001 &&
+      reduced.duration.split(',').every(duration=>parseFloat(duration)===0),
+    'Windows reduced-motion preference disables button movement and transitions');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.evaluate(()=>document.getElementById('button-motion-probe').remove());
 
   check(errors.length===0,'no JavaScript page errors: '+errors.join('; '));
   console.log('CHAPTER NAVIGATION AND BUTTON HOVER OK');

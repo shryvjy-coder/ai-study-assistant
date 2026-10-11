@@ -53,6 +53,8 @@ jobs:
           node --check tests/class9-maths-all-chapters-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
+      - name: NCERT Class 9 Chapter 4 reviewed-lesson regression
+        run: node tests/class9-ch04-audit-overlay.cjs
       - name: CAIE AS Physics deep-note regression
         run: node tests/caie-as-physics.cjs
       - name: CAIE AS Chemistry deep-note regression

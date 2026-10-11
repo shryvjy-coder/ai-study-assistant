@@ -99,6 +99,39 @@ class PipelineTests(unittest.TestCase):
             generate_with_transient_retries(request, sleep=lambda _:None)
         self.assertEqual(len(count),1)
 
+    def test_hard_daily_quota_does_not_retry(self):
+        class APIError(Exception):
+            code=429
+        calls=[]
+        def request():
+            calls.append(1)
+            raise APIError("Quota exceeded for GenerateRequestsPerDayPerProjectPerModel, limit: 0")
+        with self.assertRaisesRegex(RuntimeError, "quota appears exhausted"):
+            generate_with_transient_retries(request, sleep=lambda _:None)
+        self.assertEqual(len(calls),1)
+
+    def test_temporary_429_is_retried_and_can_recover(self):
+        class APIError(Exception):
+            code=429
+        calls=[]
+        waits=[]
+        def request():
+            calls.append(1)
+            if len(calls)==1:
+                raise APIError("RESOURCE_EXHAUSTED: requests per minute")
+            return "ok"
+        self.assertEqual(generate_with_transient_retries(request, sleep=waits.append),"ok")
+        self.assertEqual(len(calls),2)
+        self.assertEqual(waits,[10])
+
+    def test_temporary_429_reports_rate_limits_when_exhausted(self):
+        class APIError(Exception):
+            code=429
+        def request():
+            raise APIError("RESOURCE_EXHAUSTED: input tokens per minute")
+        with self.assertRaisesRegex(RuntimeError, "token-rate quota"):
+            generate_with_transient_retries(request, attempts=1, sleep=lambda _:None)
+
     def test_gemini_exhaustion_is_bounded(self):
         class APIError(Exception):
             code=503

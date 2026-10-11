@@ -1,5 +1,6 @@
 /* Review-only, textbook-cited StudyAI curriculum proposals.
- * Generated deterministically by automation/class9-maths/apply-proposals.py.
+ * Generated initially by the NCERT pipeline, with manually reviewed Chapter 4 enrichments.
+ * Changes beyond the three original AI-reviewed candidates require human checking.
  * AI-written content is JSON data: never use eval or Function on this data.
  */
 (() => {
@@ -668,7 +669,7 @@ const proposals = [
           {
             "concept": "Conditional cubic expressions in NCERT end exercises",
             "page": 23,
-            "quote": "Find the value of",
+            "quote": "x3 + y3 – 12xy + 64, when x + y = – 4",
             "rationale": "NCERT Chapter 4 end-of-chapter Exercise 13 asks for two cubic expressions given x+y=−4 or x=2y+6.",
             "status": "partial"
           }
@@ -715,7 +716,7 @@ const proposals = [
           {
             "concept": "Given-factor proof for unknown coefficients",
             "page": 23,
-            "quote": "If both x – 2 and x – 1",
+            "quote": "If both x – 2 and x – 1/2 are factors of px2 + 5x + r, show that p = r.",
             "rationale": "NCERT Chapter 4 end-of-chapter starred Exercise 10 requires a proof that p=r using specified linear factors.",
             "status": "partial"
           }

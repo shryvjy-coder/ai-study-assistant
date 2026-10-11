@@ -91,7 +91,7 @@
     $('#audit-controller').textContent = snapshot.controller?.status || 'Unavailable';
     $('#chapter-count').textContent = chapters.length+' chapters';
     $('#audit-chapters').innerHTML = chapters.map(c=>
-      '<button type="button" class="chapter-choice" role="listitem" data-audit-chapter="'+c.number+'" aria-current="false">'+
+      '<button type="button" class="chapter-choice" data-audit-chapter="'+c.number+'" aria-current="false">'+
       '<span class="chapter-number">'+String(c.number).padStart(2,'0')+'</span>'+
       '<span class="chapter-title">'+safe(c.title)+'<span class="chapter-state">'+
       safe(labels[c.status]||'Unknown state')+'</span></span></button>'

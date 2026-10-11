@@ -93,6 +93,8 @@ def claim_day(state: dict, *, run_id: int, today: str, current_notes_sha: str) -
     check_sha(current_notes_sha)
     if not state["enabled"]:
         return state, False, "Batch not armed. Manually dispatch operation=start first."
+    if state["last_attempt_utc_day"] == today:
+        return state, False, "Daily batch already claimed a run today; no second quota-consuming attempt."
     if state["inflight_run_id"] is not None:
         # A prior scheduled run failed to finalize its checkpoint pointer.
         # Do not automatically replay and potentially repay for its stages.
@@ -105,8 +107,6 @@ def claim_day(state: dict, *, run_id: int, today: str, current_notes_sha: str) -
         state["status"] = "needs_attention"
         state["inflight_run_id"] = None
         return state, False, "Notes branch changed since batch was armed; stopped without Gemini calls."
-    if state["last_attempt_utc_day"] == today:
-        return state, False, "Daily batch already claimed a run today; no second quota-consuming attempt."
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", today):
         raise ValueError("Invalid UTC date")
     if type(run_id) is not int or run_id < 1:

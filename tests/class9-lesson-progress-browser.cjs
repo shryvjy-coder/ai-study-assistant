@@ -86,6 +86,54 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     'notes card extends all the way to the right gutter without its old 1160px cap');
   check(wide.textWidth>1200,
     'full notes prose can expand beyond the old 92-character text limit');
+
+  // Test the lesson children themselves: the prior release widened the
+  // article while actual lesson paragraphs, figures and controls stayed narrow.
+  // Add a temporary lesson-style probe; remove it before progress tests.
+  const fluid=await page.evaluate(()=>{
+    const prose=document.querySelector('#study #detailed-notes .note-prose');
+    const sample=document.createElement('div');
+    sample.className='studyai-lesson-subtopic';
+    const paragraph=document.createElement('p');
+    paragraph.textContent='Long teaching explanation that should occupy the available width.';
+    const figure=document.createElement('figure');
+    figure.className='studyai-concept-figure';
+    figure.innerHTML='<svg viewBox="0 0 1200 600" aria-label="Layout test diagram"></svg>';
+    const grid=document.createElement('div');
+    grid.className='concept-grid';
+    for(let i=0;i<4;i++){
+      const card=document.createElement('div');
+      card.className='concept-card';
+      card.textContent='Concept '+(i+1);
+      grid.appendChild(card);
+    }
+    sample.append(paragraph,figure,grid);
+    prose.appendChild(sample);
+    const diagram=figure.querySelector('svg');
+    const selector=document.querySelector('#study #detailed-notes .studyai-topic-select');
+    const notes=document.querySelector('#study .personal-note-wrap');
+    const data={
+      prose:prose.getBoundingClientRect().width,
+      paragraph:paragraph.getBoundingClientRect().width,
+      illustration:diagram.getBoundingClientRect().width,
+      figureMaxWidth:getComputedStyle(diagram).maxWidth,
+      cardColumns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+      selectorMaxWidth:selector?getComputedStyle(selector).maxWidth:null,
+      personalMaxWidth:notes?getComputedStyle(notes).maxWidth:null
+    };
+    sample.remove();
+    return data;
+  });
+  check(fluid.paragraph>1200 &&
+      fluid.paragraph>fluid.prose*.93,
+    'actual lesson paragraphs reflow across the wider notes canvas: '+JSON.stringify(fluid));
+  check(fluid.illustration>1200 && fluid.figureMaxWidth==='none',
+    'concept diagrams scale to the notes width rather than stopping at 750px');
+  check(fluid.cardColumns>=3,
+    'wide lessons can show additional concept cards side by side');
+  check(fluid.selectorMaxWidth==='none' &&
+      fluid.personalMaxWidth==='none',
+    'lesson selector and personal notes do not retain old fixed width caps');
   await page.setViewportSize({width:1600,height:900});
 
   const toggle=page.locator('#toggle-notes-nav');

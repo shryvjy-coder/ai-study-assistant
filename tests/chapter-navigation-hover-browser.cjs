@@ -115,8 +115,12 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     });
   });
   for (const item of css) {
-    check(Math.abs(parseFloat(item.duration)-.5)<.001,
-      item.selector+' has a 0.5-second hover transition');
+    // Chapter buttons are within the study contents dock, whose existing
+    // 0.50s hover motion was lengthened by 0.25s. Other website buttons keep
+    // their original half-second interactions.
+    const expected=item.selector==='.chapter-item'?.75:.5;
+    check(Math.abs(parseFloat(item.duration)-expected)<.001,
+      item.selector+' has a '+expected.toFixed(2)+'-second hover transition');
   }
   // Inspect the loaded CSS rule directly. Long-page auto-scrolling can make a
   // Playwright pointer hover unreliable even when the rule is present and valid.

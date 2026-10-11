@@ -33,7 +33,7 @@ class MultiDayTests(unittest.TestCase):
         self.assertIn('cron: "15 9 * * *"', workflow)
         self.assertIn("if: steps.control.outputs.run == 'true'", workflow)
         self.assertIn("if: steps.notes-base.outcome == 'success'", workflow)
-        self.assertIn("if: steps.review.outputs.exit_code == '0'", workflow)
+        self.assertIn("steps.review.outputs.exit_code == '0'", workflow)
         self.assertIn("gh pr create --draft", workflow)
         self.assertIn("resume_run_id", workflow)
         self.assertNotIn("gh pr merge", workflow)

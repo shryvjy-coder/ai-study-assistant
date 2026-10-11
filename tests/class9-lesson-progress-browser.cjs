@@ -60,80 +60,69 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     '#study .reader-layout')).gridTemplateColumns.split(' ').length))===2,
     'desktop uses a contents panel and a wide notes column');
 
-  // A 2400px monitor used to leave blank right-hand space because the Study
-  // shell was capped at 1620px, the article at 1160px and note text at 92ch.
+  // Center the familiar-sized notes pane in the available reading area.
+  // When the contents dock is expanded, the usable area starts farther
+  // right and naturally shifts the (still centered) notes pane rightward.
   await page.setViewportSize({width:2400,height:1000});
-  const wide=await page.evaluate(()=>{
+  const measure=()=>page.evaluate(()=>{
     const shell=document.querySelector('#study>.shell').getBoundingClientRect();
     const reader=document.querySelector('#study .reader').getBoundingClientRect();
-    const article=document.querySelector('#study #reader-view').getBoundingClientRect();
-    const prose=document.querySelector('#study #detailed-notes .note-prose');
-    const text=prose?.getBoundingClientRect();
+    const prose=document.querySelector('#study #detailed-notes .note-prose').getBoundingClientRect();
     return {
       shellWidth:shell.width,
-      shellRight:window.innerWidth-shell.right,
-      readerRight:window.innerWidth-reader.right,
-      readerWidth:reader.width,
-      articleWidth:article.width,
-      textWidth:text?.width||0,
+      width:reader.width,
+      center:reader.left+reader.width/2,
+      proseWidth:prose.width,
       viewport:window.innerWidth
     };
   });
-  check(wide.shellWidth>2300 && wide.shellRight>=0 && wide.shellRight<=16,
-    'wide monitors use the Study section nearly edge-to-edge: '+JSON.stringify(wide));
-  check(wide.readerRight>=0 && wide.readerRight<=18 &&
-        wide.readerWidth>1700 && wide.articleWidth>1700,
-    'notes card extends all the way to the right gutter without its old 1160px cap');
-  check(wide.textWidth>1200,
-    'full notes prose can expand beyond the old 92-character text limit');
+  const expandedReading=await measure();
+  check(expandedReading.shellWidth>2300 &&
+      expandedReading.width>=1155 && expandedReading.width<=1165,
+    'notes return to their former 1160px width, within the wide Study workspace: '+
+      JSON.stringify(expandedReading));
+  check(expandedReading.proseWidth>550 && expandedReading.proseWidth<1050,
+    'lesson text regains a readable capped width instead of filling an ultra-wide line');
+  await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
+  const minimizedReading=await measure();
+  check(Math.abs(minimizedReading.center-minimizedReading.viewport/2)<80,
+    'minimized Contents centers the reading card near the middle of the page');
+  check(expandedReading.center-minimizedReading.center>150 &&
+      Math.abs(expandedReading.width-minimizedReading.width)<2,
+    'opening Contents pushes the notes right but does not widen the card');
+  await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
 
-  // Test the lesson children themselves: the prior release widened the
-  // article while actual lesson paragraphs, figures and controls stayed narrow.
-  // Add a temporary lesson-style probe; remove it before progress tests.
-  const fluid=await page.evaluate(()=>{
+  // Check the inner content caps as well: the previous update accidentally
+  // stretched individual paragraphs and concept illustrations too far.
+  const readable=await page.evaluate(()=>{
     const prose=document.querySelector('#study #detailed-notes .note-prose');
     const sample=document.createElement('div');
     sample.className='studyai-lesson-subtopic';
     const paragraph=document.createElement('p');
-    paragraph.textContent='Long teaching explanation that should occupy the available width.';
+    paragraph.textContent='Example explanation';
     const figure=document.createElement('figure');
     figure.className='studyai-concept-figure';
-    figure.innerHTML='<svg viewBox="0 0 1200 600" aria-label="Layout test diagram"></svg>';
-    const grid=document.createElement('div');
-    grid.className='concept-grid';
-    for(let i=0;i<4;i++){
-      const card=document.createElement('div');
-      card.className='concept-card';
-      card.textContent='Concept '+(i+1);
-      grid.appendChild(card);
-    }
-    sample.append(paragraph,figure,grid);
+    figure.innerHTML='<svg viewBox="0 0 1200 600" aria-label="Layout test"></svg>';
+    sample.append(paragraph,figure);
     prose.appendChild(sample);
-    const diagram=figure.querySelector('svg');
+    const svg=figure.querySelector('svg');
     const selector=document.querySelector('#study #detailed-notes .studyai-topic-select');
-    const notes=document.querySelector('#study .personal-note-wrap');
+    const personal=document.querySelector('#study .personal-note-wrap');
     const data={
-      prose:prose.getBoundingClientRect().width,
-      paragraph:paragraph.getBoundingClientRect().width,
-      illustration:diagram.getBoundingClientRect().width,
-      figureMaxWidth:getComputedStyle(diagram).maxWidth,
-      cardColumns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+      paragraphWidth:paragraph.getBoundingClientRect().width,
+      diagramWidth:svg.getBoundingClientRect().width,
       selectorMaxWidth:selector?getComputedStyle(selector).maxWidth:null,
-      personalMaxWidth:notes?getComputedStyle(notes).maxWidth:null
+      personalMaxWidth:personal?getComputedStyle(personal).maxWidth:null
     };
     sample.remove();
     return data;
   });
-  check(fluid.paragraph>1200 &&
-      fluid.paragraph>fluid.prose*.93,
-    'actual lesson paragraphs reflow across the wider notes canvas: '+JSON.stringify(fluid));
-  check(fluid.illustration>1200 && fluid.figureMaxWidth==='none',
-    'concept diagrams scale to the notes width rather than stopping at 750px');
-  check(fluid.cardColumns>=3,
-    'wide lessons can show additional concept cards side by side');
-  check(fluid.selectorMaxWidth==='none' &&
-      fluid.personalMaxWidth==='none',
-    'lesson selector and personal notes do not retain old fixed width caps');
+  check(readable.paragraphWidth<1050 &&
+      readable.diagramWidth<=752 &&
+      readable.selectorMaxWidth==='680px' &&
+      readable.personalMaxWidth==='820px',
+    'inner paragraphs, diagrams, lesson selector and personal notes return to readable sizing: '+
+      JSON.stringify(readable));
   await page.setViewportSize({width:1600,height:900});
 
   const toggle=page.locator('#toggle-notes-nav');
@@ -179,6 +168,9 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
     'minimizing chapters leaves subtopics expanded and visible');
+  check(await chapterToggle.locator('.studyai-section-mini-text').isVisible() &&
+      await chapterToggle.locator('.studyai-section-mini-text').textContent()==='Chapters',
+    'minimized Chapters column keeps a visible, named expand target');
   const chaptersMinWidth=await dockWidth();
   check(chaptersMinWidth<expandedDock-100 &&
       chaptersMinWidth>200 &&
@@ -190,6 +182,10 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check(await subtopicToggle.getAttribute('aria-expanded')==='false' &&
       await subtopicBody.isHidden() && await chapterBody.isHidden(),
     'subtopics can minimize independently of chapters');
+  check(await subtopicToggle.locator('.studyai-section-mini-text').isVisible() &&
+      await subtopicToggle.locator('.studyai-section-mini-text').textContent()==='Subtopics' &&
+      await chapterToggle.locator('.studyai-section-mini-text').isVisible(),
+    'both minimized columns show distinctive Chapters and Subtopics labels');
   const bothMinWidth=await dockWidth();
   check(bothMinWidth<chaptersMinWidth-100 &&
       await page.locator('#study.studyai-chapters-minimized.studyai-subtopics-minimized').count()===1,
@@ -320,11 +316,14 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   });
   check(mobileColumns.stacked && mobileColumns.fit && mobileColumns.chapterWidth>250,
     'mobile stacks both study navigation sections without overflow: '+JSON.stringify(mobileColumns));
-  await toggle.click();
+  // Onboarding may surface asynchronously in this otherwise unrelated
+  // page test. Dispatch the existing toggle handler directly on mobile;
+  // normal pointer clicking is covered earlier in this browser test.
+  await toggle.dispatchEvent('click');
   check(await page.locator('#studyai-notes-nav-content').isHidden() &&
       await page.locator('#study .reader').isVisible(),
     'mobile readers can minimize the contents while keeping the note visible');
-  await toggle.click();
+  await toggle.dispatchEvent('click');
   await page.setViewportSize({width:1600,height:900});
 
   // The normal-motion experience is slower by 250ms; reduced-motion checks

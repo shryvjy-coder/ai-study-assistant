@@ -186,9 +186,10 @@
   grid-column:auto;
   min-width:0;
   width:100%;
-  /* Allow the notes card to fill every pixel to the right of the navigation. */
-  max-width:none;
-  margin:0;
+  /* Restore the comfortable 1160px reading card; center it within the
+     space remaining after the independent Chapter/Subtopic columns. */
+  max-width:1160px;
+  margin-inline:auto;
 }
 #study .reader-view,
 #study .reader-empty,
@@ -223,8 +224,8 @@
 #study .article-tabs button{font-size:.88rem;padding:11px 13px}
 #study .note-prose,
 #study.studyai-progress-active #detailed-notes .note-prose{
-  /* Text, worked examples and figures can use the wider reading canvas. */
-  max-width:none;
+  /* Restore the previous readable line lengths inside the notes card. */
+  max-width:92ch;
   width:100%;
 }
 #study .note-prose p{line-height:1.72}
@@ -634,59 +635,40 @@
 }
 
 
-/* The shell and article already extend to the right edge. Let the ACTUAL
- * lesson content reflow into that room rather than stopping at old per-item
- * widths (82ch paragraphs, 750px diagrams, 680px lesson selector). These
- * rules affect notes only; navigation columns and content are unchanged. */
-#study #detailed-notes .note-prose,
-#study #detailed-notes .actual-chapter-notes,
-#study #detailed-notes .actual-note-topic,
-#study #detailed-notes .studyai-lesson-subtopic{
-  box-sizing:border-box;
-  width:100%;
-  min-width:0;
-  max-width:none;
-}
-#study #detailed-notes .studyai-lesson-subtopic p{
-  max-width:none;
-  width:100%;
-}
-#study #detailed-notes .studyai-concept-figure,
-#study #detailed-notes .studyai-diagram{
-  width:100%;
-  max-width:none;
-  min-width:0;
-}
-#study #detailed-notes .studyai-concept-figure svg{
-  display:block;
-  width:100%;
-  max-width:none;
-  height:auto;
-  /* Larger figures, but no giant image that pushes the lesson off-screen. */
-  max-height:min(72vh,720px);
-  object-fit:contain;
-}
-#study #detailed-notes .studyai-diagram svg{
-  max-width:none;
-  max-height:min(72vh,720px);
-  object-fit:contain;
-}
-#study #detailed-notes .studyai-compact-chapter .studyai-topic-select,
-#study #detailed-notes.studyai-compact-chapter .studyai-topic-select{
-  max-width:none;
-}
-#study .personal-note-wrap{
-  width:100%;
-  max-width:none;
-}
-/* Existing concept cards naturally gain extra columns on wide reading panes.
- * An individual card stays at least 300px wide when space permits. */
-#study #detailed-notes .concept-grid{
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));
-}
-@media(max-width:760px){
-  #study #detailed-notes .studyai-concept-figure svg,
-  #study #detailed-notes .studyai-diagram svg{
-    max-height:360px;
+
+/* Clearly labeled, independently minimized navigation columns.
+ * Keep the label inside the expand button so the text and chevron
+ * are one accessible click target, not an unlabeled 48px strip. */
+#study .studyai-section-mini-text{display:none}
+@media(min-width:761px){
+  #study.studyai-progress-active.studyai-chapters-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav #collapse-chapters,
+  #study.studyai-progress-active.studyai-subtopics-minimized:not(.studyai-nav-collapsed) .studyai-notes-nav #collapse-subtopics{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:8px;
+    width:40px;
+    height:auto;
+    min-height:142px;
+    padding:10px 4px;
+    overflow:visible;
+  }
+  #study.studyai-progress-active.studyai-chapters-minimized:not(.studyai-nav-collapsed) #collapse-chapters .studyai-section-mini-text,
+  #study.studyai-progress-active.studyai-subtopics-minimized:not(.studyai-nav-collapsed) #collapse-subtopics .studyai-section-mini-text{
+    display:block;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    white-space:nowrap;
+    letter-spacing:.055em;
+    font-size:.7rem;
+    font-weight:850;
+    line-height:1.1;
+  }
+  #study .studyai-section-chevron{
+    display:block;
+    font-size:1.18rem;
+    line-height:1;
+    flex:0 0 auto;
   }
 }

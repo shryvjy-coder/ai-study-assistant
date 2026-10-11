@@ -115,7 +115,11 @@
         rowButton.setAttribute('aria-label',
           (rowMinimized?'Expand ':'Minimize ')+label.toLowerCase());
         rowButton.title=(rowMinimized?'Expand ':'Minimize ')+label.toLowerCase();
-        rowButton.textContent=rowMinimized?'⌄':'⌃';
+        // Keep the visible Chapters/Subtopics mini-label in the button.
+        // Replacing the button's textContent would destroy the label span.
+        const chevron=rowButton.querySelector('.studyai-section-chevron');
+        if(chevron)chevron.textContent=rowMinimized?'⌄':'⌃';
+        else rowButton.textContent=rowMinimized?'⌄':'⌃';
       };
       // Initial hydration is immediate, so a saved collapsed panel doesn't
       // flash open while the browser first renders the page.

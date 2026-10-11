@@ -22,6 +22,11 @@ NOTES_BRANCH = "class9-maths-all-chapters-depth"
 CHAPTERS = list(range(5, 15))
 SCHEMA = 1
 MAX_CONSECUTIVE_PAUSES = 3
+MAX_DAILY_BUDGET = 18
+# One-time approved change to the originally armed, not-yet-run 6-attempt batch.
+# It is applied only after a scheduled day is safely claimed (and therefore
+# only after the updated controller lands on the default branch).
+PREVIOUS_DAILY_BUDGET = 6
 HEX_SHA = re.compile(r"^[0-9a-f]{40}$")
 REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 ALLOWED_MODELS = ("gemini-3.8-flash",)
@@ -38,8 +43,8 @@ def new_state(*, code_sha: str, notes_sha: str, model: str, budget: int, run_id:
     check_sha(notes_sha)
     if model not in ALLOWED_MODELS:
         raise ValueError("Unsupported Gemini model; check supported IDs and quotas")
-    if type(budget) is not int or not 1 <= budget <= 10:
-        raise ValueError("Daily API request cap must be 1–10")
+    if type(budget) is not int or not 1 <= budget <= MAX_DAILY_BUDGET:
+        raise ValueError("Daily API request cap must be 1–18")
     if type(run_id) is not int or run_id < 1:
         raise ValueError("Invalid GitHub Actions run ID")
     return {
@@ -73,7 +78,7 @@ def validate_state(state: dict) -> dict:
         raise ValueError("Unsupported model stored in batch state")
     check_sha(state.get("automation_sha"))
     check_sha(state.get("notes_sha"))
-    if type(state.get("daily_budget")) is not int or not 1 <= state["daily_budget"] <= 10:
+    if type(state.get("daily_budget")) is not int or not 1 <= state["daily_budget"] <= MAX_DAILY_BUDGET:
         raise ValueError("Invalid daily request budget in batch state")
     if type(state.get("enabled")) is not bool:
         raise ValueError("Missing enabled setting")
@@ -276,6 +281,15 @@ def prepare(args: argparse.Namespace) -> None:
                     state, run_id=args.run_id,
                     today=datetime.now(timezone.utc).date().isoformat(),
                     current_notes_sha=branch_sha(args.repo, NOTES_BRANCH))
+                if run and (state["status"] == "armed"
+                            and state["last_run_id"] is None
+                            and state["daily_budget"] == PREVIOUS_DAILY_BUDGET
+                            and args.budget == MAX_DAILY_BUDGET):
+                    # Upgrade the existing opt-in batch without resetting its
+                    # notes SHA, checkpoints, daily claim, or schedule. A failed
+                    # claim never changes the budget or invokes Gemini.
+                    next_state["daily_budget"] = MAX_DAILY_BUDGET
+                    message += " Existing armed batch budget upgraded from 6 to 18 attempts."
                 if next_state != state:
                     save(args.repo, next_state, file_sha=etag, base_sha=args.commit_sha)
                 if run:
@@ -328,7 +342,7 @@ def main() -> int:
     parser.add_argument("--commit-sha", required=True)
     parser.add_argument("--run-id", type=int, required=True)
     parser.add_argument("--model", default=ALLOWED_MODELS[0])
-    parser.add_argument("--budget", type=int, default=6)
+    parser.add_argument("--budget", type=int, default=18)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--report", type=Path)

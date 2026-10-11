@@ -192,11 +192,22 @@ async function openCourse(page, board, grade, subject, component = 'All componen
     'button softly returns to its resting position on mouse leave');
   await page.emulateMedia({reducedMotion:'reduce'});
   await probe.hover();
+  // Allow the new media query to be applied before measuring. Some browser
+  // runners can report one stale composited frame at the exact switch.
+  await page.waitForFunction(()=>{
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches)return false;
+    const button=document.getElementById('button-motion-probe');
+    const css=getComputedStyle(button);
+    const matrix=new DOMMatrixReadOnly(css.transform);
+    return Math.abs(matrix.m42)<.01 && Math.abs(matrix.m11-1)<.001 &&
+      css.transitionDuration.split(',').every(x=>parseFloat(x)===0);
+  },null,{timeout:2500});
   const reduced=await readTransform();
   check(Math.abs(reduced.y)<.01 &&
       Math.abs(reduced.scale-1)<.001 &&
       reduced.duration.split(',').every(duration=>parseFloat(duration)===0),
-    'Windows reduced-motion preference disables button movement and transitions');
+    'Windows reduced-motion preference disables button movement and transitions: '+
+      JSON.stringify(reduced));
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.evaluate(()=>document.getElementById('button-motion-probe').remove());
 

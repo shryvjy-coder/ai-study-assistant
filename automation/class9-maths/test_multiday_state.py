@@ -63,6 +63,20 @@ class MultiDayTests(unittest.TestCase):
         self.assertFalse(go2)
         self.assertIn("already claimed", reason)
 
+    def test_abandoned_prior_daily_run_disarms_instead_of_repaying(self):
+        s, first, _ = claim_day(
+            state(), run_id=101, today="2026-10-12",
+            current_notes_sha=NOTES_SHA)
+        self.assertTrue(first)
+        # No finalize call was made, e.g. the GitHub runner disappeared.
+        next_state, second, reason = claim_day(
+            s, run_id=102, today="2026-10-13",
+            current_notes_sha=NOTES_SHA)
+        self.assertFalse(second)
+        self.assertFalse(next_state["enabled"])
+        self.assertEqual(next_state["status"], "needs_attention")
+        self.assertIn("never finalized", reason)
+
     def test_source_drift_disarms_before_any_gemini_calls(self):
         s, allowed, reason = claim_day(
             state(), run_id=111, today="2026-10-12", current_notes_sha=OTHER_SHA)

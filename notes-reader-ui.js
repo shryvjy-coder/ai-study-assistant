@@ -1,4 +1,4 @@
-/* StudyAI notes: collapsible contents dock and independent chapter/lesson rows.
+/* StudyAI notes: collapsible contents dock with parallel chapter/subtopic columns.
  * Interaction durations are intentionally increased, never replaced with 0.25s.
  * Respects reduced-motion accessibility preferences.
  */
@@ -104,6 +104,13 @@
       try{savedValue=localStorage.getItem(storageKey)}catch(_){}
       let rowMinimized=savedValue==='1';
       const updateButton=()=>{
+        // Let the two side-by-side columns shrink independently, giving
+        // unused width back to the full notes reader.
+        study.classList.toggle(
+          buttonId==='collapse-chapters'
+            ?'studyai-chapters-minimized':'studyai-subtopics-minimized',
+          rowMinimized
+        );
         rowButton.setAttribute('aria-expanded',String(!rowMinimized));
         rowButton.setAttribute('aria-label',
           (rowMinimized?'Expand ':'Minimize ')+label.toLowerCase());

@@ -16,6 +16,7 @@
   </script>
   <link rel="stylesheet" href="cobalt-theme.css" />
   <link rel="stylesheet" href="course-dashboard.css" />
+  <link rel="stylesheet" href="learning-hub.css" />
   <link rel="stylesheet" href="studyai-diagrams.css" />
   <link rel="stylesheet" href="studyai-concept-figures.css" />
   <link rel="stylesheet" href="chapter-navigation-motion.css" />
@@ -46,9 +47,9 @@
   <div class="shell">
     <div class="dashboard-heading">
       <div>
-        <p class="kicker">Your StudyAI dashboard</p>
-        <h1>Your courses, your progress, your next step.</h1>
-        <p>Add the courses you actually study. StudyAI keeps notes, completion, practice evidence and revision actions together without making you dig through every curriculum.</p>
+        <p class="kicker"><span class="hub-pulse" aria-hidden="true"></span> Your learning space</p>
+        <h1>One clear place to <em>keep learning.</em></h1>
+        <p>Your courses, completed lessons and practice-based progress—together in a workspace that helps you pick up where you left off.</p>
       </div>
       <div class="dashboard-actions">
         <button class="button primary" id="open-add-course" type="button">+ Add course</button>
@@ -57,19 +58,20 @@
     </div>
 
     <div class="dashboard-metric-grid" aria-label="Dashboard summary">
-      <article class="dashboard-metric"><span>My courses</span><strong id="dashboard-course-count">0</strong></article>
-      <article class="dashboard-metric"><span>Topics completed</span><strong id="dashboard-topic-progress">—</strong></article>
-      <article class="dashboard-metric"><span>Practiced mastery</span><strong id="dashboard-mastery">—</strong></article>
-      <article class="dashboard-metric"><span>Review actions</span><strong id="dashboard-review-count">0</strong></article>
+      <article class="dashboard-metric"><span>My courses</span><strong id="dashboard-course-count">0</strong><small>Chosen by you</small></article>
+      <article class="dashboard-metric"><span>Chapters completed</span><strong id="dashboard-topic-progress">—</strong><small>Within your selected courses</small></article>
+      <article class="dashboard-metric"><span>Practiced mastery</span><strong id="dashboard-mastery">—</strong><small>Based on answered questions</small></article>
+      <article class="dashboard-metric"><span>Review actions</span><strong id="dashboard-review-count">0</strong><small>From your learning evidence</small></article>
     </div>
 
+    <div class="hub-section-title"><div><p class="small-label">Pick up where you left off</p><h2>Make your next study session count.</h2></div><a class="hub-text-link" href="#planner">Open revision planner <span aria-hidden="true">→</span></a></div>
     <div class="dashboard-progress-card">
       <article class="dashboard-next" id="dashboard-next-topic">
         <div><span class="small-label">Continue studying</span><h3>Add your first course</h3><p>Your next topic will appear here once you choose what you are studying.</p></div>
         <button class="button primary" type="button" data-dashboard-add>Add course</button>
       </article>
       <aside class="dashboard-snapshot">
-        <div class="summary-head"><span class="small-label">Selected-course completion</span><strong id="hero-percent">0%</strong></div>
+        <div class="summary-head"><span class="small-label">Chapter completion</span><strong id="hero-percent">0%</strong></div>
         <div class="rule-progress"><span id="hero-progress"></span></div>
         <dl class="summary-list">
           <div><dt>Completed</dt><dd id="hero-completed">0</dd></div>
@@ -78,13 +80,26 @@
           <div><dt>SAT mastery</dt><dd id="hero-sat">0%</dd></div>
         </dl>
         <p class="summary-note" id="hero-next">Add your courses to personalise StudyAI.</p>
+        <div class="hub-lesson-summary" id="hub-lesson-summary" hidden><span>Class 9 Maths lessons checked</span><strong id="hub-lessons-done">0 / 0</strong><div class="hub-mini-progress" role="progressbar" aria-label="Class 9 mathematics lessons completed" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="hub-lesson-fill"></span></div><small>Lesson checkmarks track reading, not tested mastery.</small></div>
       </aside>
     </div>
 
+    <section class="hub-action-section" aria-labelledby="hub-action-heading">
+      <div class="hub-section-title"><div><p class="small-label">Suggested next moves</p><h2 id="hub-action-heading">What could you do next?</h2></div><span class="hub-subtle-label">Based on your own progress</span></div>
+      <div id="hub-action-grid" class="hub-action-grid" aria-live="polite">
+        <article class="hub-action-card"><span class="hub-action-icon" aria-hidden="true">01</span><h3>Start with a course</h3><p>Add a course to get personalised study suggestions.</p><button class="button secondary" type="button" data-dashboard-add>Add course</button></article>
+      </div>
+    </section>
+
     <div class="my-courses-section">
       <div class="my-courses-head">
-        <div><span class="small-label">My Courses</span><h2>Everything you are studying.</h2></div>
+        <div><span class="small-label">Your curriculum</span><h2>My courses</h2><p class="hub-head-note">One course at a time, or all of them at once.</p></div>
         <button class="button secondary compact" id="dashboard-add-another" type="button">+ Add another course</button>
+      </div>
+      <div class="hub-course-filter" aria-label="Filter your courses" role="group">
+        <button class="hub-filter active" type="button" data-course-view="all" aria-pressed="true">All courses</button>
+        <button class="hub-filter" type="button" data-course-view="ongoing" aria-pressed="false">In progress</button>
+        <button class="hub-filter" type="button" data-course-view="complete" aria-pressed="false">Completed</button>
       </div>
       <div id="course-empty-state" class="course-empty-state">
         <span class="small-label">Start here</span>
@@ -93,6 +108,7 @@
         <button class="button primary" id="course-empty-add" type="button">Add my first course</button>
       </div>
       <div id="my-course-grid" class="my-course-grid"></div>
+      <p class="hub-course-filter-empty" id="hub-filter-empty" hidden>No courses match this filter yet. Choose All courses to see everything.</p>
       <p class="dashboard-evidence-note">Mastery only changes when you answer practice questions. Reading or marking a note complete does not increase mastery.</p>
     </div>
 
@@ -105,6 +121,7 @@
       </div>
     </div>
 
+    <div class="hub-project-link"><span><strong>Building StudyAI?</strong> Follow textbook coverage and automated reviews in a separate project workspace.</span><a href="audit-dashboard.html">Open audit monitor <span aria-hidden="true">↗</span></a></div>
     <div class="today-product-wrap">
       <div id="today-dashboard"></div>
     </div>
@@ -329,7 +346,7 @@
   <div><a class="brand" href="#today"><span class="brand-mark">S</span><span>StudyAI</span></a><p>Independent student portfolio project. Not affiliated with CBSE, Cambridge International, College Board, Khan Academy or Save My Exams.</p></div>
   <div><strong>Study</strong><a href="#study">Curriculum library</a><a href="#sat">SAT practice</a><a href="#flashcards">Flashcards</a></div>
   <div><strong>Plan</strong><a href="#progress">Progress</a><a href="#planner">Planner</a></div>
-  <div><strong>Data</strong><button class="text-button" id="share-current">Share current note</button><a href="/privacy">Privacy &amp; data</a></div>
+  <div><strong>Data</strong><button class="text-button" id="share-current">Share current note</button><a href="/privacy">Privacy &amp; data</a><a href="audit-dashboard.html">Project audit monitor</a></div>
 </div></footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>

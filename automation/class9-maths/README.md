@@ -116,6 +116,25 @@ malformed stage must be retried. If sources or code changed, an existing
 checkpoint is **rejected**, not quietly mixed with new material. Start fresh
 (or re-run against matching source revisions) if that happens.
 
+**Resuming after an automation code fix:** The normal fingerprint rejects
+different audit-code versions. If you resume from a prior manual workflow run,
+the workflow now checks out the **exact Git commit SHA of that trusted earlier
+run** and recomputes the previous fingerprint from that code plus today's
+textbook, exported notes and model. Reuse is permitted only when this old
+fingerprint agrees with the downloaded checkpoint manifest, and only when
+the exact stage prompt hash still matches and the current deterministic
+validation passes. Changed textbook bytes, notes, model or prompts remain a
+hard block. This is deliberately narrower than a general stale-cache override.
+
+For the Chapter 4 failure on **11 Oct 2026**, the checkpoints are attached
+to run `38125069123`. After merging the optional-final-omissions fix, manually
+dispatch Chapter 4 again with `resume_run_id=38125069123`,
+`restart_stage=none` and `max_api_requests=1`. If sources and prompt
+fingerprints match, coverage, challenge, drafting and mathematical review
+replay without Gemini calls, while closure uses just one new generate attempt.
+This is not a guarantee against 429 errors or that final maths QA will approve
+all lessons.
+
 **Review-stage redo:** If the model previously returned unconvincing maths
 verdicts (for example, wrong proposal IDs marked `uncertain`), choose
 `restart_stage=math` and `restart_chapter=4` together with the previous

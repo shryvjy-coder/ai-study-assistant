@@ -26,6 +26,20 @@ def state():
 
 
 class MultiDayTests(unittest.TestCase):
+    def test_workflow_requires_opt_in_and_keeps_publish_draft_only(self):
+        workflow = (Path(__file__).resolve().parents[2] /
+                    ".github/workflows/ncert-class9-multiday.yml").read_text()
+        self.assertIn('options: [status, start, stop]', workflow)
+        self.assertIn('cron: "15 9 * * *"', workflow)
+        self.assertIn("if: steps.control.outputs.run == 'true'", workflow)
+        self.assertIn("if: steps.notes-base.outcome == 'success'", workflow)
+        self.assertIn("if: steps.review.outputs.exit_code == '0'", workflow)
+        self.assertIn("gh pr create --draft", workflow)
+        self.assertIn("resume_run_id", workflow)
+        self.assertNotIn("gh pr merge", workflow)
+        self.assertNotIn("\\${", workflow)
+        self.assertIn("--exit-code", workflow)
+
     def test_start_arms_without_claiming_today_or_calling_model(self):
         s = state()
         self.assertTrue(s["enabled"])

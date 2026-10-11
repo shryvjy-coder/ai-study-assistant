@@ -64,9 +64,25 @@
     let minimized=saved==='1'||(saved===null&&
       window.matchMedia('(max-width: 760px)').matches);
 
-    const apply=()=>{
-      study.classList.toggle('studyai-nav-collapsed',minimized);
-      contents.hidden=minimized;
+    const apply=(animated=false)=>{
+      // The old handler set [hidden] immediately. That short-circuited the
+      // entire Contents panel motion, even though the CSS had a duration.
+      // On interaction, animate the panel body BEFORE hiding it.
+      if(animated && !reducedMotion()){
+        if(minimized){
+          animateRow(contents,true);
+          study.classList.add('studyai-nav-collapsed');
+        }else{
+          study.classList.remove('studyai-nav-collapsed');
+          animateRow(contents,false);
+        }
+      }else{
+        study.classList.toggle('studyai-nav-collapsed',minimized);
+        const previous=running.get(contents);
+        if(previous){previous.cancel();running.delete(contents);}
+        contents.hidden=minimized;
+        contents.inert=minimized;
+      }
       button.setAttribute('aria-expanded',String(!minimized));
       button.setAttribute('aria-label',minimized?'Expand notes contents':'Minimize notes contents');
       button.title=minimized?'Expand notes contents':'Minimize notes contents';
@@ -75,7 +91,7 @@
     button.addEventListener('click',()=>{
       minimized=!minimized;
       try{localStorage.setItem(KEY,minimized?'1':'0')}catch(_){}
-      apply();
+      apply(true);
     });
     apply();
 

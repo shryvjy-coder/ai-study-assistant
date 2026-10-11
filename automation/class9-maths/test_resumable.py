@@ -17,7 +17,8 @@ class ResumableAuditTests(unittest.TestCase):
     def checkpoint(self, root, *, model="mock-model", notes=None):
         chapter = sample_chapter()
         pdf = root / "chapter.pdf"
-        pdf.write_bytes(b"%PDF-1.4 test fixture")
+        if not pdf.exists():
+            pdf.write_bytes(b"%PDF-1.4 test fixture")
         notes = notes or chapter
         fingerprint = build_fingerprint(
             pdf, notes, chapter, model,

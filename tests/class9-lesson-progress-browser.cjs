@@ -85,27 +85,46 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   const sectionLayout=await page.evaluate(()=>{
     const chapters=document.querySelector('#study .chapter-rail').getBoundingClientRect();
     const subtopics=document.querySelector('#study .studyai-subtopics-group').getBoundingClientRect();
-    return {stacked:subtopics.top>=chapters.bottom,
-      aligned:Math.abs(chapters.left-subtopics.left)<3};
+    const reader=document.querySelector('#study .reader').getBoundingClientRect();
+    return {
+      adjacent:subtopics.left>=chapters.right-2 && reader.left>=subtopics.right-2,
+      aligned:Math.abs(chapters.top-subtopics.top)<3,
+      chapterWidth:chapters.width,subtopicWidth:subtopics.width
+    };
   });
-  check(sectionLayout.stacked && sectionLayout.aligned,
-    'chapters and subtopics appear as separate stacked rows');
+  check(sectionLayout.adjacent && sectionLayout.aligned &&
+      sectionLayout.chapterWidth>175 && sectionLayout.subtopicWidth>175,
+    'desktop places Chapters and Subtopics side by side, with full notes on the right');
+  const dockWidth=()=>page.evaluate(()=>parseFloat(getComputedStyle(
+    document.querySelector('#study .reader-layout')).gridTemplateColumns));
+  const expandedDock=await dockWidth();
   await chapterToggle.dispatchEvent('click');
   check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
     'minimizing chapters leaves subtopics expanded and visible');
+  const chaptersMinWidth=await dockWidth();
+  check(chaptersMinWidth<expandedDock-100 &&
+      chaptersMinWidth>200 &&
+      await page.locator('#study.studyai-chapters-minimized').count()===1,
+    'minimizing only Chapters shrinks its own column and enlarges the reader');
   check(await rows.count()===15,
     'minimizing chapters preserves every lesson checkbox');
   await subtopicToggle.dispatchEvent('click');
   check(await subtopicToggle.getAttribute('aria-expanded')==='false' &&
       await subtopicBody.isHidden() && await chapterBody.isHidden(),
     'subtopics can minimize independently of chapters');
+  const bothMinWidth=await dockWidth();
+  check(bothMinWidth<chaptersMinWidth-100 &&
+      await page.locator('#study.studyai-chapters-minimized.studyai-subtopics-minimized').count()===1,
+    'minimizing both columns leaves two compact tabs and maximal reading space');
   await chapterToggle.dispatchEvent('click');
-  check(await chapterBody.isVisible() && await subtopicBody.isHidden(),
-    'expanding chapters does not unexpectedly expand subtopics');
+  check(await chapterBody.isVisible() && await subtopicBody.isHidden() &&
+      Math.abs((await dockWidth())-chaptersMinWidth)<3,
+    'expanding Chapters restores its column without unexpectedly expanding Subtopics');
   await subtopicToggle.dispatchEvent('click');
-  check(await chapterBody.isVisible() && await subtopicBody.isVisible(),
-    'both rows restore independently with lesson controls intact');
+  check(await chapterBody.isVisible() && await subtopicBody.isVisible() &&
+      Math.abs((await dockWidth())-expandedDock)<3,
+    'expanding both restores parallel columns without losing lesson controls');
   check(await page.evaluate(()=>localStorage.getItem(
       'studyai-notes-chapters-minimized-v1')==='0' &&
       localStorage.getItem('studyai-notes-subtopics-minimized-v1')==='0'),
@@ -207,6 +226,17 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check((await page.evaluate(()=>getComputedStyle(document.querySelector(
     '#study .reader-layout')).display))==='block',
     'small screens stack the combined contents panel above the notes');
+  const mobileColumns=await page.evaluate(()=>{
+    const chapters=document.querySelector('#study .chapter-rail').getBoundingClientRect();
+    const subtopics=document.querySelector('#study .studyai-subtopics-group').getBoundingClientRect();
+    return {
+      stacked:subtopics.top>=chapters.bottom-2,
+      fit:document.documentElement.scrollWidth<=window.innerWidth+4,
+      chapterWidth:chapters.width
+    };
+  });
+  check(mobileColumns.stacked && mobileColumns.fit && mobileColumns.chapterWidth>250,
+    'mobile stacks both full-width sections vertically without horizontal overflow');
   await toggle.click();
   check(await page.locator('#studyai-notes-nav-content').isHidden() &&
       await page.locator('#study .reader').isVisible(),
@@ -240,12 +270,12 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   const measureTrack=()=>page.evaluate(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns));
   const expandedTrack=await measureTrack();
-  check(expandedTrack>250,'expanded contents dock occupies a readable width');
+  check(expandedTrack>450,'expanded parallel columns occupy a readable width');
   await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
   await page.waitForFunction(()=>{
     const track=parseFloat(getComputedStyle(document.querySelector(
       '#study .reader-layout')).gridTemplateColumns);
-    return track>90&&track<245;
+    return track>90&&track<440;
   },null,{timeout:1500});
   const midwayTrack=await measureTrack();
   check(midwayTrack>90&&midwayTrack<245 &&
@@ -260,12 +290,12 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.waitForFunction(()=>{
     const track=parseFloat(getComputedStyle(document.querySelector(
       '#study .reader-layout')).gridTemplateColumns);
-    return track>90&&track<245;
+    return track>90&&track<440;
   },null,{timeout:1500});
   check(await page.locator('#studyai-notes-nav-content').isVisible(),
     'opening dock animates through intermediate widths rather than snapping');
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
-    document.querySelector('#study .reader-layout')).gridTemplateColumns)>295,
+    document.querySelector('#study .reader-layout')).gridTemplateColumns)>540,
     null,{timeout:2000});
   await page.waitForFunction(()=>document.querySelector('#studyai-notes-nav-content')
     .getAnimations().length===0,null,{timeout:2000});

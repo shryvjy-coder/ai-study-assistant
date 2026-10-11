@@ -76,11 +76,13 @@ body :is(button, a.button, input[type="button"], input[type="submit"], input[typ
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]) {
+  /* Match or exceed the normal rule's specificity. Both declarations use
+   * !important, so a weaker accessibility selector would lose the cascade. */
+  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard),
+  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):not(:disabled):not([aria-disabled="true"]):is(:hover,:active) {
     transition: none !important;
   }
-  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):hover,
-  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):active {
+  body :is(button, a.button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]):not(.password-toggle):not(#flashcard):not(:disabled):not([aria-disabled="true"]):is(:hover,:active) {
     transform: none !important;
   }
 }

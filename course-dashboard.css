@@ -64,3 +64,15 @@
  .dashboard-actions{width:100%}
  .dashboard-actions .button{flex:1}
 }
+/* Accessible next-step cards share the course dashboard's existing visual system. */
+.dashboard-focus{margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}
+.dashboard-focus .my-courses-head h2{font-size:1.35rem;margin:.2rem 0}
+.dashboard-focus-caption{font-size:.78rem;color:var(--muted)}
+.dashboard-focus-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dashboard-focus-item{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.dashboard-focus-item h3{font-size:1rem;margin:6px 0 8px;line-height:1.4}
+.dashboard-focus-item p,.dashboard-focus-empty{font-size:.85rem;color:var(--muted);margin:0}
+.dashboard-focus-item .button{margin-top:auto}
+.dashboard-focus-empty{grid-column:1/-1;padding:18px;border:1px dashed var(--line);border-radius:14px}
+@media(max-width:900px){.dashboard-focus-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.dashboard-focus-grid{grid-template-columns:1fr}.dashboard-focus-caption{display:none}}

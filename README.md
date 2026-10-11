@@ -547,3 +547,42 @@ Workspace notes and follow normal StudyAI workspace sync rules. Do not upload
 secrets or other sensitive records. There is basic per-user usage throttling,
 but a public deployment still needs robust account protection, costs/quotas,
 data deletion and privacy controls, and HTTPS.
+
+
+## Reviewer-only NCERT Class 9 Maths dashboard
+
+StudyAI has an internal, read-only curriculum quality-control view at
+`/internal/ncert-audit`. It is intentionally not part of the public student
+navigation. It cannot call Gemini, trigger GitHub Actions, merge PRs, change
+review status, or deploy notes.
+
+To grant access, set `STUDYAI_AUDIT_REVIEWERS` to a comma-separated allowlist
+of signed-in StudyAI account email addresses, then restart the server. An unset
+or empty allowlist denies access. Both the page and the JSON endpoint
+`/api/internal/ncert-audit` independently enforce this rule.
+
+The controller state is read from the dedicated GitHub ref
+`automation/ncert-class9-multiday-state` via the public GitHub API on the
+server, with a two-minute cache and a short network timeout. If GitHub is
+unavailable, the viewer reports that state is unavailable rather than treating
+the audit as complete.
+
+For concept-level evidence, an operator can separately download the original
+`audit.json` from a trusted GitHub Actions review run and point
+`NCERT_AUDIT_REPORT_JSON` at its absolute path **on the server**. Do not place
+review artifacts, GitHub tokens, or Gemini keys in browser-served files. The
+viewer performs schema checks and labels processed results as awaiting human
+review, never approved. No reviewer-decision persistence is currently present.
+The report's modified timestamp identifies the loaded artifact snapshot, which
+may be older than the live controller. Verify the underlying run before
+signing off a curriculum change.
+
+The student dashboard reuses the existing `selectedCourses`,
+`studyaiLessonProgress`, `completed`, and `mastery` state. Class 9 Maths
+cards display lesson-level progress, and Continue Studying can reopen the
+last visited subtopic. The chapter completion metric remains distinct from
+practice mastery and does not claim that reading equals competence.
+
+Regression tests: `python -m unittest discover -s tests -p
+'test_audit_monitor.py' -v` and `node tests/course-dashboard-browser.cjs`
+(the latter requires Playwright and local Flask dependencies).

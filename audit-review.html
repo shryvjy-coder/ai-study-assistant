@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>NCERT Audit Review | StudyAI</title>
+<link rel="stylesheet" href="/audit-review.css">
+<script src="/audit-review.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#audit-main">Skip to audit overview</a>
+<header class="audit-header">
+  <a href="/#today" class="audit-brand"><span class="audit-logo" aria-hidden="true">S</span> StudyAI</a>
+  <span class="reviewer-tag">Internal curriculum review</span>
+  <a class="back-link" href="/#today">← Student dashboard</a>
+</header>
+<main id="audit-main" class="audit-shell">
+  <div class="audit-heading">
+    <div><p class="eyebrow">NCERT · Class 9 Mathematics · 2026–27</p><h1>Curriculum quality control</h1>
+      <p>Inspect independently produced audit evidence before reviewing proposed notes. Automated processing never means human approval.</p></div>
+    <button class="refresh-button" type="button" id="audit-refresh">Refresh status</button>
+  </div>
+  <div id="audit-message" class="audit-message" role="status" aria-live="polite">Loading verified audit sources…</div>
+  <section class="audit-highlights" aria-label="Audit summary">
+    <article><span>Chapters in curriculum</span><strong id="audit-total">14</strong></article>
+    <article><span>Reports loaded</span><strong id="audit-reports">—</strong></article>
+    <article><span>Human approvals recorded</span><strong id="audit-approved">—</strong></article>
+    <article><span>Batch controller</span><strong id="audit-controller">Unknown</strong></article>
+  </section>
+  <div class="audit-columns">
+    <section class="chapter-panel" aria-labelledby="chapter-list-title">
+      <div class="panel-heading"><h2 id="chapter-list-title">Chapter review queue</h2><small id="chapter-count">Select a chapter</small></div>
+      <div id="audit-chapters" class="chapter-list"></div>
+    </section>
+    <section class="detail-panel" aria-labelledby="audit-detail-heading">
+      <div id="audit-detail"><h2 id="audit-detail-heading">Select a chapter</h2><p>Choose a chapter to inspect its report, unresolved issues, mathematical decisions and source links.</p></div>
+    </section>
+  </div>
+  <section class="audit-sources" aria-labelledby="source-title">
+    <h2 id="source-title">Data provenance and review rules</h2>
+    <p id="source-description">This page reads the published controller state and optional server-side reports. Missing evidence is never interpreted as a completed audit.</p>
+    <div id="audit-links" class="audit-links"></div>
+    <p>To display detailed coverage evidence, an operator must configure <code>NCERT_AUDIT_REPORT_JSON</code> on the server to reference an authentic <code>audit.json</code> artifact. This viewer cannot edit, merge, publish or start audits.</p>
+  </section>
+</main>
+</body>
+</html>

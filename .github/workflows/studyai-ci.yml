@@ -18,8 +18,10 @@ jobs:
         with:
           node-version: "22"
       - run: pip install -r requirements.txt
-      - run: python -m py_compile app.py launcher.py personal_ai.py database.py production_preflight.py migrate_sqlite_to_postgres.py verify_neon_setup.py tests/pre-beta-server.py tests/postgres-migration.py
+      - run: python -m py_compile audit_monitor.py app.py launcher.py personal_ai.py database.py production_preflight.py migrate_sqlite_to_postgres.py verify_neon_setup.py tests/pre-beta-server.py tests/postgres-migration.py
       - run: python tests/pre-beta-server.py
+      - name: Audit review security and reporting tests
+        run: python -m unittest discover -s tests -p 'test_audit_monitor.py' -v
       - name: JavaScript syntax
         shell: bash
         run: |

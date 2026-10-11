@@ -161,3 +161,77 @@ billing and quota accounting govern. Cache replay of the PDF and source notes
 is rejected if their bytes change (including updates to the textbook server).
 Completed reports must still be read and mathematically checked by a human.
 This workflow never schedules itself for the next day and never auto-merges.
+
+
+## One-time opt-in automation for Chapters 5–14 (multi-day)
+
+**Only after reviewing and merging the automation PR:** Open GitHub **Actions >
+NCERT Class 9 Maths — opt-in multi-day Deep Audit > Run workflow**. Choose
+operation **start**, model `gemini-3.8-flash`, and a conservative daily cap
+(default **6 generate attempts**). **Start arms the following scheduled run**;
+the start run itself does not call Gemini or spend API quota. GitHub's daily
+schedule runs at **09:15 UTC (14:45 IST)**, after the Gemini daily quota's
+Pacific-time reset. Scheduled GitHub Actions may start late or be skipped
+during platform incidents. No model calls run on schedule at all unless the
+manual **start** operation created an active state.
+
+**Before starting**, complete review of draft Chapter 4 PR #43 and merge it
+into the **notes branch** if approved. The system snapshots that exact notes
+commit and the audit code commit at start. If the notes branch changes later
+(including an unrelated approved lesson merge), it automatically **disarms
+without Gemini calls** rather than mixing incompatible sources. You can use
+operation **stop** at any time to disarm future runs. Operation **status**
+prints the state without making model calls. To continue after a stopped or
+attention-required run, a new manual start is required; starting anew does
+**not automatically inherit prior batch checkpoints**.
+
+**Daily behaviour**:
+1. The scheduled workflow reads `.ncert-class9-multiday-state.json`
+   from the dedicated `automation/ncert-class9-multiday-state` branch.
+   This is a persistent metadata branch, separate from main, website code and
+   the unmerged notes branch. It contains no API keys or AI content.
+2. It refuses to run unless manually armed, the notes SHA still matches, and
+   the current UTC date has not already been claimed. The day is claimed
+   BEFORE calling the API to prevent duplicate daily spending.
+3. It restores the previous scheduled run's validated checkpoint artifact
+   (same strict fingerprint, model, notes, PDF bytes and prompts as Deep
+   Audit v2), then reviews the whole Chapter 5–14 range. Earlier completed
+   model stages are replayed without more Gemini generate calls.
+4. Each day is capped at `daily_budget` actual **generate attempts,
+   including temporary 503/429 retries**. A minimum 35-second interval
+   spaces requests. Token and project-wide limits are external and may still
+   trigger 429; this is a safety cap, not a guarantee of quota.
+5. After the run, an Actions artifact captures checkpoints and a report
+   even when the pipeline pauses. The state points to the newest checkpoint
+   run only after GitHub confirms the artifact upload.
+6. When **all ten chapters** are fully processed, the workflow checks that
+   the original notes branch is unchanged, applies approved candidates,
+   runs curriculum/lesson/browser regressions, and creates a **DRAFT**
+   PR against `class9-maths-all-chapters-depth`. It then disables itself.
+   **There is never an auto-merge or deployment.**
+
+Any deterministic coverage/mathematics/schema block disables the schedule
+until human inspection. If the API repeatedly fails without producing
+new validated stages for **three consecutive days**, the schedule disarms
+rather than spending quota indefinitely. When each day adds validated
+checkpoints, these productive quota pauses **do not count as stalls**. If
+a complete audit encounters browser or PR publishing errors, the next
+scheduled run retries the publishing workflow using checkpoints; no new
+model calls are required unless sources became incompatible.
+
+**Duration:** the full Deep Audit typically involves approximately 3–5
+model requests per chapter, or 30–50 model calls for Chapters 5–14.
+With six attempts allowed per day, plan for **at least 5–9 scheduled days**
+plus retries, outages, remaining quota and human checks. Daily GitHub
+artifacts expire after 30 days; download reports if you need longer retention.
+The state branch remains after completion for status/history; it is not a
+secret store. Human reviewers must still verify the teaching and mathematical
+proofs before merging lesson PRs.
+
+**Important limitations:** This new schedule is untested against real Gemini
+until you explicitly start it. Offline contract tests cannot guarantee
+external PDF availability, actual API quotas or that model responses will be
+valid. A runner termination before artifact upload can lose that day's
+in-memory progress; the controller then requires human intervention.
+`GITHUB_TOKEN` must be allowed to create draft pull requests, and workflows
+must have the contents/actions/pull-request permissions specified in YAML.

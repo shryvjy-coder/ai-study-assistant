@@ -414,6 +414,8 @@ def main() -> int:
                         help="Manually redo this stage and all later stages")
     parser.add_argument("--restart-chapter",type=int,
                         help="Chapter to redo without deleting earlier accepted stages")
+    parser.add_argument("--stop-on-blocked",action="store_true",
+                        help="Stop immediately on a structural failure instead of auditing later chapters")
     args=parser.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
         parser.error("GEMINI_API_KEY is missing: add it as a GitHub Actions repository secret")
@@ -497,8 +499,8 @@ def main() -> int:
             reports.append({"chapter_number":i,"chapter_title":entry["title"],
                             "status":status,"error":message,
                             "verified_gaps":[],"candidate_lessons":[]})
-            if paused:
-                print("  Stopping batch now to protect the remaining Gemini quota.",flush=True)
+            if paused or args.stop_on_blocked:
+                print("  Stopping batch to protect quota and preserve prior checkpoints.",flush=True)
                 break
         finally:
             pdf.unlink(missing_ok=True)

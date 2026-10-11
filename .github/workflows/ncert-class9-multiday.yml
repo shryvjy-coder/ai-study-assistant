@@ -1,0 +1,258 @@
+name: NCERT Class 9 Maths — opt-in multi-day Deep Audit
+
+# Schedule is inert until a person manually dispatches operation=start.
+# start arms the NEXT daily run; start/stop/status never invoke Gemini.
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "start = arm for next daily run; stop = disarm; status = inspect only"
+        required: true
+        type: choice
+        default: status
+        options: [status, start, stop]
+      model:
+        description: "Gemini model held fixed throughout the batch"
+        required: true
+        type: choice
+        default: gemini-3.8-flash
+        options: [gemini-3.8-flash]
+      daily_budget:
+        description: "Daily maximum Gemini generate ATTEMPTS including retries"
+        required: true
+        type: choice
+        default: "6"
+        options: ["3", "4", "5", "6", "8", "10"]
+  schedule:
+    # 09:15 UTC = 14:45 IST, after midnight PT in either seasonal offset.
+    - cron: "15 9 * * *"
+
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
+
+concurrency:
+  group: ncert-class9-maths-batch-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout controller (never calls Gemini)
+        uses: actions/checkout@v4
+        with:
+          path: control-repo
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Enforce manual opt-in, source pinning, and once-daily claim
+        id: control
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPERATION: ${{ inputs.operation || 'status' }}
+          MODEL: ${{ inputs.model || 'gemini-3.8-flash' }}
+          BUDGET: ${{ inputs.daily_budget || '6' }}
+        run: |
+          set -euo pipefail
+          python control-repo/automation/class9-maths/multiday_state.py prepare \
+            --repo "$GITHUB_REPOSITORY" --event "$GITHUB_EVENT_NAME" \
+            --operation "$OPERATION" --commit-sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" --model "$MODEL" --budget "$BUDGET" \
+            --output "$GITHUB_OUTPUT" --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout pinned review code
+        if: steps.control.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.control.outputs.code_sha }}
+          path: automation-repo
+          persist-credentials: false
+      - name: Checkout pinned unmerged notes
+        if: steps.control.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.control.outputs.notes_sha }}
+          path: site
+      - uses: actions/setup-node@v4
+        if: steps.control.outputs.run == 'true'
+        with:
+          node-version: "22"
+      - name: Install PDF/Gemini dependencies
+        if: steps.control.outputs.run == 'true'
+        run: python -m pip install -r automation-repo/automation/class9-maths/requirements.txt
+      - name: Offline tests and complete notes export
+        if: steps.control.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s automation-repo/automation/class9-maths -p 'test_*.py' -q
+          node automation-repo/automation/class9-maths/export-notes.cjs site > current-notes.json
+          python -c 'import json; assert len(json.load(open("current-notes.json"))["chapters"]) == 14'
+
+      - name: Restore previous trusted checkpoint artifact
+        if: steps.control.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESUME_RUN: ${{ steps.control.outputs.resume_run_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p review-artifacts/checkpoints
+          if [ -z "$RESUME_RUN" ]; then
+            echo "New batch, no previous checkpoint artifact."
+            exit 0
+          fi
+          [[ "$RESUME_RUN" =~ ^[0-9]+$ ]]
+          OLD_PATH="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.path')"
+          OLD_EVENT="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.event')"
+          OLD_BRANCH="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" --jq '.head_branch')"
+          if [[ "$OLD_PATH" != ".github/workflows/ncert-class9-multiday.yml" || "$OLD_EVENT" != schedule || "$OLD_BRANCH" != main ]]; then
+            echo "::error::Resume artifact must belong to this scheduled workflow in main."
+            exit 1
+          fi
+          gh run download "$RESUME_RUN" --repo "$GITHUB_REPOSITORY" \
+            --name "ncert-class9-checkpoints-$RESUME_RUN" \
+            --dir review-artifacts/checkpoints
+          echo "Recovered validated stage checkpoints from $RESUME_RUN."
+
+      - name: Review Chapters 5–14 within today's request budget
+        if: steps.control.outputs.run == 'true'
+        id: review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MODEL_ID: ${{ steps.control.outputs.model }}
+          MAX_ATTEMPTS: ${{ steps.control.outputs.budget }}
+          SPACING: ${{ steps.control.outputs.min_request_seconds }}
+        run: |
+          set -euo pipefail
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::Missing GEMINI_API_KEY secret"
+            echo "exit_code=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          set +e
+          python automation-repo/automation/class9-maths/pipeline.py \
+            --manifest automation-repo/automation/class9-maths/manifest.json \
+            --notes current-notes.json --output review-artifacts \
+            --chapter 5-14 --mode propose --depth deep --model "$MODEL_ID" \
+            --checkpoint-dir review-artifacts/checkpoints \
+            --request-budget "$MAX_ATTEMPTS" --min-request-seconds "$SPACING" \
+            --stop-on-blocked
+          RESULT=$?
+          set -e
+          echo "exit_code=$RESULT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload checkpoint snapshot even after a pause or failure
+        if: always() && steps.control.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        id: checkpoints
+        with:
+          name: ncert-class9-checkpoints-${{ github.run_id }}
+          path: review-artifacts/checkpoints/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Upload source-grounded report
+        if: always() && steps.control.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ncert-class9-report-${{ github.run_id }}
+          path: |
+            review-artifacts/audit.json
+            review-artifacts/audit.md
+            review-artifacts/candidate-lessons.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Show daily report
+        if: always() && steps.control.outputs.run == 'true'
+        run: |
+          if [ -f review-artifacts/audit.md ]; then cat review-artifacts/audit.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Check that notes branch has not moved before publishing
+        id: notes-base
+        if: steps.control.outputs.run == 'true' && steps.review.outputs.exit_code == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_SHA: ${{ steps.control.outputs.notes_sha }}
+        run: |
+          set -euo pipefail
+          CURRENT="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/class9-maths-all-chapters-depth" --jq '.object.sha')"
+          if [ "$CURRENT" != "$EXPECTED_SHA" ]; then
+            echo "::error::Refusing to publish on notes that changed during this audit."
+            exit 1
+          fi
+      - name: Apply consolidated notes only when all 10 chapters passed
+        if: steps.notes-base.outcome == 'success'
+        id: patch
+        env:
+          REVIEW_BRANCH: curriculum/ncert-multiday-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git -C site switch -c "$REVIEW_BRANCH"
+          python automation-repo/automation/class9-maths/apply-proposals.py \
+            --site site --candidates review-artifacts/candidate-lessons.json
+          node --check site/cbse-class9-maths-audited-proposals.js
+          node automation-repo/automation/class9-maths/export-notes.cjs site > merged-notes.json
+          python -c 'import json; assert len(json.load(open("merged-notes.json"))["chapters"]) == 14'
+      - name: Full chapter and progress-tracking browser checks
+        if: steps.patch.outcome == 'success'
+        id: browser
+        run: |
+          set -euo pipefail
+          python -m pip install -r site/requirements.txt
+          (cd site && npm install --no-save playwright && npx playwright install --with-deps chromium)
+          (cd site && node tests/cbse-curriculum.cjs)
+          (cd site && node tests/class9-maths-all-chapters-browser.cjs)
+          (cd site && node tests/class9-lesson-progress-browser.cjs)
+          (cd site && node tests/class9-math-topic-browser.cjs)
+      - name: Open consolidated DRAFT notes PR; never merge or deploy
+        if: steps.browser.outcome == 'success'
+        id: publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEW_BRANCH: curriculum/ncert-multiday-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          cd site
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html cbse-class9-maths-audited-proposals.js
+          if git diff --cached --quiet; then
+            echo "Full audit complete; no new evidence-backed lessons. No PR required."
+            exit 0
+          fi
+          git commit -m "Draft NCERT Chapter 5–14 evidence-backed notes"
+          git push --set-upstream origin "$REVIEW_BRANCH"
+          PR_URL="$(gh pr create --draft \
+            --base class9-maths-all-chapters-depth --head "$REVIEW_BRANCH" \
+            --title "Review NCERT Class 9 Maths Chapters 5–14 (#$GITHUB_RUN_ID)" \
+            --body-file ../review-artifacts/audit.md)"
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Persist resume pointer, finish or halt on errors
+        if: always() && steps.control.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PIPELINE_EXIT: ${{ steps.review.outputs.exit_code }}
+          CHECKPOINT_ARTIFACT: ${{ steps.checkpoints.outputs.artifact-id }}
+          PUBLISH_OUTCOME: ${{ steps.publish.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser.outcome }}
+          PATCH_OUTCOME: ${{ steps.patch.outcome }}
+          DRAFT_URL: ${{ steps.publish.outputs.url }}
+        run: |
+          set -euo pipefail
+          STAGES=0
+          if [ -d review-artifacts/checkpoints ]; then
+            STAGES="$(find review-artifacts/checkpoints -type f -name '*.json' ! -name manifest.json | wc -l | tr -d ' ')"
+          fi
+          READY=false
+          if [ "$PUBLISH_OUTCOME" = success ] && [ "$BROWSER_OUTCOME" = success ] && [ "$PATCH_OUTCOME" = success ]; then READY=true; fi
+          HAS_ARTIFACT=false
+          if [ -n "$CHECKPOINT_ARTIFACT" ]; then HAS_ARTIFACT=true; fi
+          python control-repo/automation/class9-maths/multiday_state.py finalize \
+            --repo "$GITHUB_REPOSITORY" --commit-sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" --summary "$GITHUB_STEP_SUMMARY" \
+            --report review-artifacts/audit.json --exit-code "${PIPELINE_EXIT:-1}" \
+            --publish-ok "$READY" --artifact-uploaded "$HAS_ARTIFACT" \
+            --checkpoint-count "$STAGES" --draft-url "$DRAFT_URL"

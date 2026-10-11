@@ -116,6 +116,15 @@ malformed stage must be retried. If sources or code changed, an existing
 checkpoint is **rejected**, not quietly mixed with new material. Start fresh
 (or re-run against matching source revisions) if that happens.
 
+**Review-stage redo:** If the model previously returned unconvincing maths
+verdicts (for example, wrong proposal IDs marked `uncertain`), choose
+`restart_stage=math` and `restart_chapter=4` together with the previous
+`resume_run_id`. The specified stage and all later stages are discarded
+**only for that chapter**; validated coverage, gap challenge and writing
+stages remain cached. This intentionally spends new Gemini requests on the
+problematic stage, so use it only after reading the audit report. Use
+`restart_stage=none` by default.
+
 A paused chapter deliberately returns a failed workflow status, retaining
 the report plus checkpoints and **skipping draft PR creation**. Resume from
 the latest run ID (each resumed run creates its own snapshot artifact).

@@ -119,6 +119,77 @@ class ResumableAuditTests(unittest.TestCase):
                            request=retry_later, checkpoint=resumed)
             self.assertEqual(calls, ["math", "closure"])
 
+    def test_legacy_code_resume_revalidates_four_stages_then_calls_closure_once(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            chapter = sample_chapter()
+            pdf = root / "source.pdf"
+            pdf.write_bytes(b"%PDF-1.4 exact same textbook bytes")
+            original = [Path(__file__).with_name(name)
+                        for name in ("pipeline.py", "deep_audit.py", "resumable.py")]
+            old_root = root / "old-code"
+            old_root.mkdir()
+            for source in original:
+                (old_root / source.name).write_bytes(
+                    source.read_bytes() + b"\n# harmless historical code revision\n")
+            old_paths = [old_root / p.name for p in original]
+            previous_fp = build_fingerprint(
+                pdf, chapter, chapter, "mock-model", old_paths)
+            current_fp = build_fingerprint(
+                pdf, chapter, chapter, "mock-model", original)
+            self.assertNotEqual(previous_fp, current_fp)
+            checkpoint = StageCheckpoints(root / "saved", 4, previous_fp)
+            calls = []
+            def interrupted(stage, prompt):
+                calls.append(stage)
+                if stage == "closure":
+                    raise RuntimeError("previous run failed at final reviewer")
+                return self.responses(stage)
+            with self.assertRaisesRegex(RuntimeError, "previous run failed"):
+                review_chapter(pdf, chapter, chapter, sample_pages(), "mock-model",
+                               normal=normal, validate=validate,
+                               retry=generate_with_transient_retries,
+                               request=interrupted, checkpoint=checkpoint)
+            self.assertEqual(calls, ["coverage", "challenge", "draft", "math", "closure"])
+            self.assertFalse((checkpoint.path / "closure.json").exists())
+            with self.assertRaisesRegex(ValueError, "fingerprint mismatch"):
+                StageCheckpoints(root / "saved", 4, current_fp)
+            resumed = StageCheckpoints(
+                root / "saved", 4, current_fp,
+                previous_code_fingerprint=previous_fp)
+            new_calls = []
+            def new_request(stage, prompt):
+                new_calls.append(stage)
+                return self.responses(stage)
+            result = review_chapter(
+                pdf, chapter, chapter, sample_pages(), "mock-model",
+                normal=normal, validate=validate, retry=generate_with_transient_retries,
+                request=new_request, checkpoint=resumed)
+            self.assertEqual(new_calls, ["closure"])
+            self.assertEqual(len(result["candidate_lessons"]), 1)
+            self.assertTrue((resumed.path / "closure.json").exists())
+
+    def test_legacy_code_fingerprint_cannot_override_changed_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            original = root / "legacy"
+            original.mkdir()
+            pdf = root / "source.pdf"
+            pdf.write_bytes(b"%PDF original")
+            code = root / "deep_audit.py"
+            code.write_text("old script")
+            old = build_fingerprint(
+                pdf, sample_chapter(), sample_chapter(), "model",
+                [code])
+            StageCheckpoints(root / "saved", 4, old)
+            pdf.write_bytes(b"%PDF different")
+            changed = build_fingerprint(
+                pdf, sample_chapter(), sample_chapter(), "model", [code])
+            with self.assertRaisesRegex(ValueError, "fingerprint mismatch"):
+                StageCheckpoints(
+                    root / "saved", 4, changed,
+                    previous_code_fingerprint=changed)
+
     def test_changed_model_notes_or_pdf_refuses_checkpoint(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

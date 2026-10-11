@@ -4,7 +4,8 @@
  */
 #study > .shell,
 #study.studyai-progress-active > .shell{
-  width:min(1620px,calc(100% - 26px));
+  /* Take the Study workspace across the available viewport, with 12px side gutters. */
+  width:calc(100% - 24px);
   max-width:none;
 }
 #study .section-head{margin-bottom:20px}
@@ -185,8 +186,9 @@
   grid-column:auto;
   min-width:0;
   width:100%;
-  max-width:1160px;
-  margin:0 auto;
+  /* Allow the notes card to fill every pixel to the right of the navigation. */
+  max-width:none;
+  margin:0;
 }
 #study .reader-view,
 #study .reader-empty,
@@ -221,7 +223,8 @@
 #study .article-tabs button{font-size:.88rem;padding:11px 13px}
 #study .note-prose,
 #study.studyai-progress-active #detailed-notes .note-prose{
-  max-width:92ch;
+  /* Text, worked examples and figures can use the wider reading canvas. */
+  max-width:none;
   width:100%;
 }
 #study .note-prose p{line-height:1.72}

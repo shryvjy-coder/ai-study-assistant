@@ -59,6 +59,35 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check((await page.evaluate(()=>getComputedStyle(document.querySelector(
     '#study .reader-layout')).gridTemplateColumns.split(' ').length))===2,
     'desktop uses a contents panel and a wide notes column');
+
+  // A 2400px monitor used to leave blank right-hand space because the Study
+  // shell was capped at 1620px, the article at 1160px and note text at 92ch.
+  await page.setViewportSize({width:2400,height:1000});
+  const wide=await page.evaluate(()=>{
+    const shell=document.querySelector('#study>.shell').getBoundingClientRect();
+    const reader=document.querySelector('#study .reader').getBoundingClientRect();
+    const article=document.querySelector('#study #reader-view').getBoundingClientRect();
+    const prose=document.querySelector('#study #detailed-notes .note-prose');
+    const text=prose?.getBoundingClientRect();
+    return {
+      shellWidth:shell.width,
+      shellRight:window.innerWidth-shell.right,
+      readerRight:window.innerWidth-reader.right,
+      readerWidth:reader.width,
+      articleWidth:article.width,
+      textWidth:text?.width||0,
+      viewport:window.innerWidth
+    };
+  });
+  check(wide.shellWidth>2300 && wide.shellRight>=0 && wide.shellRight<=16,
+    'wide monitors use the Study section nearly edge-to-edge: '+JSON.stringify(wide));
+  check(wide.readerRight>=0 && wide.readerRight<=18 &&
+        wide.readerWidth>1700 && wide.articleWidth>1700,
+    'notes card extends all the way to the right gutter without its old 1160px cap');
+  check(wide.textWidth>1200,
+    'full notes prose can expand beyond the old 92-character text limit');
+  await page.setViewportSize({width:1600,height:900});
+
   const toggle=page.locator('#toggle-notes-nav');
   const widthBefore=await page.evaluate(()=>getComputedStyle(document.querySelector(
     '#study .reader-layout')).gridTemplateColumns.split(' ').map(Number.parseFloat)[1]);

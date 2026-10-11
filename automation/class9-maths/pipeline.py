@@ -407,6 +407,11 @@ def main() -> int:
                         help="Hard upper bound on Gemini generate API attempts in this run (1–20)")
     parser.add_argument("--min-request-seconds",type=float,default=25.0,
                         help="Minimum seconds between Gemini requests/retries (default: 25)")
+    parser.add_argument("--restart-stage",
+                        choices=["coverage","challenge","draft","math","closure"],
+                        help="Manually redo this stage and all later stages")
+    parser.add_argument("--restart-chapter",type=int,
+                        help="Chapter to redo without deleting earlier accepted stages")
     args=parser.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
         parser.error("GEMINI_API_KEY is missing: add it as a GitHub Actions repository secret")
@@ -422,6 +427,12 @@ def main() -> int:
         chosen=select_chapters(args.chapter,list(expected))
     except ValueError as exc:
         parser.error(str(exc))
+    if bool(args.restart_stage) != bool(args.restart_chapter):
+        parser.error("--restart-stage and --restart-chapter must be supplied together")
+    if args.restart_chapter is not None and args.restart_chapter not in chosen:
+        parser.error("--restart-chapter must be among the selected chapters")
+    if args.restart_stage and args.depth != "deep":
+        parser.error("Manual stage restart requires deep review mode")
     args.output.mkdir(parents=True,exist_ok=True)
     if args.request_budget is not None:
         from resumable import RequestPacer
@@ -450,6 +461,8 @@ def main() -> int:
                                Path(__file__).with_name("resumable.py")]
                 fingerprint = build_fingerprint(pdf, bank[i], entry, args.model, audit_files)
                 checkpoint = StageCheckpoints(checkpoint_dir, i, fingerprint)
+                if args.restart_stage and i == args.restart_chapter:
+                    checkpoint.restart_from(args.restart_stage)
                 verified=review_chapter(pdf,entry,bank[i],pages,args.model,
                                         normal=normal,validate=validate,
                                         retry=quota_retry,checkpoint=checkpoint)

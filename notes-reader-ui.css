@@ -589,7 +589,9 @@
   #study.studyai-progress-active.studyai-chapters-minimized .studyai-notes-nav-content,
   #study.studyai-progress-active.studyai-subtopics-minimized .studyai-notes-nav-content,
   #study.studyai-progress-active.studyai-chapters-minimized.studyai-subtopics-minimized .studyai-notes-nav-content{
-    grid-template-columns:minmax(0,1fr);
+    /* Override the more specific desktop :not(.studyai-nav-collapsed)
+       column selectors so neither section can remain cramped on phones. */
+    grid-template-columns:minmax(0,1fr)!important;
   }
   #study.studyai-progress-active.studyai-chapters-minimized .studyai-notes-nav .chapter-rail .rail-head,
   #study.studyai-progress-active.studyai-subtopics-minimized .studyai-notes-nav .studyai-subtopics-heading{
@@ -603,6 +605,9 @@
   #study.studyai-progress-active .studyai-notes-nav .chapter-list,
   #study.studyai-progress-active .studyai-notes-nav .studyai-lesson-list{
     max-height:28vh;
+  }
+  #study.studyai-progress-active .studyai-notes-nav-content{
+    grid-template-columns:minmax(0,1fr)!important;
   }
 }
 @media(prefers-reduced-motion:reduce){

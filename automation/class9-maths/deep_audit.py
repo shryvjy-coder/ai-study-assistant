@@ -239,11 +239,27 @@ def validate_final_coverage(response: dict, chapter: dict, coverage: list[dict],
         if verdict in ("unresolved", "uncertain"):
             flags.append(f"Final textbook coverage still {verdict}: {source['concept']} (PDF p.{source['page']})")
         by_id[index] = {"id": index, "verdict": verdict, "reason": reason[:650]}
-    missed = _expect_sequence(response.get("missed_areas", []), "possible extra omissions", 0, 8)
-    for item in missed:
-        if not isinstance(item, str) or not item.strip():
-            raise ValueError("Final review returned a malformed extra omission")
-        flags.append("Extra potential omission (requires PDF evidence): " + item[:200])
+    # Optional discoveries are unverified and must not cancel verified coverage.
+    missed = response.get("missed_areas", [])
+    if not isinstance(missed, list):
+        flags.append("Invalid extra-omissions field; human PDF review required")
+        missed = []
+    if len(missed) > 8:
+        flags.append("Additional unverified omissions exceeded the review cap")
+    for index, item in enumerate(missed[:8]):
+        description = ""
+        if isinstance(item, str):
+            description = item.strip()
+        elif isinstance(item, dict):
+            for key in ("description", "concept", "topic", "area", "reason"):
+                value = item.get(key)
+                if isinstance(value, str) and value.strip():
+                    description = value.strip()
+                    break
+        if description:
+            flags.append("Extra potential omission (UNVERIFIED; requires PDF evidence): " + description[:200])
+        else:
+            flags.append(f"Malformed extra omission #{index + 1}; human textbook verification required")
     critical = _expect_sequence(response.get("critical_errors", []), "critical maths errors", 0, 8)
     if not all(isinstance(s, str) and len(s.strip()) >= 15 for s in critical):
         raise ValueError("Final review gave malformed critical error descriptions")

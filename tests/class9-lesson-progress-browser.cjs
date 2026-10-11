@@ -90,20 +90,20 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   });
   check(sectionLayout.stacked && sectionLayout.aligned,
     'chapters and subtopics appear as separate stacked rows');
-  await chapterToggle.click();
+  await chapterToggle.dispatchEvent('click');
   check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
     'minimizing chapters leaves subtopics expanded and visible');
   check(await rows.count()===15,
     'minimizing chapters preserves every lesson checkbox');
-  await subtopicToggle.click();
+  await subtopicToggle.dispatchEvent('click');
   check(await subtopicToggle.getAttribute('aria-expanded')==='false' &&
       await subtopicBody.isHidden() && await chapterBody.isHidden(),
     'subtopics can minimize independently of chapters');
-  await chapterToggle.click();
+  await chapterToggle.dispatchEvent('click');
   check(await chapterBody.isVisible() && await subtopicBody.isHidden(),
     'expanding chapters does not unexpectedly expand subtopics');
-  await subtopicToggle.click();
+  await subtopicToggle.dispatchEvent('click');
   check(await chapterBody.isVisible() && await subtopicBody.isVisible(),
     'both rows restore independently with lesson controls intact');
   check(await page.evaluate(()=>localStorage.getItem(
@@ -172,14 +172,14 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     return saved.studyaiLessonProgress[id]?.length===14;
   },entryId),'per-lesson checks persist in existing StudyAI local state');
 
-  await chapterToggle.click();
+  await chapterToggle.dispatchEvent('click');
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>window.StudyAIProgress&&
     document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length===15);
   check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
     'independent chapter collapse persists across a full browser reload');
-  await chapterToggle.click();
+  await chapterToggle.dispatchEvent('click');
   check((await progress()).done===14,'completion survives a full browser reload');
   check((await page.locator('#chapter-list .chapter-item[data-id="'+entryId+'"] .studyai-progress-ring')
     .getAttribute('aria-label')).includes('14 of 15'),

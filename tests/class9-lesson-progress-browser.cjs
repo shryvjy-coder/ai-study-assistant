@@ -49,6 +49,16 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   });
   const chapter=page.locator('#chapter-list .chapter-item[data-id="'+entryId+'"]');
   const rows=page.locator('.studyai-lesson-rail .studyai-lesson-row');
+  const leafRows=page.locator('.studyai-lesson-rail .studyai-sublesson-row');
+  const leafGroups=await page.evaluate(id=>StudyAIProgress.outline(id),entryId);
+  const expectedTotal=leafGroups.reduce((sum,g)=>sum+g.leaves.length,0);
+  const firstSize=leafGroups[0].leaves.length;
+  const secondSize=leafGroups[1].leaves.length;
+  const fifthSize=leafGroups[4].leaves.length;
+  check(firstSize>=3 && expectedTotal>30,
+    'world of numbers exposes detailed authored child subtopics, not a 15-lesson ceiling');
+  check(await leafRows.count()===expectedTotal,
+    'every authored child page has its own selectable navigation row');
   const progress=()=>page.evaluate(id=>StudyAIProgress.summary(id),entryId);
 
   check(await page.locator('#study.studyai-progress-active').count()===1,
@@ -204,35 +214,68 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     'each row saves its independent state');
   check((await page.evaluate(()=>document.querySelector('#study>.shell').getBoundingClientRect().width))>1400,
     'notes use almost the full desktop width rather than the old narrow centered shell');
-  check(await rows.count()===15,'World of Numbers has 15 selectable main subtopics, not 62');
-  check(await page.locator('.studyai-subtopic-select').count()===0,
-    'there is no duplicate 62-page subtopic menu');
-  check((await progress()).total===15&&(await progress()).done===0,
-    'new reader starts at zero of fifteen completed');
+  check(await rows.count()===15,'World of Numbers retains 15 lesson group headings');
+  check((await progress()).total===expectedTotal&&(await progress()).done===0,
+    'new reader counts all actual nested pages, without a fixed limit');
   check((await chapter.locator('.studyai-progress-ring').getAttribute('aria-label')).includes(
-    '0 of 15 lessons complete'),'chapter ring describes its starting progress');
+    '0 of '+expectedTotal+' subtopics complete'),
+    'chapter ring describes its starting detailed-subtopic progress');
+
+  // Validate all fourteen textbook chapters, not just the current one.
+  const coverage=await page.evaluate(()=>{
+    const chapters=STUDY_DATA.filter(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+      e.subject==='Mathematics'&&window.CBSE_CLASS9_MATH_FULL_NOTES?.[e.title]);
+    return {
+      totals:StudyAIProgress.courseTotals(),
+      chapters:chapters.map(entry=>{
+        const outline=StudyAIProgress.outline(entry.id);
+        return {title:entry.title,groups:outline.length,
+          leaves:outline.reduce((n,g)=>n+g.leaves.length,0),
+          valid:outline.every(g=>g.leaves.every(l=>
+            l.groupIndex===g.index && !!l.title && !!l.key))}
+      })
+    };
+  });
+  check(coverage.totals.chapters===14&&coverage.chapters.length===14,
+    'all 14 Ganita Manjari Mathematics chapters have a detailed outline');
+  check(coverage.chapters.every(item=>item.valid &&
+      item.groups>=4&&item.leaves>item.groups),
+    'every chapter exposes more selectable real pages than major lessons: '+
+      JSON.stringify(coverage.chapters));
+  check(coverage.totals.subtopics===
+      coverage.chapters.reduce((sum,c)=>sum+c.leaves,0) &&
+      coverage.totals.subtopics>100,
+    'course counts come from authored data, not a 62/189-page hardcoded target: '+
+      JSON.stringify(coverage.totals));
   check(await page.locator('#study #complete-btn').isHidden(),
     'old chapter-wide completion button is hidden to avoid ambiguous status');
 
   // The checkbox belongs to the lesson, not to the surrounding chapter link.
   await rows.nth(0).locator('.studyai-lesson-toggle').dispatchEvent('click');
-  check((await progress()).done===1,'first lesson checkbox marks exactly one completed');
+  check((await progress()).done===firstSize,
+    'major lesson checkbox completes each of its actual child subtopics');
   check(await rows.nth(0).locator('.studyai-lesson-toggle').getAttribute('aria-checked')==='true',
     'checkbox reports completion accessibly');
   check((await chapter.locator('.studyai-progress-ring').getAttribute('aria-label')).includes(
-    '1 of 15 lessons complete'),'chapter ring updates to one out of fifteen');
+    firstSize+' of '+expectedTotal+' subtopics complete'),
+    'chapter ring reflects the number of completed child subtopics');
 
   await rows.nth(1).locator('.studyai-lesson-toggle').dispatchEvent('click');
-  check((await progress()).done===2,'second lesson checkbox updates completion independently');
+  check((await progress()).done===firstSize+secondSize,
+    'second major lesson completes its own set of children independently');
   await rows.nth(0).locator('.studyai-lesson-toggle').dispatchEvent('click');
-  check((await progress()).done===1,'checking again reverses completion without affecting the other lesson');
+  check((await progress()).done===secondSize,
+    'checking the first parent again leaves only the second group completed');
 
   // The inline completion action is linked to the same underlying lesson.
   await page.evaluate(()=>window.StudyAILessonReader.goTo(0));
-  const inline=page.locator('#detailed-notes .actual-note-topic:not([hidden]) .studyai-inline-complete');
-  check(await inline.count()===1,'visible note contains an inline Mark as complete action');
+  const inline=page.locator(
+    '#detailed-notes .actual-note-topic:not([hidden]) > .studyai-inline-completion .studyai-inline-complete');
+  check(await inline.count()===1,
+    'major lesson overview retains one inline Mark as complete action');
   await inline.dispatchEvent('click');
-  check((await progress()).done===2,'inline action and sidebar checkbox share the same saved state');
+  check((await progress()).done===firstSize+secondSize,
+    'inline parent action and nested sidebar checkboxes share the same state');
   check(await rows.nth(0).locator('.studyai-lesson-toggle').getAttribute('aria-checked')==='true',
     'inline completion immediately checks its matching sidebar entry');
   check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,
@@ -244,25 +287,54 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check(await rows.nth(4).locator('.studyai-lesson-link').getAttribute('aria-current')==='page',
     'selected lesson receives accessible current-page state');
 
+  // Every authored nested page can also be studied and completed separately.
+  const focused=leafGroups[0].leaves.find(leaf=>leaf.kind==='subtopic');
+  check(!!focused,'first major lesson has at least one genuine authored subsection');
+  await page.evaluate(key=>window.StudyAILessonReader.goToLeaf(key),focused.key);
+  check(await page.evaluate(()=>window.StudyAILessonReader.activeLeafKey())===focused.key,
+    'child navigation opens an independent sub-subtopic page');
+  check(await page.locator(
+    '#detailed-notes .actual-note-topic:not([hidden]) .studyai-lesson-subtopic:not([hidden])').count()===1,
+    'focused sub-subtopic shows just its teaching material, not an endless chapter');
+  check(await page.locator('.studyai-sublesson-row.is-active .studyai-sublesson-link').count()===1,
+    'currently selected child has a highlighted, accessible navigation link');
+  const leafTick=leafRows.filter({has:page.locator(
+    '.studyai-sublesson-link')}).filter({hasText:focused.title})
+    .first().locator('.studyai-sublesson-toggle');
+  // Clear just the selected child, not its completed parent group.
+  await leafTick.dispatchEvent('click');
+  check((await progress()).done===firstSize+secondSize-1,
+    'individual child checkbox updates fine-grained progress');
+  check(await rows.nth(0).locator('.studyai-lesson-toggle')
+    .getAttribute('aria-checked')==='mixed',
+    'partly completed major lesson displays a mixed completion state');
+  await leafTick.dispatchEvent('click');
+  check((await progress()).done===firstSize+secondSize,
+    'child completion is independently reversible');
+  await page.evaluate(()=>window.StudyAILessonReader.goTo(0));
+
   // Test 100%, then reversibility of the derived chapter completion state.
   for(let i=0;i<15;i++){
     if(await rows.nth(i).locator('.studyai-lesson-toggle').getAttribute('aria-checked')!=='true'){
       await rows.nth(i).locator('.studyai-lesson-toggle').dispatchEvent('click');
     }
   }
-  check((await progress()).done===15,'completing every lesson fills the chapter');
+  check((await progress()).done===expectedTotal,
+    'completing all detailed subtopics fills the chapter, regardless of count');
   check((await chapter.locator('.studyai-progress-ring').getAttribute('aria-label')).includes(
     '100 percent'),'ring reaches 100 percent');
   check(await page.evaluate(id=>state.completed.includes(id),entryId),
     'complete chapter also updates the existing StudyAI dashboard state');
   await rows.nth(4).locator('.studyai-lesson-toggle').dispatchEvent('click');
-  check((await progress()).done===14,'unchecking a lesson lowers the chapter progress');
+  check((await progress()).done===expectedTotal-fifthSize,
+    'unchecking a parent reverses only its own child completion marks');
   check(!await page.evaluate(id=>state.completed.includes(id),entryId),
     'partially completed chapters are no longer shown as entirely complete');
-  check(await page.evaluate(id=>{
+  check(await page.evaluate(({id,total})=>{
     const saved=JSON.parse(localStorage.getItem('studyai-multicurriculum-v1'));
-    return saved.studyaiLessonProgress[id]?.length===14;
-  },entryId),'per-lesson checks persist in existing StudyAI local state');
+    return saved.studyaiLessonProgress[id]?.length===total;
+  },{id:entryId,total:expectedTotal-fifthSize}),
+    'per-subtopic checks persist in existing StudyAI local state');
 
   await chapterToggle.dispatchEvent('click');
   await page.reload({waitUntil:'load'});
@@ -272,9 +344,10 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
     'independent chapter collapse persists across a full browser reload');
   await chapterToggle.dispatchEvent('click');
-  check((await progress()).done===14,'completion survives a full browser reload');
+  check((await progress()).done===expectedTotal-fifthSize,
+    'detailed subtopic completion survives a full browser reload');
   check((await page.locator('#chapter-list .chapter-item[data-id="'+entryId+'"] .studyai-progress-ring')
-    .getAttribute('aria-label')).includes('14 of 15'),
+    .getAttribute('aria-label')).includes((expectedTotal-fifthSize)+' of '+expectedTotal),
     'the circle restores the correct saved percentage');
 
   const another=await page.evaluate(()=>{
@@ -286,13 +359,17 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.locator('#chapter-list .chapter-item[data-id="'+another+'"]').dispatchEvent('click');
   const otherInfo=await page.evaluate(id=>StudyAIProgress.summary(id),another);
   check(otherInfo.total>=4,'a different Maths chapter also has selectable topic lessons');
-  check(await page.locator('.studyai-lesson-rail .studyai-lesson-row').count()===otherInfo.total,
-    'lesson checklist updates when a different chapter is selected');
+  check(await page.locator('.studyai-lesson-rail .studyai-lesson-row').count()===otherInfo.lessonCount &&
+      await page.locator('.studyai-lesson-rail .studyai-sublesson-row').count()===otherInfo.total,
+    'both major lessons and nested pages update when another chapter is selected');
   await page.locator('.studyai-lesson-rail .studyai-lesson-row').first()
     .locator('.studyai-lesson-toggle').dispatchEvent('click');
-  check((await page.evaluate(id=>StudyAIProgress.summary(id),another)).done===1,
-    'second chapter maintains its own independent checkbox progress');
-  check((await progress()).done===14,
+  const secondChapterFirstSize=await page.evaluate(id=>
+    StudyAIProgress.outline(id)[0].leaves.length,another);
+  check((await page.evaluate(id=>StudyAIProgress.summary(id),another)).done===
+      secondChapterFirstSize,
+    'another chapter tracks all its independently authored children');
+  check((await progress()).done===expectedTotal-fifthSize,
     'checking another chapter does not overwrite the first chapter progress');
 
   await page.setViewportSize({width:570,height:840});

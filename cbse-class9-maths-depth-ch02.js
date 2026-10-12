@@ -6,7 +6,7 @@ D.apply('Introduction to Linear Polynomials',[
 ['Polynomial language',[
 ['From repeated arithmetic to algebraic rules',[
 'An expression such as 4n+3 can describe a pattern without listing every value. Algebraic symbols are useful because one rule applies to many different inputs. The symbol n is a variable; the fixed numbers 4 and 3 are coefficients or constants. The expression can be evaluated after a value is assigned to n.',
-'A polynomial in one variable contains terms with nonnegative integer exponents and real coefficients. Thus x²+2x+1 is polynomial, but 1/x is not a polynomial in x, since x appears with exponent −1. A linear polynomial has degree 1, so it can be written ax+b with a≠0.'
+'A polynomial in one variable is also called a univariate polynomial. It contains terms with nonnegative integer exponents and real coefficients. Thus x²+2x+1 is a polynomial in x, but 1/x is not, since x appears with exponent −1. An expression such as 4x+5y+3 contains two variables and is not univariate. A linear polynomial in one variable has degree 1, so it can be written ax+b with a≠0.'
 ],['Linear polynomial P(x)=ax+b, a≠0','Degree of ax+b is 1 for a≠0'],[
 E('Recognise a linear polynomial','Identify the linear polynomials among 7x−2, x²+1 and 1/x+3.',['7x−2 has highest power 1 and a nonzero coefficient of x.','x²+1 has degree 2.','1/x+3 contains the forbidden negative exponent −1.'],'Only 7x−2 is linear in x.')]],
 ['Terms, coefficients and constants',[
@@ -54,9 +54,16 @@ E('Fractional argument','Calculate P(−1/2) for P(x)=6x+5.',['Substitute using 
 E('Find a distant term','The first term is 7 and each new term increases by 4. Find the 25th term.',['aₙ=7+(n−1)4.','For n=25 there are 24 changes after the first term.','a₂₅=7+24×4=7+96.'],'103')]],
 ['Changing quantities and rates',[
 'Linear relationships also describe real-life situations. If a taxi charges a fixed booking fee of ₹50 plus ₹12 for every kilometre, cost C(k)=50+12k. The constant term represents the starting cost and the coefficient represents the change in cost per kilometre.',
-'If a table gives costs for equally spaced travel distances, the repeated change in cost should match the rate. For example an extra 3 km increases cost by ₹36. This is a valuable sense check before graphing.'
+'If a table gives costs for equally spaced travel distances, the repeated change in cost should match the rate. For example an extra 3 km increases cost by ₹36. This is a valuable sense check before graphing. Some real fares have a fixed amount over an initial interval and a different rate later. Such a piecewise pricing rule is not one degree-one polynomial over the entire distance domain: state the condition attached to each part before substituting.'
 ],['Output = fixed amount + (rate × input)'],[
-E('A price rule','A print shop charges ₹30 setup plus ₹4 per page. Calculate the cost for 18 pages.',['Write C(n)=30+4n.','Substitute n=18.','C(18)=30+72.'],'₹102')]],
+E('A price rule','A print shop charges ₹30 setup plus ₹4 per page. Calculate the cost for 18 pages.',['Write C(n)=30+4n.','Substitute n=18.','C(18)=30+72.'],'₹102'),
+E('An initial flat fare followed by a per-kilometre rate',
+ 'A taxi charges ₹30 for trips up to 3 km, then ₹10 for every additional kilometre. Find the fare for 8 km. Is one linear polynomial correct for every distance?',
+ ['For 0≤d≤3 km the fare stays ₹30, so F(d)=30 in that interval.',
+ 'For d>3 km only the extra distance d−3 is charged at ₹10 per km: F(d)=30+10(d−3).',
+ 'At d=8, charge for 5 extra kilometres: F(8)=30+10×5=₹80.',
+ 'One rule cannot describe the entire domain: the first part is constant and the second part has a positive slope. The formula ₹10d would wrongly charge ₹20 for 2 km.'],
+ '₹80 for 8 km. Piecewise: F(d)=30 for 0≤d≤3, and F(d)=30+10(d−3) for d>3.')]],
 ['Recognising non-linear change',[
 'Not every pattern has constant first differences. The sequence 1,4,9,16,... grows by 3,5,7,...; those differences are not constant. Its nth term n² is quadratic, not linear.',
 'A visual graph can sometimes appear almost straight over a tiny interval, but exact classification requires a mathematical rule or sufficient pattern evidence. Checking differences is useful for regularly spaced inputs, not a universal test for every data table.'
@@ -73,12 +80,20 @@ E('Find the rule','A linear pattern has output 11 at input 2 and output 23 at in
 'Patterns expressed in words often involve brackets. Twice the sum of a number and 5 is 2(n+5), not 2n+5. Distributivity says that multiplying a sum multiplies each term, so 2(n+5)=2n+10.',
 'Expanding or factorising does not change the values produced by an expression. Both forms describe the same relationship. One form may communicate the context more clearly, while another may make the variable coefficient easier to identify.'
 ],['a(b+c)=ab+ac'],[
-E('Derive an expression','Five boxes each contain n pencils and two extra pencils. Write the total.',['One box has n+2 pencils.','Five identical boxes contain 5(n+2).','Distribute 5 to each term.'],'5n+10 pencils')]],
+E('Derive an expression','Each of five boxes contains n pencils and 2 extra pencils. Write the total.',['One box has n+2 pencils.','Five identical boxes contain 5(n+2).','Distribute 5 to each term.'],'5n+10 pencils')]],
 ['Inverse questions: recovering the input',[
 'Many word problems give the output and ask for the original input. To reverse y=ax+b, first remove the fixed addition b and then divide by the nonzero rate a. In equations, perform the same operation on both sides to preserve equality.',
 'For the cost rule C=30+4n, a bill of ₹106 gives 106=30+4n. Subtract 30 to obtain 76=4n, and divide by 4 to get n=19. Substitution gives the original total.'
 ],['For a≠0, x=(y−b)/a'],[
-E('A hidden input','If P(x)=5x−9 and P(x)=31, find x.',['Set 5x−9=31.','Add 9: 5x=40.','Divide by 5 and check in P.'],'x=8')]]
+E('A hidden input','If P(x)=5x−9 and P(x)=31, find x.',['Set 5x−9=31.','Add 9: 5x=40.','Divide by 5 and check in P.'],'x=8'),
+E('Recover two polynomials from their sum and a shared value',
+ 'Let p(x)=ax+b and q(x)=cx+d. Suppose p(0)=4, p(x)+q(x)=8x+2, and p(3)=q(3). Find both polynomials.',
+ ['The condition p(0)=4 gives b=4.',
+ 'Matching coefficients in p+q=8x+2 gives a+c=8 and b+d=2, hence d=−2.',
+ 'Because p(3)=q(3), 3a+4=3c−2. Thus a−c=−2.',
+ 'Solve the two equations a+c=8 and a−c=−2: a=3 and c=5.',
+ 'Check p(3)=13=q(3), and (3x+4)+(5x−2)=8x+2.'],
+ 'p(x)=3x+4 and q(x)=5x−2.')]]
 ]],
 ['Visualising a linear relationship',[
 ['Why a linear polynomial graphs as a line',[
@@ -88,9 +103,15 @@ E('A hidden input','If P(x)=5x−9 and P(x)=31, find x.',['Set 5x−9=31.','Add 
 E('Read a linear graph from its rule','For y=−2x+6, find two points for plotting.',['At x=0, y=6, so (0,6) lies on the line.','At x=3, y=0, so (3,0) lies on the line.','Join the two plotted points and extend the line.'],'The line passes through (0,6) and (3,0).')]],
 ['Intercepts and the zero of a polynomial',[
 'The zero of a linear polynomial P(x)=ax+b is the input where its output is zero. On a coordinate graph this means y=0, so the corresponding point lies on the x-axis. Solving ax+b=0 gives x=−b/a.',
-'This connects a familiar algebraic calculation to geometry. A graph crossing the x-axis at x=4 tells us P(4)=0, even if the polynomial is written in a different equivalent form.'
+'This connects a familiar algebraic calculation to geometry. A graph crossing the x-axis at x=4 tells us P(4)=0, even if the polynomial is written in a different equivalent form. In the family y=ax+a with a≠0, factor as a(x+1). Every such line crosses the x-axis at x=−1, even though its slope a and y-intercept a change from line to line.'
 ],['x-intercept: (−b/a,0) when a≠0','y-intercept: (0,b)'],[
-E('Locate a polynomial zero','Where does the graph of y=3x−12 cross the x-axis?',['On the x-axis, y=0.','Solve 3x−12=0, giving 3x=12.','Therefore x=4.'],'(4,0)')]],
+E('Locate a polynomial zero','Where does the graph of y=3x−12 cross the x-axis?',['On the x-axis, y=0.','Solve 3x−12=0, giving 3x=12.','Therefore x=4.'],'(4,0)'),
+E('A whole family of lines through one point',
+ 'For each nonzero number a, consider y=ax+a. Show that all these lines share one x-intercept, and compare a=2 with a=−3.',
+ ['Factor the rule: y=a(x+1). Because a≠0, y=0 requires x+1=0, giving x=−1.',
+ 'For a=2 the line is y=2x+2; for a=−3 it is y=−3x−3.',
+ 'Substitute x=−1 in each: both give y=0, but their slopes and y-intercepts are different.'],
+ 'All pass through (−1,0); the slopes are 2 and −3, respectively.')]],
 ['Checking predictions by graph and algebra',[
 'Once a linear rule is known, a table, a graph and an equation provide three ways of representing the same relationship. They should agree: if y=2x+1, then the point (4,9) belongs to the line because 2(4)+1=9.',
 'Points that fail the equation are not on the line, even if a rough sketch makes them look close. Graphs are useful for interpretation, but substitution gives an exact test of whether a proposed point is a solution.'

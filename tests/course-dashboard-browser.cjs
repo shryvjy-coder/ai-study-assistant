@@ -106,13 +106,14 @@ async function dismissFirstRun(page){
     save();
     const courseUnits=STUDY_DATA.filter(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics')
       .reduce((sum,e)=>sum+(window.StudyAIProgress.summary(e.id)?.total||1),0);
-    return {title:lessons[1].title,total:courseUnits};
+    const migratedDone=window.StudyAIProgress.summary(topic.id).done;
+    return {title:lessons[1].title,total:courseUnits,done:migratedDone};
   });
-  await page.waitForFunction(total=>
-    document.querySelector('#my-course-grid .course-card .course-card-stats')?.textContent.includes('1 / '+total),
-    progressSetup.total);
-  check((await page.locator('#my-course-grid .course-card').first().locator('.course-card-stats').textContent()).includes('1 / '+progressSetup.total),
-    'course completion uses persisted lesson checkboxes rather than only finished chapters');
+  await page.waitForFunction(({done,total})=>
+    document.querySelector('#my-course-grid .course-card .course-card-stats')?.textContent.includes(done+' / '+total),
+    progressSetup);
+  check((await page.locator('#my-course-grid .course-card').first().locator('.course-card-stats').textContent()).includes(progressSetup.done+' / '+progressSetup.total),
+    'course completion migrates an old checked lesson into its actual child-subtopic count');
   check((await page.locator('#dashboard-next-topic').textContent()).includes(progressSetup.title),
     'continue panel identifies the precise recent lesson');
   check(await page.locator('#dashboard-study-suggestions .dashboard-focus-item').count()>0,

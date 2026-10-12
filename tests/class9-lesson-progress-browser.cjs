@@ -349,6 +349,13 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>window.StudyAIProgress&&
     document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length===15);
+  // A full reload may return to the Today route. Reopen the Study page through
+  // the application's own router before asserting whether panels are visible.
+  await page.evaluate(()=>{
+    location.hash='#study';
+    applyAppPageRoute({scroll:false});
+  });
+  await page.waitForFunction(()=>document.getElementById('study')?.hidden===false);
   const reloadPanel=await page.evaluate(()=>({
     chapterExpanded:document.getElementById('collapse-chapters')?.getAttribute('aria-expanded'),
     chaptersHidden:document.getElementById('chapter-list')?.hidden,

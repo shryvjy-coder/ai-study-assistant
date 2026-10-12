@@ -31,8 +31,12 @@ def select_chapters(spec: str, available: list[int]) -> list[int]:
         if start>end:
             raise ValueError("Chapter range must be ascending")
         selected=list(range(start,end+1))
+    elif re.fullmatch(r"[1-9][0-9]*(,[1-9][0-9]*)+",spec):
+        selected=list(map(int,spec.split(",")))
+        if len(set(selected))!=len(selected):
+            raise ValueError("Chapter selector contains duplicate chapters")
     else:
-        raise ValueError("Chapter selector must be a number, 'all', or ascending range such as 4-14")
+        raise ValueError("Chapter selector must be a number, 'all', ascending range, or comma list")
     if any(number not in approved for number in selected):
         raise ValueError("Selected chapters must exist in the verified manifest")
     return selected
@@ -76,6 +80,47 @@ def get_pdf(url: str, target: Path) -> None:
             delay = min(5 * (2 ** (attempt - 1)), 20)
             print(f"  NCERT connection failed: {exc}; retrying in {delay}s.", flush=True)
             time.sleep(delay)
+
+def get_pdf_cached(url: str, target: Path, number: int, cache_dir: Path | None) -> None:
+    """Reuse only recent intact PDF bytes previously fetched from official NCERT.
+
+    Cached files are private GitHub Actions artifacts and never published to
+    the site. Any mismatched URL/hash or stale/invalid file is downloaded anew.
+    """
+    if cache_dir is None:
+        return get_pdf(url,target)
+    import hashlib
+    from datetime import datetime, timezone
+    cache_dir.mkdir(parents=True,exist_ok=True)
+    cache=cache_dir/f"chapter-{number:02}.pdf"
+    meta=cache_dir/f"chapter-{number:02}.json"
+    if cache.is_file() and meta.is_file() and cache.stat().st_size<=MAX_PDF_BYTES:
+        try:
+            details=json.loads(meta.read_text(encoding="utf-8"))
+            age=(datetime.now(timezone.utc) -
+                 datetime.fromisoformat(details["fetched_at"])).total_seconds()
+            raw=cache.read_bytes()
+            good=(details.get("url")==url and
+                  details.get("sha256")==hashlib.sha256(raw).hexdigest() and
+                  0<=age<=21*86400 and raw.startswith(b"%PDF"))
+            if good:
+                pdf_pages(cache)
+                target.write_bytes(raw)
+                print(f"  Reusing recent official NCERT PDF cache for Chapter {number}.",
+                      flush=True)
+                return
+        except (OSError, ValueError, KeyError, TypeError):
+            pass
+    get_pdf(url,target)
+    pdf_pages(target)
+    raw=target.read_bytes()
+    metadata={"url":url,"sha256":hashlib.sha256(raw).hexdigest(),
+              "fetched_at":datetime.now(timezone.utc).isoformat()}
+    temp=cache.with_suffix(".tmp")
+    temp.write_bytes(raw)
+    temp.replace(cache)
+    meta.write_text(json.dumps(metadata,sort_keys=True)+"\n",encoding="utf-8")
+
 
 def pdf_pages(path: Path) -> list[str]:
     from pypdf import PdfReader
@@ -403,6 +448,8 @@ def main() -> int:
                         help="Deep: four independent Gemini checks plus deterministic QA")
     parser.add_argument("--checkpoint-dir",type=Path,
                         help="Persistent per-chapter validated stage checkpoints for deep audits")
+    parser.add_argument("--pdf-cache-dir",type=Path,
+                        help="Optional recent verified NCERT source cache restored from trusted artifacts")
     parser.add_argument("--previous-review-code-dir",type=Path,
                         help="Verified checkout of the exact trusted code used by the previous run")
     parser.add_argument("--request-budget",type=int,
@@ -453,7 +500,7 @@ def main() -> int:
         print(f"Reviewing Chapter {i}/14: {entry['title']}",flush=True)
         pdf=work/f"chapter-{i:02}.pdf"
         try:
-            get_pdf(entry["pdf"],pdf)
+            get_pdf_cached(entry["pdf"],pdf,i,args.pdf_cache_dir)
             pages=pdf_pages(pdf)
             if args.depth=="deep":
                 if args.mode!="propose":

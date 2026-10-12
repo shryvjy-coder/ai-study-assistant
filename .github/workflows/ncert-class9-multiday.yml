@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "start = arm for next daily run; stop = disarm; status = inspect only"
+        description: "start/stop/status = no API calls; upgrade = explicitly re-pin audit code without API calls"
         required: true
         type: choice
         default: status
-        options: [status, start, stop]
+        options: [status, start, stop, upgrade]
       model:
         description: "Gemini model held fixed throughout the batch"
         required: true
@@ -117,14 +117,43 @@ jobs:
             --dir review-artifacts/checkpoints
           echo "Recovered validated stage checkpoints from $RESUME_RUN."
 
-      - name: Review Chapters 5–14 within today's request budget
+      - name: Plan independent chapters within the same daily free-tier budget
         if: steps.control.outputs.run == 'true'
+        id: plan
+        env:
+          MODEL_ID: ${{ steps.control.outputs.model }}
+          PINNED_CODE_SHA: ${{ steps.control.outputs.code_sha }}
+        run: |
+          set -euo pipefail
+          if [ ! -f automation-repo/automation/class9-maths/free_queue.py ]; then
+            # Existing armed batches stay backward compatible until a person
+            # explicitly dispatches operation=upgrade. Never change a live
+            # audit's pinned code behind its back.
+            echo "queue_active=false" >> "$GITHUB_OUTPUT"
+            echo "has_work=true" >> "$GITHUB_OUTPUT"
+            echo "chapters=5-14" >> "$GITHUB_OUTPUT"
+            echo "Older pinned audit code; original sequential audit preserved." >> "$GITHUB_STEP_SUMMARY"
+          else
+            python automation-repo/automation/class9-maths/free_queue.py plan \
+              --manifest automation-repo/automation/class9-maths/manifest.json \
+              --notes current-notes.json \
+              --model "$MODEL_ID" --code-sha "$PINNED_CODE_SHA" \
+              --queue review-artifacts/checkpoints/free-queue.json \
+              --plan review-artifacts/free-queue-plan.json \
+              --github-output "$GITHUB_OUTPUT"
+            echo "queue_active=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Review queued independent chapters within today's shared request budget
+        if: steps.control.outputs.run == 'true' && steps.plan.outputs.has_work == 'true'
         id: review
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           MODEL_ID: ${{ steps.control.outputs.model }}
           MAX_ATTEMPTS: ${{ steps.control.outputs.budget }}
           SPACING: ${{ steps.control.outputs.min_request_seconds }}
+          CHAPTERS: ${{ steps.plan.outputs.chapters }}
+          QUEUE_ACTIVE: ${{ steps.plan.outputs.queue_active }}
         run: |
           set -euo pipefail
           if [ -z "$GEMINI_API_KEY" ]; then
@@ -132,17 +161,46 @@ jobs:
             echo "exit_code=1" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          ARGS=()
+          if [ "$QUEUE_ACTIVE" = true ]; then
+            ARGS+=(--pdf-cache-dir review-artifacts/checkpoints/pdf-cache)
+            # A structurally blocked chapter must not prevent other chapters
+            # from progressing; API quota exhaustion still stops the run.
+          else
+            ARGS+=(--stop-on-blocked)
+          fi
           set +e
           python automation-repo/automation/class9-maths/pipeline.py \
             --manifest automation-repo/automation/class9-maths/manifest.json \
             --notes current-notes.json --output review-artifacts \
-            --chapter 5-14 --mode propose --depth deep --model "$MODEL_ID" \
+            --chapter "$CHAPTERS" --mode propose --depth deep --model "$MODEL_ID" \
             --checkpoint-dir review-artifacts/checkpoints \
             --request-budget "$MAX_ATTEMPTS" --min-request-seconds "$SPACING" \
-            --stop-on-blocked
+            "${ARGS[@]}"
           RESULT=$?
           set -e
           echo "exit_code=$RESULT" >> "$GITHUB_OUTPUT"
+
+      - name: Reconcile only verified chapter results across previous scheduled days
+        if: always() && steps.control.outputs.run == 'true' && steps.plan.outcome == 'success'
+        id: queue
+        env:
+          MODEL_ID: ${{ steps.control.outputs.model }}
+          PINNED_CODE_SHA: ${{ steps.control.outputs.code_sha }}
+          QUEUE_ACTIVE: ${{ steps.plan.outputs.queue_active }}
+        run: |
+          set -euo pipefail
+          if [ "$QUEUE_ACTIVE" != true ]; then
+            echo "queue_status=legacy" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python automation-repo/automation/class9-maths/free_queue.py reconcile \
+            --manifest automation-repo/automation/class9-maths/manifest.json \
+            --notes current-notes.json \
+            --model "$MODEL_ID" --code-sha "$PINNED_CODE_SHA" \
+            --queue review-artifacts/checkpoints/free-queue.json \
+            --plan review-artifacts/free-queue-plan.json \
+            --output review-artifacts --github-output "$GITHUB_OUTPUT"
 
       - name: Upload checkpoint snapshot even after a pause or failure
         if: always() && steps.control.outputs.run == 'true'
@@ -171,7 +229,7 @@ jobs:
 
       - name: Check that notes branch has not moved before publishing
         id: notes-base
-        if: steps.control.outputs.run == 'true' && steps.review.outputs.exit_code == '0'
+        if: steps.control.outputs.run == 'true' && ((steps.queue.outputs.queue_complete == 'true' && (steps.review.outputs.exit_code == '0' || steps.review.outcome == 'skipped')) || (steps.queue.outputs.queue_status == 'legacy' && steps.review.outputs.exit_code == '0'))
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EXPECTED_SHA: ${{ steps.control.outputs.notes_sha }}
@@ -240,6 +298,7 @@ jobs:
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           PATCH_OUTCOME: ${{ steps.patch.outcome }}
           DRAFT_URL: ${{ steps.publish.outputs.url }}
+          QUEUE_STATUS: ${{ steps.queue.outputs.queue_status }}
         run: |
           set -euo pipefail
           STAGES=0
@@ -255,4 +314,5 @@ jobs:
             --run-id "$GITHUB_RUN_ID" --summary "$GITHUB_STEP_SUMMARY" \
             --report review-artifacts/audit.json --exit-code "${PIPELINE_EXIT:-1}" \
             --publish-ok "$READY" --artifact-uploaded "$HAS_ARTIFACT" \
-            --checkpoint-count "$STAGES" --draft-url "$DRAFT_URL"
+            --checkpoint-count "$STAGES" --draft-url "$DRAFT_URL" \
+            --queue-status "${QUEUE_STATUS:-legacy}"

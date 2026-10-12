@@ -261,6 +261,22 @@ def prepare(args: argparse.Namespace) -> None:
                           model=args.model, budget=args.budget, run_id=args.run_id)
         save(args.repo, state, file_sha=etag, base_sha=args.commit_sha)
         message = "Armed for the NEXT scheduled daily tick. No Gemini API calls in this start run."
+    elif operation == "upgrade":
+        # Deliberate manual re-pin only while no stage was ever generated.
+        # Previously validated checkpoints must NOT be silently discarded.
+        if state is None or not state["enabled"]:
+            raise ValueError("Arm a batch before upgrading its review code")
+        if (state["inflight_run_id"] is not None or
+                state["resume_run_id"] is not None or
+                state["progress_stage_count"] != 0):
+            raise ValueError("An existing run/checkpoint requires manual migration")
+        if state["notes_sha"] != branch_sha(args.repo, NOTES_BRANCH):
+            raise ValueError("Protected notes branch changed; refusing to upgrade")
+        state["automation_sha"] = check_sha(args.commit_sha)
+        save(args.repo, state, file_sha=etag, base_sha=args.commit_sha)
+        message = ("Pinned audit code upgraded by explicit human dispatch; "
+                   "existing opt-in and protected notes SHA stay intact. "
+                   "No Gemini requests in this operation.")
     elif operation == "stop":
         if state is not None:
             save(args.repo, stop(state), file_sha=etag, base_sha=args.commit_sha)
@@ -316,8 +332,18 @@ def finalize(args: argparse.Namespace) -> None:
         reports = json.loads(args.report.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         reports = []
-    result = report_state(reports, exit_code=args.exit_code,
-                          publish_ok=(args.publish_ok == "true"))
+    if args.queue_status in ("complete", "paused", "needs_attention"):
+        # Queue holds all previous verified results, not just today's chapters.
+        if args.queue_status == "needs_attention":
+            result = "blocked"
+        elif args.queue_status == "paused":
+            result = "paused"
+        else:
+            result = report_state(reports, exit_code=0,
+                                  publish_ok=(args.publish_ok == "true"))
+    else:
+        result = report_state(reports, exit_code=args.exit_code,
+                              publish_ok=(args.publish_ok == "true"))
     previous_state = dict(state)
     next_state = advance(state, run_id=args.run_id, result=result,
                          artifact_uploaded=(args.artifact_uploaded == "true"),
@@ -338,7 +364,7 @@ def main() -> int:
     parser.add_argument("command", choices=["prepare", "finalize"])
     parser.add_argument("--repo", required=True)
     parser.add_argument("--event", default="workflow_dispatch")
-    parser.add_argument("--operation", choices=["start", "stop", "status"], default="status")
+    parser.add_argument("--operation", choices=["start", "stop", "status", "upgrade"], default="status")
     parser.add_argument("--commit-sha", required=True)
     parser.add_argument("--run-id", type=int, required=True)
     parser.add_argument("--model", default=ALLOWED_MODELS[0])
@@ -351,6 +377,7 @@ def main() -> int:
     parser.add_argument("--artifact-uploaded", default="false")
     parser.add_argument("--checkpoint-count", type=int, default=0)
     parser.add_argument("--draft-url", default="")
+    parser.add_argument("--queue-status", choices=["legacy", "complete", "paused", "needs_attention"], default="legacy")
     args = parser.parse_args()
     if not REPO.fullmatch(args.repo):
         parser.error("Invalid repository identifier")

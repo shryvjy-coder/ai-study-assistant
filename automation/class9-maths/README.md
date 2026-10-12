@@ -250,3 +250,67 @@ valid. A runner termination before artifact upload can lose that day's
 in-memory progress; the controller then requires human intervention.
 `GITHUB_TOKEN` must be allowed to create draft pull requests, and workflows
 must have the contents/actions/pull-request permissions specified in YAML.
+
+
+## Free-tier Class 9 Maths chapter queue (upgrade without spending on extra accounts)
+
+The opted-in multi-day workflow can now maintain a **source-bound independent
+queue for Chapters 5–14** instead of redoing early blocked chapters repeatedly.
+The same, single `GEMINI_API_KEY` project quota, max 18 attempts per scheduled
+day and minimum 35-second spacing remain in place. Actual limits vary by
+project/model; **the cap is not a promise of 18 free requests**. Do not bypass
+project limits by creating extra accounts. The default schedule remains inert
+unless a user previously opted in. No tasks are triggered by a git push.
+
+**Activation for an existing ARMED batch with no checkpoints:**
+
+1. Review and merge the queue implementation into `main` after offline and CI
+   tests pass. This does not change the running pinned audit code.
+2. In **Actions → NCERT Class 9 Maths — opt-in multi-day Deep Audit → Run
+   workflow**, choose `operation=upgrade` on the main branch. This is a
+   **no-API-call** operation: it explicitly re-pins the source review code
+   while preserving the approved notes SHA and the original manual opt-in.
+   It refuses to upgrade any batch with checkpoints or an unfinished run.
+3. The next eligible scheduled run reads the same existing authorized
+   `GEMINI_API_KEY` secret (do not paste keys into GitHub issues, source code
+   or messages). If no key or free quota is available, no successful chapter
+   is falsely claimed.
+
+**What changes in a scheduled run:**
+
+- A queue record, saved under
+  `review-artifacts/checkpoints/free-queue.json`, identifies pending,
+  partially reviewed, processed and temporarily blocked chapters.
+- The planner sends an explicit chapter list to the existing Deep Audit
+  pipeline. All Gemini attempts across that list share **one RequestPacer and
+  one daily request budget**; API calls are not run concurrently.
+- An NCERT PDF fetched from the allowlisted official URL is cached with its
+  SHA-256 and fetch time (up to 21 days) inside a trusted GitHub Actions
+  artifact. Cache corruption, mismatched URLs, or stale PDFs cause a fresh
+  official download, never unverified source substitution.
+- Successful math/source-validated review results are retained per chapter.
+  A blocked chapter backs off (2, 4, then 8 days); other chapters can make
+  progress in the same daily run. After three failed attempts for any chapter
+  the schedule stops for a human review.
+- Completed stages retain their prior strict prompt/source/model fingerprints;
+  checkpoint mismatches are rejected. When a daily limit is reached, work
+  pauses safely and resumes after the next permitted claim.
+- **No source material or generated candidate is merged automatically.** The
+  workflow consolidates all ten verified chapter results only after every
+  chapter has passed, reruns browser tests and creates a **draft PR targeting
+  the protected unmerged notes branch**. A person must review the mathematical
+  content and approve further changes.
+
+If the old pinned automation code has not yet been manually upgraded, the
+updated workflow detects the legacy pin and uses its original behavior instead
+of switching the live batch without approval. This means a code merge **alone**
+does not activate the new queue.
+
+The queue design is reusable for other grades later but currently deliberately
+enforces the verified 14-chapter Ganita Manjari manifest and only schedules
+Chapters 5–14. Adding new books requires their own independently verified
+manifest, quality gates, budgets and explicit user approval.
+
+All queue/planning tests are offline (unittest) and require neither API keys
+nor network access. Neither rate-limit workarounds nor arbitrary extra account
+API keys are part of this design.

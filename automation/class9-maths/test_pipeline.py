@@ -53,7 +53,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(select_chapters("4-14",available),list(range(4,15)))
         self.assertEqual(select_chapters("3",available),[3])
         self.assertEqual(select_chapters("all",available),available)
-        for value in ("0","15","14-4","4,14","1-15","-3","3-",""):
+        self.assertEqual(select_chapters("4,14",available),[4,14])
+        for value in ("0","15","14-4","4,4","1-15","-3","3-",""):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 select_chapters(value,available)
 

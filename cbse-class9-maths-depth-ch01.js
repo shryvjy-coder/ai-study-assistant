@@ -4,6 +4,9 @@
 (() => {
 'use strict';
 const D=window.StudyAIClass9Depth,E=D.example;
+const ch01=window.CBSE_CLASS9_MATH_FULL_NOTES?.['Orienting Yourself: The Use of Coordinates'];
+if(!ch01)throw Error('Chapter 1 final audit: notes bank is missing');
+if(ch01._studyaiCh01FinalAuditV1)return;
 D.apply('Orienting Yourself: The Use of Coordinates',[
 ['The Cartesian plane',[
 ['Why a single number is not enough',[
@@ -229,7 +232,7 @@ const learning=[
 const mixedAt=ch.sections.findIndex(s=>s.title==='Mixed exam applications and fully worked solutions');
 if(mixedAt<0)throw Error('Chapter 1 audit: missing mixed-application section');
 ch.sections.unshift(learning[0]);
-ch.sections.splice(mixedAt+1,0,...learning.slice(1)); // indices shift by one after unshift
+ch.sections.splice(mixedAt+1,0,...learning.slice(1)); // keep the final mixed-exam practice block after the advanced teaching
 
 // Extend the existing reflection subsection instead of duplicating it.
 const reflections=ch.sections
@@ -254,6 +257,46 @@ horizontal.paragraphs.push(
  'The expression |x₂−x₁| is the larger x-coordinate minus the smaller x-coordinate, regardless of endpoint order. This formula measures a horizontal segment because both y-coordinates agree. If both coordinates change, use the Pythagorean distance formula instead—absolute horizontal change alone is not the full straight-line distance.'
 );
 
+
+/* Verify the original lesson targets, then enrich without making new pages. */
+const requiredLesson=title=>{
+ const matches=ch.sections.flatMap(s=>s.subtopics||[]).filter(s=>s.title===title);
+ if(matches.length!==1)throw Error('Chapter 1 final audit: expected exactly one lesson '+title);
+ return matches[0];
+};
+requiredLesson('Drawing shapes from vertices').examples.push(E(
+ 'Complete the fourth corner of an axis-aligned table',
+ 'A rectangular table has three consecutive floor-contact points A=(2,5), B=(8,5), and C=(8,1), measured in feet. Find the fourth corner D, its floor dimensions, and say whether these data determine table height.',
+ ['AB has constant y=5, so it is horizontal and 8−2=6 ft long.',
+ 'BC has constant x=8, so it is vertical and 5−1=4 ft long.',
+ 'Opposite sides must remain parallel, so the missing vertex combines the x-coordinate of A with the y-coordinate of C: D=(2,1).',
+ 'These points locate feet on a two-dimensional floor plan; they do not describe the height above the floor.'],
+ 'D=(2,1); floor dimensions 6 ft by 4 ft; table height is undetermined.'
+));
+const street=requiredLesson('Historical ideas and the modern Cartesian grid');
+street.paragraphs.push(
+ 'Counting numbered streets away from central roads can give ambiguous crossings unless the directions are included. North versus south and east versus west must be distinguished by labels or coordinate signs. This explains the role of negative numbers in locating a place on a four-direction grid.'
+);
+street.examples.push(E(
+ 'Street labels need directions',
+ 'Town streets are 200 m apart on both sides of two central roads. A crossing is described as the fourth street east or west and the third north or south. How many crossings satisfy this unsigned description?',
+ ['East or west gives x=+800 or −800 m.',
+ 'North or south gives y=+600 or −600 m.',
+ 'Pair each x-value with each y-value. The unsigned pair (4,3) alone cannot identify one crossing.'],
+ 'Four crossings: (800,600), (800,−600), (−800,600), (−800,−600) metres.'
+));
+const circle=requiredLesson('When two circular regions touch or overlap');
+circle.paragraphs[1]=
+ 'For circle boundaries, compare centre distance d with the sum r₁+r₂ and difference |r₁−r₂| (for positive radii). Two crossings require |r₁−r₂|<d<r₁+r₂. The circles touch externally if d=r₁+r₂, and internally if d=|r₁−r₂|>0. When d<|r₁−r₂|, the smaller boundary lies entirely inside the larger without touching. Concentric circles (d=0) coincide at every boundary point only when their radii also match; otherwise their boundaries do not meet. Overlap of filled discs is different from boundary intersection.';
+circle.examples.push(E(
+ 'Internal tangency is one point, not two',
+ 'One circle has centre (0,0) and radius 5; another has centre (3,0) and radius 2. How many boundary intersections are there?',
+ ['The distance between centres is 3.',
+ 'The difference in radii is |5−2|=3, equal to the centre distance.',
+ 'The smaller circle touches the larger on the inside at point (5,0).'],
+ 'Exactly one shared point: (5,0).'
+));
+
 // Recompute all public audit metrics so the browser checks reflect appended notes.
 const audit=window.STUDYAI_CLASS9_DEPTH_AUDIT?.['Orienting Yourself: The Use of Coordinates'];
 if(audit){
@@ -268,4 +311,5 @@ if(audit){
  audit.reviewedSource='NCERT Ganita Manjari Part I 2026–27, Chapter 1 (iemh101.pdf)';
 }
 
+ch01._studyaiCh01FinalAuditV1=true;
 })();

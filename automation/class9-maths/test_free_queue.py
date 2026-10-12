@@ -102,6 +102,44 @@ class FreeChapterQueueTests(unittest.TestCase):
             reconcile(q, [6], [dict(self.report(6),
                 candidate_lessons=[{}, {}, {}])], self.day)
 
+    def test_cli_plan_and_reconcile_preserves_previous_verified_work(self):
+        from subprocess import run
+        import sys
+        script = Path(__file__).resolve().with_name("free_queue.py")
+        plan = self.root / "plan.json"
+        outputs = self.root / "actions-out"
+        report_dir = self.root / "report"
+        report_dir.mkdir()
+        common = [
+            "--manifest", str(self.manifest), "--notes", str(self.notes),
+            "--queue", str(self.path), "--model", "gemini-3.8-flash",
+            "--code-sha", self.code, "--plan", str(plan),
+            "--today", "2026-10-12", "--github-output", str(outputs),
+        ]
+        result = run([sys.executable, str(script), "plan", *common],
+                     capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(plan.read_text()), list(CHAPTERS))
+        self.assertIn("has_work=true", outputs.read_text())
+        (report_dir / "audit.json").write_text(json.dumps([
+            self.report(5), self.report(6, "blocked")
+        ]), encoding="utf-8")
+        run([sys.executable, str(script), "reconcile", *common,
+             "--output", str(report_dir)], capture_output=True, text=True,
+            check=True)
+        self.assertEqual(len(json.loads((report_dir/"audit.json").read_text())), 1)
+        self.assertEqual(json.loads((report_dir/"candidate-lessons.json").read_text()), [])
+        self.assertIn("queue_status=paused", outputs.read_text())
+        next_plan = self.root/"next-plan.json"
+        later = list(common)
+        later[later.index(str(plan))] = str(next_plan)
+        later[later.index("2026-10-12")] = "2026-10-13"
+        run([sys.executable, str(script), "plan", *later],
+            capture_output=True, text=True, check=True)
+        later_chapters = json.loads(next_plan.read_text())
+        self.assertNotIn(5, later_chapters)
+        self.assertNotIn(6, later_chapters)
+        self.assertIn(7, later_chapters)
+
     def test_manual_upgrade_only_repins_clean_state_without_model_calls(self):
         from argparse import Namespace
         from unittest.mock import patch

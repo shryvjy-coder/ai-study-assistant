@@ -80,6 +80,11 @@
           hide(part,false);
           part.classList.remove('studyai-current-subtopic');
         });
+        // The overview displays the complete parent lesson, not dozens of
+        // repetitive "mark this child" bars. Each child gets its inline
+        // completion button when the student opens its focused page.
+        section.querySelectorAll('.studyai-inline-leaf-only').forEach(bar=>
+          hide(bar,true));
       }else section.classList.remove('studyai-current-topic');
     });
     setNavigation();
@@ -102,7 +107,6 @@
     rememberedLeaf.set(activeEntry,leaf.key);
     const examples=[...section.children].filter(node=>node.classList.contains('worked-box'));
     const parts=[...section.children].filter(node=>node.classList.contains('studyai-lesson-subtopic'));
-    let exampleCursor=0;
     [...section.children].forEach(child=>{
       const isHeading=child.matches(':scope > h3');
       const isFigure=child.classList.contains('studyai-concept-figure')||
@@ -119,13 +123,16 @@
       }else if(leaf.kind==='example'){
         visible=isHeading||(isExample&&examples.indexOf(child)===leaf.exampleIndex);
       }
-      if(isCoreCompletion && leaf.kind!=='core')visible=false;
+      if(isCoreCompletion){
+        visible=leaf.kind==='core' && child.dataset.leafKey===leaf.key;
+      }
       hide(child,!visible);
       if(isPart){
         child.classList.toggle('studyai-current-subtopic',visible&&leaf.kind==='subtopic');
       }
-      if(isExample)exampleCursor++;
     });
+    section.querySelectorAll('.studyai-inline-leaf-only').forEach(bar=>
+      hide(bar,bar.querySelector('.studyai-inline-complete')?.dataset.leafKey!==leaf.key));
     setNavigation();
     const notes=document.getElementById('detailed-notes');
     if(scroll)scrollToLesson(notes,section);

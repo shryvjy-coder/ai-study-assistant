@@ -41,7 +41,8 @@ const check=(v,message)=>{assert.ok(v,message);console.log('PASS',message)};
     const groups=StudyAIProgress.outline(entry.id),leaves=groups.flatMap(g=>g.leaves);
     const topics=chapter.sections.flatMap(s=>s.subtopics||[]);
     const get=x=>topics.find(t=>t.title===x);
-    const text=topics.flatMap(t=>[...(t.paragraphs||[]),...(t.formulas||[]) ]).join(' ');
+    const text=topics.flatMap(t=>[...(t.paragraphs||[]),...(t.formulas||[]),
+      ...(t.examples||[]).flatMap(e=>[e.question,...(e.steps||[]),e.answer])]).join(' ');
     const audit=STUDYAI_CLASS9_DEPTH_AUDIT?.[title];
     return {
       id:entry.id,total:leaves.length,groups:groups.length,
@@ -80,8 +81,10 @@ const check=(v,message)=>{assert.ok(v,message);console.log('PASS',message)};
     'original cuboid, cylinder, cone, pyramid, sphere and application lessons remain');
   check(info.newTopics && info.schema,
     'three focused NCERT skills and non-empty worked examples are present');
-  check(info.source && info.skills,
-    'key mathematical derivations, cases and textbook applications appear');
+  check(info.source,
+    'key geometric derivations and required domain restrictions appear');
+  check(info.skills,
+    'mathematical worked-example skills and textbook applications appear');
   check(info.status && info.sourceRef,
     'source recorded and automated report never claims completed human editorial review');
   check(info.chapter13,'Chapter 13 integration remains available');
@@ -126,8 +129,7 @@ const check=(v,message)=>{assert.ok(v,message);console.log('PASS',message)};
     8+12*(5-2)+6*(5-2)**2+(5-2)**3===125,
     'integer-cuboid and painted-cube arithmetic independently verified');
   check(Math.abs((1-1/1.1**2)*100-2100/121)<1e-10 &&
-    Math.round(1024-512*Math.PI/3)===488 &&
-    37*0+23*0===0,
+    Math.round(1024-512*Math.PI/3)===488,
     'reciprocal percentage and sphere displacement independently verified');
   check(errors.length===0,'no browser JS exceptions: '+errors.join('; '));
   console.log('CHAPTER 14 NCERT RECONCILIATION BROWSER REGRESSION PASS');

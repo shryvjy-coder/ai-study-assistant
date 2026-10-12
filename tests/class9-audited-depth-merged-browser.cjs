@@ -82,13 +82,23 @@ const titles=[
     openTopic(entry.title,entry.id);
     const groups=StudyAIProgress.outline(id);
     const leaf=groups.flatMap(g=>g.leaves).find(item=>item.kind==='subtopic');
-    StudyAILessonReader.goToLeaf(leaf.key);
-    return {key:leaf.key,total:StudyAIProgress.summary(id).total};
+    const opened=StudyAILessonReader.goToLeaf(leaf.key);
+    return {key:leaf.key,opened,activeKey:StudyAILessonReader.activeLeafKey(),
+      total:StudyAIProgress.summary(id).total};
   },chapters[3].id);
   check(await page.locator('.studyai-sublesson-row').count()===selection.total,
     'audited Chapter 8 focused lessons appear as separate navigation items');
-  const visible=await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count();
-  check(visible===1,'only selected audited lesson is visible');
+  check(selection.opened&&selection.activeKey===selection.key,
+    'focused audited lesson selection succeeds and stays active');
+  const focus=await page.evaluate(()=>({
+    selected:document.querySelectorAll(
+      '#detailed-notes .studyai-current-subtopic:not([hidden])').length,
+    heading:document.querySelector(
+      '#detailed-notes .studyai-current-subtopic:not([hidden]) h4')?.textContent||'',
+    notesVisible:document.querySelector('#detailed-notes')?.getBoundingClientRect().width>0
+  }));
+  check(focus.selected===1&&focus.notesVisible,
+    'exactly one focused audited subtopic renders in the visible notes: '+JSON.stringify(focus));
   check(errors.length===0,'no JavaScript exceptions after integrating audited chapters: '+errors.join('; '));
   console.log('AUDITED CLASS 9 MATH CHAPTERS 5–11 INTEGRATION PASS');
 })().catch(error=>{

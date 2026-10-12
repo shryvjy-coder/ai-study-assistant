@@ -487,9 +487,23 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     };
     requestAnimationFrame(sample);
   }));
+  const openState=await page.evaluate(()=>{
+    const element=document.getElementById('studyai-notes-nav-content');
+    return {
+      hidden:element.hidden,
+      inert:element.inert,
+      display:getComputedStyle(element).display,
+      visibility:getComputedStyle(element).visibility,
+      opacity:getComputedStyle(element).opacity,
+      height:element.getBoundingClientRect().height,
+      studyHidden:document.getElementById('study').hidden,
+      collapsed:document.getElementById('study').classList.contains('studyai-nav-collapsed'),
+      expanded:document.getElementById('toggle-notes-nav').getAttribute('aria-expanded')
+    };
+  });
   check(openingWidths.some(width=>width>90&&width<440) &&
       await page.locator('#studyai-notes-nav-content').isVisible(),
-    'opening dock animates through intermediate widths rather than snapping: '+JSON.stringify({first:openingWidths.slice(0,8),last:openingWidths.slice(-8),min:Math.min(...openingWidths),max:Math.max(...openingWidths)}));
+    'opening dock animates through intermediate widths rather than snapping: '+JSON.stringify({first:openingWidths.slice(0,8),last:openingWidths.slice(-8),min:Math.min(...openingWidths),max:Math.max(...openingWidths),panel:openState}));
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns)>540,
     null,{timeout:2000});

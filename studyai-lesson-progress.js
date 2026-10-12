@@ -1,9 +1,9 @@
 /* StudyAI — progress-aware chapter/lesson navigation for CBSE Class 9 Mathematics.
  *
  * Layout: Collapsible contents (chapters and lesson checklist) | Teaching note
- * The chapter ring shows completed substantial lessons (not every small h4
- * heading). Completion is stored in the existing StudyAI account state so it
- * survives reloads and syncs through the existing authenticated state API.
+ * Chapter rings count the ACTUAL selectable authored subtopics and worked
+ * examples, without a fixed maximum. Old section-level completion records
+ * migrate into the new fine-grained checklist without losing progress.
  * No notes, formulas, SVGs or exercises are changed by this UI enhancement.
  */
 (() => {
@@ -19,6 +19,7 @@
   ]);
   let chapterEntry=null;
   let lessons=[];
+  let groups=[];
   let sideRail=null;
 
   const isCourse=()=>current.board==='CBSE'&&current.grade==='Class 9'&&
@@ -31,33 +32,36 @@
     typeof state.studyaiLessonProgress==='object'&&!Array.isArray(state.studyaiLessonProgress)
     ?state.studyaiLessonProgress:{};
 
-  function lessonData(entry){
-    const sections=bank(entry)?.sections||[];
-    const appearances=new Map();
-    return sections.filter(section=>
-      section&&typeof section.title==='string'&&section.title.trim()&&
-      !ignored.has(section.title.trim())).map(section=>{
-        const title=section.title.trim();
-        const occurrence=appearances.get(title)||0;
-        appearances.set(title,occurrence+1);
-        return {title,key:occurrence?title+' #'+(occurrence+1):title};
-      });
-  }
+  const lessonGroups=entry=>window.StudyAIClass9Outline?.forEntry(entry)||[];
+  const lessonData=entry=>lessonGroups(entry).flatMap(group=>group.leaves);
 
   function readChecks(entry,units=lessonData(entry)){
     const record=readStore()[entry.id];
-    // Preserve an existing "Completed" chapter from the old StudyAI reader.
+    // Older StudyAI stored complete MAJOR lesson keys. Treat such a check
+    // as completing its authored children until the next explicit edit
+    // migrates it to the new stable leaf-key representation.
+    const legacy=lessonGroups(entry);
     const values=Array.isArray(record)?record:
-      state.completed?.includes(entry.id)?units.map(lesson=>lesson.key):[];
-    const allowed=new Set(units.map(unit=>unit.key));
-    return new Set(values.filter(value=>typeof value==='string'&&allowed.has(value)));
+      state.completed?.includes(entry.id)?units.map(leaf=>leaf.key):[];
+    const selected=new Set(values.filter(x=>typeof x==='string'));
+    const migrated=new Set();
+    for(const group of legacy){
+      if(selected.has(group.key))group.leaves.forEach(leaf=>migrated.add(leaf.key));
+    }
+    const allowed=new Set(units.map(leaf=>leaf.key));
+    selected.forEach(key=>{if(allowed.has(key))migrated.add(key)});
+    return migrated;
   }
 
   function summary(entry){
     const units=lessonData(entry);
     const marked=readChecks(entry,units);
     const done=units.filter(unit=>marked.has(unit.key)).length;
-    return {done,total:units.length,percent:units.length?Math.round(100*done/units.length):0};
+    return {
+      done,total:units.length,
+      percent:units.length?Math.round(100*done/units.length):0,
+      lessonCount:lessonGroups(entry).length
+    };
   }
 
   function makeRing(info){
@@ -67,7 +71,7 @@
     ring.style.setProperty('--studyai-done',info.percent+'%');
     ring.setAttribute('role','img');
     ring.setAttribute('aria-label',info.done+' of '+info.total+
-      ' lessons complete, '+info.percent+' percent');
+      ' subtopics complete, '+info.percent+' percent');
     const numeral=document.createElement('span');
     numeral.className='studyai-progress-number';
     numeral.textContent=info.total&&info.done===info.total?'✓':info.percent+'%';
@@ -89,7 +93,7 @@
       label.className='studyai-chapter-name';
       label.textContent=entry.title;
       button.replaceChildren(makeRing(info),label);
-      button.title=entry.title+' — '+info.done+' of '+info.total+' lessons complete';
+      button.title=entry.title+' — '+info.done+' of '+info.total+' subtopics complete';
     });
   }
 
@@ -104,6 +108,7 @@
       sideRail=null;
       chapterEntry=null;
       lessons=[];
+      groups=[];
       return;
     }
     sideRail=one('#study .studyai-lesson-rail');
@@ -142,45 +147,71 @@
       ring.querySelector('.studyai-progress-number').textContent=
         info.total>0&&info.done===info.total?'✓':info.percent+'%';
       ring.setAttribute('aria-label',info.done+' of '+info.total+
-        ' lessons complete, '+info.percent+' percent');
-      button.title=entry.title+' — '+info.done+' of '+info.total+' lessons complete';
+        ' subtopics complete, '+info.percent+' percent');
+      button.title=entry.title+' — '+info.done+' of '+info.total+' subtopics complete';
     });
   }
 
-  function activeIndex(){
-    return window.StudyAILessonReader?.activeIndex?.()||0;
-  }
+  const byLeafKey=key=>lessons.find(leaf=>leaf.key===key);
+  const activeIndex=()=>window.StudyAILessonReader?.activeIndex?.()||0;
+  const activeLeaf=()=>window.StudyAILessonReader?.activeLeafKey?.()||null;
 
   function refreshIndicators(){
     if(!isEligible(chapterEntry)||!sideRail)return;
     const checked=readChecks(chapterEntry,lessons);
-    const completed=lessons.filter(lesson=>checked.has(lesson.key)).length;
     const count=sideRail.querySelector('.studyai-rail-count');
-    if(count)count.textContent=completed+' of '+lessons.length+' completed';
+    if(count)count.textContent=checked.size+' of '+lessons.length+' subtopics completed';
     const bar=sideRail.querySelector('.studyai-rail-progress-fill');
-    if(bar)bar.style.width=(lessons.length?completed*100/lessons.length:0)+'%';
-    sideRail.querySelectorAll('.studyai-lesson-row').forEach(row=>{
-      const n=Number(row.dataset.index);
-      const lesson=lessons[n];
-      if(!lesson)return;
-      const done=checked.has(lesson.key);
-      const active=n===activeIndex();
-      row.classList.toggle('is-complete',done);
-      row.classList.toggle('is-active',active);
-      const link=row.querySelector('.studyai-lesson-link');
-      if(active)link?.setAttribute('aria-current','page');
+    if(bar)bar.style.width=(lessons.length?checked.size*100/lessons.length:0)+'%';
+    const selectedIndex=activeIndex();
+    const selectedLeaf=activeLeaf();
+    sideRail.querySelectorAll('.studyai-outline-group').forEach(groupNode=>{
+      const group=groups[Number(groupNode.dataset.index)];
+      if(!group)return;
+      const complete=group.leaves.filter(leaf=>checked.has(leaf.key)).length;
+      groupNode.classList.toggle('is-complete',complete===group.leaves.length);
+      const header=groupNode.querySelector(':scope > .studyai-lesson-row');
+      header?.classList.toggle('is-active',group.index===selectedIndex);
+      header?.classList.toggle('is-complete',complete===group.leaves.length);
+      const link=header?.querySelector('.studyai-lesson-link');
+      if(group.index===selectedIndex&&!selectedLeaf)link?.setAttribute('aria-current','page');
       else link?.removeAttribute('aria-current');
-      const tick=row.querySelector('.studyai-lesson-toggle');
-      if(tick){
-        tick.setAttribute('aria-checked',String(done));
-        tick.setAttribute('aria-label',(done?'Mark incomplete: ':'Mark complete: ')+lesson.title);
-        tick.title=done?'Mark incomplete':'Mark as complete';
-        tick.textContent=done?'✓':'';
+      const toggle=header?.querySelector('.studyai-lesson-toggle');
+      if(toggle){
+        const status=complete===0?'false':
+          complete===group.leaves.length?'true':'mixed';
+        toggle.setAttribute('aria-checked',status);
+        toggle.setAttribute('aria-label',
+          (status==='true'?'Mark all incomplete: ':'Mark all complete: ')+group.title);
+        toggle.title=complete+' of '+group.leaves.length+' subtopics completed';
+        toggle.textContent=status==='true'?'✓':status==='mixed'?'−':'';
       }
+      const count=groupNode.querySelector('.studyai-outline-group-count');
+      if(count)count.textContent=complete+'/'+group.leaves.length;
+      groupNode.querySelectorAll('.studyai-sublesson-row').forEach(row=>{
+        const leaf=byLeafKey(row.dataset.leafKey);
+        if(!leaf)return;
+        const done=checked.has(leaf.key);
+        const active=selectedLeaf===leaf.key;
+        row.classList.toggle('is-complete',done);
+        row.classList.toggle('is-active',active);
+        const link=row.querySelector('.studyai-sublesson-link');
+        if(active)link?.setAttribute('aria-current','page');
+        else link?.removeAttribute('aria-current');
+        const tick=row.querySelector('.studyai-sublesson-toggle');
+        if(tick){
+          tick.setAttribute('aria-checked',String(done));
+          tick.setAttribute('aria-label',
+            (done?'Mark incomplete: ':'Mark complete: ')+leaf.title);
+          tick.title=done?'Mark incomplete':'Mark as complete';
+          tick.textContent=done?'✓':'';
+        }
+      });
     });
-    one('#detailed-notes')?.querySelectorAll('.studyai-inline-complete').forEach(button=>{
-      const key=button.dataset.lessonKey;
-      const done=checked.has(key);
+    document.querySelectorAll('#detailed-notes .studyai-inline-complete').forEach(button=>{
+      const group=groups.find(item=>item.key===button.dataset.groupKey);
+      const done=group?group.leaves.every(leaf=>checked.has(leaf.key)):
+        checked.has(button.dataset.leafKey);
       button.classList.toggle('is-complete',done);
       button.setAttribute('aria-pressed',String(done));
       button.textContent=done?'✓ Completed · Mark incomplete':'✓ Mark as complete';
@@ -188,76 +219,161 @@
     updateChapterRings();
   }
 
-  function toggleLesson(index){
+  function persistChecks(marked){
     if(!isEligible(chapterEntry))return;
-    const unit=lessons[index];
-    if(!unit)return;
     const store=readStore();
-    const checked=readChecks(chapterEntry,lessons);
-    if(checked.has(unit.key))checked.delete(unit.key);
-    else checked.add(unit.key);
-    state.studyaiLessonProgress={...store,[chapterEntry.id]:[...checked]};
-    // The previous single chapter-wide completion state remains consistent
-    // with the new lesson-level progress and the existing dashboard.
+    state.studyaiLessonProgress={...store,[chapterEntry.id]:[...marked]};
     if(!Array.isArray(state.completed))state.completed=[];
-    const wasComplete=state.completed.indexOf(chapterEntry.id);
-    if(checked.size===lessons.length && lessons.length){
-      if(wasComplete<0)state.completed.push(chapterEntry.id);
-    } else if(wasComplete>=0){
-      state.completed.splice(wasComplete,1);
-    }
+    const oldIndex=state.completed.indexOf(chapterEntry.id);
+    const allDone=lessons.length>0&&marked.size===lessons.length;
+    if(allDone&&oldIndex<0)state.completed.push(chapterEntry.id);
+    if(!allDone&&oldIndex>=0)state.completed.splice(oldIndex,1);
     save();
     refreshIndicators();
     if(typeof updateDashboard==='function')updateDashboard();
     if(typeof updateTopicActions==='function')updateTopicActions();
   }
-
-  function createLessonRow(lesson,index){
+  function toggleLeaf(key){
+    if(!isEligible(chapterEntry)||!byLeafKey(key))return;
+    const checked=readChecks(chapterEntry,lessons);
+    if(checked.has(key))checked.delete(key);
+    else checked.add(key);
+    persistChecks(checked);
+  }
+  function toggleGroup(index){
+    if(!isEligible(chapterEntry))return;
+    const group=groups[index];
+    if(!group)return;
+    const checked=readChecks(chapterEntry,lessons);
+    const allDone=group.leaves.every(leaf=>checked.has(leaf.key));
+    group.leaves.forEach(leaf=>{
+      if(allDone)checked.delete(leaf.key);
+      else checked.add(leaf.key);
+    });
+    persistChecks(checked);
+  }
+  function addToggle(role,title,callback){
+    const button=document.createElement('button');
+    button.type='button';
+    button.className=role;
+    button.setAttribute('role','checkbox');
+    button.setAttribute('aria-checked','false');
+    button.setAttribute('aria-label','Mark complete: '+title);
+    button.title='Mark as complete';
+    button.addEventListener('click',callback);
+    return button;
+  }
+  function createLessonGroup(group){
+    const container=document.createElement('div');
+    container.className='studyai-outline-group';
+    container.dataset.index=String(group.index);
     const row=document.createElement('div');
     row.className='studyai-lesson-row';
-    row.dataset.index=String(index);
-
+    row.dataset.index=String(group.index);
+    const disclosure=document.createElement('button');
+    disclosure.type='button';
+    disclosure.className='studyai-outline-disclosure';
+    disclosure.textContent='⌄';
+    disclosure.setAttribute('aria-label','Show subtopics in '+group.title);
+    disclosure.setAttribute('aria-expanded','false');
+    const children=document.createElement('div');
+    children.className='studyai-outline-children';
+    children.hidden=true;
+    children.id='studyai-lesson-children-'+group.index;
+    disclosure.setAttribute('aria-controls',children.id);
+    const openChildren=open=>{
+      children.hidden=!open;
+      disclosure.textContent=open?'⌄':'›';
+      disclosure.setAttribute('aria-expanded',String(open));
+      disclosure.setAttribute('aria-label',
+        (open?'Hide':'Show')+' subtopics in '+group.title);
+    };
+    disclosure.addEventListener('click',()=>openChildren(children.hidden));
     const link=document.createElement('button');
     link.type='button';
     link.className='studyai-lesson-link';
-    link.textContent=String(index+1).padStart(2,'0')+'  '+lesson.title;
+    const label=document.createElement('span');
+    label.textContent=String(group.index+1).padStart(2,'0')+'  '+group.title;
+    const counter=document.createElement('span');
+    counter.className='studyai-outline-group-count';
+    counter.setAttribute('aria-label','Subtopics completed');
+    link.append(label,counter);
     link.addEventListener('click',()=>{
-      window.StudyAILessonReader?.goTo(index);
+      window.StudyAILessonReader?.goTo(group.index);
+      openChildren(true);
       refreshIndicators();
     });
-
-    const toggle=document.createElement('button');
-    toggle.type='button';
-    toggle.className='studyai-lesson-toggle';
-    toggle.setAttribute('role','checkbox');
-    toggle.setAttribute('aria-checked','false');
-    toggle.setAttribute('aria-label','Mark complete: '+lesson.title);
-    toggle.title='Mark as complete';
-    toggle.addEventListener('click',()=>toggleLesson(index));
-    row.append(link,toggle);
-    return row;
+    const groupTick=addToggle('studyai-lesson-toggle',group.title,
+      ()=>toggleGroup(group.index));
+    row.append(disclosure,link,groupTick);
+    group.leaves.forEach((leaf,index)=>{
+      const child=document.createElement('div');
+      child.className='studyai-sublesson-row';
+      child.dataset.leafKey=leaf.key;
+      const childLink=document.createElement('button');
+      childLink.type='button';
+      childLink.className='studyai-sublesson-link';
+      childLink.textContent=String(index+1).padStart(2,'0')+'  '+leaf.title;
+      childLink.addEventListener('click',()=>{
+        window.StudyAILessonReader?.goToLeaf(leaf.key);
+        refreshIndicators();
+      });
+      const childTick=addToggle('studyai-sublesson-toggle',leaf.title,
+        ()=>toggleLeaf(leaf.key));
+      child.append(childLink,childTick);
+      children.append(child);
+    });
+    container.append(row,children);
+    if(group.index===activeIndex())openChildren(true);
+    return container;
   }
 
+  function inlineComplete(label,callback,key,type){
+    const bar=document.createElement('div');
+    bar.className='studyai-inline-completion';
+    if(type==='leaf')bar.classList.add('studyai-inline-leaf-only');
+    const description=document.createElement('span');
+    description.textContent=label;
+    const button=document.createElement('button');
+    button.className='studyai-inline-complete';
+    button.type='button';
+    if(type==='group')button.dataset.groupKey=key;
+    else button.dataset.leafKey=key;
+    button.setAttribute('aria-pressed','false');
+    button.addEventListener('click',callback);
+    bar.append(description,button);
+    return bar;
+  }
   function mountInlineButtons(){
     const rendered=[...document.querySelectorAll(
       '#detailed-notes .actual-note-topic')].filter(section=>
-        !ignored.has(String(section.querySelector(':scope > h3')?.textContent||'').trim()));
+      !ignored.has(String(section.querySelector(':scope > h3')?.textContent||'').trim()));
     rendered.forEach((section,index)=>{
-      const lesson=lessons[index];
+      const group=groups[index];
       const heading=section.querySelector(':scope > h3');
-      if(!lesson||!heading)return;
-      const bar=document.createElement('div');
-      bar.className='studyai-inline-completion';
-      const description=document.createElement('span');
-      description.textContent='Track your progress through this lesson';
-      const button=document.createElement('button');
-      button.className='studyai-inline-complete';
-      button.type='button';
-      button.dataset.lessonKey=lesson.key;
-      button.setAttribute('aria-pressed','false');
-      button.addEventListener('click',()=>toggleLesson(index));
-      bar.append(description,button);
-      heading.insertAdjacentElement('afterend',bar);
+      if(!group||!heading)return;
+      heading.insertAdjacentElement('afterend',inlineComplete(
+        'Track your progress through this lesson',
+        ()=>toggleGroup(index),group.key,'group'));
+      const parts=[...section.children].filter(child=>
+        child.classList.contains('studyai-lesson-subtopic'));
+      const examples=[...section.children].filter(child=>
+        child.classList.contains('worked-box'));
+      for(const leaf of group.leaves){
+        let target=null;
+        if(leaf.kind==='core')target=heading;
+        if(leaf.kind==='subtopic'){
+          target=parts[leaf.subtopicIndex]?.querySelector(':scope > h4');
+        }
+        if(leaf.kind==='example'){
+          target=examples[leaf.exampleIndex]?.querySelector(':scope > h4');
+        }
+        if(!target)continue;
+        const bar=inlineComplete('Mark this subtopic as complete',
+          ()=>toggleLeaf(leaf.key),leaf.key,'leaf');
+        target.insertAdjacentElement('afterend',bar);
+        bar.hidden=true;
+      }
     });
   }
 
@@ -265,10 +381,10 @@
     if(!isEligible(entry))return;
     setLayout();
     chapterEntry=entry;
-    lessons=lessonData(entry);
+    groups=lessonGroups(entry);
+    lessons=groups.flatMap(group=>group.leaves);
     if(!sideRail)return;
     sideRail.replaceChildren();
-
     const header=document.createElement('div');
     header.className='studyai-side-head';
     const label=document.createElement('span');
@@ -286,11 +402,10 @@
     fill.className='studyai-rail-progress-fill';
     bar.append(fill);
     header.append(label,title,counter,bar);
-
     const list=document.createElement('nav');
-    list.className='studyai-lesson-list';
-    list.setAttribute('aria-label','Lessons in '+entry.title);
-    lessons.forEach((lesson,index)=>list.append(createLessonRow(lesson,index)));
+    list.className='studyai-lesson-list studyai-outline-list';
+    list.setAttribute('aria-label','Lessons and subtopics in '+entry.title);
+    groups.forEach(group=>list.append(createLessonGroup(group)));
     sideRail.append(header,list);
     mountInlineButtons();
     refreshIndicators();
@@ -325,6 +440,17 @@
     completedKeys:entryId=>{
       const entry=STUDY_DATA.find(e=>e.id===entryId);
       return entry&&bank(entry)?[...readChecks(entry)]:[];
+    },
+    outline:entryId=>{
+      const entry=STUDY_DATA.find(e=>e.id===entryId);
+      return entry&&bank(entry)?lessonGroups(entry):[];
+    },
+    courseTotals:()=>{
+      const entries=STUDY_DATA.filter(entry=>
+        entry.board==='CBSE'&&entry.grade==='Class 9'&&
+        entry.subject==='Mathematics'&&bank(entry));
+      return {chapters:entries.length,subtopics:entries.reduce(
+        (n,entry)=>n+lessonData(entry).length,0)};
     }
   };
 

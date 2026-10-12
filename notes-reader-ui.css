@@ -672,3 +672,151 @@
     flex:0 0 auto;
   }
 }
+
+
+/* Detailed Class 9 Maths outline: any number of real sub-subtopics.
+ * Expand one substantial lesson to reveal its authored smaller pages and
+ * individual completion checks. The reader's 1160px centered width stays.
+ */
+#study.studyai-progress-active .studyai-outline-list{
+  display:grid;
+  gap:5px;
+  align-content:start;
+  max-height:min(64vh,660px);
+  overflow-y:auto;
+  scrollbar-width:thin;
+}
+#study.studyai-progress-active .studyai-outline-group{
+  display:block;
+  border:1px solid transparent;
+  border-radius:9px;
+  min-width:0;
+}
+#study.studyai-progress-active .studyai-outline-group:has(.studyai-lesson-row.is-active){
+  border-color:var(--line);
+  background:color-mix(in srgb,var(--blue-soft) 22%,var(--surface));
+}
+#study.studyai-progress-active .studyai-outline-group>.studyai-lesson-row{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding-left:3px;
+}
+#study.studyai-progress-active .studyai-outline-disclosure{
+  flex:0 0 22px;
+  width:22px;
+  height:32px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--teal-dark);
+  font-size:1.15rem;
+  cursor:pointer;
+  padding:0;
+}
+#study.studyai-progress-active .studyai-outline-disclosure:hover{
+  background:var(--blue-soft);
+}
+#study.studyai-progress-active .studyai-outline-list .studyai-lesson-link{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  padding:9px 4px;
+  font-size:.8rem;
+  line-height:1.35;
+}
+#study.studyai-progress-active .studyai-outline-group-count{
+  color:var(--muted);
+  font-size:.69rem;
+  font-weight:750;
+  letter-spacing:.02em;
+}
+#study.studyai-progress-active .studyai-outline-children:not([hidden]){
+  display:grid;
+  gap:1px;
+  padding:0 4px 7px 14px;
+  border-left:2px solid color-mix(in srgb,var(--teal) 35%,var(--line));
+  margin:0 3px 3px 11px;
+}
+#study.studyai-progress-active .studyai-outline-children[hidden],
+#study #detailed-notes .studyai-leaf-hidden,
+#study #detailed-notes .studyai-inline-leaf-only[hidden]{
+  display:none!important;
+}
+#study.studyai-progress-active .studyai-sublesson-row{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+  border-radius:8px;
+}
+#study.studyai-progress-active .studyai-sublesson-row:hover{
+  background:var(--surface-2);
+}
+#study.studyai-progress-active .studyai-sublesson-row.is-active{
+  background:var(--blue-soft);
+  box-shadow:inset 3px 0 0 var(--teal);
+}
+#study.studyai-progress-active .studyai-sublesson-link{
+  flex:1;
+  min-width:0;
+  border:0;
+  padding:9px 4px 9px 8px;
+  border-radius:8px;
+  background:transparent;
+  text-align:left;
+  color:var(--ink);
+  font:inherit;
+  font-size:.76rem;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+  cursor:pointer;
+}
+#study.studyai-progress-active .studyai-sublesson-row.is-active .studyai-sublesson-link{
+  color:var(--teal-dark);
+  font-weight:800;
+}
+#study.studyai-progress-active .studyai-sublesson-row.is-complete .studyai-sublesson-link{
+  color:var(--muted);
+}
+#study.studyai-progress-active .studyai-sublesson-toggle{
+  flex:0 0 22px;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  margin-right:5px;
+  padding:0;
+  border:1.5px solid var(--muted);
+  border-radius:6px;
+  color:#fff;
+  background:var(--surface);
+  font-weight:800;
+  font-size:.8rem;
+  cursor:pointer;
+}
+#study.studyai-progress-active .studyai-sublesson-toggle[aria-checked="true"]{
+  background:var(--teal);
+  border-color:var(--teal);
+}
+#study.studyai-progress-active .studyai-lesson-toggle[aria-checked="mixed"]{
+  border-color:var(--teal);
+  color:var(--teal-dark);
+  background:var(--teal-soft);
+}
+#study.studyai-progress-active .studyai-sublesson-link:focus-visible,
+#study.studyai-progress-active .studyai-sublesson-toggle:focus-visible,
+#study.studyai-progress-active .studyai-outline-disclosure:focus-visible{
+  outline:3px solid var(--teal);
+  outline-offset:2px;
+}
+#study.studyai-progress-active #detailed-notes .studyai-current-subtopic{
+  margin:10px 0 20px;
+  border:0;
+}
+@media(max-width:760px){
+  #study.studyai-progress-active .studyai-outline-list{
+    max-height:35vh;
+  }
+}

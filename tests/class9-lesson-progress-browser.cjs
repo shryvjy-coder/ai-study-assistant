@@ -472,13 +472,23 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns)<54,
     null,{timeout:2000});
-  await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
-  await page.waitForFunction(()=>{
-    const track=parseFloat(getComputedStyle(document.querySelector(
-      '#study .reader-layout')).gridTemplateColumns);
-    return track>90&&track<440;
-  },null,{timeout:1500});
-  check(await page.locator('#studyai-notes-nav-content').isVisible(),
+  // Capture opening widths on consecutive animation frames INSIDE the page.
+  // A standalone polling call can miss a 550ms CSS transition entirely when
+  // the test runner pauses between browser protocol round trips.
+  const openingWidths=await page.evaluate(()=>new Promise(resolve=>{
+    const layout=document.querySelector('#study .reader-layout');
+    const widths=[];
+    const start=performance.now();
+    document.getElementById('toggle-notes-nav').click();
+    const sample=()=>{
+      widths.push(parseFloat(getComputedStyle(layout).gridTemplateColumns));
+      if(performance.now()-start>=850)resolve(widths);
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  check(openingWidths.some(width=>width>90&&width<440) &&
+      await page.locator('#studyai-notes-nav-content').isVisible(),
     'opening dock animates through intermediate widths rather than snapping');
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns)>540,

@@ -71,7 +71,7 @@
     ring.style.setProperty('--studyai-done',info.percent+'%');
     ring.setAttribute('role','img');
     ring.setAttribute('aria-label',info.done+' of '+info.total+
-      ' lessons complete, '+info.percent+' percent');
+      ' subtopics complete, '+info.percent+' percent');
     const numeral=document.createElement('span');
     numeral.className='studyai-progress-number';
     numeral.textContent=info.total&&info.done===info.total?'✓':info.percent+'%';
@@ -93,7 +93,7 @@
       label.className='studyai-chapter-name';
       label.textContent=entry.title;
       button.replaceChildren(makeRing(info),label);
-      button.title=entry.title+' — '+info.done+' of '+info.total+' lessons complete';
+      button.title=entry.title+' — '+info.done+' of '+info.total+' subtopics complete';
     });
   }
 
@@ -147,8 +147,8 @@
       ring.querySelector('.studyai-progress-number').textContent=
         info.total>0&&info.done===info.total?'✓':info.percent+'%';
       ring.setAttribute('aria-label',info.done+' of '+info.total+
-        ' lessons complete, '+info.percent+' percent');
-      button.title=entry.title+' — '+info.done+' of '+info.total+' lessons complete';
+        ' subtopics complete, '+info.percent+' percent');
+      button.title=entry.title+' — '+info.done+' of '+info.total+' subtopics complete';
     });
   }
 

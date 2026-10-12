@@ -26,6 +26,15 @@ const escapeHtml=value=>String(value==null?'':value)
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
+// Do not display generic end-of-chapter filler as individual teaching pages.
+// Filter even pre-existing sections that were injected before this script ran.
+const class9FillerTitles=new Set([
+  'Chapter coverage','Exam application',
+  'Common traps and final checks','Mastery check'
+]);
+const realClass9Sections=sections=>asArray(sections).filter(section=>
+  !class9FillerTitles.has(clean(section?.title)));
+
 function guideParagraph(entry,section,index){
   const topic=clean(entry.title)||'this topic';
   const heading=clean(section.title)||'this part of the topic';
@@ -144,7 +153,7 @@ function enrichClass9Math(){
     if(!full||full._studyaiLongForm||full._studyaiTopicFirst)continue;
     full._studyaiLongForm=true;
     const keyPoints=unique(entry.keyPoints);
-    full.sections=asArray(full.sections).map((section,index)=>{
+    full.sections=realClass9Sections(full.sections).map((section,index)=>{
       const copy={...section};
       const paragraphs=unique(copy.paragraphs);
       const extra=guideParagraph(entry,copy,index);
@@ -153,26 +162,7 @@ function enrichClass9Math(){
       copy.bullets=unique([...(asArray(copy.bullets)),...(keyPoints[index]?[keyPoints[index]]:[])]);
       return copy;
     });
-    full.sections.push({
-      title:'Chapter coverage',
-      paragraphs:['Use the checklist below only after studying the worked explanations above. You should be able to derive or justify each point and connect it to a question, diagram, graph or calculation.'],
-      bullets:keyPoints
-    });
-    full.sections.push({
-      title:'Exam application',
-      paragraphs:['For multi-step problems, write down what is known, choose a representation, show the reasoning and then check the result against the original conditions.'],
-      bullets:unique(entry.method)
-    });
-    full.sections.push({
-      title:'Common traps and final checks',
-      paragraphs:['Before finishing a solution, check signs, units, scale, restrictions, exact values and whether the final line answers the question that was asked.'],
-      bullets:unique(entry.mistakes)
-    });
-    full.sections.push({
-      title:'Mastery check',
-      paragraphs:['Try these from memory. A complete answer should include the reasoning, not only the final formula or result.'],
-      bullets:masteryQuestions(entry)
-    });
+
   }
 }
 
@@ -323,7 +313,7 @@ function contentFirstClass9Math(entry){
   if(full){
     return '<div class="note-prose actual-chapter-notes detailed-exam-notes content-first-long-notes">'+
       '<section class="note-section actual-note-intro"><p class="chapter-lead">'+escapeHtml(full.lead||entry.summary||'')+'</p></section>'+
-      asArray(full.sections).map(renderSection).join('')+
+      realClass9Sections(full.sections).map(renderSection).join('')+
       '</div>';
   }
   return contentFirstDeepNotes(entry);

@@ -43,10 +43,19 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
       topic:e.title,topicId:e.id,component:'All components'};
     renderFilters();
     openTopic(e.title,e.id);
-    const intro=document.getElementById('studyai-onboarding');
-    if(intro?.open)intro.close();
     return e.id;
   });
+  // Product onboarding opens 450ms after mount on a new profile. Closing
+  // the dialog before that timer fires does not persist the skip preference,
+  // so it can reopen later and intercept actual Playwright pointer clicks.
+  // Follow the real user Skip action before testing the chapter controls.
+  await page.waitForFunction(()=>!!window.StudyAIProduct?.prefs);
+  if(!await page.evaluate(()=>StudyAIProduct.prefs().onboardingComplete)){
+    await page.locator('#studyai-onboarding[open]').waitFor({state:'visible',timeout:3000});
+    await page.locator('#studyai-onboarding [data-onboarding-skip]').click();
+    await page.waitForFunction(()=>StudyAIProduct.prefs().onboardingComplete &&
+      !document.querySelector('#studyai-onboarding')?.open);
+  }
   const chapter=page.locator('#chapter-list .chapter-item[data-id="'+entryId+'"]');
   const rows=page.locator('.studyai-lesson-rail .studyai-lesson-row');
   const leafRows=page.locator('.studyai-lesson-rail .studyai-sublesson-row');
@@ -340,9 +349,27 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>window.StudyAIProgress&&
     document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length===15);
+  // A full reload may return to the Today route. Reopen the Study page through
+  // the application's own router before asserting whether panels are visible.
+  await page.evaluate(()=>{
+    location.hash='#study';
+    applyAppPageRoute({scroll:false});
+  });
+  await page.waitForFunction(()=>document.getElementById('study')?.hidden===false);
+  const reloadPanel=await page.evaluate(()=>({
+    chapterExpanded:document.getElementById('collapse-chapters')?.getAttribute('aria-expanded'),
+    chaptersHidden:document.getElementById('chapter-list')?.hidden,
+    chaptersVisible:getComputedStyle(document.getElementById('chapter-list')).display!=='none',
+    subtopicsHidden:document.getElementById('studyai-subtopics-content')?.hidden,
+    subtopicsVisible:getComputedStyle(document.getElementById('studyai-subtopics-content')).display!=='none',
+    chapterPreference:localStorage.getItem('studyai-notes-chapters-minimized-v1'),
+    subtopicPreference:localStorage.getItem('studyai-notes-subtopics-minimized-v1'),
+    studyHidden:document.getElementById('study')?.hidden,
+    chapterCount:document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length
+  }));
   check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
-    'independent chapter collapse persists across a full browser reload');
+    'independent chapter collapse persists across a full browser reload: '+JSON.stringify(reloadPanel));
   await chapterToggle.dispatchEvent('click');
   check((await progress()).done===expectedTotal-fifthSize,
     'detailed subtopic completion survives a full browser reload');
@@ -445,14 +472,38 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns)<54,
     null,{timeout:2000});
-  await page.evaluate(()=>document.getElementById('toggle-notes-nav').click());
-  await page.waitForFunction(()=>{
-    const track=parseFloat(getComputedStyle(document.querySelector(
-      '#study .reader-layout')).gridTemplateColumns);
-    return track>90&&track<440;
-  },null,{timeout:1500});
-  check(await page.locator('#studyai-notes-nav-content').isVisible(),
-    'opening dock animates through intermediate widths rather than snapping');
+  // Capture opening widths on consecutive animation frames INSIDE the page.
+  // A standalone polling call can miss a 550ms CSS transition entirely when
+  // the test runner pauses between browser protocol round trips.
+  const openingWidths=await page.evaluate(()=>new Promise(resolve=>{
+    const layout=document.querySelector('#study .reader-layout');
+    const widths=[];
+    const start=performance.now();
+    document.getElementById('toggle-notes-nav').click();
+    const sample=()=>{
+      widths.push(parseFloat(getComputedStyle(layout).gridTemplateColumns));
+      if(performance.now()-start>=850)resolve(widths);
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  const openState=await page.evaluate(()=>{
+    const element=document.getElementById('studyai-notes-nav-content');
+    return {
+      hidden:element.hidden,
+      inert:element.inert,
+      display:getComputedStyle(element).display,
+      visibility:getComputedStyle(element).visibility,
+      opacity:getComputedStyle(element).opacity,
+      height:element.getBoundingClientRect().height,
+      studyHidden:document.getElementById('study').hidden,
+      collapsed:document.getElementById('study').classList.contains('studyai-nav-collapsed'),
+      expanded:document.getElementById('toggle-notes-nav').getAttribute('aria-expanded')
+    };
+  });
+  check(openingWidths.some(width=>width>90&&width<440) &&
+      await page.locator('#studyai-notes-nav-content').isVisible(),
+    'opening dock animates through intermediate widths rather than snapping: '+JSON.stringify({first:openingWidths.slice(0,8),last:openingWidths.slice(-8),min:Math.min(...openingWidths),max:Math.max(...openingWidths),panel:openState}));
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns)>540,
     null,{timeout:2000});

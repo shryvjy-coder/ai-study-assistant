@@ -64,17 +64,39 @@
     let minimized=saved==='1'||(saved===null&&
       window.matchMedia('(max-width: 760px)').matches);
 
+    let gridOpeningAnimation=null;
     const apply=(animated=false)=>{
       // The old handler set [hidden] immediately. That short-circuited the
       // entire Contents panel motion, even though the CSS had a duration.
       // On interaction, animate the panel body BEFORE hiding it.
       if(animated && !reducedMotion()){
+        if(gridOpeningAnimation){
+          gridOpeningAnimation.cancel();
+          gridOpeningAnimation=null;
+        }
         if(minimized){
-          animateRow(contents,true);
           study.classList.add('studyai-nav-collapsed');
+          animateRow(contents,true);
         }else{
+          // The CSS grid's opening transition can be skipped when the inner
+          // panel becomes unhidden in the same turn. Animate the measured
+          // grid tracks explicitly, preserving responsive track dimensions.
+          const layout=study.querySelector('.reader-layout');
+          const from=layout?getComputedStyle(layout).gridTemplateColumns:null;
           study.classList.remove('studyai-nav-collapsed');
           animateRow(contents,false);
+          const to=layout?getComputedStyle(layout).gridTemplateColumns:null;
+          if(layout&&layout.animate&&from&&to&&from!==to&&
+              getComputedStyle(layout).display==='grid'){
+            const motion=layout.animate([
+              {gridTemplateColumns:from},
+              {gridTemplateColumns:to}
+            ],{duration:550,easing:'cubic-bezier(.22,.82,.27,1)'});
+            gridOpeningAnimation=motion;
+            motion.addEventListener('finish',()=>{
+              if(gridOpeningAnimation===motion)gridOpeningAnimation=null;
+            });
+          }
         }
       }else{
         study.classList.toggle('studyai-nav-collapsed',minimized);

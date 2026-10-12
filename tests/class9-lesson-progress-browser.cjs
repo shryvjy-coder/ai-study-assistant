@@ -349,9 +349,20 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>window.StudyAIProgress&&
     document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length===15);
+  const reloadPanel=await page.evaluate(()=>({
+    chapterExpanded:document.getElementById('collapse-chapters')?.getAttribute('aria-expanded'),
+    chaptersHidden:document.getElementById('chapter-list')?.hidden,
+    chaptersVisible:getComputedStyle(document.getElementById('chapter-list')).display!=='none',
+    subtopicsHidden:document.getElementById('studyai-subtopics-content')?.hidden,
+    subtopicsVisible:getComputedStyle(document.getElementById('studyai-subtopics-content')).display!=='none',
+    chapterPreference:localStorage.getItem('studyai-notes-chapters-minimized-v1'),
+    subtopicPreference:localStorage.getItem('studyai-notes-subtopics-minimized-v1'),
+    studyHidden:document.getElementById('study')?.hidden,
+    chapterCount:document.querySelectorAll('.studyai-lesson-rail .studyai-lesson-row').length
+  }));
   check(await chapterToggle.getAttribute('aria-expanded')==='false' &&
       await chapterBody.isHidden() && await subtopicBody.isVisible(),
-    'independent chapter collapse persists across a full browser reload');
+    'independent chapter collapse persists across a full browser reload: '+JSON.stringify(reloadPanel));
   await chapterToggle.dispatchEvent('click');
   check((await progress()).done===expectedTotal-fifthSize,
     'detailed subtopic completion survives a full browser reload');

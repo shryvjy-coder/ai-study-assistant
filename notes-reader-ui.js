@@ -64,17 +64,28 @@
     let minimized=saved==='1'||(saved===null&&
       window.matchMedia('(max-width: 760px)').matches);
 
+    let navMotionVersion=0;
     const apply=(animated=false)=>{
+      const thisMotion=++navMotionVersion;
       // The old handler set [hidden] immediately. That short-circuited the
       // entire Contents panel motion, even though the CSS had a duration.
       // On interaction, animate the panel body BEFORE hiding it.
       if(animated && !reducedMotion()){
         if(minimized){
-          animateRow(contents,true);
           study.classList.add('studyai-nav-collapsed');
+          animateRow(contents,true);
         }else{
-          study.classList.remove('studyai-nav-collapsed');
+          // Restore content while the dock still has its collapsed grid track.
+          // Removing the class in the same style-calculation turn caused the
+          // opening track to jump directly from 52px to 548px, even though
+          // collapsing animated correctly. Commit the old layout first, then
+          // let the next frame transition to the expanded CSS grid.
           animateRow(contents,false);
+          study.querySelector('.reader-layout')?.getBoundingClientRect();
+          requestAnimationFrame(()=>{
+            if(navMotionVersion===thisMotion&&!minimized)
+              study.classList.remove('studyai-nav-collapsed');
+          });
         }
       }else{
         study.classList.toggle('studyai-nav-collapsed',minimized);

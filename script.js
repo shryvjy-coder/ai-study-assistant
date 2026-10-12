@@ -827,6 +827,14 @@ function cambridgeFullNotes(e){
  const checks=Array.isArray(d.selfCheck)&&d.selfCheck.length?`<section class="note-section actual-note-topic"><h3>Check your understanding</h3><ol>${d.selfCheck.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>`:'';
  return `<div class="note-prose actual-chapter-notes detailed-exam-notes cambridge-full-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">${esc(d.overview||e.summary||'')}</p></section>${sections}${formulaHtml}${distinctions}${reasoning}${examHtml}${practice}${checks}</div>`;
 }
+function class9CbseScienceNotes(e){
+  const full=window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[e.title];
+  if(!full)return richDeepSections(e);
+  const bullets=items=>Array.isArray(items)&&items.length?'<ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'';
+  const examples=items=>(Array.isArray(items)?items:[]).map(ex=>'<div class="worked-box"><h4>'+esc(ex.title||'Worked example')+'</h4>'+(ex.question?'<p><strong>Question:</strong> '+esc(ex.question)+'</p>':'')+(Array.isArray(ex.steps)&&ex.steps.length?'<ol>'+ex.steps.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':'')+(ex.answer?'<p><strong>Answer:</strong> '+esc(ex.answer)+'</p>':'')+'</div>').join('');
+  const sections=(full.sections||[]).map(section=>'<section class="note-section actual-note-topic"><h3>'+esc(section.title||'')+'</h3>'+(section.paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('')+bullets(section.bullets)+examples(section.examples)+(section.tip?'<div class="exam-box"><h4>Exam tip</h4><p>'+esc(section.tip)+'</p></div>':'')+'</section>').join('');
+  return '<div class="note-prose actual-chapter-notes detailed-exam-notes science-full-notes"><section class="note-section actual-note-intro"><p class="chapter-lead">'+esc(full.lead||e.summary||'')+'</p><p class="muted"><strong>Textbook:</strong> NCERT Exploration (2026–27), '+esc(full.sourcePdf||'')+', printed pages '+esc(full.printedPages||'')+'</p></section>'+sections+'</div>';
+}
 function richDeepSections(e){
  const d=e.deepNotes||{};
  const pairs=items=>(Array.isArray(items)?items:[]).map(item=>Array.isArray(item)?`<li><strong>${esc(item[0])}:</strong> ${esc(item[1])}</li>`:`<li>${esc(item)}</li>`).join('');
@@ -859,6 +867,7 @@ function richDeepSections(e){
 }
 function deepSections(e){
  if(e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Mathematics'&&e.deepNotes?.overview)return class9CbseMathNotes(e);
+  if(e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='Science'&&window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[e.title])return class9CbseScienceNotes(e);
  if(/^Cambridge/.test(e.board||'')&&(e.cambridgeFullNotes||e.deepNotes?.overview))return cambridgeFullNotes(e);
  if(e.deepNotes?.overview)return richDeepSections(e);
  const subject=e.subject||'',keyPoints=e.keyPoints||[],formulas=e.formulas||[],method=e.method||[],mistakes=e.mistakes||[];

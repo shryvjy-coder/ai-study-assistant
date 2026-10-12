@@ -489,7 +489,7 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   }));
   check(openingWidths.some(width=>width>90&&width<440) &&
       await page.locator('#studyai-notes-nav-content').isVisible(),
-    'opening dock animates through intermediate widths rather than snapping');
+    'opening dock animates through intermediate widths rather than snapping: '+JSON.stringify({first:openingWidths.slice(0,8),last:openingWidths.slice(-8),min:Math.min(...openingWidths),max:Math.max(...openingWidths)}));
   await page.waitForFunction(()=>parseFloat(getComputedStyle(
     document.querySelector('#study .reader-layout')).gridTemplateColumns)>540,
     null,{timeout:2000});

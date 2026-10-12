@@ -58,9 +58,12 @@ const check=(condition,description)=>{
         .map(node=>node.textContent.trim());
       const raw=CBSE_CLASS9_MATH_FULL_NOTES[entry.title].sections;
       const persisted=outline.flatMap(g=>g.leaves.map(l=>l.key));
-      const leaf=outline.flatMap(g=>g.leaves).find(l=>l.kind==='subtopic');
+      const allLeaves=outline.flatMap(g=>g.leaves);
+      const leaf=allLeaves.find(l=>l.kind==='subtopic')||allLeaves[0];
       const opened=leaf?StudyAILessonReader.goToLeaf(leaf.key):false;
       const visible=notes.querySelectorAll('.note-section.actual-note-topic:not([hidden])');
+      const focusMatches=leaf?.kind!=='subtopic' ||
+        visible[0]?.querySelectorAll('.studyai-current-subtopic:not([hidden])').length===1;
       return {
         chapter:entry.title,
         originalTotal,
@@ -71,9 +74,9 @@ const check=(condition,description)=>{
         noFillerInOutline:outline.every(g=>!unwanted.has(g.title)),
         keysStable:JSON.stringify(originalKeys)===JSON.stringify(persisted) &&
           originalTotal===StudyAIProgress.summary(entry.id).total,
-        focused:opened&&visible.length===1 &&
-          visible[0].querySelectorAll('.studyai-current-subtopic:not([hidden])').length===1,
-        renderedTeaching:notes.textContent.includes(leaf?.title||'~') &&
+        focused:opened&&visible.length===1&&focusMatches&&
+          StudyAILessonReader.activeLeafKey()===leaf?.key,
+        renderedTeaching:visible[0]?.textContent.trim().length>100 &&
           headings.length>0
       };
     });

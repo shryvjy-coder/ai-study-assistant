@@ -102,6 +102,34 @@ class FreeChapterQueueTests(unittest.TestCase):
             reconcile(q, [6], [dict(self.report(6),
                 candidate_lessons=[{}, {}, {}])], self.day)
 
+    def test_manual_upgrade_only_repins_clean_state_without_model_calls(self):
+        from argparse import Namespace
+        from unittest.mock import patch
+        from multiday_state import prepare, new_state
+        old = new_state(code_sha="a"*40, notes_sha="c"*40,
+                        model="gemini-3.8-flash", budget=6, run_id=12)
+        writes = []
+        config = Namespace(
+            repo="example/studyai", event="workflow_dispatch",
+            operation="upgrade", commit_sha="b"*40, run_id=13,
+            model="gemini-3.8-flash", budget=6,
+            output=self.root/"actions-output.txt",
+            summary=self.root/"actions-summary.md",
+        )
+        with patch("multiday_state.load", return_value=(old,"etag")), \
+             patch("multiday_state.branch_sha", return_value="c"*40), \
+             patch("multiday_state.save", side_effect=lambda repo, data, **kwargs:
+                   writes.append(data)):
+            prepare(config)
+        self.assertEqual(writes[-1]["automation_sha"], "b"*40)
+        self.assertEqual(writes[-1]["notes_sha"], "c"*40)
+        self.assertIsNone(writes[-1]["last_attempt_utc_day"])
+        self.assertIn("run=false", config.output.read_text())
+        old["resume_run_id"] = 111
+        with patch("multiday_state.load", return_value=(old,"etag")):
+            with self.assertRaisesRegex(ValueError, "migration"):
+                prepare(config)
+
     def test_allow_selected_chapter_lists_but_reject_duplicates(self):
         self.assertEqual(select_chapters("5,7,8", list(range(1, 15))), [5, 7, 8])
         with self.assertRaisesRegex(ValueError, "duplicate"):

@@ -55,6 +55,7 @@ jobs:
           node --check tests/class9-audited-depth-merged-browser.cjs
           node --check tests/class9-ch12-ncert-depth-browser.cjs
           node --check tests/class9-ch13-ncert-depth-browser.cjs
+          node --check tests/class9-no-filler-notes-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -101,6 +102,8 @@ jobs:
         run: node tests/class9-ch12-ncert-depth-browser.cjs
       - name: Chapter 13 NCERT systems and progress regression
         run: node tests/class9-ch13-ncert-depth-browser.cjs
+      - name: Class 9 notes without generic filler sections
+        run: node tests/class9-no-filler-notes-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

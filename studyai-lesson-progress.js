@@ -152,10 +152,6 @@
     });
   }
 
-  function activeIndex(){
-    return window.StudyAILessonReader?.activeIndex?.()||0;
-  }
-
   const byLeafKey=key=>lessons.find(leaf=>leaf.key===key);
   const activeIndex=()=>window.StudyAILessonReader?.activeIndex?.()||0;
   const activeLeaf=()=>window.StudyAILessonReader?.activeLeafKey?.()||null;

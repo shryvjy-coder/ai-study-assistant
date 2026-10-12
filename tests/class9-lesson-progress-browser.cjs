@@ -47,6 +47,17 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
     if(intro?.open)intro.close();
     return e.id;
   });
+  // Product onboarding opens 450ms after mount on a new profile. Closing
+  // the dialog before that timer fires does not persist the skip preference,
+  // so it can reopen later and intercept actual Playwright pointer clicks.
+  // Follow the real user Skip action before testing the chapter controls.
+  await page.waitForFunction(()=>!!window.StudyAIProduct?.prefs);
+  if(!await page.evaluate(()=>StudyAIProduct.prefs().onboardingComplete)){
+    await page.locator('#studyai-onboarding[open]').waitFor({state:'visible',timeout:3000});
+    await page.locator('#studyai-onboarding [data-onboarding-skip]').click();
+    await page.waitForFunction(()=>StudyAIProduct.prefs().onboardingComplete &&
+      !document.querySelector('#studyai-onboarding')?.open);
+  }
   const chapter=page.locator('#chapter-list .chapter-item[data-id="'+entryId+'"]');
   const rows=page.locator('.studyai-lesson-rail .studyai-lesson-row');
   const leafRows=page.locator('.studyai-lesson-rail .studyai-sublesson-row');

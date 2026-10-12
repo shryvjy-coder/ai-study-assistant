@@ -270,7 +270,7 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   // The inline completion action is linked to the same underlying lesson.
   await page.evaluate(()=>window.StudyAILessonReader.goTo(0));
   const inline=page.locator(
-    '#detailed-notes .actual-note-topic:not([hidden]) > .studyai-inline-completion .studyai-inline-complete');
+    '#detailed-notes .actual-note-topic:not([hidden]) > .studyai-inline-completion:not(.studyai-inline-leaf-only) .studyai-inline-complete');
   check(await inline.count()===1,
     'major lesson overview retains one inline Mark as complete action');
   await inline.dispatchEvent('click');

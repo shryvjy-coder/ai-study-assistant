@@ -59,8 +59,10 @@ const expected=[
         typeof x.title==='string' && x.paragraphs?.length>=2 &&
         (x.examples||[]).every(e=>e.title&&e.question&&
           Array.isArray(e.steps)&&e.steps.length>=2&&e.answer)),
-      midpoint:find('Midpoint theorem and the factor one-half')?.paragraphs.some(p=>
-        p.includes('SAS')&&p.includes('DF=2DE')),
+      midpoint:(find('Midpoint theorem and the factor one-half')?.paragraphs||[])
+        .join(' ').includes('SAS') &&
+        (find('Midpoint theorem and the factor one-half')?.paragraphs||[])
+        .join(' ').includes('DF=2DE'),
       converse:find('Converse midpoint theorem')?.paragraphs.some(p=>
         p.includes('unique')&&p.includes('AE=EC')),
       centroid:find('The centroid divides each median 2 to 1')?.paragraphs.some(p=>

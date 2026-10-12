@@ -226,7 +226,13 @@ def main() -> int:
         record = queue["items"][str(number)]
         lines.append(f"- Chapter {number}: {record['status']}"
                      + (f", next retry {record['retry_day']}" if record["retry_day"] else ""))
-    (args.output / "audit.md").write_text("\n".join(lines)+"\n", encoding="utf-8")
+    # Retain the full, source-cited model/deterministic validation narrative
+    # in the draft-review body; a queue-status table alone is insufficient
+    # evidence for an NCERT content review.
+    from pipeline import render_report
+    source_review = render_report(merged, args.model, "propose") if merged else ""
+    (args.output / "audit.md").write_text(
+        "\n".join(lines) + "\n\n" + source_review + "\n", encoding="utf-8")
     current = status(queue)
     if args.github_output:
         with args.github_output.open("a", encoding="utf-8") as output:

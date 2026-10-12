@@ -43,8 +43,6 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
       topic:e.title,topicId:e.id,component:'All components'};
     renderFilters();
     openTopic(e.title,e.id);
-    const intro=document.getElementById('studyai-onboarding');
-    if(intro?.open)intro.close();
     return e.id;
   });
   // Product onboarding opens 450ms after mount on a new profile. Closing

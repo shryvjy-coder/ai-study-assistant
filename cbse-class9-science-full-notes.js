@@ -11,15 +11,17 @@
     sourcePdf: 'iesc101.pdf',
     printedPages: '1–7',
     reviewStatus: 'Textbook-grounded draft; independent editorial review outstanding',
-    lead: 'Science is not simply a list of facts to memorise. It is a way of asking focused questions, constructing useful simplifications, expressing observations precisely, making predictions, and changing explanations when evidence requires it. This opening chapter shows how those habits work in real situations.',
+    lead: 'Science is not simply a list of facts to memorise. It is a way of asking focused questions, constructing useful simplifications, expressing observations precisely, making predictions, and changing explanations when evidence requires it. This opening chapter shows how those habits work in real situations. The magnifying glass in NCERT’s page design stands for careful observation; the compass stands for choosing purposeful questions and models while recognising their limits.',
     sections: [
       {
         title: 'Asking questions and building useful scientific models',
+        visual: 'model-cycle',
         paragraphs: [
           'A scientific investigation starts with a question about the natural world. Observations suggest possible explanations, but the investigator must decide what to measure and which details can affect the answer. A scientific model is a deliberately simplified representation of an object, system or process. It is useful only relative to the question it is designed to answer.',
           'For example, a model of a cricket ball travelling towards the boundary needs the speed and direction immediately after the shot, its starting position, and enough information about the path to decide whether it lands first. The ball colour and manufacturer of the bat do not affect that prediction. At a first approximation, effects such as wind, spin and air resistance might be omitted. If that basic model gives poor predictions, those influences become candidates for the next version.',
+          'In the simplest idealised model of a ball moving through the air, if air resistance is neglected, balls launched with the same initial speed and direction follow the same path regardless of mass. A model that includes air resistance can require mass, size and shape because these affect the motion. The textbook includes ball mass as relevant for the cricket shot; the important skill is to explain which assumptions make a factor important rather than declare it always relevant or always irrelevant.',
           'Models have assumptions, not merely diagrams. A point can represent a moving car when its overall position matters, spheres can represent atoms when discussing bonds, and an outline of a cell can emphasise structures that perform different jobs. None of these representations contains every detail of the real system. A good scientific explanation states what the model includes, what it leaves out, why this is reasonable, and when the simplification would fail.',
-          'NCERT also describes physicist Meghnad Saha simplifying the behaviour of matter in stars. By concentrating on relevant gas properties and ionisation rather than modelling every microscopic event, he developed ideas connecting conditions inside a star to its light. The point is not that ignored features never matter: scientific models deliberately choose a manageable level of detail.'
+          'NCERT also describes physicist Meghnad Saha simplifying the behaviour of matter in stars. By treating stellar matter as a hot gas, he focused on temperature, pressure and how atoms form ions instead of describing every atom and reaction. This helped explain how the colour and light of stars relate to their temperature. The point is not that ignored features never matter: scientific models deliberately choose a manageable level of detail.'
         ],
         examples: [
           {
@@ -45,12 +47,16 @@
             answer: 'First estimate: 30 minutes under a constant-average-speed assumption; refined estimate: about 38 minutes if stops add 8 minutes. The numbers are illustrative, not measured facts about a particular trip.'
           }
         ],
+        checkQuestions: [
+          {question:'Two students throw balls with the same initial speed and direction. When would their different masses matter to the model?',answer:'In a model ignoring air resistance, mass does not change the predicted path. In a more realistic model including air resistance, mass can affect how strongly drag changes the path. State which model is being used.'}
+        ],
         tip: 'Always explain an omitted factor in terms of the question. “It is unimportant to this prediction” is stronger than saying a detail never affects the system.'
       },
       {
         title: 'Scientific language, units and the role of mathematics',
         paragraphs: [
           'Everyday words can have stricter scientific meanings. Force, work and cell are examples of terms whose definitions depend on scientific context. Shared vocabulary, agreed symbols and standard units let investigators in different places compare their findings. Mass is commonly represented by m, velocity by v, force by F and electric current by I; the symbol and unit are related but not interchangeable.',
+          'The symbol c for the speed of light comes historically from the Latin word celeritas, meaning speed. In vacuum, its defined SI value is exactly 299,792,458 metres per second. Scientific notation reflects international conventions, not necessarily abbreviations of modern English terms.',
           'A number is not a complete scientific measurement without its unit and meaning. A distance of 6 km and a speed of 12 km/h can be used together to find a time in hours because the kilometres cancel. But if a density is measured in pounds per litre, it cannot be treated numerically as kilograms per litre. NCERT discusses an aircraft incident involving this kind of unit mismatch: a flight required 22,300 kg of fuel but received substantially too little after incompatible units were mixed.',
           'Equations express how quantities are related; they are more than recipes for inserting numbers. To reason from an equation, identify the physical situation, define every variable, check the conditions under which the relation applies, carry units through the calculation, and interpret the answer. For example, distance ÷ speed estimates journey time if speed is understood as an appropriate average over the route.',
           'The SI system gives science shared measurement standards. Standard units are useful in daily life too: when we purchase one kilogram of rice, its agreed meaning should not vary with the shop or country. Precision also requires knowing the difference between an approximate measurement and an exact relationship.'
@@ -113,6 +119,10 @@
             answer: 'No. Theories and laws serve different scientific purposes; an established theory is evidence-based, not a mere guess.'
           }
         ],
+        checkQuestions: [
+          {question:'A family predicts that a local cricket team will win its next game. How could they make that prediction better supported by evidence?',answer:'Identify testable factors such as recent match results, player availability and playing conditions. Explain uncertainties and compare predictions with what happens; a single result does not establish a universal rule.'},
+          {question:'A viral post says food becomes unsafe during an eclipse. Which type of evidence would you seek before accepting it?',answer:'Ask for a plausible physical, chemical or biological mechanism and reliable comparative observations or tests. The change in sunlight alone is not evidence that the food becomes unsafe.'}
+        ],
         tip: 'When evaluating a claim, separate observation, explanation, prediction and test. Do not mistake correlation, one anecdote or a confident statement for proof.'
       },
       {
@@ -139,17 +149,21 @@
             question: 'How would you estimate the mass of uncooked rice needed for four people for 30 days?',
             steps: [
               'Decide what is being estimated. A simple upper-bound model might assume rice provides all the energy needs, although real diets contain many foods.',
-              'Look up or measure the energy supplied by a known mass of uncooked rice and an approximate daily energy requirement.',
-              'Use mass per day × 4 people × 30 days, keeping energy and mass units consistent.',
-              'Check whether the result is a plausible household amount; document how the answer changes when rice supplies only part of the diet.'
+              'To demonstrate the arithmetic only, suppose each person is assigned a hypothetical 2,000 kcal/day, and assume uncooked rice supplies 350 kcal per 100 g. These are illustrative model inputs, not personal dietary targets.',
+              'Modelled energy over 30 days: 4 × 2,000 kcal/day × 30 days = 240,000 kcal. Estimated uncooked rice: 240,000 kcal ÷ (350 kcal per 100 g) = about 68,600 g, or 69 kg.',
+              'The textbook deliberately assumes all energy comes from rice to teach estimation. Actual diets contain many foods and personal needs vary; the result must not be treated as a realistic requirement or eating recommendation.'
             ],
-            answer: 'The chapter emphasises the method and reasonableness of the estimate; no single exact household consumption figure follows without stated nutrition assumptions.'
+            answer: 'About 69 kg of uncooked rice for 30 days under the explicitly hypothetical all-rice energy model. The result is illustrative, not a recommended diet or real household requirement.'
           }
+        ],
+        checkQuestions: [
+          {question:'Give one situation where a rough estimate is adequate and one where a precise measurement is essential. Explain your choices.',answer:'Estimating travel time to choose when to leave can often tolerate uncertainty; measuring a quantity for an aircraft’s safe operation requires much greater precision. The required accuracy depends on the consequence of error.'}
         ],
         tip: 'Show the order of magnitude and explain uncertainty. Do not report many decimal places when your starting estimates are approximate.'
       },
       {
         title: 'One connected science: People, systems and responsible enquiry',
+        visual: 'mask-map',
         paragraphs: [
           'Physics, chemistry, biology, Earth science and mathematics are useful disciplines for organising knowledge, but real systems do not respect subject boundaries. A problem such as designing a protective face mask can involve physical movement of particles, the properties of fibres, biological considerations and quantitative modelling of filtration. Each contribution answers part of the larger question.',
           'In the same way, a mobile phone involves electrical signals, materials, energy use and human behaviour. A traffic problem may require motion, data analysis, environmental observations and social decisions. Draw a simple map linking at least two disciplines to the actual question, and state what each contributes. Merely listing subject names does not demonstrate the connection.',
@@ -168,6 +182,9 @@
             ],
             answer: 'Several disciplines offer complementary explanations; the complete question is about an interacting system.'
           }
+        ],
+        checkQuestions: [
+          {question:'A school wants to understand how a reusable water filter works. Name two sciences involved and explain what each contributes.',answer:'Materials science or chemistry helps explain the filter medium and its interactions with substances; biology can examine microorganisms; physics helps explain water flow. At least two connected explanations are needed, rather than only naming subjects.'}
         ],
         tip: 'For a cross-disciplinary answer, give one concrete contribution from each selected subject and explicitly connect them to the same problem.'
       }

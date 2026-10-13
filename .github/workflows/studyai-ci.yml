@@ -80,6 +80,7 @@ jobs:
           node --check tests/class9-science-ch04-ncert-depth-browser.cjs
           node --check tests/class9-science-ch05-ncert-depth-browser.cjs
           node --check tests/class9-science-ch06-ncert-depth-browser.cjs
+          node --check tests/study-page-visible-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -116,6 +117,8 @@ jobs:
       - run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
+      - name: Study page visibility with long saved lesson
+        run: node tests/study-page-visible-browser.cjs
       - name: Class 9 chapter topic-page pilot
         run: node tests/class9-math-topic-browser.cjs
       - name: Class 9 checkable lessons and progress rings

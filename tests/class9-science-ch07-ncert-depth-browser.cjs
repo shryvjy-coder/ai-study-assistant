@@ -81,11 +81,11 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   'page references correct and editorial approval is not overstated');
  check(content.notesCount===1&&content.headings.length===10&&new Set(content.headings).size===10,
   'ten complete authored lesson sections render without duplication');
- check(content.pCount>=50&&content.exampleCount===49&&content.tipCount===10,
-  '50 teaching paragraphs, 49 worked examples and all ten exam tips render');
+ check(content.pCount>=50&&content.exampleCount===50&&content.tipCount===10,
+  '50 teaching paragraphs, 50 worked examples and all ten exam tips render');
  const required=['Activity 7.1','Activity 7.2','Activity 7.3','Activity 7.4','Activity 7.5',
   'Example 7.1','Example 7.2','Example 7.3','Example 7.4','Example 7.5',
-  'Example 7.6','Example 7.8','Example 7.9','Example 7.10',
+  'Example 7.6','Example 7.7','Example 7.8','Example 7.9','Example 7.10',
   'Example 7.11','Example 7.12','Example 7.13',
   'joule','kg·m²/s²','perpendicular','−30 J','force–displacement',
   '150 J','√66','work–kinetic energy','ΔK','184.9 J','70 m/s',

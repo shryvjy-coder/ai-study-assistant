@@ -250,6 +250,60 @@ const check=(ok,message)=>{assert.ok(ok,message);console.log('PASS',message)};
   check(await page.locator('#study #complete-btn').isHidden(),
     'old chapter-wide completion button is hidden to avoid ambiguous status');
 
+  // Reading to the visible end of a focused page saves progress without
+  // asking the student to click the manual completion checkbox.
+  const autoLeaf=leafGroups[0].leaves.find(leaf=>leaf.kind==='subtopic');
+  check(!!autoLeaf,'scroll completion test has an authored child page');
+  await page.evaluate(key=>window.StudyAILessonReader.goToLeaf(key),autoLeaf.key);
+  check((await progress()).done===0,
+    'opening a child page never automatically marks it complete');
+  const placePageEnd=()=>page.evaluate(()=>{
+    const section=document.querySelector(
+      '#detailed-notes .actual-note-topic.studyai-current-topic:not([hidden])');
+    if(!section)throw Error('No visible lesson section');
+    window.scrollBy(0,section.getBoundingClientRect().bottom-window.innerHeight+75);
+  });
+  await placePageEnd();
+  await page.waitForTimeout(80);
+  check((await progress()).done===0,
+    'programmatic scroll or navigation alone does not earn completion');
+  await page.mouse.move(1200,420);
+  await page.mouse.wheel(0,110);
+  await page.waitForFunction(id=>StudyAIProgress.summary(id).done===1,entryId);
+  check(await page.evaluate(id=>StudyAIProgress.completedKeys(id)
+    .includes(window.StudyAILessonReader.activeLeafKey()),entryId),
+    'downward scrolling to the end checks the selected child and stores its stable key');
+  check((await chapter.locator('.studyai-progress-ring').getAttribute('aria-label'))
+    .includes('1 of '+expectedTotal),
+    'scroll completion immediately updates the chapter progress ring');
+  await page.evaluate(key=>{
+    const row=[...document.querySelectorAll('.studyai-sublesson-row')]
+      .find(item=>item.dataset.leafKey===key);
+    if(!row)throw Error('Missing child checklist row');
+    row.querySelector('.studyai-sublesson-toggle').click();
+  },autoLeaf.key);
+  check((await progress()).done===0,
+    'student can manually undo a scroll-completed lesson');
+  await page.waitForTimeout(100);
+  check((await progress()).done===0,
+    'manually unchecking is not instantly undone without another reading scroll');
+
+  // Reading the overview to its end checks all of that major lesson's leaves.
+  await page.evaluate(()=>window.StudyAILessonReader.goTo(0));
+  check((await progress()).done===0,
+    'changing from focused page to overview does not silently mark progress');
+  await placePageEnd();
+  await page.waitForTimeout(60);
+  check((await progress()).done===0,
+    'jumping to the group end programmatically does not count as reading');
+  await page.mouse.wheel(0,110);
+  await page.waitForFunction(id=>StudyAIProgress.summary(id).done>0,entryId);
+  check((await progress()).done===firstSize,
+    'scrolling to lesson overview end completes exactly its authored children');
+  await rows.nth(0).locator('.studyai-lesson-toggle').dispatchEvent('click');
+  check((await progress()).done===0,
+    'lesson-level manual uncheck still works after automatic group completion');
+
   // The checkbox belongs to the lesson, not to the surrounding chapter link.
   await rows.nth(0).locator('.studyai-lesson-toggle').dispatchEvent('click');
   check((await progress()).done===firstSize,

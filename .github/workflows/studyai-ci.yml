@@ -58,6 +58,7 @@ jobs:
           node --check tests/class9-ch03-ncert-final-browser.cjs
           node --check tests/class9-ch04-ncert-final-browser.cjs
           node --check tests/class9-ch06-ncert-final-browser.cjs
+          node --check tests/class9-ch07-provisional-browser.cjs
           node --check tests/class9-ch12-ncert-depth-browser.cjs
           node --check tests/class9-ch13-ncert-depth-browser.cjs
           node --check tests/class9-ch14-ncert-depth-browser.cjs
@@ -116,6 +117,8 @@ jobs:
         run: node tests/class9-ch04-ncert-final-browser.cjs
       - name: Chapter 6 NCERT final notes and progress regression
         run: node tests/class9-ch06-ncert-final-browser.cjs
+      - name: Chapter 7 provisional notes and reader regression
+        run: node tests/class9-ch07-provisional-browser.cjs
       - name: Chapter 12 NCERT proofs and reader regression
         run: node tests/class9-ch12-ncert-depth-browser.cjs
       - name: Chapter 13 NCERT systems and progress regression

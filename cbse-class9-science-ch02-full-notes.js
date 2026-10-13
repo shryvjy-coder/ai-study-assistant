@@ -51,6 +51,7 @@
       },
       {
         title: 'Cell membrane, diffusion and osmosis',
+        visual: 'osmosis-plant',
         paragraphs: [
           'The cell membrane (plasma membrane) surrounds every cell and helps control exchanges with its environment. Selectively permeable means some substances cross more easily than others; permeability depends on the substance and the transport mechanism. Oxygen and carbon dioxide can move across membranes by diffusion when their concentration differs on the two sides.',
           'The fluid-mosaic model describes a membrane about 7–10 nm thick, built mainly from a phospholipid bilayer and proteins. The water-attracting heads face water on either side; water-repelling tails lie between them. The components can move within the membrane, while proteins help transport substances or receive signals. This description is a useful model, not a rigid wall with permanently fixed gates.',
@@ -174,6 +175,7 @@
       },
       {
         title: 'Organelles working together: ribosomes, ER, Golgi and lysosomes',
+        visual: 'protein-path',
         paragraphs: [
           'An organelle is a cell component with a particular function. Not every organelle has its own membrane: ribosomes, for example, have no surrounding membrane and can be free in the cytoplasm or attached to rough endoplasmic reticulum. Ribosomes assemble proteins using genetic instructions. In eukaryotes, the nucleolus helps form ribosomal subunits, which function in the cytoplasm.',
           'The endoplasmic reticulum (ER) is a membrane network connected to the nuclear envelope. Rough ER (RER) is dotted with attached ribosomes and is especially important in making proteins intended for cell membranes, compartments or secretion. Smooth ER (SER) has no attached ribosomes and is involved in lipid synthesis and functions such as metabolism of some molecules. Both perform distinct but coordinated tasks.',
@@ -258,6 +260,7 @@
       },
       {
         title: 'Cell growth and division: mitosis versus meiosis',
+        visual: 'division',
         paragraphs: [
           'Cells grow only within workable limits; multicellular organisms often grow mainly by increasing cell number through division. An onion root tip contains many actively dividing cells. Under a microscope, its cells may show different arrangements of nuclear material because they are at different stages of the cell cycle. Activity 2.5 uses this observation to connect cell division with root growth; the prepared-slide observation should be done in a supervised school laboratory.',
           'Mitosis is a type of division that normally produces two daughter cells with the same chromosome number and very similar genetic information as the parent cell. In multicellular organisms it supports growth, repair and replacement of cells. It is also used in many forms of asexual reproduction. Chromosomes are copied before division, and the copies are distributed so each daughter cell receives a complete set.',

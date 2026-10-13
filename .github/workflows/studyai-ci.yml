@@ -80,6 +80,7 @@ jobs:
           node --check tests/class9-science-ch04-ncert-depth-browser.cjs
           node --check tests/class9-science-ch05-ncert-depth-browser.cjs
           node --check tests/class9-science-ch06-ncert-depth-browser.cjs
+          node --check tests/study-page-visible-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -154,6 +155,8 @@ jobs:
         run: node tests/class9-science-ch05-ncert-depth-browser.cjs
       - name: Verify NCERT Class 9 Science Chapter 6 depth and regression
         run: node tests/class9-science-ch06-ncert-depth-browser.cjs
+      - name: Study page visibility with long saved lesson
+        run: node tests/study-page-visible-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

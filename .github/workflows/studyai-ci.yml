@@ -74,12 +74,15 @@ jobs:
           node --check cbse-class9-science-ch05-reader-enhancements.js
           node --check cbse-class9-science-ch06-full-notes.js
           node --check cbse-class9-science-ch06-reader-enhancements.js
+          node --check cbse-class9-science-ch07-full-notes.js
+          node --check cbse-class9-science-ch07-reader-enhancements.js
           node --check tests/class9-science-ch01-ncert-depth-browser.cjs
           node --check tests/class9-science-ch02-ncert-depth-browser.cjs
           node --check tests/class9-science-ch03-ncert-depth-browser.cjs
           node --check tests/class9-science-ch04-ncert-depth-browser.cjs
           node --check tests/class9-science-ch05-ncert-depth-browser.cjs
           node --check tests/class9-science-ch06-ncert-depth-browser.cjs
+          node --check tests/class9-science-ch07-ncert-depth-browser.cjs
           node --check tests/study-page-visible-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
@@ -157,6 +160,8 @@ jobs:
         run: node tests/class9-science-ch05-ncert-depth-browser.cjs
       - name: Verify NCERT Class 9 Science Chapter 6 depth and regression
         run: node tests/class9-science-ch06-ncert-depth-browser.cjs
+      - name: Class 9 Science Chapter 7 NCERT teaching and visual regression
+        run: node tests/class9-science-ch07-ncert-depth-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

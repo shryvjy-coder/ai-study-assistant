@@ -97,3 +97,13 @@
  .science-ch03-figure{margin:20px auto}
  .science-ch03-figure figcaption{font-size:.84rem}
 }
+
+/* NCERT Class 9 Science Chapter 4: labelled mathematical SVG explanations. */
+.science-ch04-figure{max-width:780px;width:100%;margin:24px auto}
+.science-ch04-figure svg{display:block;width:100%;max-width:750px;height:auto;margin:auto}
+.science-ch04-figure figcaption{line-height:1.7}
+.science-ch04-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch04-figure{margin:20px auto}
+ .science-ch04-figure figcaption{font-size:.84rem}
+}

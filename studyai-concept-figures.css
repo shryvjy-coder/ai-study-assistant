@@ -59,3 +59,21 @@
   font-weight:800;
 }
 .studyai-mistake-warning p{margin:0;line-height:1.65}
+
+/* Class 9 Science: meaningful diagrams and optional answer reveals. */
+.science-ch01-figure{max-width:760px;margin:24px auto}
+.science-ch01-figure svg{max-width:460px}
+.science-ch01-self-check{
+  margin:25px 0 20px;
+  padding:20px;
+  border:1px solid var(--line,#ccd9d6);
+  border-radius:14px;
+  background:var(--surface,#fff);
+}
+.science-ch01-self-check>h4{margin:0 0 16px;font-size:1.08rem}
+.science-ch01-question+.science-ch01-question{border-top:1px solid var(--line,#ccd9d6);padding-top:13px}
+.science-ch01-question-text{font-weight:650;line-height:1.55;margin:0 0 9px}
+.science-ch01-question details{margin-bottom:14px}
+.science-ch01-question summary{cursor:pointer;color:var(--ink,#1e3837);font-weight:650}
+.science-ch01-question details p{margin:10px 0 0;line-height:1.65}
+@media(max-width:550px){.science-ch01-self-check{padding:15px}}

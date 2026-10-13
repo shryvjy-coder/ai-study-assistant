@@ -127,3 +127,13 @@
  .science-ch06-figure{margin:20px auto}
  .science-ch06-figure figcaption{font-size:.85rem}
 }
+
+/* Original Chapter 7 work, energy and machine figures: responsive and accessible. */
+.science-ch07-figure{max-width:780px;width:100%;margin:24px auto}
+.science-ch07-figure svg{display:block;width:100%;max-width:750px;height:auto;margin:auto}
+.science-ch07-figure figcaption{line-height:1.68}
+.science-ch07-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch07-figure{margin:20px auto}
+ .science-ch07-figure figcaption{font-size:.85rem}
+}

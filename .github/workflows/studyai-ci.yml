@@ -70,10 +70,13 @@ jobs:
           node --check cbse-class9-science-ch03-reader-enhancements.js
           node --check cbse-class9-science-ch04-full-notes.js
           node --check cbse-class9-science-ch04-reader-enhancements.js
+          node --check cbse-class9-science-ch05-full-notes.js
+          node --check cbse-class9-science-ch05-reader-enhancements.js
           node --check tests/class9-science-ch01-ncert-depth-browser.cjs
           node --check tests/class9-science-ch02-ncert-depth-browser.cjs
           node --check tests/class9-science-ch03-ncert-depth-browser.cjs
           node --check tests/class9-science-ch04-ncert-depth-browser.cjs
+          node --check tests/class9-science-ch05-ncert-depth-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
       - name: CAIE AS Physics deep-note regression
@@ -144,6 +147,8 @@ jobs:
         run: node tests/class9-science-ch03-ncert-depth-browser.cjs
       - name: Class 9 Science Chapter 4 NCERT motion and diagram regression
         run: node tests/class9-science-ch04-ncert-depth-browser.cjs
+      - name: Class 9 Science Chapter 5 NCERT mixtures and concentration regression
+        run: node tests/class9-science-ch05-ncert-depth-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

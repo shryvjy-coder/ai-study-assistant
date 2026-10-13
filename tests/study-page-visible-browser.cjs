@@ -33,7 +33,7 @@ function check(ok,message){assert.ok(ok,message);console.log('PASS',message)}
    reducedMotion:'no-preference'
  });
  const errors=[];
- page.on('pageerror',err=>errors.push(err.message));
+ page.on('pageerror',err=>errors.push(err.stack||err.message));
  await page.goto(base+'#today',{waitUntil:'load'});
  await page.waitForFunction(()=>typeof STUDY_DATA!=='undefined'&&
    !!STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&

@@ -77,3 +77,13 @@
 .science-ch01-question summary{cursor:pointer;color:var(--ink,#1e3837);font-weight:650}
 .science-ch01-question details p{margin:10px 0 0;line-height:1.65}
 @media(max-width:550px){.science-ch01-self-check{padding:15px}}
+
+/* NCERT Class 9 Science Chapter 2: original explanatory figures. */
+.science-ch02-figure{width:100%;max-width:770px;margin:24px auto}
+.science-ch02-figure svg{max-width:740px;width:100%;height:auto}
+.science-ch02-self-check{margin-top:22px}
+.science-ch02-figure figcaption{line-height:1.65}
+@media(max-width:550px){
+ .science-ch02-figure{margin:20px auto}
+ .science-ch02-figure figcaption{font-size:.84rem}
+}

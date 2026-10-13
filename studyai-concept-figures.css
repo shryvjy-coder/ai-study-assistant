@@ -107,3 +107,13 @@
  .science-ch04-figure{margin:20px auto}
  .science-ch04-figure figcaption{font-size:.84rem}
 }
+
+/* NCERT Class 9 Science Chapter 5 — authored, accessible concept figures. */
+.science-ch05-figure{max-width:780px;width:100%;margin:24px auto}
+.science-ch05-figure svg{display:block;width:100%;max-width:750px;height:auto;margin:auto}
+.science-ch05-figure figcaption{line-height:1.68}
+.science-ch05-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch05-figure{margin:20px auto}
+ .science-ch05-figure figcaption{font-size:.85rem}
+}

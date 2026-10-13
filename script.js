@@ -1267,7 +1267,10 @@ function bindAuth(){
  setAuthMode('login');
 }
 function initMotion(){
- const targets=$$('.section,.feature-strip');targets.forEach(el=>el.classList.add('motion-reveal'));
+ // Never conceal whole application pages: a long chapter can be taller than
+ // the observer threshold allows, leaving Study and its notes fully transparent.
+ // Reveal only small decorative strips. Page content must remain visible.
+ const targets=$('.feature-strip');targets.forEach(el=>el.classList.add('motion-reveal'));
  if(!('IntersectionObserver'in window)){targets.forEach(el=>el.classList.add('motion-in'));return}
  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('motion-in');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -40px'});targets.forEach(el=>obs.observe(el));
 }

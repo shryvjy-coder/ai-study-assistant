@@ -123,6 +123,31 @@ for(const [sectionTitle,title,paragraphs,formulas,examples] of records){
  if(section.subtopics.some(s=>s.title===title))continue;
  section.subtopics.push(D.subsection(title,paragraphs,formulas,examples.map(x=>E(...x))));
 }
+/* NCERT Chapter 8 Exercise Set 8.3: transform an affine recurrence into
+   a GP. Enrich an existing topic, never create a duplicate progress leaf. */
+if(!ch._studyaiCh08FinalRecurrenceV1){
+ const targets=ch.sections.flatMap(s=>s.subtopics||[])
+  .filter(s=>s.title==='Explicit versus recursive descriptions');
+ if(targets.length!==1)throw Error('Chapter 8 final audit: recursion lesson not unique');
+ const lesson=targets[0];
+ lesson.paragraphs.push(
+  'A recurrence of the form tₙ₊₁=rtₙ+b is not a geometric progression in tₙ if b≠0, because its adjacent-term ratio is usually not constant. A useful method is to find a fixed value c that stays unchanged under the rule, so c=rc+b. For r≠1 this is c=b/(1−r). Define uₙ=tₙ−c. Then uₙ₊₁=r uₙ, an ordinary GP, and the explicit term is tₙ=c+(t₁−c)rⁿ⁻¹. This algebra assumes the stated recurrence and its starting value; the transformation must be checked by substitution.',
+  'For t₁=2 and tₙ₊₁=3tₙ−2, the fixed value is c=(−2)/(1−3)=1. Subtracting 1 gives uₙ₊₁=tₙ₊₁−1=3(tₙ−1)=3uₙ, with u₁=1. Hence tₙ=1+3ⁿ⁻¹. To locate a specified term, solve the resulting power equation and verify that n is a positive integer.'
+ );
+ lesson.formulas=(lesson.formulas||[]).concat(
+  'If tₙ₊₁=rtₙ+b and r≠1, then c=b/(1−r) and tₙ=c+(t₁−c)rⁿ⁻¹'
+ );
+ lesson.examples.push(E('Find the position of a term in a shifted geometric recurrence',
+  'Start with t₁=2 and repeatedly apply tₙ₊₁=3tₙ−2. At which position is the term 730?',
+  ['The fixed value of the recurrence is c=1 because 1=3×1−2.',
+   'Write uₙ=tₙ−1. Then uₙ₊₁=3uₙ, and u₁=t₁−1=1.',
+   'Therefore uₙ=3ⁿ⁻¹ and tₙ=1+3ⁿ⁻¹.',
+   'Set 1+3ⁿ⁻¹=730, so 3ⁿ⁻¹=729=3⁶. Therefore n−1=6 and n=7.',
+   'Check by iterating: 2,4,10,28,82,244,730.'],
+  'The seventh term is 730.'
+ ));
+ ch._studyaiCh08FinalRecurrenceV1=true;
+}
 const audit=window.STUDYAI_CLASS9_DEPTH_AUDIT?.['Predicting What Comes Next: Exploring Sequences and Progressions'];
 if(audit){
  const sections=ch.sections,parts=sections.flatMap(s=>s.subtopics||[]);

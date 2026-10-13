@@ -78,6 +78,54 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   check(result.noTemplates&&result.coverage,'textbook-specific models, SI units, laws, predictions, estimation and interdisciplinary science are covered');
   check(result.mathStillStable,'Class 9 Maths completion outline remains unchanged');
   check(result.reviewStatus.includes('outstanding'),'full-note source does not falsely claim human editorial certification');
+  // Focused audit corrections: only Chapter 1 receives the two authored
+  // figures and student-controlled answer reveals. Existing notes stay intact.
+  const figures=page.locator('#detailed-notes .science-ch01-figure');
+  const questions=page.locator('#detailed-notes .science-ch01-question details');
+  check(await figures.count()===2,
+    'Chapter 1 includes two authored scientific-model and interdisciplinary diagrams');
+  check(await figures.nth(0).getAttribute('data-science-visual')==='model-cycle'&&
+      await figures.nth(1).getAttribute('data-science-visual')==='mask-map',
+    'diagram types match the accompanying models and interdisciplinary notes');
+  check(await figures.locator('svg[role="img"] title').count()===2&&
+      await figures.locator('svg[role="img"] desc').count()===2&&
+      await figures.locator('figcaption').count()===2,
+    'all science illustrations have accessible titles, descriptions and captions');
+  check(await questions.count()===5,
+    'chapter provides five original self-check questions without extra lesson pages');
+  check(await questions.evaluateAll(items=>items.every(item=>!item.open)),
+    'self-check answers remain hidden until the student chooses to reveal them');
+  await questions.first().locator('summary').click();
+  check(await questions.first().evaluate(item=>item.open)&&
+      (await questions.first().locator('p').innerText()).includes('air resistance'),
+    'self-check answer can be revealed with the native accessible disclosure');
+  await questions.first().locator('summary').click();
+  check(!await questions.first().evaluate(item=>item.open),
+    'students can close the answer again without changing progress');
+  const specificText=(await page.locator('#detailed-notes').innerText());
+  check(specificText.includes('299,792,458')&&
+      specificText.includes('celeritas')&&
+      specificText.includes('69 kg')&&
+      specificText.includes('pressure and how atoms form ions')&&
+      specificText.includes('same initial speed and direction'),
+    'historical symbol, completed rice estimation, Saha and model assumptions are taught');
+  const scienceFiguresBefore=await figures.count();
+  await page.setViewportSize({width:390,height:844});
+  const figureGeometry=await figures.evaluateAll(items=>items.map(item=>{
+    const rect=item.getBoundingClientRect();
+    return {width:rect.width,svgWidth:item.querySelector('svg').getBoundingClientRect().width};
+  }));
+  check(figureGeometry.length===2&&
+      figureGeometry.every(item=>item.width<=391&&item.svgWidth<=item.width+1),
+    'science diagrams fit mobile viewport and remain within their figure cards');
+  await page.setViewportSize({width:1365,height:900});
+  await page.evaluate(()=>{
+    const entry=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&
+      e.subject==='Science'&&e.title==='Exploration: Entering the World of Secondary Science');
+    renderReaderContent(entry);
+  });
+  check(await figures.count()===scienceFiguresBefore&&await questions.count()===5,
+    're-rendering does not duplicate original diagrams or practice questions');
   check(errors.length===0,'no uncaught JavaScript errors: '+errors.join('; '));
   console.log('CLASS 9 SCIENCE CH01 EXPLORATION REAL-BROWSER REGRESSION PASS');
 })().catch(error=>{

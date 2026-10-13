@@ -252,6 +252,88 @@
     });
     persistChecks(checked);
   }
+  // Reading to the end completes the selected focused page (or all leaves
+  // on a full lesson overview). Merely opening a lesson never earns progress.
+  // Use the existing stable keys and persistence path so dashboard rings,
+  // manual checkboxes and saved progress remain in sync.
+  let readerScrollIntent=false;
+  let scrollCheckQueued=false;
+  let touchY=null;
+  function resetReaderScrollIntent(){
+    readerScrollIntent=false;
+  }
+  function atReadingEnd(){
+    if(!readerScrollIntent||!isEligible(chapterEntry))return;
+    const notes=one('#detailed-notes');
+    if(!notes||!notes.offsetParent)return;
+    const section=notes.querySelector(
+      '.actual-note-topic.studyai-current-topic:not([hidden])');
+    if(!section)return;
+    const rect=section.getBoundingClientRect();
+    // Reaching the actual end of the visible lesson is required. Do not
+    // count a chapter simply because navigation jumped near its start.
+    if(rect.bottom>window.innerHeight+16||
+       rect.bottom<0||rect.top>=window.innerHeight)return;
+    const marked=readChecks(chapterEntry,lessons);
+    const key=activeLeaf();
+    let changed=false;
+    if(key){
+      const leaf=byLeafKey(key);
+      if(!leaf)return;
+      if(!marked.has(key)){marked.add(key);changed=true;}
+    }else{
+      const group=groups[activeIndex()];
+      if(!group)return;
+      group.leaves.forEach(leaf=>{
+        if(!marked.has(leaf.key)){marked.add(leaf.key);changed=true;}
+      });
+    }
+    // A manual 'mark incomplete' must stay incomplete until the next real
+    // downward reading gesture, not immediately flip back on its own.
+    resetReaderScrollIntent();
+    if(changed)persistChecks(marked);
+  }
+  function queueReadingEndCheck(){
+    if(scrollCheckQueued)return;
+    scrollCheckQueued=true;
+    requestAnimationFrame(()=>{
+      scrollCheckQueued=false;
+      atReadingEnd();
+    });
+  }
+  function scrollingDown(event){
+    if(!isEligible(chapterEntry))return;
+    if(event.target?.closest?.('.studyai-notes-nav'))return;
+    if(event.type==='wheel'&&event.deltaY<=0)return;
+    if(event.type==='keydown'){
+      if(!['ArrowDown','PageDown','End',' '].includes(event.key)||
+         event.altKey||event.ctrlKey||event.metaKey||
+         event.target?.closest?.('button,input,select,textarea,[contenteditable]'))return;
+    }
+    readerScrollIntent=true;
+    queueReadingEndCheck();
+  }
+  document.addEventListener('wheel',scrollingDown,{passive:true});
+  document.addEventListener('touchstart',event=>{
+    touchY=event.touches?.[0]?.clientY??null;
+  },{passive:true});
+  document.addEventListener('touchmove',event=>{
+    const y=event.touches?.[0]?.clientY;
+    if(y===undefined||touchY===null)return;
+    const down=touchY-y>2;
+    touchY=y;
+    if(down)scrollingDown(event);
+  },{passive:true});
+  document.addEventListener('keydown',scrollingDown);
+  // Scrollbars can also be dragged instead of using the wheel.
+  document.addEventListener('pointerdown',event=>{
+    const scrollbarWidth=window.innerWidth-document.documentElement.clientWidth;
+    if(scrollbarWidth>0&&event.clientX>=document.documentElement.clientWidth)
+      scrollingDown(event);
+  });
+  window.addEventListener('scroll',queueReadingEndCheck,{passive:true});
+  document.addEventListener('scroll',queueReadingEndCheck,{passive:true,capture:true});
+
   function addToggle(role,title,callback){
     const button=document.createElement('button');
     button.type='button';
@@ -412,6 +494,7 @@
   }
 
   renderReaderContent=function(entry){
+    resetReaderScrollIntent();
     const result=previousRender.apply(this,arguments);
     setLayout();
     if(isEligible(entry))buildLessonRail(entry);
@@ -426,6 +509,7 @@
   };
 
   window.addEventListener('studyai:lesson-changed',event=>{
+    resetReaderScrollIntent();
     if(chapterEntry?.id===event.detail?.entryId)refreshIndicators();
   });
   window.addEventListener('studyai:state-changed',()=>{

@@ -79,7 +79,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   });
   check(result.chapterFound&&result.count===13&&result.originalPreserved,
     'all 13 Class 9 Science chapter IDs and legacy records remain present');
-  check(result.bookMapped&&result.bankCount===2&&result.hasChapter1,
+  check(result.bookMapped&&result.bankCount===3&&result.hasChapter1,
     'Chapter 2 authored notes are selected without replacing Chapter 1');
   check(result.pageRange==='8–27'&&result.reviewStatus.includes('outstanding'),
     'chapter source cites correct printed pages without editorial certification claim');

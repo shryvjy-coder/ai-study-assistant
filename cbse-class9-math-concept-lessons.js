@@ -75,8 +75,18 @@ const lessons={
   {title:'Another irrational number: π',paragraphs:[
    'The ratio of the circumference of any circle to its diameter is π. This ratio is the same for circles of all sizes. It is irrational, so its exact value cannot be captured by any integer fraction or finite decimal. Familiar fractions such as 22/7 and decimal 3.14 are approximations, not identities.',
    'Āryabhaṭa gave the approximation 3.1416, and Indian mathematicians including Mādhava developed striking methods for approximating π. The mathematical lesson is the difference between a computed approximation, which may be very accurate, and an exact irrational number, which does not become rational just because its value can be estimated.',
+   'Mādhava’s infinite series for π is π = 4(1 − 1/3 + 1/5 − 1/7 + ⋯). It is an exact infinite sum, while every finite partial sum is only a rational approximation. π is already defined geometrically as the circumference-to-diameter ratio, so it is incorrect to suggest that an infinite sum is the only way to describe an irrational number.',
+   'The series converges slowly: its partial sums alternately overshoot and undershoot π. The absolute error after finitely many terms is smaller than 4 times the first omitted unit fraction. Keeping π symbolic is often more accurate than rounding or substituting an early partial sum.',
    'In a calculation involving π, leave the symbol π intact unless the problem specifically asks for a decimal approximation or fixes a value such as 22/7.'
-  ]}
+  ],examples:[{
+    title:'Mādhava series: a rational partial sum is not π',
+    question:'Use the first three terms of π = 4(1 − 1/3 + 1/5 − ⋯). Find the partial sum exactly and explain why it does not equal π.',
+    steps:['Add inside the brackets with denominator 15: 1 − 1/3 + 1/5 = (15−5+3)/15 = 13/15.',
+      'Multiply by 4 to get 52/15, approximately 3.4667.',
+      'The next omitted term is negative, so this three-term partial sum overestimates π. The alternating-series bound on its absolute error is 4/7.',
+      'Only the limit of infinitely many terms equals π; every finite partial sum here is rational.'],
+    answer:'Three-term sum = 52/15 ≈ 3.4667; it is an overestimate, not π.'
+  }]}
 ]},
 'Why √2 is irrational':{
  subtopics:[

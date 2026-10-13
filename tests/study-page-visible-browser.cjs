@@ -49,8 +49,19 @@ function check(ok,message){assert.ok(ok,message);console.log('PASS',message)}
  });
  check(!!selected,'known long full-note chapter exists');
  await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>!!window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.['How Forces Affect Motion']&&
+   !!window.STUDYAI_LONG_NOTES_APPLIED);
+ // Opening a chapter from the dashboard renders its long notes before the
+ // page navigation. That is the scenario where old scroll reveals got stuck.
+ await page.evaluate(()=>{
+  const entry=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&
+    x.subject==='Science'&&x.title==='How Forces Affect Motion');
+  current={board:entry.board,grade:entry.grade,subject:entry.subject,
+    topic:entry.title,topicId:entry.id,component:'All components'};
+  renderFilters();openTopic(entry.title,entry.id);
+ });
  await page.waitForFunction(()=>!!document.querySelector('#detailed-notes .science-full-notes')&&
-  document.querySelectorAll('#detailed-notes .worked-box').length>=30);
+   document.querySelectorAll('#detailed-notes .worked-box').length>=30);
  check(await page.evaluate(()=>document.body.dataset.appPage==='today'),
    'dashboard route starts active before returning to saved lesson');
  await page.evaluate(()=>{location.hash='#study'});

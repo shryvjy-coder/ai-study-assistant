@@ -31,7 +31,7 @@ const check=(v,s)=>{assert.ok(v,s);console.log('PASS',s)};
      'Cubes as products of three factors','Simplification and restrictions'].every(t=>topics.some(p=>p.title===t)),
    overlay:topics.some(t=>t.title==='Square of a trinomial') &&
      topics.some(t=>t.title==='Sum, difference, and three-variable cubic identities'),
-   newProof:pattern?.paragraphs?.some(p=>p.includes('x⁵−y⁵')&&p.includes('xⁿ−yⁿ')),
+   newProof:pattern?.paragraphs?.some(p=>p.includes('x⁵−y⁵')) && pattern?.paragraphs?.some(p=>p.includes('xⁿ−yⁿ')),
    example:pattern?.examples?.some(e=>e.title==='Prove x−y is a factor of the fifth-power difference'&&
      e.answer.includes('x⁵−y⁵=(x−y)')),
    ch03:CBSE_CLASS9_MATH_FULL_NOTES['The World of Numbers']?.sections

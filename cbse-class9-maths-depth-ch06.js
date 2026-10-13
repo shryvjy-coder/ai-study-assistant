@@ -336,6 +336,37 @@ ch6topic('Composite perimeter and area','Circle grids and the four-petal exercis
   'Covered fraction=80π/320=π/4.'
  ],'π/4, approximately 78.5%.')
  ]);
+/* Final independent Chapter 6 NCERT exercise patch, kept inside existing
+   subtopics so all progress keys and reader routes remain unchanged. */
+const existingLesson=(title)=>{
+ const matches=ch.sections.flatMap(s=>s.subtopics||[]).filter(s=>s.title===title);
+ if(matches.length!==1)throw Error('Chapter 6 final audit missing or duplicate lesson: '+title);
+ return matches[0];
+};
+const rectangles=existingLesson('Formulas and reasonableness checks');
+rectangles.paragraphs.push(
+ 'NCERT asks whether two rectangles with the same perimeter and area must be congruent. Write their side lengths as l and w. The perimeter fixes S=l+w=P/2, while the area fixes A=lw. Then (l−w)²=(l+w)²−4lw=S²−4A. Since positive side lengths have an unordered pair {l,w}={(S+√(S²−4A))/2,(S−√(S²−4A))/2}, the same P and A determine the same two side lengths, up to swapping. Therefore the rectangles are congruent. This argument requires actual non-degenerate rectangles; perimeter or area alone does not determine dimensions.'
+);
+rectangles.examples.push(E('Same perimeter and area: prove rectangle congruence',
+ 'Two rectangular plots each have perimeter 34 m and area 60 m². Can they have different unordered side lengths?',
+ ['Each has l+w=34/2=17 m and lw=60 m².',
+  'Compute (l−w)²=(l+w)²−4lw=17²−4×60=49, so |l−w|=7 m.',
+  'The two positive side lengths are (17+7)/2=12 m and (17−7)/2=5 m.',
+  'Every rectangle with this perimeter and area has these dimensions (possibly rotated), so they are congruent.'],
+ 'No. Both must be 12 m by 5 m rectangles.'
+));
+const triangles=existingLesson('Triangles sharing base and parallels');
+triangles.paragraphs.push(
+ 'A kite with two pairs of equal adjacent sides has a symmetry diagonal joining the vertices where equal side pairs meet. That diagonal perpendicularly bisects the other diagonal. Draw both diagonals of lengths d₁ and d₂. The four right triangles have heights along one diagonal that sum to d₁, each using half the other diagonal as a base. Their total area is (1/2)×d₁×d₂. Equivalently, the symmetry diagonal divides the kite into two triangles of the same base d₁ with perpendicular heights adding to d₂. This proof requires perpendicular diagonals and should not be applied to arbitrary quadrilaterals.'
+);
+triangles.formulas=(triangles.formulas||[]).concat('Kite area=½×(product of its perpendicular diagonals)');
+triangles.examples.push(E('Prove the area of a kite from diagonals',
+ 'A kite has perpendicular diagonals of lengths 14 cm and 10 cm. Find its area without guessing a height.',
+ ['Use one diagonal as the common base of the two triangles forming the kite.',
+  'Their perpendicular heights add to the length of the other diagonal, 10 cm.',
+  'Add the triangle areas: A=½×14×(h₁+h₂)=½×14×10.'],
+ '70 cm².'
+));
 const mixedIndex=ch.sections.findIndex(s=>s.title==='Mixed exam applications and fully worked solutions');
 if(mixedIndex<0)throw Error('Chapter 6 textbook audit: mixed-exam lesson not found');
 ch.sections.splice(mixedIndex,0,...extra);

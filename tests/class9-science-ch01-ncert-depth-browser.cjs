@@ -70,7 +70,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
     };
   });
   check(result.scienceCount===13&&result.scienceOtherUntouched,'all 13 original Class 9 Science chapter records remain present');
-  check(result.matchesKey&&result.bankCount===1,'new full notes map to the existing correct NCERT Science chapter');
+  check(result.matchesKey&&result.bankCount===2,'Chapter 1 notes remain mapped correctly alongside the new Chapter 2 entry');
   check(result.proseClass===1,'Science Chapter 1 uses real chapter notes rather than generic template');
   check(result.titles.length===5&&new Set(result.titles).size===5,'five cohesive and distinct authored science teaching sections');
   check(result.paragraphCount>=14&&result.textLength>9500,'substantial detailed explanatory text is visible in the actual reader');

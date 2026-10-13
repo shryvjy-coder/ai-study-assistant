@@ -117,3 +117,13 @@
  .science-ch05-figure{margin:20px auto}
  .science-ch05-figure figcaption{font-size:.85rem}
 }
+
+/* Class 9 Science Chapter 6: authored responsive force-and-motion diagrams. */
+.science-ch06-figure{max-width:780px;width:100%;margin:24px auto}
+.science-ch06-figure svg{display:block;width:100%;max-width:750px;height:auto;margin:auto}
+.science-ch06-figure figcaption{line-height:1.68}
+.science-ch06-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch06-figure{margin:20px auto}
+ .science-ch06-figure figcaption{font-size:.85rem}
+}

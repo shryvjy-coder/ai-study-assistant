@@ -343,6 +343,16 @@ const chapter={
           "answer": "Potential energy increases by 125 J."
         },
         {
+          "title": "NCERT Example 7.7: cricket-ball potential energy",
+          "question": "A fielder sends a 200 g cricket ball 10 m above the ground. Find its gravitational potential energy at maximum height, with g = 10 m/s².",
+          "steps": [
+            "Convert 200 g = 0.2 kg.",
+            "Reference the potential energy to the ground and use U = mgh.",
+            "U = 0.2 × 10 × 10 = 20 J."
+          ],
+          "answer": "20 J of gravitational potential energy relative to ground."
+        },
+        {
           "title": "Textbook end exercise 5: staircase and lift",
           "question": "A 50 kg pupil climbs to a floor 72.5 m above ground. Calculate gain in U if they go by stairs or lift; take g = 10.",
           "steps": [

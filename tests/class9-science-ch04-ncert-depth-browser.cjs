@@ -92,7 +92,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   'rectangle','triangle','100 m','0.5 m/s²','310 m',
   'v = u + at','s = ut + ½at²','v² = u² + 2as',
   '28.125','112.5','reaction distance','25 m','2πR/T',
-  'tangent','marble','motion in one dimension'
+  'tangent','marble','one-dimensional'
  ];
  const missing=needleList.filter(word=>!result.text.toLowerCase().includes(word.toLowerCase()));
  check(missing.length===0,'chapter-specific textbook physics and solved steps are rendered: '+missing.join(', '));

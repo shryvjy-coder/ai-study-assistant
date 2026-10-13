@@ -64,8 +64,18 @@ E('Prove the consecutive-squares pattern','Prove that the sum of the first and t
 ],['(a+b)³=a³+3a²b+3ab²+b³','(a−b)³=a³−3a²b+3ab²−b³'],[E('Expand a cube','Expand (x+2)³.',['Use a=x, b=2.','Terms are x³, 3x²(2), 3x(2²), 2³.','Simplify each coefficient.'],'x³+6x²+12x+8.')]],
 ['Patterns as conjectures and proofs',[
 'A number pattern can suggest an identity, but the pattern by itself does not prove it. For example, 1+3=4, 1+3+5=9 and 1+3+5+7=16 suggest that the first n odd numbers sum to n².',
-'A geometric proof adds an L-shaped border containing 2n−1 unit squares to a square of side n−1, making a larger n×n square. Algebraically the step is (n−1)²+(2n−1)=n². This explains why the pattern continues.'
-],['1+3+5+…+(2n−1)=n²'],[E('Consecutive odd numbers','Find the sum of the first 35 positive odd integers.',['The nth odd number is 2n−1.','The sum of the first n odd numbers equals n².','Use n=35.'],'35²=1225.')]]
+'A geometric proof adds an L-shaped border containing 2n−1 unit squares to a square of side n−1, making a larger n×n square. Algebraically the step is (n−1)²+(2n−1)=n². This explains why the pattern continues.',
+'NCERT also invites a generalisation of the fact that x−y divides both x²−y² and x³−y³. For every positive integer n, expand (x−y)(xⁿ⁻¹+xⁿ⁻²y+⋯+xyⁿ⁻²+yⁿ⁻¹). Each interior term from multiplying by x cancels the matching term from multiplying by −y, leaving just xⁿ−yⁿ. Thus x−y divides xⁿ−yⁿ as a polynomial identity for every n≥1.',
+'The same claim can be checked by substituting x=y, but substitution alone only shows the polynomial vanishes there; expanding the explicit factorisation gives the stronger complete proof. In particular, x⁴−y⁴=(x−y)(x+y)(x²+y²) and x⁵−y⁵=(x−y)(x⁴+x³y+x²y²+xy³+y⁴). These formulas are valid for all real x and y, with no assumption that x and y are positive.'
+],['1+3+5+…+(2n−1)=n²'],[E('Consecutive odd numbers','Find the sum of the first 35 positive odd integers.',['The nth odd number is 2n−1.','The sum of the first n odd numbers equals n².','Use n=35.'],'35²=1225.'),
+E('Prove x−y is a factor of the fifth-power difference',
+ 'Show that x⁵−y⁵ is divisible by x−y, including when x=y.',
+ ['Write Q=x⁴+x³y+x²y²+xy³+y⁴.',
+ 'Multiply xQ=x⁵+x⁴y+x³y²+x²y³+xy⁴.',
+ 'Multiply −yQ=−x⁴y−x³y²−x²y³−xy⁴−y⁵.',
+ 'Add the two lines. Every interior term cancels, leaving x⁵−y⁵.',
+ 'When x=y the product and original difference are both zero. Polynomial divisibility means the factorisation holds identically, not that the quotient is defined at x=y.'],
+ 'x⁵−y⁵=(x−y)(x⁴+x³y+x²y²+xy³+y⁴).')]]
 ]],
 ['Rational algebraic expressions',[
 ['Simplification and restrictions',[

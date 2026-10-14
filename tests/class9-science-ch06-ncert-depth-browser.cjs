@@ -73,7 +73,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
    };
  });
  check(content.found&&content.count===13&&content.original,'all thirteen original Science chapter records and ID survive');
- check(content.book&&content.bankCount===8&&content.earlier,'Chapter 6 coexists with five previous curated chapters');
+ check(content.book&&content.bankCount===9&&content.earlier,'Chapter 6 coexists with five previous curated chapters');
  check(content.pages==='94–115'&&content.status.includes('outstanding'),'NCERT page range and editorial status are honest');
  check(content.curatedCount===1&&content.headings.length===8&&new Set(content.headings).size===8,'eight substantive sections render once');
  check(content.pCount>=40&&content.examples===33&&content.tips===8,'all teaching paragraphs, worked examples and exam tips render');

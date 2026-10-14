@@ -23,10 +23,12 @@
   );
   function forEntry(entry){
     if(!entry||entry.board!=='CBSE'||entry.grade!=='Class 9'||
-      !['Mathematics','Science'].includes(entry.subject))return [];
+      !['Mathematics','Science','English'].includes(entry.subject))return [];
     const source=entry.subject==='Science'
       ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES
-      :window.CBSE_CLASS9_MATH_FULL_NOTES;
+      :entry.subject==='English'
+        ?window.CBSE_CLASS9_ENGLISH_FULL_NOTES
+        :window.CBSE_CLASS9_MATH_FULL_NOTES;
     const chapter=source?.[entry.title];
     if(!chapter)return [];
     const appearances=new Map();

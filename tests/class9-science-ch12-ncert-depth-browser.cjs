@@ -33,6 +33,11 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  const page=await browser.newPage({viewport:{width:1365,height:900},reducedMotion:'reduce'});
  const jsErrors=[];
  page.on('pageerror',error=>jsErrors.push(error.message));
+ // Optional first-run onboarding may appear after load and intercept browser clicks.
+ // Close the dialog during tests; production onboarding remains untouched.
+ await page.addLocatorHandler(page.locator('#studyai-onboarding[open]'),async()=>{
+  await page.evaluate(()=>{const dialog=document.querySelector('#studyai-onboarding');if(dialog?.open)dialog.close();});
+ });
  await page.goto(base+'#study',{waitUntil:'load'});
  await page.waitForFunction(()=>!!window.STUDYAI_GRADE9_DEEP_NOTES_STATUS&&
    !!window.CBSE_CLASS9_SCIENCE_FULL_NOTES&&!!window.STUDYAI_LONG_NOTES_APPLIED);

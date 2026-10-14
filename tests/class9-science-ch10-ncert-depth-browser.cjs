@@ -74,7 +74,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(result.found&&result.original&&result.sourceSame,
    'the original chapter identity and all 13 Science records are unchanged');
- check(result.bankCount===12&&result.earlier,
+ check(result.bankCount===13&&result.earlier,
    'Chapter 10 coexists with all 9 earlier upgraded chapters');
  check(result.pdf==='iesc110.pdf'&&result.pages==='184–207'&&result.review.includes('outstanding'),
    'official NCERT reference and outstanding editorial review clearly disclosed');

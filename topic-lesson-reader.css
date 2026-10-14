@@ -132,3 +132,6 @@
     grid-template-columns:minmax(0,1fr);
   }
 }
+
+/* Preserve paragraph separation and letter layout in authored English model answers. */
+#detailed-notes .english-full-notes .worked-box p{white-space:pre-line}

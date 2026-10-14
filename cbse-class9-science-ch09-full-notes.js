@@ -1211,6 +1211,17 @@ const chapter={
           "answer": "Only 2Fe³⁺ with 3O²⁻ meets both conditions."
         },
         {
+          "title": "NCERT Q2: six outer electrons and a two-L-electron partner",
+          "question": "Neutral X has six valence electrons and forms a diatomic molecule; Y has two electrons in its second shell. Identify likely X/Y among first-18 elements, X₂ and the simplest oxide formula.",
+          "steps": [
+            "An element with configuration 2,6 is oxygen (X); neutral oxygen forms O₂ with O=O double bond through two shared pairs.",
+            "Element Y with exactly two electrons in its second shell is beryllium, configuration 2,2, which commonly has valency 2.",
+            "Oxygen has common valency 2, so simplest composition with beryllium is BeO.",
+            "At this level BeO is usually classified with metal oxides; in advanced chemistry its bonding has appreciable covalent character, so the ionic/covalent binary is a simplified model."
+          ],
+          "answer": "X is O, X₂ is O₂ (double bond); Y is Be; simplest compound formula BeO."
+        },
+        {
           "title": "NCERT Q4: statement checking",
           "question": "An item says 'N₂ contains three nitrogen atoms' and 'water has two H bonded to one O'. Which is correct?",
           "steps": [

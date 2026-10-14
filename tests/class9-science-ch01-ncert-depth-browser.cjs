@@ -102,7 +102,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   await questions.first().locator('summary').click();
   check(!await questions.first().evaluate(item=>item.open),
     'students can close the answer again without changing progress');
-  const specificText=(await page.locator('#detailed-notes').innerText());
+  const specificText=(await page.locator('#detailed-notes').textContent());
   check(specificText.includes('299,792,458')&&
       specificText.includes('celeritas')&&
       specificText.includes('69 kg')&&

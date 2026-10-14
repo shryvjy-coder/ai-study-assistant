@@ -1,4 +1,4 @@
-/* StudyAI — progress-aware chapter/lesson navigation for CBSE Class 9 Mathematics.
+/* StudyAI — progress-aware chapter/lesson navigation for CBSE Class 9 Mathematics and Science.
  *
  * Layout: Collapsible contents (chapters and lesson checklist) | Teaching note
  * Chapter rings count the ACTUAL selectable authored subtopics and worked
@@ -22,11 +22,15 @@
   let groups=[];
   let sideRail=null;
 
+  const isSupportedSubject=subject=>subject==='Mathematics'||subject==='Science';
   const isCourse=()=>current.board==='CBSE'&&current.grade==='Class 9'&&
-    current.subject==='Mathematics';
-  const bank=entry=>window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry?.title]||null;
+    isSupportedSubject(current.subject);
+  const bank=entry=>entry?.subject==='Science'
+    ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry?.title]||null
+    :entry?.subject==='Mathematics'
+      ?window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry?.title]||null:null;
   const isEligible=entry=>isCourse()&&entry?.board==='CBSE'&&
-    entry?.grade==='Class 9'&&entry?.subject==='Mathematics'&&!!bank(entry);
+    entry?.grade==='Class 9'&&entry?.subject===current.subject&&!!bank(entry);
   const one=selector=>document.querySelector(selector);
   const readStore=()=>state.studyaiLessonProgress&&
     typeof state.studyaiLessonProgress==='object'&&!Array.isArray(state.studyaiLessonProgress)
@@ -529,10 +533,10 @@
       const entry=STUDY_DATA.find(e=>e.id===entryId);
       return entry&&bank(entry)?lessonGroups(entry):[];
     },
-    courseTotals:()=>{
+    courseTotals:(subject='Mathematics')=>{
       const entries=STUDY_DATA.filter(entry=>
         entry.board==='CBSE'&&entry.grade==='Class 9'&&
-        entry.subject==='Mathematics'&&bank(entry));
+        entry.subject===subject&&isSupportedSubject(subject)&&bank(entry));
       return {chapters:entries.length,subtopics:entries.reduce(
         (n,entry)=>n+lessonData(entry).length,0)};
     }

@@ -50,7 +50,10 @@
     if (next) {
       button.textContent = 'Next chapter →';
       button.setAttribute('aria-label', 'Next chapter: ' + next.title);
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
+        // Stop delegated link/route handlers from overriding a chapter button click.
+        event.preventDefault();
+        event.stopPropagation();
         // Chapter-to-chapter navigation belongs to Study, including Cambridge courses.
         // Clear a stale Dashboard route before opening the next chapter.
         if (location.hash !== '#study') location.hash = '#study';

@@ -74,7 +74,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(result.found&&result.original&&result.sourceSame,
    'original lesson ID, source and all thirteen Science records remain unchanged');
- check(result.bankCount===11&&result.earlier,
+ check(result.bankCount===12&&result.earlier,
    'Chapter 11 coexists with earlier ten full-depth Science chapters');
  check(result.pdf==='iesc111.pdf'&&result.pages==='208–227'&&result.review.includes('outstanding'),
    'NCERT 2026 curriculum ID and pending external editorial review are disclosed');

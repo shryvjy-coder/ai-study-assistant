@@ -99,7 +99,7 @@ const check=(ok,msg)=>{assert.ok(ok,msg);console.log('PASS',msg)};
    'curriculum audit corrections and full NCERT exercise models are present');
  check(activeNotes.letter.includes('Subject: Student Volunteers for Adult Literacy')&&
    activeNotes.letter.includes('Yours truly,')&&
-   activeNotes.letter.split('\\n').length>10,
+   activeNotes.letter.split('\n').length>10,
    'complete multi-paragraph model letter is stored with readable line breaks');
 
  const first=await page.evaluate(id=>StudyAIProgress.outline(id)[0],baseline.id);

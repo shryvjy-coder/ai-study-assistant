@@ -76,7 +76,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(result.scienceCount===13&&result.exists&&result.allLegacyExist,
   'the original thirteen Science chapter records and Chapter 4 identity are preserved');
- check(result.matchingBook&&result.bankCount===8&&result.previouslyAudited,
+ check(result.matchingBook&&result.bankCount===9&&result.previouslyAudited,
   'four curated Science chapters coexist with their original course keys');
  check(result.sourcePages==='48–71'&&result.editorialReview.includes('outstanding'),
   'source pages are correct and editorial certification remains pending');

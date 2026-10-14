@@ -53,6 +53,8 @@ jobs:
           node --check tests/class9-math-topic-browser.cjs
           node --check tests/class9-lesson-progress-browser.cjs
           node --check tests/class9-science-checklist-parity-browser.cjs
+          node --check cbse-class9-english-kaveri-unit01-full-notes.js
+          node --check tests/class9-english-kaveri-unit01-browser.cjs
           node --check tests/class9-audited-depth-merged-browser.cjs
           node --check tests/class9-ch01-ncert-final-browser.cjs
           node --check tests/class9-ch02-ncert-final-browser.cjs
@@ -147,6 +149,8 @@ jobs:
         run: node tests/class9-lesson-progress-browser.cjs
       - name: Science Class 9 Maths-style subtopic navigation and saved checklist regression
         run: node tests/class9-science-checklist-parity-browser.cjs
+      - name: Kaveri Class 9 English Unit 1 full lesson and checklist regression
+        run: node tests/class9-english-kaveri-unit01-browser.cjs
       - name: Previously audited chapters 5–11 stay readable and trackable
         run: node tests/class9-audited-depth-merged-browser.cjs
       - name: Chapter 1 NCERT final notes and progress regression

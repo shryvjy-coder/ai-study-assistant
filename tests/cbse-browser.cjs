@@ -107,7 +107,7 @@ async function choose(page,grade,subject){
   await choose(page,'Class 9','English');
   await page.locator('.chapter-item').first().click();
   const englishDeep=await page.locator('#detailed-notes').textContent();
-  check(englishDeep.includes('Literacy and agency')&&englishDeep.includes('Vocabulary to know'),'Class 9 Kaveri renders unit-specific literature notes and vocabulary');
+  check(englishDeep.includes('Krishtakka')&&englishDeep.includes('Karmaveera')&&englishDeep.includes('Subramania Bharati')&&englishDeep.includes('past perfect'),'Class 9 Kaveri renders detailed authentic prose, poetry and language notes');
 
   await choose(page,'Class 9','Hindi');
   await page.locator('.chapter-item').filter({hasText:'रीढ़ की हड्डी'}).click();

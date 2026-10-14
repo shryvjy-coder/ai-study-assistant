@@ -188,3 +188,13 @@
  .science-ch12-figure{margin:20px auto}
  .science-ch12-figure figcaption{font-size:.86rem}
 }
+
+/* Class 9 Science Chapter 13 — original Earth-system learning figures. */
+.science-ch13-figure{width:100%;max-width:820px;margin:24px auto}
+.science-ch13-figure svg{display:block;width:100%;max-width:800px;height:auto;margin:auto}
+.science-ch13-figure figcaption{line-height:1.7}
+.science-ch13-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch13-figure{margin:20px auto}
+ .science-ch13-figure figcaption{font-size:.86rem}
+}

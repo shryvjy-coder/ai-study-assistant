@@ -801,6 +801,597 @@ const chapter={
       ],
       "tip": "Classify yeast using more than cell number. Treat lichens as symbiosis and fungi as distinct from plants.",
       "visual": "fungi"
+    },
+    {
+      "title": "Plant kingdom I: thallophytes, bryophytes, ferns and water dependence",
+      "paragraphs": [
+        "NCERT §12.6.4 presents the traditional school division of Kingdom PLANTAE into THALLOPHYTA, BRYOPHYTA, PTERIDOPHYTA, GYMNOSPERMS and ANGIOSPERMS. This makes a convenient comparison of structural features associated with living on land. These are textbook survey groupings, NOT five consecutive individual ancestors: evolution forms branching lineages and some older groups, especially 'Thallophyta', are not treated as natural single ancestry groups in modern phylogenetics.",
+        "THALLOPHYTA (in this textbook) includes simple algae such as SPIROGYRA with an undifferentiated THALLUS rather than true roots, stems and leaves. A thin aquatic body can exchange water, dissolved nutrients and gases across much of its surface. It lacks the specialised vascular tissues xylem and phloem of taller land plants.",
+        "BRYOPHYTA includes MOSSES and liverworts such as MARCHANTIA. They grow as low mats on damp soil, stones or walls. They have RHIZOIDS for attachment and absorption, and may show leaf-like and stem-like forms, but do not have true vascular root/stem/leaf systems comparable with ferns and seed plants.",
+        "Bryophytes are called 'AMPHIBIANS OF THE PLANT KINGDOM' because they live on land yet the movement of male gametes to eggs in typical sexual reproduction depends on a film of water. Their moisture dependence is linked to both their reproductive biology and lack of long-distance vascular transport.",
+        "NCERT Activity 12.6 compares bryophyte features under a hand lens or microscope; focus on drawings of rhizoids and relatively simple bodies. Use teacher-provided specimens or prepared images for safe class observations; identification should not depend on displacing rare plants from protected habitats.",
+        "PTERIDOPHYTA includes FERNS (also Marsilea and horsetails in traditional accounts). These plants have TRUE roots, stems and leaves and well-developed vascular tissue: XYLEM conducts much of the water and mineral transport, PHLOEM distributes food. NCERT shows a fern stem cross section in Fig. 12.11.",
+        "Pteridophytes are seedless vascular plants that produce SPORES rather than flowers and seeds. Many require free water for fertilisation because their motile male gametes swim to eggs. The presence of vascular tissues supports larger structures but does not automatically remove all dependency on moist conditions.",
+        "NCERT Activity 12.7 asks comparison between fern and sunflower stem vascular bundles from previously seen slides. Both have vascular tissues; only looking at 'xylem present' is insufficient to distinguish a fern from a sunflower. Examine seed/flower production and other characters as well."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Q11: moss versus fern",
+          "question": "Why are mosses and ferns in different traditional plant groups if neither makes flowers or seeds?",
+          "steps": [
+            "Moss has rhizoids and lacks true vascular tissues.",
+            "Fern has true roots, stem, leaves and xylem/phloem.",
+            "Both may depend on moisture for fertilisation, but body organisation differs."
+          ],
+          "answer": "Moss Bryophyta; fern Pteridophyta."
+        },
+        {
+          "title": "Label thallus",
+          "question": "A green aquatic filament has no true roots, stem or leaves. What plant division fits the traditional NCERT key?",
+          "steps": [
+            "It has a simple thallus.",
+            "No vascular tissues or differentiated organs observed.",
+            "Spirogyra is the example."
+          ],
+          "answer": "Thallophyta (Spirogyra-like alga)."
+        },
+        {
+          "title": "Why plant amphibians?",
+          "question": "Explain the term for bryophytes.",
+          "steps": [
+            "Bryophytes can live on damp land.",
+            "Male gametes usually need water to reach egg.",
+            "So moisture remains vital during sexual reproduction."
+          ],
+          "answer": "Bryophytes: land-dwelling yet reproductively water-dependent."
+        },
+        {
+          "title": "Activity 12.6 identification",
+          "question": "A green mat on a shaded wall has rhizoids, not true roots. What group is likely?",
+          "steps": [
+            "A low mat suits bryophyte growth.",
+            "Rhizoids distinguish simple anchorage.",
+            "Lack of vascular organs supports moss/bryophyte identification."
+          ],
+          "answer": "Bryophyta."
+        },
+        {
+          "title": "Activity 12.7 fern transport",
+          "question": "Name tissues seen in fern vascular bundles and their broad transport roles.",
+          "steps": [
+            "Xylem moves water and mineral nutrients.",
+            "Phloem moves products of photosynthesis.",
+            "Together are vascular tissue."
+          ],
+          "answer": "Xylem and phloem."
+        },
+        {
+          "title": "Fern reproduction",
+          "question": "A fern produces sori with spores. Does it thereby make seeds?",
+          "steps": [
+            "Spores can grow into further fern life stages.",
+            "Seeds contain a developed embryo with protective structures and arise via a different cycle.",
+            "A fern is seedless."
+          ],
+          "answer": "No; ferns reproduce with spores, not seeds."
+        },
+        {
+          "title": "Water dependence comparison",
+          "question": "Which of thallophytes, bryophytes and ferns has true vascular transport tissue?",
+          "steps": [
+            "Thallophytes simple thallus.",
+            "Bryophytes lack xylem/phloem.",
+            "Ferns are vascular pteridophytes."
+          ],
+          "answer": "Ferns."
+        },
+        {
+          "title": "False linear ancestry",
+          "question": "Is a living moss the direct parent of every living fern?",
+          "steps": [
+            "Both are extant evolutionary lineages.",
+            "The textbook groups them by contrasting innovations.",
+            "Branching common ancestry does not require one existing species to be the parent of another."
+          ],
+          "answer": "No."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Which plant group contains Spirogyra in the traditional system?",
+          "answer": "Thallophyta."
+        },
+        {
+          "question": "Which structure anchors mosses in place?",
+          "answer": "Rhizoids."
+        },
+        {
+          "question": "Which group first on the textbook ladder has true xylem and phloem?",
+          "answer": "Pteridophyta."
+        },
+        {
+          "question": "Do ferns make seeds?",
+          "answer": "No; they are seedless spore-producing vascular plants."
+        }
+      ],
+      "tip": "Table 12.3: distinguish body differentiation, xylem/phloem, seed formation and dependence on water.",
+      "visual": "plantlow"
+    },
+    {
+      "title": "Plant kingdom II: gymnosperms, angiosperms, seeds and monocots/dicots",
+      "paragraphs": [
+        "GYMNOSPERMS are vascular seed plants whose OVULES and mature SEEDS are not enclosed in the fruit of a flower. NCERT examples include pines (Pinus) and cycads (Cycas), often with seed-bearing cone structures. 'Naked seeds' means unenclosed by an ovary-derived fruit, not that embryos are left entirely unprotected.",
+        "Gymnosperm pollen delivers male genetic material to the ovule and pollen-tube mechanisms make fertilisation independent of free external water for gamete swimming. Seeds protect embryos and contain nutrients. Many gymnosperms such as pine have needle-like leaves and structural adaptations that limit water loss, though not every gymnosperm occurs only in cold climates.",
+        "ANGIOSPERMS are flowering plants. Their seeds become enclosed by a FRUIT formed from the ovary after fertilisation. Flowers promote pollination and fruits aid seed protection and dispersal. NCERT examples include mango, pea, sunflower, grasses and other familiar crops.",
+        "Two major angiosperm groups used in Activity 12.8 are MONOCOTS and DICOTS. Common monocot examples (grasses, maize) have one cotyledon in the seed, often parallel leaf venation and fibrous roots. Common eudicot examples (pea, sunflower, mango) have two cotyledons, frequently net-like/reticulate venation and a taproot system. These patterns are tendencies and should be checked using multiple plant parts.",
+        "NCERT Activity 12.9 and Table 12.3 compare five textbook plant groups on SURVIVAL ADVANTAGES and CHALLENGES: thallophytes absorb directly in water but lack terrestrial support; bryophytes colonise moist land but need moisture; ferns move water with vascular bundles but remain seedless; gymnosperms produce pollen/seeds without free surface water but lack fruits; angiosperms have flowers/fruits but need suitable reproductive conditions and pollination agents.",
+        "Distinguish SEED versus FRUIT: the seed arises from the OVULE after fertilisation; the fruit largely arises from the OVARY. Gymnosperms make seeds but no flower-derived fruit. Angiosperms usually use flowers and enclosed seeds. This corrects the common claim that every vascular plant must make flowers.",
+        "NCERT's Bridging Science and Society highlights HORTUS MALABARICUS, a 17th-century account of Malabar plants compiled by Hendrik van Rheede with crucial collaboration by Itty Achudan and local experts. It provides historical context for botanical observation, traditional plant knowledge and scientific naming, rather than a new biological kingdom.",
+        "The 'algae to angiosperms' order is a table of increasing apparent adaptations, not a literal march in which a present-day Spirogyra transforms into a living mango tree. Living lineages share older ancestors and have adapted in different directions."
+      ],
+      "examples": [
+        {
+          "title": "Gymnosperm versus angiosperm",
+          "question": "Compare a pine cone and mango fruit in terms of seed enclosure.",
+          "steps": [
+            "Pine is a gymnosperm with seeds exposed on reproductive structures.",
+            "Mango is an angiosperm with seeds enclosed within a fruit.",
+            "Fruit derives from flower ovary."
+          ],
+          "answer": "Pine gymnosperm (no enclosing fruit); mango angiosperm (fruit)."
+        },
+        {
+          "title": "NCERT Pause and Ponder 3",
+          "question": "What innovations reduce reliance on free water during gymnosperm fertilisation?",
+          "steps": [
+            "Male gametes are transported using pollen.",
+            "Pollen-tube or associated reproductive mechanism removes the need for surface water for swimming gametes.",
+            "Seeds protect developing embryos."
+          ],
+          "answer": "Pollen and seed adaptations."
+        },
+        {
+          "title": "NCERT Pause and Ponder 4",
+          "question": "Why do tall vascular plants need transport tissues?",
+          "steps": [
+            "Water must move from roots to elevated shoots.",
+            "Sugars made in leaves must move to sinks.",
+            "Diffusion alone is inefficient over great distances."
+          ],
+          "answer": "Xylem and phloem support long-distance transport."
+        },
+        {
+          "title": "NCERT Pause and Ponder 5",
+          "question": "What advantages can seeds and fruits give?",
+          "steps": [
+            "Seeds protect embryos and store resources.",
+            "Fruits can protect and help disperse seeds.",
+            "These structures support survival beyond the parent plant."
+          ],
+          "answer": "Embryo protection, resources and dispersal."
+        },
+        {
+          "title": "Monocot/dicot diagnosis",
+          "question": "A plant has one cotyledon, parallel venation and fibrous roots. Which traditional group?",
+          "steps": [
+            "One cotyledon is strong clue.",
+            "Parallel leaves and fibrous roots support it.",
+            "Combined diagnosis suggests monocot."
+          ],
+          "answer": "Monocotyledon."
+        },
+        {
+          "title": "Another diagnosis",
+          "question": "Two cotyledons and reticulate venation suggest which angiosperm group?",
+          "steps": [
+            "Two seed leaves → dicot pattern.",
+            "Reticulate leaf veins reinforce.",
+            "Classify as dicot in NCERT model."
+          ],
+          "answer": "Dicotyledon."
+        },
+        {
+          "title": "Why a fern isn't gymnosperm",
+          "question": "A fern has xylem/phloem but no seeds. What differentiates it?",
+          "steps": [
+            "Vascular tissue occurs in both.",
+            "Fern reproduces with spores.",
+            "Gymnosperms produce seeds without fruit."
+          ],
+          "answer": "Fern is pteridophyte, not gymnosperm."
+        },
+        {
+          "title": "Hortus Malabaricus",
+          "question": "What does the historical work demonstrate in the textbook?",
+          "steps": [
+            "Plants were systematically recorded in India.",
+            "Local botanical experts contributed traditional knowledge.",
+            "Modern science can learn from careful historical observations."
+          ],
+          "answer": "Indian botanical knowledge contributed to scientific records."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is a naked seed?",
+          "answer": "A seed not enclosed in an ovary-derived fruit."
+        },
+        {
+          "question": "Which major plant group produces flowers and fruits?",
+          "answer": "Angiosperms."
+        },
+        {
+          "question": "Name one gymnosperm.",
+          "answer": "Pinus (pine) or Cycas."
+        },
+        {
+          "question": "How many cotyledons does a monocot seed usually have?",
+          "answer": "One."
+        },
+        {
+          "question": "Do angiosperms and gymnosperms both have xylem and phloem?",
+          "answer": "Yes."
+        }
+      ],
+      "tip": "Seeds alone do not prove angiosperm; check whether the seed is enclosed in a fruit.",
+      "visual": "planthigh"
+    },
+    {
+      "title": "Animalia: tissue organisation, notochord and eight invertebrate phyla — I",
+      "paragraphs": [
+        "Kingdom ANIMALIA includes multicellular eukaryotic heterotrophs whose cells do not have rigid plant/fungal cell walls. Many animals can move, yet sessile sponges and corals are still animals. NCERT uses body symmetry, tissues, organs, digestive openings, segmentation, skeleton type and NOTOCHORD as comparisons.",
+        "PORIFERA (sponges) are aquatic filter feeders with pores allowing water movement. They have cellular-level organisation without true tissues or organs. Sponge cells have plasma membranes but no rigid cell wall, are eukaryotic and heterotrophic. NCERT Q2's 'presence of a cell membrane' is the best offered choice, but **all cells have plasma membranes**; it is not a uniquely diagnostic animal feature on its own.",
+        "CNIDARIA includes HYDRA, jellyfish and corals. They have tissue-level organisation and specialised stinging cells (cnidocytes), commonly on tentacles, which assist feeding and defence. Their gastrovascular cavity typically has ONE digestive opening, rather than distinct mouth and anus. They may show radial symmetry.",
+        "PLATYHELMINTHES are FLATWORMS such as planaria, tapeworms and flukes. They have bilateral symmetry and organ-level differentiation, are flattened and acoelomate (no fully developed body cavity). Many examples have a branched digestive tract with one opening, but tapeworms are an exception and lack a conventional digestive tract entirely; do not teach 'all flatworms have a mouth'.",
+        "NEMATODA are cylindrical, unsegmented ROUNDWORMS including Ascaris. They commonly have a COMPLETE digestive tract with a mouth and an anus, and pseudocoelom (fluid-filled body cavity not fully mesoderm-lined). Parasites and free-living forms occur; their movement and life cycles vary.",
+        "Comparisons across these first phyla show DIFFERENT body plans rather than a simple ladder of one living group becoming the next. Sponges lack true tissues, cnidarians have organised tissues, flatworms often show bilateral symmetry and organ differentiation, and nematodes exhibit a tube-within-tube body plan.",
+        "Basic terminology: RADIAL symmetry allows several equivalent planes around an axis; BILATERAL symmetry roughly divides body into left and right halves along one plane. ACOELOMATE means no body cavity of the coelom type, PSEUDOCOELOMATE has a partly lined cavity, and true COELOMATE has a cavity fully lined by mesoderm. NCERT focuses on the broader body-plan features, so these names are supportive extensions.",
+        "NCERT Fig. 12.16 charts key differences; recognise each example visually from textbook figures, but do not assume that sedentary behaviour automatically means 'plant' or that an animal must have legs."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Q2: sponge animal placement",
+          "question": "Why is a sponge an animal despite immobility and lack of true tissues?",
+          "steps": [
+            "It is multicellular eukaryotic heterotroph.",
+            "Cells lack rigid cell walls and obtain organic food by filtering.",
+            "Question's option 'cell membrane' is the best offered but not exclusive to Animalia."
+          ],
+          "answer": "Animalia; choose cell membrane among given options but justify via full cellular/nutritional traits."
+        },
+        {
+          "title": "Hydra phylum",
+          "question": "A water animal has tentacles with stinging cells and a single digestive opening. Which phylum?",
+          "steps": [
+            "Tentacle nematocysts/cnidocytes are distinctive.",
+            "Tissue-level organisation and one opening fit.",
+            "Examples include Hydra/jellyfish."
+          ],
+          "answer": "Cnidaria."
+        },
+        {
+          "title": "Flatworm identification",
+          "question": "A bilateral flat parasitic worm has no body cavity. Which phylum?",
+          "steps": [
+            "Flattened body and bilateral symmetry.",
+            "Acoelomate body plan.",
+            "Fits Platyhelminthes."
+          ],
+          "answer": "Platyhelminthes."
+        },
+        {
+          "title": "Roundworm identification",
+          "question": "A cylindrical unsegmented worm has separate mouth and anus. Identify group.",
+          "steps": [
+            "Cylindrical and unsegmented.",
+            "Two digestive openings.",
+            "Nematoda."
+          ],
+          "answer": "Nematoda."
+        },
+        {
+          "title": "Symmetry comparison",
+          "question": "Compare adult jellyfish and earthworm symmetry.",
+          "steps": [
+            "Jellyfish usually radial body organisation.",
+            "Earthworm has left-right bilateral organisation.",
+            "Different plans serve different functions."
+          ],
+          "answer": "Radial versus bilateral."
+        },
+        {
+          "title": "Sponge tissue misconception",
+          "question": "Does a sponge's lack of true organs mean it lacks cells or cannot feed?",
+          "steps": [
+            "Sponge cells specialise at a cellular level.",
+            "Water current carries microscopic food.",
+            "Complex organs are unnecessary for the basic filter-feeding process."
+          ],
+          "answer": "No; sponges function without true tissues."
+        },
+        {
+          "title": "Tapeworm exception",
+          "question": "Is 'every flatworm has a single digestive opening' strictly true?",
+          "steps": [
+            "Planarians have a one-opening cavity.",
+            "Parasitic tapeworms absorb through body surface and lack digestive tract.",
+            "General descriptions admit exceptions."
+          ],
+          "answer": "No."
+        },
+        {
+          "title": "Why habitat misleading",
+          "question": "Both a sponge and flowering water plant remain attached in water. Which criteria separate them?",
+          "steps": [
+            "Sponge: heterotrophic animal cells without cell walls.",
+            "Plant: photosynthetic eukaryotic cells with cellulose walls.",
+            "Habitat and movement alone are weak."
+          ],
+          "answer": "Animalia versus Plantae based on cell walls and nutrition."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What phylum includes sponges?",
+          "answer": "Porifera."
+        },
+        {
+          "question": "Which animal group has stinging cnidocytes?",
+          "answer": "Cnidaria."
+        },
+        {
+          "question": "Are sponges animals even without true tissues?",
+          "answer": "Yes."
+        },
+        {
+          "question": "Which group contains flatworms?",
+          "answer": "Platyhelminthes."
+        },
+        {
+          "question": "Which group contains Ascaris?",
+          "answer": "Nematoda."
+        }
+      ],
+      "tip": "Q2's 'cell membrane' is best among options but not a unique animal diagnostic; add heterotrophy and absent cell wall.",
+      "visual": "invertebrates1"
+    },
+    {
+      "title": "Animalia: four more invertebrate phyla and the Arthropoda diagnostic",
+      "paragraphs": [
+        "ANNELIDA includes segmented WORMS such as earthworms and leeches. Their bodies have repeated units (segments), a true COELOM in standard descriptions, and organised organ systems. Segmentation supports more flexible, coordinated motion. Not every visible ring on an animal makes it an annelid.",
+        "ARTHROPODA is a vast and diverse animal phylum including insects, spiders, crabs and many others. The diagnostic pair is JOINTED APPENDAGES plus a CHITINOUS EXOSKELETON. Their body regions and segment patterns vary: insects typically have six legs, arachnids eight, and crustaceans many specialised appendages.",
+        "NCERT Q1 asks to distinguish an INSECT from an EARTHWORM in a garden. Both can be bilaterally symmetrical and segmented, and both may have cylindrical-looking bodies. JOINTED LEGS are the decisive provided choice for insect/arthropod versus earthworm/annelid.",
+        "The arthropod exoskeleton supports and protects the body, offers muscle attachments and can reduce water loss in terrestrial species. It also imposes a growth constraint: many arthropods periodically shed and remake it through MOLTING (ecdysis). A tough exoskeleton does not mean every arthropod can live indefinitely in a dry environment.",
+        "MOLLUSCA includes snails, clams, octopuses and squids. Many have a soft body and muscular FOOT (modified in cephalopods), a MANTLE, and often a calcium carbonate SHELL, though octopuses have no external hard shell. The pasted Gemini draft wrongly implies mollusc bodies are always segmented; most molluscs are NOT segmented in the annelid sense.",
+        "ECHINODERMATA comprises exclusively MARINE animals such as sea stars and sea urchins. They possess a calcium-carbonate INTERNAL SKELETON of ossicles and a unique WATER-VASCULAR SYSTEM with tube feet. Adults often show five-rayed radial symmetry while larvae are bilaterally symmetrical. They have no notochord.",
+        "NCERT Fig. 12.16 juxtaposes invertebrate organisation and skeleton types: Arthropoda and many Mollusca have protective external structures, whereas echinoderms have an internal mineral skeleton. The presence of any skeleton does not automatically mean CHORDATA; a notochord is a different developmental structure.",
+        "These phyla diverged along separate histories. Features such as jointed legs, mantle, tube feet and segmentation help classify them, but 'more complex' is not a ranking of biological worth or proof that one living species descends directly from another."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Q1: insect or earthworm",
+          "question": "Which offered trait confirms an insect rather than earthworm?",
+          "steps": [
+            "Bilateral symmetry occurs in both.",
+            "Segmentation occurs in both.",
+            "Jointed appendages distinguish arthropods."
+          ],
+          "answer": "Body with jointed legs."
+        },
+        {
+          "title": "NCERT Pause and Ponder 6",
+          "question": "Explain advantage of jointed appendages and external skeleton in insects.",
+          "steps": [
+            "Joints make controlled movement possible.",
+            "Exoskeleton protects and provides muscle attachment.",
+            "It can reduce water loss on land."
+          ],
+          "answer": "Movement, support and protection."
+        },
+        {
+          "title": "Annelid identification",
+          "question": "Earthworm has a coelom and ring-like segments. Which phylum?",
+          "steps": [
+            "Segments recur along body.",
+            "Coelom supports internal organs.",
+            "Earthworm is Annelida."
+          ],
+          "answer": "Annelida."
+        },
+        {
+          "title": "Spider versus insect",
+          "question": "An eight-legged spider has a hard exoskeleton. Is it an insect?",
+          "steps": [
+            "It belongs to Arthropoda.",
+            "Eight legs are typical of arachnids.",
+            "Most adult insects have six legs."
+          ],
+          "answer": "Arthropod, but not an insect."
+        },
+        {
+          "title": "Octopus mollusc",
+          "question": "An octopus has no obvious outer shell. Can it still be a mollusc?",
+          "steps": [
+            "Shells are not present externally in all molluscs.",
+            "Octopus has specialised cephalopod mantle/foot-derived arms.",
+            "It belongs to Mollusca."
+          ],
+          "answer": "Yes; Mollusca."
+        },
+        {
+          "title": "Sea star skeleton",
+          "question": "Sea star has hard internal plates and tube feet. Which phylum?",
+          "steps": [
+            "Marine animal with water-vascular system.",
+            "Calcium carbonate endoskeleton.",
+            "Echinodermata."
+          ],
+          "answer": "Echinodermata."
+        },
+        {
+          "title": "Two skeleton categories",
+          "question": "Compare exoskeleton of insect to internal sea-star skeletal plates.",
+          "steps": [
+            "Arthropod exoskeleton surrounds/supports externally.",
+            "Echinoderm plates form internal support.",
+            "Neither automatically implies notochord."
+          ],
+          "answer": "Arthropoda exoskeleton; Echinodermata endoskeleton."
+        },
+        {
+          "title": "Mollusca segmentation myth",
+          "question": "Is annelid-style body segmentation a defining feature of all molluscs?",
+          "steps": [
+            "Molluscs mainly defined by mantle, foot and visceral mass.",
+            "Most lack repeated body segmentation.",
+            "Some superficial lines in shells are growth markings, not true body segments."
+          ],
+          "answer": "No."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What phylum contains jointed-legged animals?",
+          "answer": "Arthropoda."
+        },
+        {
+          "question": "Which phylum has a mantle and often a shell?",
+          "answer": "Mollusca."
+        },
+        {
+          "question": "What phylum has water-vascular tube feet?",
+          "answer": "Echinodermata."
+        },
+        {
+          "question": "Which group includes earthworms and leeches?",
+          "answer": "Annelida."
+        },
+        {
+          "question": "Is every eight-legged arthropod an insect?",
+          "answer": "No; spiders are arachnids."
+        }
+      ],
+      "tip": "Insect = Arthropoda with six adult legs; earthworm = Annelida. Molluscs are not generally segmented.",
+      "visual": "invertebrates2"
+    },
+    {
+      "title": "Chordates, protochordates and five vertebrate groups",
+      "paragraphs": [
+        "A NOTOCHORD is a flexible supporting rod found at least during some developmental stage in CHORDATES. NCERT groups Chordata into PROTOCHORDATA (represented by Amphioxus) and VERTEBRATA (vertebrates), which develop a VERTEBRAL COLUMN or backbone. Modern chordate biology recognises additional branches including tunicates; the school summary is a useful simplified framework.",
+        "An animal can be an INVERTEBRATE and still be a chordate: in common usage 'invertebrate' means without a backbone, while the textbook sometimes uses non-chordate as a near synonym. Protochordates such as Amphioxus have a notochord but no vertebral column. For NCERT answers, make clear whether the criterion is NOTOCHORD or BACKBONE.",
+        "FISH include familiar aquatic vertebrates with fins and gills, often scales. They are adapted for aquatic respiration and swimming. There are exceptions in body coverings and air-breathing capacities; don't assume all fish have identical gill types or reproductive methods.",
+        "AMPHIBIANS include frogs, toads and salamanders. The textbook model uses an aquatic larval stage with gills (tadpole) and adult forms that may breathe with lungs and moist skin, with life on or near water and land. NCERT Q15 Organism S has a backbone and aquatic respiration during early life—identify as Class AMPHIBIA in that school context.",
+        "REPTILES include lizards, snakes, turtles and crocodilians. Many have dry keratinised scales and breathe with lungs; many lay shelled eggs on land, though some reptiles give live birth. Birds are evolutionarily nested within reptilian ancestry, even though NCERT discusses them as distinct classroom classes.",
+        "BIRDS have FEATHERS, generally a beak, wings (modified forelimbs) and internally strengthened/lightweight skeletons with specialised air spaces in many flying species. Some birds do not fly, so 'can fly' cannot be an absolutely necessary classification feature. Their eggs typically have hard shells.",
+        "MAMMALS have MAMMARY GLANDS producing milk, hair/fur at least during some life stages, and characteristic internal structures. Most give live birth, but monotremes lay eggs, and bats fly while whales live in water. Mammalian classification therefore should rely on structural/reproductive traits rather than simply habitat, walking or live birth.",
+        "The textbook's structural adaptations illustrate diverse solutions: fish fins/gills, bird feathers and air spaces, camels' fat stores, and polar bears' dense fur. These are evolutionary changes shaped over generations, not intentional transformations made by an individual after suddenly entering a new environment."
+      ],
+      "examples": [
+        {
+          "title": "Amphioxus place",
+          "question": "An aquatic animal has a notochord but no backbone. Which NCERT chordate subgroup?",
+          "steps": [
+            "Presence of notochord establishes chordate relation.",
+            "Absence of vertebral column excludes vertebrates.",
+            "Amphioxus is the example of Protochordata."
+          ],
+          "answer": "Protochordata."
+        },
+        {
+          "title": "Q15 organism S",
+          "question": "S is multicellular, differentiated, vertebral column present, early aquatic respiration. Identify likely vertebrate class.",
+          "steps": [
+            "Backbone → Vertebrata.",
+            "Early aquatic respiration suggests gilled larval stage.",
+            "Typical frog developmental model → Amphibia."
+          ],
+          "answer": "Amphibia."
+        },
+        {
+          "title": "A whale classification",
+          "question": "Why is a whale mammal, not fish, despite aquatic habitat?",
+          "steps": [
+            "Breathes air with lungs and has mammalian internal anatomy.",
+            "Has mammary glands and nourishes young with milk.",
+            "Habitat does not determine mammal versus fish."
+          ],
+          "answer": "Mammalia."
+        },
+        {
+          "title": "Penguin and class",
+          "question": "A flightless feathered animal lays eggs. Why is it still a bird?",
+          "steps": [
+            "Feathers are distinctive.",
+            "Wings/forelimb and avian structures remain.",
+            "Flying is not essential for every bird."
+          ],
+          "answer": "Birds/Aves."
+        },
+        {
+          "title": "Bat versus flying bird",
+          "question": "Both fly. Which trait makes bat a mammal?",
+          "steps": [
+            "Bat has mammary glands and hair.",
+            "Bird has feathers and beak.",
+            "Flight evolved in different lineages."
+          ],
+          "answer": "Mammalia."
+        },
+        {
+          "title": "Notochord versus spine",
+          "question": "Are notochord and vertebral column identical structures?",
+          "steps": [
+            "Notochord is flexible embryonic support.",
+            "Vertebral column is segmented spinal support of vertebrates.",
+            "Related during development, not the same object."
+          ],
+          "answer": "No."
+        },
+        {
+          "title": "Five NCERT groups",
+          "question": "Name the five classroom vertebrate groups and one defining clue each.",
+          "steps": [
+            "Fish: fins/gills; Amphibians: aquatic larval phase.",
+            "Reptiles: keratinised scales; Birds: feathers.",
+            "Mammals: mammary glands and hair."
+          ],
+          "answer": "Fish, Amphibians, Reptiles, Birds and Mammals."
+        },
+        {
+          "title": "Why habitat is not a hierarchy",
+          "question": "Give an aquatic mammal and a flying mammal example.",
+          "steps": [
+            "Whale is aquatic yet mammalian.",
+            "Bat flies yet mammalian.",
+            "DNA and key anatomy outweigh habitat."
+          ],
+          "answer": "Whale and bat."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is a notochord?",
+          "answer": "A flexible supporting rod characteristic of chordates during at least part of development."
+        },
+        {
+          "question": "Is Amphioxus a vertebrate?",
+          "answer": "No; a protochordate without backbone."
+        },
+        {
+          "question": "Which vertebrate class has feathers?",
+          "answer": "Birds/Aves."
+        },
+        {
+          "question": "Which vertebrate class has mammary glands?",
+          "answer": "Mammalia."
+        },
+        {
+          "question": "Which class fits a tadpole-to-frog pattern?",
+          "answer": "Amphibia."
+        }
+      ],
+      "tip": "Notochord ≠ vertebral column; in NCERT's simplified key identify Protochordata versus Vertebrata correctly.",
+      "visual": "chordates"
     }
   ]
 };

@@ -1392,6 +1392,499 @@ const chapter={
       ],
       "tip": "Notochord ≠ vertebral column; in NCERT's simplified key identify Protochordata versus Vertebrata correctly.",
       "visual": "chordates"
+    },
+    {
+      "title": "Seven-rank taxonomy: the tiger and pea pyramids and common ancestry",
+      "paragraphs": [
+        "Taxonomy is the science of identifying, naming and classifying organisms. NCERT §12.7.1 uses seven principal nested RANKS: KINGDOM → PHYLUM (often called DIVISION for plants) → CLASS → ORDER → FAMILY → GENUS → SPECIES. A lower taxon is contained inside a higher one, much as a street is part of a town, which is part of a state.",
+        "Moving DOWN the seven-rank hierarchy, a taxon usually contains FEWER different organisms and its members share MORE features. NCERT Q12 asks which between CLASS and GENUS has fewer members/more similarities: GENUS. Going from a genus such as Panthera upward to the class Mammalia includes many more mammals unrelated at the genus level.",
+        "The textbook TIGER sequence is: Kingdom Animalia → Phylum Chordata → Subphylum Vertebrata (an additional rank) → Class Mammalia → Order Carnivora → Family Felidae → Genus Panthera → Species Panthera tigris. Lion (Panthera leo) and tiger share a genus but are not the same species.",
+        "The textbook GARDEN PEA sequence is: Kingdom Plantae → Division/Phylum Magnoliophyta → Class Magnoliopsida → Order Fabales → Family Fabaceae → Genus Pisum → Species Pisum sativum. The textbook shows this particular historical plant taxonomy. Modern botanical phylogenetic systems may assign some intermediate names differently; follow the NCERT pyramid for this chapter's exercises.",
+        "At the broad Kingdom rank you might find many unrelated-looking organisms grouped by foundational features; at Species level the group is comparatively specific. In sexually reproducing organisms, successful natural interbreeding with fertile offspring is a common school-level species concept, but it has limits for fossils, asexual microbes, and species that hybridise.",
+        "NCERT Figure 12.17 shows TWO taxonomic pyramids for tiger and pea. When comparing both, observe that the rank names largely match even though the taxa at each rank are different, and the plant division can be written as Phylum/Division in the textbook representation.",
+        "The word SPECIES in 'genus + species' scientific naming is often used informally for the specific epithet, but the FULL binomial is required for an unambiguous species scientific name. Panthera is genus; tigris is the specific epithet; Panthera tigris names the species.",
+        "A family can contain multiple genera, an order multiple families, a class multiple orders. Class Mammalia contains tiger, human, whale and bat. Genus Panthera contains only more closely related cats, showing why genus members tend to share more anatomical and genetic characteristics."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Q12 genus versus class",
+          "question": "Which has fewer members but more features in common: Mammalia (class) or Panthera (genus)?",
+          "steps": [
+            "Genus lies below family, order and class.",
+            "Lower ranks cover narrower groups.",
+            "Panthera has fewer members that are closer relatives."
+          ],
+          "answer": "Genus."
+        },
+        {
+          "title": "All seven ranks",
+          "question": "Recall the seven common ranks in decreasing breadth.",
+          "steps": [
+            "Start Kingdom.",
+            "Then Phylum, Class and Order.",
+            "Finish Family, Genus and Species."
+          ],
+          "answer": "Kingdom → Phylum → Class → Order → Family → Genus → Species."
+        },
+        {
+          "title": "Tiger at family",
+          "question": "What is a tiger's family?",
+          "steps": [
+            "NCERT tiger pyramid lists Animalia, Chordata, Vertebrata, Mammalia, Carnivora.",
+            "Immediately next below order is Felidae.",
+            "Hence family = Felidae."
+          ],
+          "answer": "Felidae."
+        },
+        {
+          "title": "Garden pea at order",
+          "question": "Which order contains garden pea according to NCERT?",
+          "steps": [
+            "Pea pyramid: Plantae → Magnoliophyta → Magnoliopsida.",
+            "Then Fabales before family Fabaceae.",
+            "Order is Fabales."
+          ],
+          "answer": "Fabales."
+        },
+        {
+          "title": "Tiger and lion",
+          "question": "Why can tiger and lion share Panthera but differ in species?",
+          "steps": [
+            "Genus collects closely related species.",
+            "Tiger epithet tigris; lion epithet leo.",
+            "Distinct combinations indicate separate species."
+          ],
+          "answer": "Same genus, distinct species."
+        },
+        {
+          "title": "Rank relation",
+          "question": "If an organism is in family Felidae, must it be in order Carnivora in standard classification?",
+          "steps": [
+            "A family nests inside an order.",
+            "Felidae is classified within Carnivora.",
+            "Its constituent species belong to that higher rank."
+          ],
+          "answer": "Yes."
+        },
+        {
+          "title": "Pea scientific name",
+          "question": "What is the full scientific species name for Pisum, the garden-pea genus?",
+          "steps": [
+            "Genus Pisum.",
+            "Specific epithet sativum.",
+            "Combine in binomial form."
+          ],
+          "answer": "Pisum sativum."
+        },
+        {
+          "title": "Species concept limitation",
+          "question": "Would inability to observe mating in a fossil alone disprove that fossils belong to species?",
+          "steps": [
+            "Biological species criterion relies on reproduction.",
+            "Ancient fossils cannot be tested for natural mating.",
+            "Taxonomists use morphology and ancestry evidence."
+          ],
+          "answer": "No; species criteria have limits."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "How many major ranks are in the NCERT hierarchy?",
+          "answer": "Seven."
+        },
+        {
+          "question": "Which rank is immediately below order?",
+          "answer": "Family."
+        },
+        {
+          "question": "What is the genus of a tiger?",
+          "answer": "Panthera."
+        },
+        {
+          "question": "Which family contains the garden pea?",
+          "answer": "Fabaceae."
+        },
+        {
+          "question": "Do narrower taxa usually share more traits?",
+          "answer": "Yes."
+        }
+      ],
+      "tip": "Use the identical rank order for the tiger and pea charts; NCERT adds subphylum Vertebrata for tiger.",
+      "visual": "taxonomy"
+    },
+    {
+      "title": "Binomial names, genetic relationships, fossils and conservation threats",
+      "paragraphs": [
+        "BINOMIAL NOMENCLATURE gives organisms internationally understood two-part Latin or Latinised scientific species names, avoiding confusion between regional common names. The system was standardised by Carl Linnaeus. For a tiger, many local names refer to the same species, Panthera tigris.",
+        "RULE 1: Each full species name consists of the GENUS name first and the SPECIFIC EPITHET second. RULE 2: Capitalise the initial of genus but use lowercase for epithet. RULE 3: In printed text, italicise BOTH words (Panthera tigris); in handwritten writing, UNDERLINE EACH WORD SEPARATELY. The plain-text reader can state this convention, while the accompanying figure visibly demonstrates italics.",
+        "Examples in NCERT and related discussion include Panthera tigris (tiger), Panthera leo (lion), Mangifera indica (mango), Pisum sativum (pea) and Cinnamomum camphora. Correct the erroneous 'mangifera Indica' to Mangifera indica with appropriate formatting rather than changing only capitalisation.",
+        "Scientific labels help researchers combine observations and specimens across languages and regions. Names can change as classification is revised by better evidence; a name is a conventional reference, not a guarantee that current genus assignments will never change.",
+        "NCERT §12.9 introduces FOSSILS as preserved remains, impressions or traces of earlier organisms in rock or sediment. In undisturbed sedimentary sequences, lower layers are generally older, allowing scientists to place fossils in relative time. Combined with radiometric dating and comparisons of structures, fossils reveal changing lineages and vanished organisms.",
+        "A common oversimplification is 'every newer fossil is more complex than every older fossil'. In reality, lineages branch and many simple body plans persist alongside complex ones. Fossils show both continuity and diversity through time, not a strict chain marching from 'inferior' to 'superior' species.",
+        "Indian palaeobotanist BIRBAL SAHNI made major contributions to the study of fossil plants. NCERT identifies his association with the Birbal Sahni Institute of Palaeosciences in Lucknow. The study of ancient flora helps reconstruct past climates, environments and evolutionary relationships.",
+        "NCERT §12.10 outlines threats including pollution, land clearing, overuse of resources and climate change. If one species disappears, dependent organisms may also be affected. Conservation depends on protecting habitats, genetic variety and ecological relationships, not merely keeping captive lists of names.",
+        "The biodiversity chapter also recognises naturalists' identification of the Purple Frog and efforts to protect the Sangai deer's wetland habitat. Data and scientific naming allow conservationists to track rare lineages over time; community knowledge and new molecular tools can complement established monitoring methods."
+      ],
+      "examples": [
+        {
+          "title": "Fix a binomial",
+          "question": "Correct the text 'panthera Tigris'.",
+          "steps": [
+            "Genus initial must be uppercase → Panthera.",
+            "Epithet is lowercase → tigris.",
+            "Italicise complete two-word name when printed."
+          ],
+          "answer": "Panthera tigris, both words italicised in print."
+        },
+        {
+          "title": "Tiger and lion binomials",
+          "question": "Which part is shared by Panthera tigris and Panthera leo?",
+          "steps": [
+            "First word is genus.",
+            "Both begin Panthera.",
+            "Second epithets differ."
+          ],
+          "answer": "Genus Panthera."
+        },
+        {
+          "title": "Printed versus handwritten",
+          "question": "How should a handwritten name Mangifera indica be formatted?",
+          "steps": [
+            "Capitalise M, keep indica lowercase.",
+            "Use genus first.",
+            "Underline each word separately when handwritten."
+          ],
+          "answer": "Mangifera and indica separately underlined."
+        },
+        {
+          "title": "Relative fossil age",
+          "question": "Two fossils are in a stable undisturbed sedimentary sequence; specimen A in deeper layer. Which is generally older?",
+          "steps": [
+            "Earlier deposits usually lie below later ones.",
+            "Stratigraphy provides relative age.",
+            "A is generally older, barring disturbance/redeposition."
+          ],
+          "answer": "A, under the stated assumptions."
+        },
+        {
+          "title": "Fossil complexity caveat",
+          "question": "Do younger rock layers guarantee every organism in them was structurally more complex?",
+          "steps": [
+            "Evolution branches, and simple organisms persist.",
+            "Fossils of simpler and complex forms can coexist.",
+            "A universal increase in complexity is false."
+          ],
+          "answer": "No."
+        },
+        {
+          "title": "Birbal Sahni",
+          "question": "What scientific field is Birbal Sahni associated with?",
+          "steps": [
+            "NCERT mentions fossil plants.",
+            "Study of fossil plants is palaeobotany.",
+            "His work connects past and present plant evolution."
+          ],
+          "answer": "Palaeobotany."
+        },
+        {
+          "title": "Language confusion",
+          "question": "Why is a scientific name useful when one tiger has many regional names?",
+          "steps": [
+            "Common names vary by language.",
+            "Binomial refers to a taxonomic species.",
+            "Researchers can communicate consistently."
+          ],
+          "answer": "A standard universal name reduces ambiguity."
+        },
+        {
+          "title": "Climate threat to endemics",
+          "question": "Why might an endemic species be more affected if its entire limited range loses suitable habitat?",
+          "steps": [
+            "Its geographic distribution is restricted.",
+            "Loss across that region can remove much of its habitat.",
+            "Migration may not offer many alternative sites."
+          ],
+          "answer": "Limited range can increase extinction vulnerability."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "How many words in a binomial scientific species name?",
+          "answer": "Two."
+        },
+        {
+          "question": "Which word begins with uppercase?",
+          "answer": "The genus."
+        },
+        {
+          "question": "How should printed scientific binomials appear?",
+          "answer": "Italicised."
+        },
+        {
+          "question": "Who researched fossil plants in India?",
+          "answer": "Birbal Sahni."
+        },
+        {
+          "question": "Are all deeper layers always older in any disturbed terrain?",
+          "answer": "No; apply the rule to undisturbed sequences."
+        }
+      ],
+      "tip": "Scientific names require capitalisation plus italics/handwritten separate underlining; fossils indicate branching history.",
+      "visual": "namesfossils"
+    },
+    {
+      "title": "NCERT Questions 1–15: worked identification, viruses and seven-part case study",
+      "paragraphs": [
+        "NCERT's fifteen 'Revise, Reflect, Refine' questions combine basic organism traits, a branching classification model and a seven-part environmental case. The key exam skill is JUSTIFICATION: name the organism or group and identify the structural/cellular criterion that makes it a better match than competing kingdoms or phyla.",
+        "Q1: An insect is distinguished from an earthworm by JOINTED LEGS. Both can be bilateral and segmented, so those alternatives alone are insufficient. Q2: Sponge cells have a plasma membrane and lack the rigid cell wall of plants/fungi; the printed 'presence of cell membrane' answer is the best available, but cell membranes exist in all cells and animal classification requires additional context.",
+        "Q3 asks two animals from your environment and traits differentiating them; choose clear examples such as ant (arthropod, jointed legs) and earthworm (annelid, ring-like segmentation without jointed legs). Q4: cellular structure is applicable to all organisms and separates major lineages, whereas xylem/phloem exist only within vascular plants.",
+        "Q5: a one-celled organism with a true nucleus and multiple CILIA fits a Paramecium-like member of PROTISTA. Q6: producers/consumers/decomposers and genetic/species/ecosystem variety stabilise functions though outcomes depend on local context. Q7: putting all unicellular organisms into one kingdom mixes prokaryotic bacteria and nucleated protists.",
+        "Q8–10 ask about VIRUSES. Viruses are ACELLULAR entities containing nucleic acid (DNA OR RNA) packaged in proteins and sometimes an added lipid ENVELOPE. They cannot independently perform the complete cellular metabolism and replication of living cells; they use host-cell machinery. Not all viruses lack an outer membrane-like envelope, so the accurate fundamental distinction is **no cellular organisation**, not 'absence of any lipid covering'.",
+        "Q9 asks whether a classification scheme could include viruses in a separate category. The scientifically defensible answer is that viruses can be classified using their genome type, structure and hosts, but they do not fit into the FIVE kingdoms of cellular life. Q10 asks what such exceptions teach: scientific classifications have assumptions and evolve as evidence improves.",
+        "Q11 compares mosses (Bryophyta without vascular transport) and ferns (Pteridophyta with true organs/xylem/phloem). Q12: GENUS has fewer members and greater shared traits than CLASS. Q13: movement + photosynthesis suggests Euglena, but the one-celled TRUE NUCLEUS is essential to justify Protista.",
+        "Q14: YEAST is unicellular and nucleated but still FUNGUS because it has absorptive heterotrophic nutrition and fungal wall/lineage characters. Q15 presents five coded organisms P, Q, R, S, T—students should not memorise letters without learning diagnostic evidence.",
+        "Q15 organism P: tiny cells, NO TRUE NUCLEUS, rigid covering and high-salt/high-temperature tolerance → prokaryotic MONERA in Whittaker framework, with a possible archaea-like extremophile in modern domains. Q: multicellular FILAMENTOUS, wall, nonphotosynthetic, absorbs from decaying matter → FUNGI. R: UNICELLULAR, true nucleus, CONTRACTILE VACUOLE, flagellum and light/dark nutritional switching → PROTISTA (Euglena-like).",
+        "Q15 S: multicellular tissue-organised animal with BACKBONE and AQUATIC RESPIRATION during early development → VERTEBRATE, Class AMPHIBIA (frog-like). T: genetic material but ACELLULAR, inactive without HOST CELL → VIRUS, outside the five kingdoms. The clues reflect levels of cellular, structural and developmental organisation.",
+        "Q15(iii) why Q and R differ despite being eukaryotic: Q is a multicellular hyphal absorptive fungus with wall; R a one-celled flagellated mixotrophic protist. Q15(iv) why nutrition alone fails to classify S: many animals are heterotrophs, and backbone/larval respiration identify a smaller chordate class.",
+        "Q15(v) why T fails: no cellular organisation on which the five kingdoms are based. Q15(vi) why habitat misgroups: the pond can have bacterial P-like organisms, protist R and amphibian S; they share water but not cellular or body structures. Q15(vii): a multicellular eukaryote without chlorophyll absorbing nutrients EXTERNALLY from a HOST fits Fungi more than Animalia IF fungal wall/hyphal biology supports it; parasitic animals exist, so absorption alone cannot identify lineage.",
+        "For NCERT Activities 12.1–12.9 and ten Pause-and-Ponder questions, use observation skills and safe prepared images, not instructions for culturing microbes or identifying mushrooms for eating. The textbook's 'Journey Beyond' invites field surveys and conversations with naturalists, which should respect wildlife and habitat protections."
+      ],
+      "examples": [
+        {
+          "title": "Q1 insect",
+          "question": "An unknown segmented garden animal has jointed legs. Identify the animal group.",
+          "steps": [
+            "Jointed appendages diagnose Arthropoda.",
+            "Six legs in adult form suggest an insect.",
+            "Earthworms do not have jointed legs."
+          ],
+          "answer": "Arthropoda; likely insect."
+        },
+        {
+          "title": "Q2 sponge MCQ",
+          "question": "Among absence of mitochondria, photosynthesis, cell membrane or cell wall, which textbook option supports sponge classification?",
+          "steps": [
+            "Sponge cells are eukaryotic and have mitochondria.",
+            "They do not photosynthesise and do not have rigid walls.",
+            "'Cell membrane' is the available correct option, though non-unique across cells."
+          ],
+          "answer": "Presence of cell membrane; justify with animal cellular features."
+        },
+        {
+          "title": "Q3 two animals",
+          "question": "Compare an ant and an earthworm using a structural diagnostic feature.",
+          "steps": [
+            "Ant is an arthropod with jointed appendages and exoskeleton.",
+            "Earthworm has annelid segments, no jointed legs.",
+            "Both are animals but different phyla."
+          ],
+          "answer": "Ant Arthropoda; earthworm Annelida."
+        },
+        {
+          "title": "Q4 universal cells",
+          "question": "Why prefer cell structure to xylem/phloem for kingdom classification?",
+          "steps": [
+            "Nucleus/wall organisation applies broadly to cellular organisms.",
+            "Vascular tissues exist only among vascular plants.",
+            "Use broad feature for broad split."
+          ],
+          "answer": "Cell structure."
+        },
+        {
+          "title": "Q5 nucleus and cilia",
+          "question": "One-celled organism has nucleus and many cilia. Classify.",
+          "steps": [
+            "It is eukaryotic.",
+            "One-celled ciliate suits textbook Protista.",
+            "Paramecium example."
+          ],
+          "answer": "Protista."
+        },
+        {
+          "title": "Q6 ecosystem balance",
+          "question": "Name three roles that a diverse ecosystem can maintain.",
+          "steps": [
+            "Plants/algae produce food.",
+            "Animals pollinate, disperse seeds and consume.",
+            "Microbes recycle matter."
+          ],
+          "answer": "Production, consumption/pollination, decomposition."
+        },
+        {
+          "title": "Q7 one-celled kingdom",
+          "question": "Why not combine all unicellular species?",
+          "steps": [
+            "Bacteria are prokaryotic.",
+            "Protists and yeasts are eukaryotic.",
+            "Cellular differences are fundamental."
+          ],
+          "answer": "They hide multiple evolutionary groups."
+        },
+        {
+          "title": "Q8–Q10 viral exception",
+          "question": "Why are viruses outside Whittaker's kingdoms?",
+          "steps": [
+            "They are not cells.",
+            "They lack autonomous cellular metabolism.",
+            "They require a host cell to replicate."
+          ],
+          "answer": "Acellular and host-dependent."
+        },
+        {
+          "title": "Q11 plants",
+          "question": "Distinguish moss and fern for exam.",
+          "steps": [
+            "Moss has rhizoids and lacks vascular vessels.",
+            "Fern has true roots/stem/leaves and xylem/phloem.",
+            "Both generally seedless."
+          ],
+          "answer": "Bryophyta versus Pteridophyta."
+        },
+        {
+          "title": "Q12 lower rank",
+          "question": "Which between class and genus contains fewer organisms?",
+          "steps": [
+            "Rank hierarchy narrows down.",
+            "Genus below class.",
+            "Therefore genus."
+          ],
+          "answer": "Genus."
+        },
+        {
+          "title": "Q13 mixed traits",
+          "question": "Motility and autotrophy together suggest which textbook protist, and which cell trait confirms kingdom?",
+          "steps": [
+            "Euglena uses flagellum and can photosynthesise.",
+            "Check it has a true nucleus and single cell.",
+            "Place under Protista."
+          ],
+          "answer": "Euglena-like Protista; true nucleus."
+        },
+        {
+          "title": "Q14 fungal yeast",
+          "question": "A nucleated unicellular cell with chitin-containing wall absorbs food. Which kingdom?",
+          "steps": [
+            "Its cell number does not define Protista.",
+            "Fungal wall and absorptive nutrition are stronger evidence.",
+            "Placed in Fungi."
+          ],
+          "answer": "Fungi."
+        },
+        {
+          "title": "Q15(i) identify Q",
+          "question": "Multicellular, filamentous and feeds on dead matter through absorption. Name kingdom.",
+          "steps": [
+            "Hyphae-like filaments and wall.",
+            "No chlorophyll, decomposer.",
+            "Fungal organisation."
+          ],
+          "answer": "Fungi."
+        },
+        {
+          "title": "Q15(ii) identify P",
+          "question": "No true nucleus and extreme salt/heat tolerance. Name old kingdom and modern domain possibility.",
+          "steps": [
+            "Prokaryotic organisation means Monera in Whittaker.",
+            "Extreme environments may suggest archaea.",
+            "Confirm by molecular evidence before final domain assignment."
+          ],
+          "answer": "Monera; possibly Archaea."
+        },
+        {
+          "title": "Q15(iii) compare R and Q",
+          "question": "Both have nuclei, so why R Protista and Q Fungi?",
+          "steps": [
+            "R one-celled with flagellum, vacuole, mixotrophy.",
+            "Q multicellular mycelium/absorption.",
+            "Differences in body plan and nutrition."
+          ],
+          "answer": "R Protista, Q Fungi."
+        },
+        {
+          "title": "Q15(iv) classify S",
+          "question": "Backbone present and early aquatic respiration. Why not decide only from heterotrophy?",
+          "steps": [
+            "Many animal groups are heterotrophs.",
+            "Backbone proves vertebrate.",
+            "Aquatic larval stage suggests amphibian."
+          ],
+          "answer": "Amphibia; need structural/developmental clues."
+        },
+        {
+          "title": "Q15(v) T is outside",
+          "question": "Acellular entity contains DNA/RNA and needs host to multiply. What fundamental kingdom trait is missing?",
+          "steps": [
+            "Five-kingdom system classifies cellular organisms.",
+            "T lacks cell structure.",
+            "Virus cannot be placed in any one cellular kingdom."
+          ],
+          "answer": "Cellular organisation."
+        },
+        {
+          "title": "Q15(vi) habitat error",
+          "question": "Would a freshwater pond justify grouping P, R, S under one kingdom?",
+          "steps": [
+            "Their habitats may overlap.",
+            "P prokaryote; R eukaryotic protist; S amphibian animal.",
+            "Shared location does not mean close ancestry."
+          ],
+          "answer": "No; grouping by habitat is misleading."
+        },
+        {
+          "title": "Q15(vii) fungus versus animal",
+          "question": "Multicellular eukaryote lacks chlorophyll and absorbs nutrients externally from a host. What further clue settles Fungi?",
+          "steps": [
+            "External absorptive feeding is fungal-like.",
+            "Check chitin-containing walls/hyphae and fungal ancestry.",
+            "Animals lack cell walls and most ingest food."
+          ],
+          "answer": "Likely Fungi; wall/lineage features strengthen assignment."
+        },
+        {
+          "title": "Viruses with envelopes nuance",
+          "question": "Is 'all viruses have no lipid envelope' a valid reason for classification outside kingdoms?",
+          "steps": [
+            "Some viruses have a host-derived lipid envelope.",
+            "A viral envelope is not a functioning cell.",
+            "Acellularity and host-dependent reproduction are the correct criteria."
+          ],
+          "answer": "No; some viruses are enveloped."
+        },
+        {
+          "title": "Five kingdoms case recap",
+          "question": "List the P–T identifications in order.",
+          "steps": [
+            "P prokaryotic Monera; Q filamentous Fungi.",
+            "R mixotrophic protist; S amphibian vertebrate.",
+            "T acellular virus."
+          ],
+          "answer": "P Monera, Q Fungi, R Protista, S Amphibia (Animalia), T virus outside kingdoms."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "In Q15 which letter is the fungus?",
+          "answer": "Q."
+        },
+        {
+          "question": "Which letter is the Euglena-like protist?",
+          "answer": "R."
+        },
+        {
+          "question": "Which letter is the amphibian?",
+          "answer": "S."
+        },
+        {
+          "question": "Which letter is the acellular virus?",
+          "answer": "T."
+        },
+        {
+          "question": "Does a lipid envelope mean a virus is a complete cell?",
+          "answer": "No."
+        }
+      ],
+      "tip": "Q15: cite the CELLULAR evidence, nutrition and body-plan evidence for each P–T assignment; habitat alone never suffices.",
+      "visual": "cases"
     }
   ]
 };

@@ -75,7 +75,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(result.found&&result.original&&result.sourceSame,
    'existing identifiers, source metadata and 13 original Science records remain intact');
- check(result.bankCount===12&&result.earlier,
+ check(result.bankCount===13&&result.earlier,
    '12 full depth Science chapters including 11 previously upgraded ones');
  check(result.pdf==='iesc112.pdf'&&result.pages==='228–251'&&result.review.includes('outstanding'),
    'correct 2026 NCERT Chapter 12 identity and honest review status');

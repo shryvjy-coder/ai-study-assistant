@@ -55,7 +55,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   return {
     found:!!entry?.id,
     original:science.length===13&&science.every(e=>!!e.deepNotes?.overview),
-    all13:science.every(e=>!!bank[e.title]&&bank[e.title].sourcePdf===e.sourcePdf),
+    all13:science.every(e=>!!bank[e.title]&&bank[e.title].sourcePdf===e.sourceFile),
     all13Names:science.map(e=>e.title),
     allUniqueIds:new Set(science.map(e=>e.id)).size===13,
     sourceSame:entry?.sourceBook===bank[title]?.sourceBook,

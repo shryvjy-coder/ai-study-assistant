@@ -72,7 +72,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(result.found&&result.original&&result.sourceSame,
   'all 13 original Science IDs/entry overviews remain intact and Chapter 9 resolves');
- check(result.bankCount===12&&result.earlier,'Chapter 9 coexists with the eight prior curated chapters');
+ check(result.bankCount===13&&result.earlier,'Chapter 9 coexists with the eight prior curated chapters');
  check(result.pdf==='iesc109.pdf'&&result.pages==='162–183'&&result.review.includes('outstanding'),
   'NCERT textbook reference and human-editorial-review status preserved');
  check(result.curated===1&&result.headings.length===11&&new Set(result.headings).size===11,

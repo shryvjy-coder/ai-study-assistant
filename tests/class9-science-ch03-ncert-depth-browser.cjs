@@ -73,7 +73,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(info.scienceCount===13&&info.originalNotesExist&&info.originalKeyStable,
   'original 13 Class 9 Science entries and stable IDs remain present');
- check(info.bankCount===10&&info.existingChapters&&info.matched,
+ check(info.bankCount===11&&info.existingChapters&&info.matched,
   'Chapters 1–3 retain independently mapped, curated full notes');
  check(info.chapterStatus.includes('outstanding')&&info.printedPages==='28–47',
   'correct source pages and pending editorial certification');

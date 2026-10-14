@@ -22,7 +22,7 @@
 | §§9.7–9.8 pp.179–180 | All four numbered textbook Examples 9.4–9.7, nitric acid and methane, KCl and Mg(OH)₂, end exercise 8 masses | 10. Molecular and formula mass |
 | Final exercises pp.181–183 | 15 NCERT questions with systematic reasoning, including NCERT Q3 ion balances, Q4 statements, Q13 limitations, Q14 molten ion issue, Q15 ion counts | 11. Integrated revision |
 
-There are **11 substantive lesson sections, 83 original explanation paragraphs, 90 worked examples, 44 answer-reveal practice questions, and 11 original captioned SVG diagrams**. The lesson explicitly covers the NCERT four classroom activities and all seven numbered worked examples, and reinforces the skills needed for all 24 Pause and Ponder questions and 15 end exercises. Students should still use the textbook for exact question diagrams.
+There are **11 substantive lesson sections, 83 original explanation paragraphs, 91 worked examples, 44 answer-reveal practice questions, and 11 original captioned SVG diagrams**. The lesson explicitly covers the NCERT four classroom activities and all seven numbered worked examples, and reinforces the skills needed for all 24 Pause and Ponder questions and 15 end exercises. Students should still use the textbook for exact question diagrams.
 
 ## Independent scientific corrections to proposed Gemini drafts
 

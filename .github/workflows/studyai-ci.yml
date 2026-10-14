@@ -80,6 +80,8 @@ jobs:
           node --check cbse-class9-science-ch08-reader-enhancements.js
           node --check cbse-class9-science-ch09-full-notes.js
           node --check cbse-class9-science-ch09-reader-enhancements.js
+          node --check cbse-class9-science-ch10-full-notes.js
+          node --check cbse-class9-science-ch10-reader-enhancements.js
           node --check tests/class9-science-ch01-ncert-depth-browser.cjs
           node --check tests/class9-science-ch02-ncert-depth-browser.cjs
           node --check tests/class9-science-ch03-ncert-depth-browser.cjs
@@ -89,6 +91,7 @@ jobs:
           node --check tests/class9-science-ch07-ncert-depth-browser.cjs
           node --check tests/class9-science-ch08-ncert-depth-browser.cjs
           node --check tests/class9-science-ch09-ncert-depth-browser.cjs
+          node --check tests/class9-science-ch10-ncert-depth-browser.cjs
           node --check tests/study-page-visible-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
@@ -172,6 +175,8 @@ jobs:
         run: node tests/class9-science-ch08-ncert-depth-browser.cjs
       - name: Chapter 9 NCERT chemical bonding and formulas browser regression
         run: node tests/class9-science-ch09-ncert-depth-browser.cjs
+      - name: Chapter 10 NCERT sound-wave reader regression
+        run: node tests/class9-science-ch10-ncert-depth-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

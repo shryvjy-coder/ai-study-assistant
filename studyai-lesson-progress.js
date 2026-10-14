@@ -24,7 +24,8 @@
 
   const isSupportedSubject=subject=>subject==='Mathematics'||subject==='Science'||subject==='English';
   const isCourse=()=>current.board==='CBSE'&&current.grade==='Class 9'&&
-    isSupportedSubject(current.subject);
+    isSupportedSubject(current.subject)&&
+    (current.subject!=='English'||!!window.CBSE_CLASS9_ENGLISH_FULL_NOTES?.[current.topic]);
   const bank=entry=>entry?.subject==='Science'
     ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry?.title]||null
     :entry?.subject==='English'

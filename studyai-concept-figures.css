@@ -137,3 +137,13 @@
  .science-ch07-figure{margin:20px auto}
  .science-ch07-figure figcaption{font-size:.85rem}
 }
+
+/* CBSE Class 9 Science Chapter 8: original accessible atom diagrams. */
+.science-ch08-figure{max-width:780px;width:100%;margin:24px auto}
+.science-ch08-figure svg{display:block;width:100%;max-width:750px;height:auto;margin:auto}
+.science-ch08-figure figcaption{line-height:1.68}
+.science-ch08-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch08-figure{margin:20px auto}
+ .science-ch08-figure figcaption{font-size:.85rem}
+}

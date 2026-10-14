@@ -51,8 +51,12 @@
       button.textContent = 'Next chapter →';
       button.setAttribute('aria-label', 'Next chapter: ' + next.title);
       button.addEventListener('click', () => {
+        // Chapter-to-chapter navigation belongs to Study, including Cambridge courses.
+        // Clear a stale Dashboard route before opening the next chapter.
+        if (location.hash !== '#study') location.hash = '#study';
         // Preserve the active board, grade, subject and optional Maths route.
         openTopic(next.title, next.id);
+        if (location.hash !== '#study') location.hash = '#study';
 
         // Students reading a long chapter should start the new note at its heading.
         const heading = document.getElementById('note-title');

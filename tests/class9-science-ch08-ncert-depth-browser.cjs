@@ -72,7 +72,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
    };
  });
  check(content.found&&content.original&&content.sourceSame,'original chapter identity, 13 Science records and textbook metadata intact');
- check(content.bankCount===9&&content.previous,'Chapter 8 coexists with 7 previously upgraded chapters');
+ check(content.bankCount===10&&content.previous,'Chapter 8 coexists with 7 previously upgraded chapters');
  check(content.pdf==='iesc108.pdf'&&content.pages==='140–161'&&content.review.includes('outstanding'),
   'official NCERT citation and pending teacher editorial review are correctly disclosed');
  check(content.curatedCount===1&&content.headings.length===10&&new Set(content.headings).size===10,

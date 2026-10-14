@@ -1,0 +1,35 @@
+/* Original StudyAI English Kaveri notes. The shared Maths/Science progress
+   reader remains the layout source of truth; these styles are local to English. */
+#detailed-notes .studyai-english-full-notes .chapter-lead{line-height:1.8}
+#detailed-notes .studyai-english-full-notes .studyai-english-worked{margin:18px 0}
+#detailed-notes .studyai-english-full-notes .studyai-lesson-subtopic{
+  padding:6px 0 12px;
+  border-bottom:1px solid var(--line);
+}
+#detailed-notes .studyai-english-checks{
+  margin:24px 0;
+  padding:18px;
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  border-radius:13px;
+}
+#detailed-notes .studyai-english-checks>h4{margin:0 0 16px;color:var(--ink)}
+#detailed-notes .studyai-english-question{
+  margin:10px 0;padding:12px 0;border-top:1px solid var(--line);
+}
+#detailed-notes .studyai-english-question>p{
+  margin:0 0 10px;font-weight:650;line-height:1.6;
+}
+#detailed-notes .studyai-english-question details{
+  border:1px solid var(--line);border-radius:8px;
+  background:var(--surface);padding:9px 12px;
+}
+#detailed-notes .studyai-english-question summary{
+  cursor:pointer;color:var(--teal-dark);font-weight:700;
+}
+#detailed-notes .studyai-english-question details>p{margin:10px 0 2px;line-height:1.65}
+#detailed-notes .studyai-english-full-notes a{color:var(--teal-dark)}
+@media(max-width:650px){
+  #detailed-notes .studyai-english-checks{padding:12px}
+  #detailed-notes .studyai-english-question{padding:10px 0}
+}

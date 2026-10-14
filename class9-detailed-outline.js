@@ -1,4 +1,4 @@
-/* StudyAI • Class 9 Mathematics • authored teaching outline.
+/* StudyAI • CBSE Class 9 Mathematics and Science • authored teaching outline.
  * Builds unlimited chapter > lesson > focused-subtopic navigation from the
  * existing NCERT-aligned material, never from a fixed target or filler pages.
  * Every leaf points to an actual rendered explanation, worked example, or
@@ -23,8 +23,11 @@
   );
   function forEntry(entry){
     if(!entry||entry.board!=='CBSE'||entry.grade!=='Class 9'||
-      entry.subject!=='Mathematics')return [];
-    const chapter=window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry.title];
+      !['Mathematics','Science'].includes(entry.subject))return [];
+    const source=entry.subject==='Science'
+      ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES
+      :window.CBSE_CLASS9_MATH_FULL_NOTES;
+    const chapter=source?.[entry.title];
     if(!chapter)return [];
     const appearances=new Map();
     const groups=[];

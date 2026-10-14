@@ -22,13 +22,15 @@
   let groups=[];
   let sideRail=null;
 
-  const isSupportedSubject=subject=>subject==='Mathematics'||subject==='Science';
+  const isSupportedSubject=subject=>['Mathematics','Science','English'].includes(subject);
   const isCourse=()=>current.board==='CBSE'&&current.grade==='Class 9'&&
     isSupportedSubject(current.subject);
-  const bank=entry=>entry?.subject==='Science'
-    ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry?.title]||null
-    :entry?.subject==='Mathematics'
-      ?window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry?.title]||null:null;
+  const bank=entry=>entry?.subject==='English'
+    ?window.CBSE_CLASS9_ENGLISH_FULL_NOTES?.[entry?.title]||null
+    :entry?.subject==='Science'
+      ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry?.title]||null
+      :entry?.subject==='Mathematics'
+        ?window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry?.title]||null:null;
   const isEligible=entry=>isCourse()&&entry?.board==='CBSE'&&
     entry?.grade==='Class 9'&&entry?.subject===current.subject&&!!bank(entry);
   const one=selector=>document.querySelector(selector);
@@ -502,6 +504,22 @@
     const result=previousRender.apply(this,arguments);
     setLayout();
     if(isEligible(entry))buildLessonRail(entry);
+    else if(isCourse()&&current.subject==='English'){
+      // Units awaiting a textbook-level audit keep their existing notes; do
+      // not show stale checkboxes from the previous, completed English unit.
+      chapterEntry=null;lessons=[];groups=[];
+      if(sideRail){
+        sideRail.replaceChildren();
+        const note=document.createElement('div');note.className='studyai-side-head';
+        const label=document.createElement('span');label.className='small-label';
+        label.textContent='English • Kaveri';
+        const heading=document.createElement('h3');heading.className='studyai-rail-title';
+        heading.textContent='Detailed subtopics in progress';
+        const msg=document.createElement('p');msg.className='studyai-rail-count';
+        msg.textContent='This unit keeps its existing overview until its full notes are upgraded. Unit 1 has the complete lesson checklist.';
+        note.append(label,heading,msg);sideRail.append(note);
+      }
+    }
     return result;
   };
 

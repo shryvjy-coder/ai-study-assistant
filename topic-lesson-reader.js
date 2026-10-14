@@ -221,7 +221,9 @@
     const enabled=entry?.board==='CBSE'&&entry?.grade==='Class 9'&&
       (entry?.subject==='Mathematics'
         ?!!window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry.title]
-        :entry?.subject==='Science'&&!!window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry.title]);
+        :entry?.subject==='Science'
+          ?!!window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry.title]
+          :entry?.subject==='English'&&!!window.CBSE_CLASS9_ENGLISH_FULL_NOTES?.[entry.title]);
     if(!enabled){
       activeEntry=null;groups=[];sections=[];
       return result;

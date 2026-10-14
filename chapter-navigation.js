@@ -51,8 +51,13 @@
       button.textContent = 'Next chapter →';
       button.setAttribute('aria-label', 'Next chapter: ' + next.title);
       button.addEventListener('click', () => {
+        // A chapter link always leads to the Study page even if onboarding or
+        // a delayed route transition previously changed the app hash.
+        // This also keeps keyboard/DOM-activated navigation consistent.
+        if (location.hash !== '#study') location.hash='#study';
         // Preserve the active board, grade, subject and optional Maths route.
         openTopic(next.title, next.id);
+        if (location.hash !== '#study') location.hash='#study';
 
         // Students reading a long chapter should start the new note at its heading.
         const heading = document.getElementById('note-title');

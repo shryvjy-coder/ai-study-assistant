@@ -75,7 +75,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(content.found&&content.scienceCount===13&&content.original,
   'all 13 original Class 9 Science records and Chapter 7 identity intact');
- check(content.correctBook&&content.bankCount===12&&content.previous,
+ check(content.correctBook&&content.bankCount===13&&content.previous,
   'Chapter 7 correct book and six previous detailed Science chapters coexist');
  check(content.printedPages==='116–139'&&content.reviewStatus.includes('outstanding'),
   'page references correct and editorial approval is not overstated');

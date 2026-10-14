@@ -33,6 +33,11 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  const page=await browser.newPage({viewport:{width:1365,height:900},reducedMotion:'reduce'});
  const jsErrors=[];
  page.on('pageerror',error=>jsErrors.push(error.message));
+ // Optional first-run onboarding may appear after load and intercept browser clicks.
+ // Close the dialog during tests; production onboarding remains untouched.
+ await page.addLocatorHandler(page.locator('#studyai-onboarding[open]'),async()=>{
+  await page.evaluate(()=>{const dialog=document.querySelector('#studyai-onboarding');if(dialog?.open)dialog.close();});
+ });
  await page.goto(base+'#study',{waitUntil:'load'});
  await page.waitForFunction(()=>!!window.STUDYAI_GRADE9_DEEP_NOTES_STATUS&&
    !!window.CBSE_CLASS9_SCIENCE_FULL_NOTES&&!!window.STUDYAI_LONG_NOTES_APPLIED);
@@ -75,7 +80,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(result.found&&result.original&&result.sourceSame,
    'existing identifiers, source metadata and 13 original Science records remain intact');
- check(result.bankCount===12&&result.earlier,
+ check(result.bankCount===13&&result.earlier,
    '12 full depth Science chapters including 11 previously upgraded ones');
  check(result.pdf==='iesc112.pdf'&&result.pages==='228–251'&&result.review.includes('outstanding'),
    'correct 2026 NCERT Chapter 12 identity and honest review status');

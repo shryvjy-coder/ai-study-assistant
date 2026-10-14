@@ -102,7 +102,7 @@ async function choose(page,grade,subject){
   await choose(page,'Class 9','Science');
   await page.locator('.chapter-item').filter({hasText:'Earth as a System'}).click();
   const scienceDeep=await page.locator('#detailed-notes').textContent();
-  check(scienceDeep.includes('Earth spheres')&&scienceDeep.includes('Energy flows through the system'),'Class 9 Science renders textbook-grounded Earth-system distinctions');
+  check(scienceDeep.includes('GEOSPHERE')&&scienceDeep.includes('CRYOSPHERE')&&scienceDeep.includes('3.6 × 10⁶ J')&&scienceDeep.includes('biogeochemical'), 'Class 9 Science renders detailed Earth-system spheres, solar calculation and matter cycles');
 
   await choose(page,'Class 9','English');
   await page.locator('.chapter-item').first().click();

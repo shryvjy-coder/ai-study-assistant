@@ -86,6 +86,8 @@ jobs:
           node --check cbse-class9-science-ch11-reader-enhancements.js
           node --check cbse-class9-science-ch12-full-notes.js
           node --check cbse-class9-science-ch12-reader-enhancements.js
+          node --check cbse-class9-science-ch13-full-notes.js
+          node --check cbse-class9-science-ch13-reader-enhancements.js
           node --check tests/class9-science-ch01-ncert-depth-browser.cjs
           node --check tests/class9-science-ch02-ncert-depth-browser.cjs
           node --check tests/class9-science-ch03-ncert-depth-browser.cjs
@@ -98,6 +100,7 @@ jobs:
           node --check tests/class9-science-ch10-ncert-depth-browser.cjs
           node --check tests/class9-science-ch11-ncert-depth-browser.cjs
           node --check tests/class9-science-ch12-ncert-depth-browser.cjs
+          node --check tests/class9-science-ch13-ncert-depth-browser.cjs
           node --check tests/study-page-visible-browser.cjs
       - name: CBSE NCERT curriculum regression
         run: node tests/cbse-curriculum.cjs
@@ -187,6 +190,8 @@ jobs:
         run: node tests/class9-science-ch11-ncert-depth-browser.cjs
       - name: Chapter 12 NCERT biodiversity and taxonomy browser regression
         run: node tests/class9-science-ch12-ncert-depth-browser.cjs
+      - name: Chapter 13 complete NCERT Science curriculum browser regression
+        run: node tests/class9-science-ch13-ncert-depth-browser.cjs
       - name: Chapter navigation and hover motion
         run: node tests/chapter-navigation-hover-browser.cjs
       - name: Refreshed CBSE browser coverage

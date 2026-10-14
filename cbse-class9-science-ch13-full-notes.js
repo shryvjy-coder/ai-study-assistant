@@ -598,7 +598,8 @@ const chapter={
         "Earth can lose surface heat by INFRARED radiation, sensible heat transfer/convection to air and evaporation of water (latent heat). NCERT Q11's radiative answer is essential, but a complete scientific treatment recognises all pathways. Solar absorption, reflection, outgoing longwave radiation and atmospheric circulation interact continuously.",
         "Stratospheric OZONE (O₃) absorbs much UV, protecting life. Some human-made CFCs released in the past produced ozone-destroying chlorine radicals in the stratosphere; the MONTREAL PROTOCOL helped reduce ozone-depleting emissions and initiated recovery. It is a separate problem from greenhouse warming even though some gases affect both.",
         "GROUND-LEVEL ozone is harmful air pollution often formed by photochemical reactions involving nitrogen oxides and volatile organic compounds in sunlight, including emissions related to vehicles and industry. It can harm lungs and vegetation. The slogan GOOD UP HIGH, BAD NEARBY refers to the same molecule in different locations and roles.",
-        "Venus is hotter at the surface than Mercury despite being farther from the Sun because its massive CO₂-rich atmosphere creates a strong greenhouse effect. Don't assume all planets with CO₂ behave identically; greenhouse strength depends on pressure, radiation and many atmospheric parameters."
+        "Venus is hotter at the surface than Mercury despite being farther from the Sun because its massive CO₂-rich atmosphere creates a strong greenhouse effect. Don't assume all planets with CO₂ behave identically; greenhouse strength depends on pressure, radiation and many atmospheric parameters.",
+        "NCERT PAUSE AND PONDER 1 asks students to explore a GREENHOUSE-EFFECT COMPUTER SIMULATION. Investigate two controlled model runs—otherwise identical but with lower versus higher greenhouse-gas concentration—and observe changes in simulated surface temperature, incoming sunlight and outgoing long-wave IR. This is a model illustrating absorption and emission, not a direct measurement of the entire real Earth; altering multiple settings simultaneously would confuse the comparison."
       ],
       "examples": [
         {
@@ -680,6 +681,16 @@ const chapter={
             "Long-term balance can be approached with a warmer surface."
           ],
           "answer": "No; the balance changes, not an infinite sealed blanket."
+        },
+        {
+          "title": "Pause and Ponder 1: interpret a virtual greenhouse model",
+          "question": "Two simulator runs have identical incoming sunlight but Run B has more greenhouse gas. What change should be examined, and what mechanism explains it?",
+          "steps": [
+            "Compare temperature and the proportion/timing of outgoing infrared radiation while keeping other settings constant.",
+            "Additional greenhouse gas can absorb and re-emit more outgoing IR in the model.",
+            "Simulated surface temperature can increase until a new energy balance is approached; exact result depends on model."
+          ],
+          "answer": "Observe warmer equilibrium temperature under increased greenhouse-gas absorption, explained by reduced net escape of IR at unchanged sunlight."
         }
       ],
       "checkQuestions": [
@@ -702,6 +713,10 @@ const chapter={
         {
           "question": "Which treaty targets ozone-depleting CFCs?",
           "answer": "Montreal Protocol."
+        },
+        {
+          "question": "Which variable should be changed alone in the Pause and Ponder 1 model comparison?",
+          "answer": "Greenhouse-gas concentration, keeping incoming sunlight and other controls comparable."
         }
       ],
       "tip": "A UV-protecting ozone layer is DIFFERENT from IR-trapping greenhouse gases and ground-level smog ozone.",

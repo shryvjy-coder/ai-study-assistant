@@ -1,4 +1,4 @@
-/* StudyAI | NCERT Class 9 Maths | chapter > lesson > focused subtopic.
+/* StudyAI | CBSE Class 9 Mathematics and Science | chapter > lesson > focused subtopic.
  * Preserve the major-lesson dropdown and group overview pages, while allowing
  * any number of AUTHORED child explanations and worked examples to be opened
  * as their own page. Nothing is split into empty paragraph-only pages.
@@ -219,8 +219,9 @@
     notes.querySelector('.studyai-topic-pagination')?.remove();
     notes.classList.remove('studyai-compact-chapter');
     const enabled=entry?.board==='CBSE'&&entry?.grade==='Class 9'&&
-      entry?.subject==='Mathematics'&&
-      !!window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry.title];
+      (entry?.subject==='Mathematics'
+        ?!!window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry.title]
+        :entry?.subject==='Science'&&!!window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry.title]);
     if(!enabled){
       activeEntry=null;groups=[];sections=[];
       return result;

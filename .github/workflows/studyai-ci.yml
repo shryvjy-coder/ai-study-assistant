@@ -52,6 +52,7 @@ jobs:
           node --check tests/chapter-navigation-hover-browser.cjs
           node --check tests/class9-math-topic-browser.cjs
           node --check tests/class9-lesson-progress-browser.cjs
+          node --check tests/class9-science-checklist-parity-browser.cjs
           node --check tests/class9-audited-depth-merged-browser.cjs
           node --check tests/class9-ch01-ncert-final-browser.cjs
           node --check tests/class9-ch02-ncert-final-browser.cjs
@@ -144,6 +145,8 @@ jobs:
         run: node tests/class9-math-topic-browser.cjs
       - name: Class 9 checkable lessons and progress rings
         run: node tests/class9-lesson-progress-browser.cjs
+      - name: Science Class 9 Maths-style subtopic navigation and saved checklist regression
+        run: node tests/class9-science-checklist-parity-browser.cjs
       - name: Previously audited chapters 5–11 stay readable and trackable
         run: node tests/class9-audited-depth-merged-browser.cjs
       - name: Chapter 1 NCERT final notes and progress regression

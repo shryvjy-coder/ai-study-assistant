@@ -56,17 +56,17 @@ const check=(ok,msg)=>{assert.ok(ok,msg);console.log('PASS',msg)};
  check(baseline.englishCount===8&&new Set(baseline.ids).size===8&&
   baseline.fullKeys.length===1&&baseline.pdf==='iebe101.pdf',
   'all eight original Kaveri unit identifiers remain; only unit 1 upgraded');
- check(baseline.count===11&&baseline.paragraphs===77&&baseline.worked===54,
-  '11 long-form teaching lessons, 77 paragraphs and 54 independent worked models');
+ check(baseline.count===11&&baseline.paragraphs===82&&baseline.worked===72,
+  '11 long-form teaching lessons, 82 paragraphs and 72 independent worked models');
  check(await page.locator('#study.studyai-progress-active').count()===1&&
   await page.locator('.studyai-lesson-rail .studyai-lesson-row').count()===11,
   'Maths/Science-style progress reader activates for new detailed English unit');
  const summary=await page.evaluate(id=>StudyAIProgress.summary(id),baseline.id);
- check(summary.lessonCount===11&&summary.total===65&&summary.done===0,
-  'English unit exposes 11 core lessons and 54 actual worked-example subtopics');
+ check(summary.lessonCount===11&&summary.total===83&&summary.done===0,
+  'English unit exposes 11 core lessons and 72 actual worked-example subtopics');
  check(await page.locator('#detailed-notes .english-full-notes').count()===1&&
   await page.locator('#detailed-notes .actual-note-topic').count()===11&&
-  await page.locator('#detailed-notes .worked-box').count()===54,
+  await page.locator('#detailed-notes .worked-box').count()===72,
   'detailed English content and solved models remain fully mounted in document');
  check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,
   'one complete lesson page visible at a time instead of one huge English scroll');
@@ -78,6 +78,30 @@ const check=(ok,msg)=>{assert.ok(ok,msg);console.log('PASS',msg)};
  const whole=await page.locator('#detailed-notes').textContent();
  check(terms.every(x=>whole.toLowerCase().includes(x.toLowerCase())),
   'text-specific prose, poem, grammar, speaking, listening and writing depth preserved');
+
+ const activeNotes=await page.evaluate(()=>{
+   const c=window.CBSE_CLASS9_ENGLISH_FULL_NOTES['How I Taught My Grandmother to Read · Bharat Our Land'];
+   const titles=c.sections.flatMap(s=>s.examples.map(e=>e.title));
+   return {paragraph:c.sections[4].paragraphs.join(' '),
+     titles, letter:c.sections[6].examples.find(e=>e.title==='Original full model letter: student literacy volunteers')?.answer||''};
+ });
+ check(activeNotes.paragraph.includes('3) TRUE')&&
+   !activeNotes.paragraph.includes('grandmother was the narrator\'s teacher is FALSE'),
+   'NCERT Part II statement 3 correctly recognises the narrator as grandmother\'s first teacher');
+ const auditedTitles=['NCERT Part II true-or-false with evidence',
+   'NCERT prose Extract 1: five answers (pp. 10–11)',
+   'NCERT prose Extract 2: five answers (pp. 11–12)',
+   'NCERT Simple Past / Past Perfect V(ii): A–J',
+   'NCERT poem cloze and four poetic features (p. 25)',
+   'NCERT poem extract: five questions (pp. 28–29)',
+   'NCERT writing model: a memorable journey (p. 32)'];
+ check(auditedTitles.every(t=>activeNotes.titles.includes(t)),
+   'curriculum audit corrections and full NCERT exercise models are present');
+ check(activeNotes.letter.includes('Subject: Student Volunteers for Adult Literacy')&&
+   activeNotes.letter.includes('Yours truly,')&&
+   activeNotes.letter.split('\n').length>10,
+   'complete multi-paragraph model letter is stored with readable line breaks');
+
  const first=await page.evaluate(id=>StudyAIProgress.outline(id)[0],baseline.id);
  const example=first.leaves.find(l=>l.kind==='example');
  check(!!example,'first English lesson has independent worked model');

@@ -75,7 +75,7 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
  });
  check(content.chapterFound&&content.scienceCount===13&&content.allOriginal,
   'all 13 original Class 9 Science records and stable Chapter 5 ID remain');
- check(content.bookMatches&&content.bankCount===11&&content.previousTitles,
+ check(content.bookMatches&&content.bankCount===12&&content.previousTitles,
   'curated Chapter 5 coexists with the four previously upgraded chapters');
  check(content.printedPages==='72–93'&&content.reviewStatus.includes('outstanding'),
   'textbook pages are correct and notes do not falsely claim teacher certification');

@@ -90,8 +90,18 @@ async function openCourse(page, board, grade, subject, component = 'All componen
       label+' preserves the next chapter as last visited');
     check(await page.locator('#tab-notes > .chapter-next-nav').count()===1,
       label+' re-render does not duplicate chapter navigation');
+    // Chapter hash routing and tab transitions can finish after the DOM click.
+    // Require the actual Full notes panel to become visible; do not accept a
+    // hidden tab merely because it still exists in the DOM.
+    await page.locator('#tab-notes').waitFor({state:'visible',timeout:4500}).catch(()=>{});
+    const tabState=await page.evaluate(()=>({
+      url:location.hash,active:document.querySelector('.article-tabs button.active')?.dataset.tab,
+      hidden:document.getElementById('tab-notes')?.classList.contains('hidden'),
+      studyHidden:document.getElementById('study')?.hidden,
+      readerHidden:document.getElementById('reader-view')?.classList.contains('hidden')
+    }));
     check(await page.locator('#tab-notes').isVisible(),
-      label+' next chapter opens Full notes rather than another tab');
+      label+' next chapter opens visible Full notes rather than another tab: '+JSON.stringify(tabState));
 
     // Last page has no valid next entry and should not wrap to a different course.
     await page.evaluate(id=>{

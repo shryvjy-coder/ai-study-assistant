@@ -22,13 +22,15 @@
   let groups=[];
   let sideRail=null;
 
-  const isSupportedSubject=subject=>subject==='Mathematics'||subject==='Science';
+  const isSupportedSubject=subject=>subject==='Mathematics'||subject==='Science'||subject==='English';
   const isCourse=()=>current.board==='CBSE'&&current.grade==='Class 9'&&
     isSupportedSubject(current.subject);
   const bank=entry=>entry?.subject==='Science'
     ?window.CBSE_CLASS9_SCIENCE_FULL_NOTES?.[entry?.title]||null
-    :entry?.subject==='Mathematics'
-      ?window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry?.title]||null:null;
+    :entry?.subject==='English'
+      ?window.CBSE_CLASS9_ENGLISH_FULL_NOTES?.[entry?.title]||null
+      :entry?.subject==='Mathematics'
+        ?window.CBSE_CLASS9_MATH_FULL_NOTES?.[entry?.title]||null:null;
   const isEligible=entry=>isCourse()&&entry?.board==='CBSE'&&
     entry?.grade==='Class 9'&&entry?.subject===current.subject&&!!bank(entry);
   const one=selector=>document.querySelector(selector);

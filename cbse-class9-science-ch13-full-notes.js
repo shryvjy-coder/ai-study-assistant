@@ -587,6 +587,594 @@ const chapter={
       ],
       "tip": "Do not confuse positive stratospheric temperature gradient with tropospheric −6.5°C/km lapse rate.",
       "visual": "layers"
+    },
+    {
+      "title": "Greenhouse mechanism, infrared energy loss and ozone's two contrasting roles",
+      "paragraphs": [
+        "Earth's surface receives mostly short-wave SOLAR radiation (especially visible light), absorbs some of it and warms. A warmed surface sends thermal energy upward as LONG-WAVELENGTH INFRARED radiation. The atmosphere's greenhouse gases absorb and RE-EMIT portions of this IR in all directions; downward emission slows net radiative cooling of the surface–lower atmosphere system.",
+        "NCERT Q2 asks for the CORRECT mechanism: Earth absorbs sunlight, re-radiates energy and greenhouse gases capture/re-emit part of the outgoing IR. The intended option is (iii). The statement 'carbon dioxide heats Earth primarily by absorbing all incoming visible sunlight directly' is a misconception; CO₂'s key greenhouse role is infrared absorption.",
+        "WATER VAPOUR, CARBON DIOXIDE (CO₂), METHANE (CH₄) and other greenhouse gases make Earth's mean surface warmer than without this radiative greenhouse effect. The natural greenhouse effect supports life; ENHANCED GREENHOUSE warming occurs when additional gases change atmospheric IR absorption, making Earth's net energy balance shift until the planet warms.",
+        "At the top of the atmosphere Earth ultimately must release energy to space to balance incoming absorbed sunlight over long time scales. 'Trapped heat forever' is a pedagogical shortcut: greenhouse gases do not permanently prevent ALL IR escape. Instead they change where/from what temperature radiation effectively escapes, slowing the net loss and raising equilibrium surface temperatures.",
+        "Earth can lose surface heat by INFRARED radiation, sensible heat transfer/convection to air and evaporation of water (latent heat). NCERT Q11's radiative answer is essential, but a complete scientific treatment recognises all pathways. Solar absorption, reflection, outgoing longwave radiation and atmospheric circulation interact continuously.",
+        "Stratospheric OZONE (O₃) absorbs much UV, protecting life. Some human-made CFCs released in the past produced ozone-destroying chlorine radicals in the stratosphere; the MONTREAL PROTOCOL helped reduce ozone-depleting emissions and initiated recovery. It is a separate problem from greenhouse warming even though some gases affect both.",
+        "GROUND-LEVEL ozone is harmful air pollution often formed by photochemical reactions involving nitrogen oxides and volatile organic compounds in sunlight, including emissions related to vehicles and industry. It can harm lungs and vegetation. The slogan GOOD UP HIGH, BAD NEARBY refers to the same molecule in different locations and roles.",
+        "Venus is hotter at the surface than Mercury despite being farther from the Sun because its massive CO₂-rich atmosphere creates a strong greenhouse effect. Don't assume all planets with CO₂ behave identically; greenhouse strength depends on pressure, radiation and many atmospheric parameters."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Q2 choose greenhouse explanation",
+          "question": "Pick between 'CO₂ immediately absorbs all incoming sunlight' and 'surface emits infrared absorbed by greenhouse gases'.",
+          "steps": [
+            "Visible sunlight largely penetrates atmosphere and is absorbed at surface.",
+            "The warm Earth emits infrared thermal radiation.",
+            "Greenhouse gases absorb/re-emit outgoing IR."
+          ],
+          "answer": "Second statement; NCERT Q2 option (iii)."
+        },
+        {
+          "title": "Q11: Earth loses heat",
+          "question": "Name two ways the surface transfers energy upward.",
+          "steps": [
+            "Infrared radiation travels away as EM waves.",
+            "Evaporation moves latent heat with water vapour; convection transfers sensible heat.",
+            "Eventually outgoing radiation carries energy to space."
+          ],
+          "answer": "Infrared radiation and evaporation/convection."
+        },
+        {
+          "title": "Incoming versus outgoing",
+          "question": "Is the radiation emitted by warm Earth typically shorter wavelength than sunlight?",
+          "steps": [
+            "Sun's very hot surface radiates strongly at visible/near-IR wavelengths.",
+            "Cool Earth radiates mainly thermal IR at longer wavelengths.",
+            "Thus Earth's radiation is typically longer-wavelength."
+          ],
+          "answer": "No; Earth emits longer-wave thermal infrared."
+        },
+        {
+          "title": "Natural versus enhanced",
+          "question": "Why does explaining greenhouse gases as universally 'bad' misrepresent the process?",
+          "steps": [
+            "Natural gases help keep Earth warm enough for life.",
+            "Adding extra greenhouse gases changes heat balance.",
+            "Distinguish helpful baseline from additional warming."
+          ],
+          "answer": "Natural greenhouse effect supports habitability; enhancement can cause harm."
+        },
+        {
+          "title": "Stratospheric ozone role",
+          "question": "How does absorbing UV by ozone affect the stratosphere?",
+          "steps": [
+            "Ozone photochemistry absorbs UV.",
+            "Some energy becomes heat in the layer.",
+            "UV at the surface is reduced."
+          ],
+          "answer": "Protective UV filtering and upper atmospheric heating."
+        },
+        {
+          "title": "Ground-level ozone role",
+          "question": "Can the same O₃ formula be pollutant near the surface?",
+          "steps": [
+            "Near-surface ozone can be formed from sunlight plus precursor gases.",
+            "It irritates airways and damages plants.",
+            "Location and pathways matter."
+          ],
+          "answer": "Yes; tropospheric ozone is harmful smog pollutant."
+        },
+        {
+          "title": "Montreal Protocol",
+          "question": "Which problem did the international Montreal Protocol directly address?",
+          "steps": [
+            "CFCs and related substances can destroy stratospheric ozone.",
+            "Agreement targeted ozone-depleting substances.",
+            "Its main aim was ozone protection rather than directly ending CO₂-driven warming."
+          ],
+          "answer": "Stratospheric ozone depletion."
+        },
+        {
+          "title": "Why greenhouse gases don't stop all heat forever",
+          "question": "If greenhouse gases trap some IR, must energy build up infinitely?",
+          "steps": [
+            "Infrared still escapes to space.",
+            "Warming changes emitted intensity and vertical conditions.",
+            "Long-term balance can be approached with a warmer surface."
+          ],
+          "answer": "No; the balance changes, not an infinite sealed blanket."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Which NCERT Q2 answer choice describes greenhouse warming?",
+          "answer": "Option (iii): surface absorption followed by outgoing IR absorption by gases."
+        },
+        {
+          "question": "Is the natural greenhouse effect necessary for life-friendly temperatures?",
+          "answer": "Yes."
+        },
+        {
+          "question": "Where is protective ozone mainly located?",
+          "answer": "Stratosphere."
+        },
+        {
+          "question": "Where is smog ozone harmful?",
+          "answer": "Troposphere near the ground."
+        },
+        {
+          "question": "Which treaty targets ozone-depleting CFCs?",
+          "answer": "Montreal Protocol."
+        }
+      ],
+      "tip": "A UV-protecting ozone layer is DIFFERENT from IR-trapping greenhouse gases and ground-level smog ozone.",
+      "visual": "greenhouse"
+    },
+    {
+      "title": "Local valley and mountain breezes: heating, density and slopes",
+      "paragraphs": [
+        "Differential heating can create DAILY local winds in mountainous valleys. During the DAY, sun-facing mountain slopes heat more quickly than adjacent air and valley surfaces in many circumstances. The slope air warms, becomes less dense and rises UP the hillside, drawing air from below: an ANABATIC or VALLEY BREEZE.",
+        "At NIGHT, slopes cool radiatively. Air contacting the surface becomes cooler and denser, so gravity carries it DOWN the slope into valley bottoms: a KATABATIC or MOUNTAIN BREEZE. These local currents influence cold-air pooling, fog formation, moisture and growing conditions in mountain communities.",
+        "The names describe movement relative to terrain: 'valley breeze' rises from the valley toward mountain slopes by day, while 'mountain breeze' descends from cool mountains to valley at night. They are not the same phenomenon as land–sea breeze, although both are related to unequal heating.",
+        "NCERT Figure 13.8 (a) and (b) compares arrows for the two directions. To draw a scientifically useful diagram, label SUN/day and MOON/night or clear sky, warm rising arrows up slopes and cool descending arrows into valley. Distinguish surface flows from any return circulation drawn aloft.",
+        "NCERT Q5 compares a GRASS-COVERED slope to a BARREN ROCKY slope. Vegetation often supplies shade, soil moisture and TRANSPIRATION cooling, reducing daytime temperature extremes; exposed rock may become hotter under sunshine and cool more rapidly overnight, often favouring stronger local air-temperature contrasts.",
+        "The exact BREEZE TEMPERATURE AND SPEED also depend on rock properties, soil moisture, air humidity, exposure, cloud cover and terrain geometry. It is too strong to claim rocky slopes always have a lower heat capacity, always cool quicker, and always produce stronger winds under any conditions. Answer expected tendency first, then note controls.",
+        "During a sunny day an unsheltered dark rock slope can intensify daytime ascending flow. At night it can produce colder down-slope air if it radiates and cools faster. A grassy slope's evapotranspiration and insulation may moderate extremes. Field measurements are needed to quantify actual difference.",
+        "NCERT PAUSE AND PONDER 2 asks how cooler mountain breezes can benefit agriculture. Cooler night air can reduce some heat stress and affect moisture conditions, but severe downslope cold pooling or frost may harm crops; it is an influence rather than a universal benefit."
+      ],
+      "examples": [
+        {
+          "title": "Day/night identify direction",
+          "question": "A slope heats strongly at 2 pm. Is near-surface breeze more likely uphill or downhill?",
+          "steps": [
+            "Slope warms nearby air.",
+            "Warmer less dense air rises.",
+            "Valley air moves up slope."
+          ],
+          "answer": "Upslope valley breeze."
+        },
+        {
+          "title": "After sunset",
+          "question": "A dry slope loses energy overnight. What is near-ground wind direction?",
+          "steps": [
+            "Air near slope cools and becomes denser.",
+            "Gravity drives it downward.",
+            "Wind moves toward valley bottom."
+          ],
+          "answer": "Downslope mountain breeze."
+        },
+        {
+          "title": "NCERT Q5 vegetation comparison",
+          "question": "Predict which slope typically has less extreme daytime surface heating: shaded grass or bare dark rock.",
+          "steps": [
+            "Grass shades underlying soil.",
+            "Transpiration can remove energy as latent heat.",
+            "Bare dark rock may absorb/retain more sensible heat."
+          ],
+          "answer": "Grassy slope typically heats less strongly under otherwise similar conditions."
+        },
+        {
+          "title": "Q5 at night nuance",
+          "question": "Why might a bare rocky mountain have colder downslope air at night, yet why not guaranteed?",
+          "steps": [
+            "If rock surface cools faster, it chills adjacent air.",
+            "Dense cooled air descends.",
+            "Wind/clouds and thermal properties can change outcomes."
+          ],
+          "answer": "A common tendency, not an invariable rule."
+        },
+        {
+          "title": "Pause and Ponder 2 farming",
+          "question": "Give one crop benefit and one risk from descending cool air.",
+          "steps": [
+            "Moderate cooling can reduce heat stress.",
+            "Cold air can collect in valleys and sometimes cause frost.",
+            "Benefit depends on season and plant needs."
+          ],
+          "answer": "Cooling may help; severe cold/frost may hurt."
+        },
+        {
+          "title": "Wind energy source",
+          "question": "Is the mountain breeze powered by energy created by wind itself?",
+          "steps": [
+            "Solar heating and night radiative cooling establish temperature contrast.",
+            "Air-density and pressure fields respond.",
+            "Air moves under pressure/gravity forces."
+          ],
+          "answer": "No; differential heating and cooling drive it."
+        },
+        {
+          "title": "Sketch arrow check",
+          "question": "A student's day diagram has downhill cold arrows on heated slopes. Correct it.",
+          "steps": [
+            "Day generally creates buoyant upslope near-surface flow.",
+            "Night creates denser downhill flow.",
+            "Swap directional labels."
+          ],
+          "answer": "Day upslope, night downslope."
+        },
+        {
+          "title": "Valley cold-air pool",
+          "question": "Why can valley floors be unexpectedly cold at dawn?",
+          "steps": [
+            "Cooling forms dense air on slopes.",
+            "It drains downhill into valley basin.",
+            "It accumulates under stable conditions."
+          ],
+          "answer": "Downslope katabatic drainage causes pooling."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is a valley breeze's daytime direction?",
+          "answer": "Uphill from valley toward heated slopes."
+        },
+        {
+          "question": "What is a mountain breeze's nighttime direction?",
+          "answer": "Downhill from mountain slopes toward valley."
+        },
+        {
+          "question": "Which condition often cools a grassy slope?",
+          "answer": "Evapotranspiration and shade."
+        },
+        {
+          "question": "Is it guaranteed that rocky slopes always create stronger winds?",
+          "answer": "No; local conditions matter."
+        }
+      ],
+      "tip": "NCERT Q5: daytime warmer upslope on bare rock, night often colder downslope, but state conditional comparison.",
+      "visual": "breezes"
+    },
+    {
+      "title": "Planetary wind belts and Coriolis deflection",
+      "paragraphs": [
+        "Equatorial regions receive more direct sunlight on average, warming air, which rises and contributes to an EQUATORIAL LOW-PRESSURE belt near 0° latitude. Air can move poleward aloft and subside near approximately 30° N/S, forming SUBTROPICAL HIGH-PRESSURE belts.",
+        "Surface flow from subtropical highs back toward the equator contributes to TRADE WINDS. Some circulation toward 60° meets colder polar air and rises, forming SUBPOLAR LOW-PRESSURE regions around 60° N/S. Dense polar air descends around 90° N/S, generating POLAR HIGHS.",
+        "NCERT Figure 13.9 simplifies global circulation into latitude zones at 0°, 30°, 60° and 90° in BOTH hemispheres. Real belts shift with seasons and continents, and Earth's circulation has Hadley, Ferrel and Polar cells rather than perfectly straight one-way arrows.",
+        "The CORIOLIS EFFECT is an apparent deflection of moving air and water in Earth's rotating reference frame. It acts to the RIGHT of motion in the NORTHERN HEMISPHERE and to the LEFT in the SOUTHERN HEMISPHERE. It does NOT always mean wind physically blows east, because 'right of motion' depends on its original direction.",
+        "Near the equator the horizontal Coriolis influence is small; its magnitude depends on latitude and speed. Pressure-gradient forces, friction and topography also determine wind direction, so hemispheric deflection is a starting principle for large-scale patterns, not enough to forecast tomorrow's wind at school.",
+        "Jet streams, cyclones and monsoon circulations are influenced by global pressure structures. The southwest Indian monsoon depends on land–sea heating contrast, ocean moisture, seasonal shifts and dynamic circulation, so planetary belts alone do not explain its detailed rainfall.",
+        "A usefully labelled diagram has alternating rising/sinking branches at roughly 0° low, 30° high, 60° low and 90° high; surface transport arrows should connect regions and be marked as schematic. NCERT's key lesson: uneven solar heating plus planetary rotation produces curved, organised winds.",
+        "PAUSE AND PONDER 3 links warm ocean water moving toward poles to regional climates: the energy is transported from tropical regions to cooler latitudes, moderating seasonal extremes and impacting coastal environments. Ocean-current details follow in the next lesson."
+      ],
+      "examples": [
+        {
+          "title": "Pressure belts by latitude",
+          "question": "List the pressure tendencies near 0°, 30°, 60° and 90°.",
+          "steps": [
+            "0° heated rising air: low.",
+            "30° subsiding air: high.",
+            "60° convergent/rising air: low; 90° cold subsiding air: high."
+          ],
+          "answer": "0° low, 30° high, 60° low, 90° high."
+        },
+        {
+          "title": "Right or left",
+          "question": "Wind blowing north in Northern Hemisphere is deflected toward which SIDE of its direction?",
+          "steps": [
+            "Northern hemisphere Coriolis rightward relative to movement.",
+            "Facing north, right is east.",
+            "Deflection is toward east for this specific path."
+          ],
+          "answer": "Right, east for northbound flow."
+        },
+        {
+          "title": "Southern hemisphere",
+          "question": "A moving air parcel in Southern Hemisphere is deflected which way relative to its path?",
+          "steps": [
+            "Coriolis reverses orientation between hemispheres.",
+            "Southern Hemisphere deflection to left.",
+            "Exact compass direction depends on motion direction."
+          ],
+          "answer": "Left."
+        },
+        {
+          "title": "Why 30° high?",
+          "question": "What creates subtropical high-pressure region in the textbook conceptual circulation?",
+          "steps": [
+            "Tropical heated air rises near equator.",
+            "At altitude moves poleward and eventually cools.",
+            "Subsides around 30°, building higher surface pressure."
+          ],
+          "answer": "Sinking air around 30° latitude."
+        },
+        {
+          "title": "Polar highs",
+          "question": "Why does very cold polar surface air tend toward high pressure?",
+          "steps": [
+            "Cooling increases air density.",
+            "Dense air sinks.",
+            "Subsidence contributes to polar surface high pressure."
+          ],
+          "answer": "Cold dense descending air."
+        },
+        {
+          "title": "Equator trap",
+          "question": "Is Coriolis strongest at equator?",
+          "steps": [
+            "Magnitude of horizontal Coriolis parameter varies with sin latitude.",
+            "Near zero at equator.",
+            "Larger at higher latitudes."
+          ],
+          "answer": "No, weakest/zero for horizontal motion at equator."
+        },
+        {
+          "title": "Local wind versus global belt",
+          "question": "Can knowledge of 30° high alone tell exact morning breeze in a Himalayan valley?",
+          "steps": [
+            "Global circulation is broad-scale.",
+            "Local slope heating drives valley/mountain breezes.",
+            "Both phenomena interact but have different scale."
+          ],
+          "answer": "No; local terrain and daily heating matter."
+        },
+        {
+          "title": "Coriolis not compass",
+          "question": "If wind is deflected right in north, does that automatically mean it always blows due east?",
+          "steps": [
+            "Deflection is relative to direction of travel.",
+            "Southbound wind deflected right tends west, northbound tends east.",
+            "So no fixed compass direction."
+          ],
+          "answer": "No."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What pressure belt occurs near the equator?",
+          "answer": "Equatorial low."
+        },
+        {
+          "question": "What about roughly 30° N/S?",
+          "answer": "Subtropical high."
+        },
+        {
+          "question": "What about 60° N/S?",
+          "answer": "Subpolar low."
+        },
+        {
+          "question": "What is NH Coriolis direction?",
+          "answer": "To the right of motion."
+        },
+        {
+          "question": "What is SH Coriolis direction?",
+          "answer": "To the left of motion."
+        }
+      ],
+      "tip": "Memorise 0 low → 30 high → 60 low → 90 high; deflection is relative to motion.",
+      "visual": "winds"
+    },
+    {
+      "title": "Ocean currents, surface gyres, density flow and the Indian monsoon",
+      "paragraphs": [
+        "OCEAN CURRENTS are sustained movements of seawater that redistribute heat, salt, gases and nutrients. Strong planetary WINDS drag surface water; Earth's rotation and coastal boundaries deflect these moving masses into basin-scale patterns. Deep circulation is strongly affected by DENSITY differences related to temperature and salinity.",
+        "Warm seawater is generally less dense than equally salty cold seawater; water with higher SALINITY is generally denser than less salty water at the same temperature. The combination can cause sinking of cold salty water in certain polar areas and transport along deep pathways. The entire deep ocean is not one simple smooth conveyor belt, but the density-driven contrast is NCERT's main model.",
+        "Large surface circulation GYRES are commonly clockwise in subtropical ocean basins of the Northern Hemisphere and counterclockwise in Southern Hemisphere basins. Actual polar, coastal and monsoon-driven systems can differ, and local eddies interrupt the ideal picture.",
+        "The GULF STREAM is a warm current along the eastern North American Atlantic margin; connected North Atlantic circulation transports heat toward Europe, including the NORTH ATLANTIC DRIFT. These transports help moderate parts of northwestern European coastal climate. Cold water returning deeper or at higher latitudes transfers mass and energy over longer timescales.",
+        "Warmer currents can make neighbouring coasts milder; upwelling and cold currents can supply nutrients supporting marine food webs. Heat transport is not simply 'all warm water moves poleward on the surface while all deep water moves equatorward'; water-mass pathways reflect continents, winds and salinity.",
+        "NCERT Figure 13.10 a–b shows broad gyres and a Gulf Stream/North Atlantic Drift example. Students should label heat transport and deflection conceptually, not assume their arrows describe precise navigation routes or speeds.",
+        "Indian Institute of Tropical Meteorology (IITM), PUNE, uses coupled models of atmosphere, ocean, land and ice and observations from satellites, ocean buoys and polar stations to study monsoon variability. Numerical models are scientific tools that test how processes interact, not exact deterministic forecasts many seasons ahead.",
+        "NCERT PAUSE AND PONDER 3 asks what happens to warm equatorial surface water moving north or south: it generally releases heat to the cooler atmosphere, eventually cools, and contributes to moderating regional climate; salinity can also change through evaporation, precipitation and ice processes."
+      ],
+      "examples": [
+        {
+          "title": "Current drivers",
+          "question": "Name four physical factors that set major ocean currents.",
+          "steps": [
+            "Surface wind stress.",
+            "Temperature/salinity variations affecting density.",
+            "Earth rotation/Coriolis.",
+            "Continental coastlines and basin geometry."
+          ],
+          "answer": "Wind, density, rotation and coastlines."
+        },
+        {
+          "title": "Warm versus cold at fixed salt",
+          "question": "At same salinity, which parcel is usually denser: warm tropical or cold polar water?",
+          "steps": [
+            "Cooling generally makes seawater denser.",
+            "Dense parcels may sink where conditions support deep-water formation.",
+            "So cold parcel generally denser."
+          ],
+          "answer": "Cold water."
+        },
+        {
+          "title": "Salinity comparison",
+          "question": "Two equal-temperature seawater samples differ in salinity. Which tends to be denser?",
+          "steps": [
+            "More dissolved salts add mass per volume.",
+            "At fixed temperature/pressure, salinity generally raises density.",
+            "Dense water may sink."
+          ],
+          "answer": "The higher-salinity water."
+        },
+        {
+          "title": "Gyre hemispheres",
+          "question": "Which subtropical gyre orientation is most common north/south?",
+          "steps": [
+            "North subtropical gyres mostly clockwise.",
+            "South subtropical gyres mostly counterclockwise.",
+            "These are simplified large-basin conventions."
+          ],
+          "answer": "NH clockwise; SH anticlockwise."
+        },
+        {
+          "title": "North Atlantic Drift",
+          "question": "What is its climate significance?",
+          "steps": [
+            "Moves heat from lower latitude Atlantic to higher latitude regions.",
+            "Transfers energy to air over ocean/coasts.",
+            "Moderates aspects of NW European winters."
+          ],
+          "answer": "Heat transport toward northwestern Europe."
+        },
+        {
+          "title": "NCERT Pause and Ponder 3",
+          "question": "Warm surface water moves poleward. What happens?",
+          "steps": [
+            "It transports thermal energy into cooler regions.",
+            "It can release heat to atmosphere and cool.",
+            "Regional climates may be moderated."
+          ],
+          "answer": "Redistributes heat and often cools while moving."
+        },
+        {
+          "title": "IITM India",
+          "question": "What can an atmosphere–ocean–land–ice coupled model help scientists study?",
+          "steps": [
+            "Monsoon depends on interacting spheres.",
+            "Model connects their heat, water and pressure dynamics.",
+            "Simulation explores rainfall patterns and climate change responses."
+          ],
+          "answer": "Indian monsoon variability and forecasts."
+        },
+        {
+          "title": "Why not exact gyre maps?",
+          "question": "Could an actual monsoon wind drive a different seasonal Indian Ocean surface flow?",
+          "steps": [
+            "Indian Ocean winds reverse with seasons in several regions.",
+            "Currents respond to seasonal stress and geography.",
+            "Ideal gyre arrows are not universal local predictions."
+          ],
+          "answer": "Yes; currents vary regionally and seasonally."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What principally drags surface ocean water into motion?",
+          "answer": "Wind stress."
+        },
+        {
+          "question": "Which two properties strongly affect seawater density?",
+          "answer": "Temperature and salinity."
+        },
+        {
+          "question": "Which current brings warm water toward NW Europe?",
+          "answer": "Gulf Stream/North Atlantic Drift circulation."
+        },
+        {
+          "question": "What does IITM stand for?",
+          "answer": "Indian Institute of Tropical Meteorology."
+        }
+      ],
+      "tip": "Gyres are a typical broad pattern, not a rule for every sea; distinguish surface wind forcing from density-driven deep flow.",
+      "visual": "currents"
+    },
+    {
+      "title": "The water cycle: reservoirs, weather, infiltration and runoff",
+      "paragraphs": [
+        "The WATER CYCLE moves water between ocean, land, air, ice and living organisms. Solar energy supports EVAPORATION from lakes and seas and TRANSPIRATION from plants. Moist air rises and cools, allowing CONDENSATION into cloud droplets and ice crystals; PRECIPITATION returns water as rain, snow or hail.",
+        "Once water reaches land, some moves in surface RUNOFF toward streams and oceans, while some INFILTRATES soil and may PERCOLATE down to recharge GROUNDWATER. Plants can absorb soil moisture, and some precipitation becomes snow or glacier ice for delayed meltwater release.",
+        "The hydrological terms describe DISTINCT transitions: evaporation liquid→vapour; condensation vapour→liquid; precipitation fall from cloud; runoff horizontal surface flow; infiltration entry into soil. A quick exam diagram should label at least five arrows with correct directions.",
+        "Water also dissolves and transports minerals, fertilisers and pollutants from rocks/soil into rivers and oceans. This connects hydrosphere to geosphere chemistry and to biosphere food webs. Erosion from strong runoff can damage soil and increase river sediment.",
+        "NCERT Q3 asks how climate change alters the water cycle. WARMER AIR can contain more moisture under saturation conditions; evaporation may increase where water is available, and high moisture can fuel more intense rainfall. At the same time drought can intensify in some regions, particularly when precipitation shifts in space/time.",
+        "Intense downpours often produce more overland runoff and soil erosion and may leave less infiltration relative to a gentle sustained rain, depending on soil permeability and antecedent moisture. Groundwater recharge can decrease in some places even when rainfall events become more intense; this is a conditional hydrological response, not a universal outcome.",
+        "Changes in Himalayan glaciers affect seasonal timing of river runoff. Early warming may temporarily enhance meltwater flows, but long-run ice loss reduces glacier storage and can threaten dry-season water availability. Coastal cities face sea-level rise from land-ice loss and warming-related ocean expansion.",
+        "NCERT's Figure 13.12 and PAUSE AND PONDER connections invite a SYSTEMS answer: stronger rainfall → runoff → erosion → less soil fertility → weaker crops, or rainfall captured into groundwater → wells/springs → irrigation → plant growth. Distinguish short-term events from multi-decade climate trends."
+      ],
+      "examples": [
+        {
+          "title": "Draw a water cycle verbally",
+          "question": "Order ocean evaporation, cloud formation, rain and river return.",
+          "steps": [
+            "Sun heats water causing evaporation.",
+            "Vapour cools/condenses into clouds.",
+            "Rain precipitates; runoff/groundwater move water back."
+          ],
+          "answer": "Evaporation → condensation → precipitation → runoff/infiltration."
+        },
+        {
+          "title": "NCERT Q3 climate and rain",
+          "question": "Why can a warmer climate produce both heavier rain and drought?",
+          "steps": [
+            "Moist air can retain more water vapour.",
+            "Large rain events may intensify where conditions support ascent.",
+            "Rainfall timing/location and evaporation can leave other areas drier."
+          ],
+          "answer": "Distribution/intensity change; both floods and drought may become more severe."
+        },
+        {
+          "title": "Downpour vs drizzle",
+          "question": "Which may produce more surface runoff on already saturated soil: heavy 30-minute storm or same rain spread gently?",
+          "steps": [
+            "Soil infiltration has finite capacity.",
+            "Sudden rain rate can exceed capacity.",
+            "Excess flows on surface."
+          ],
+          "answer": "Intense storm often creates more runoff."
+        },
+        {
+          "title": "Runoff fraction calculation",
+          "question": "Of 100 mm rain, 35 mm infiltrates and 10 mm evaporates/retains; estimate direct runoff in this toy water budget.",
+          "steps": [
+            "Start 100 mm incoming.",
+            "Subtract 35 infiltrated, 10 other terms.",
+            "Remaining 55 mm is runoff under assumptions."
+          ],
+          "answer": "55 mm."
+        },
+        {
+          "title": "Glacier delayed reservoir",
+          "question": "Why does snowpack influence summer lake water levels?",
+          "steps": [
+            "Winter precipitation freezes and stores as snow/ice.",
+            "Summer warming melts stored water.",
+            "Reduced winter snow reduces later potential supply."
+          ],
+          "answer": "Snow/ice stores water seasonally."
+        },
+        {
+          "title": "Evaporation vs transpiration",
+          "question": "Compare source of vapour in each process.",
+          "steps": [
+            "Evaporation from open water/wet surfaces.",
+            "Transpiration is water loss from plant leaves through stomata.",
+            "Both add water vapour to air."
+          ],
+          "answer": "Nonliving wet surfaces vs plants."
+        },
+        {
+          "title": "Groundwater quality",
+          "question": "Can fertiliser runoff also pollute groundwater?",
+          "steps": [
+            "Some dissolved nutrients infiltrate soil.",
+            "They can leach downward into aquifers.",
+            "Groundwater contamination risk depends on soil and chemical transport."
+          ],
+          "answer": "Yes, infiltration may carry soluble pollutants."
+        },
+        {
+          "title": "No creation of water",
+          "question": "Does a water cycle manufacture new water molecules every turn?",
+          "steps": [
+            "Water is transferred among reservoirs and phases.",
+            "Phase changes conserve H₂O molecules.",
+            "Chemical reactions can also change water, but the hydrological model circulates existing mass."
+          ],
+          "answer": "No; it moves water rather than creating it from nothing."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What takes liquid water to vapour?",
+          "answer": "Evaporation."
+        },
+        {
+          "question": "What is water entry into soil called?",
+          "answer": "Infiltration."
+        },
+        {
+          "question": "What replenishes aquifers?",
+          "answer": "Groundwater recharge from infiltrating water."
+        },
+        {
+          "question": "Which part moves water over the land surface?",
+          "answer": "Runoff."
+        },
+        {
+          "question": "Does precipitation intensity affect infiltration?",
+          "answer": "Yes, depending on soil and rainfall rate."
+        }
+      ],
+      "tip": "Q3: tie warmer air → moisture → extreme rainfall + runoff/erosion/infiltration changes, not only 'more rain'.",
+      "visual": "water"
     }
   ]
 };

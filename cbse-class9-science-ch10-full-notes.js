@@ -591,6 +591,757 @@ const chapter={
       ],
       "tip": "Read ν (nu) as frequency and v as speed. Express Hz as s⁻¹ to check whether formulas give the correct unit.",
       "visual": "quantities"
+    },
+    {
+      "title": "Speed of sound: derive v = λν and compare media, temperatures and delays",
+      "paragraphs": [
+        "A sound wave travels one full wavelength λ between consecutive compressions in one period T. Therefore wave SPEED v=distance/time=λ/T. Since ν=1/T, substitute to obtain v=λν, also written v=fλ. This applies to periodic waves in media where a meaningful propagation speed exists. SI units are λ in metres, ν in s⁻¹ and v in m/s.",
+        "In an ordinary uniform medium under unchanged conditions, the propagation speed is set by the properties of the MEDIUM, not how frequently a source vibrates. If ν doubles while v stays fixed, λ must halve. This is why distinct pitches from a musical ensemble generally reach a listener together through air. Some specialised media are dispersive, but that is not the intended Class 9 case.",
+        "NCERT Table 10.1 gives speed at 15°C: AIR approximately 340 m/s, WATER approximately 1500 m/s, and STEEL approximately 5000 m/s. The ratios are water/air=1500/340≈4.41 and steel/water=5000/1500≈3.33. The typical ordering is solid > liquid > gas for the examples taught; it is not an unbreakable ordering for every possible solid and gas under every condition.",
+        "Sound in air generally travels faster when temperature rises because changing air temperature affects molecular thermal motion and the medium's mechanical response. NCERT reports about 331 m/s at 0°C and 344 m/s at 22°C; humid air also supports slightly faster sound than dry air under otherwise similar conditions.",
+        "NCERT Example 10.2 computes wavelengths at the rough human-hearing limits with v=344 m/s: 20 Hz corresponds to 344/20=17.2 m; 20,000 Hz corresponds to 344/20000=0.0172 m=1.72 cm. Be sure to convert '20 kHz' to 20,000 Hz before calculating.",
+        "NCERT Example 10.3 gives a 5.0-second lag between lightning flash and thunder. Ignoring the much smaller light travel time, d=vt=340×5=1700 m=1.7 km. This is a ONE-WAY sound problem, unlike an ECHO requiring sound to travel out and back.",
+        "NCERT Example 10.4 uses Fig. 10.22 to find a wave wavelength of 50 m in steel; at 5000 m/s, frequency ν=5000/50=100 Hz and period T=1/100=0.01 s. A graph-reading problem therefore combines a spatial measurement with a temporal relation.",
+        "Two friends 340 m apart along a steel fence hear the same knock by two routes. Air time is 340/340=1.00 s; steel time is 340/5000=0.068 s; delay difference is 0.932 s. Since this is more than 0.1 s, the sounds can be distinguished. Both route lengths are ONE-WAY to the observer, so do NOT divide their travel times by two.",
+        "NCERT exercise Q15 uses the same source-to-cliff-and-back path for sounds through air and through water, with t_air=4.5×t_water. Because equal distance d_roundtrip means v_air×t_air=v_water×t_water, it follows v_air/v_water=t_water/t_air=1/4.5=2/9. Faster sound in water is consistent with the result."
+      ],
+      "examples": [
+        {
+          "title": "Derive the wave equation",
+          "question": "Show why speed equals λν using a period T.",
+          "steps": [
+            "In one cycle duration T a crest moves distance λ.",
+            "Thus v=λ/T.",
+            "Frequency ν=1/T, so substitute to obtain v=λν."
+          ],
+          "answer": "v=λν, equivalent to v=fλ."
+        },
+        {
+          "title": "NCERT Example 10.2: 20 Hz wavelength",
+          "question": "With sound speed 344 m/s, find the wavelength of a 20 Hz sound.",
+          "steps": [
+            "Rearrange λ=v/ν.",
+            "344/20=17.2.",
+            "Units m/s ÷ s⁻¹ = m."
+          ],
+          "answer": "17.2 m."
+        },
+        {
+          "title": "NCERT Example 10.2: 20 kHz wavelength",
+          "question": "Find λ for ν=20 kHz if sound speed 344 m/s.",
+          "steps": [
+            "20 kHz=20,000 Hz.",
+            "λ=344/20,000=0.0172 m.",
+            "Convert ×100 into centimetres."
+          ],
+          "answer": "0.0172 m =1.72 cm."
+        },
+        {
+          "title": "NCERT Example 10.3: lightning delay",
+          "question": "Thunder arrives 5 s after the flash. Sound speed 340 m/s. Approximate strike distance.",
+          "steps": [
+            "Light travel time is negligible for this distance.",
+            "One-way d=vt=340×5.",
+            "Convert 1700 m to kilometres."
+          ],
+          "answer": "1700 m or 1.7 km."
+        },
+        {
+          "title": "NCERT Example 10.4: steel graph",
+          "question": "A steel sound wave has λ=50 m and speed=5000 m/s. Determine ν and T.",
+          "steps": [
+            "ν=v/λ=5000/50=100 Hz.",
+            "T=1/100=0.01 s.",
+            "The wave completes 100 cycles per second."
+          ],
+          "answer": "ν=100 Hz; T=0.010 s."
+        },
+        {
+          "title": "Pause and Ponder 10: medium speed ratios",
+          "question": "Find speed ratio water/air and steel/water using 1500,340,5000 m/s.",
+          "steps": [
+            "Water/air=1500/340≈4.4118.",
+            "Steel/water=5000/1500≈3.3333.",
+            "Ratios are unitless when both speeds use the same unit."
+          ],
+          "answer": "About 4.41 and 3.33."
+        },
+        {
+          "title": "Pause and Ponder 11: steel fence delay",
+          "question": "Knock heard over 340 m in steel at 5000 m/s and in air at 340 m/s. Find time difference.",
+          "steps": [
+            "Air time=340/340=1.000 s.",
+            "Steel time=340/5000=0.068 s.",
+            "Difference=1.000−0.068=0.932 s."
+          ],
+          "answer": "0.932 s, distinguishable as separate arrivals."
+        },
+        {
+          "title": "NCERT Q9: period from wavelength",
+          "question": "A sound wave has λ=3.44 m and v=344 m/s. Find T.",
+          "steps": [
+            "From v=λ/T, obtain T=λ/v.",
+            "T=3.44/344.",
+            "T=0.010 s."
+          ],
+          "answer": "0.01 s."
+        },
+        {
+          "title": "NCERT Q12: temperature dependence",
+          "question": "At 1720 m, compare thunder travel times for v=331 m/s (0°C) and 344 m/s (22°C).",
+          "steps": [
+            "At 22°C: t=1720/344=5.00 s.",
+            "At 0°C: t=1720/331≈5.1964 s.",
+            "Additional time ≈0.1964 s."
+          ],
+          "answer": "About 0.20 s longer at 0°C."
+        },
+        {
+          "title": "NCERT Q15: same cliff path in air and water",
+          "question": "Both sounds travel identical round-trip distances, but t_air=4.5t_water. Find v_air:v_water.",
+          "steps": [
+            "For a fixed travel distance, v=d/t.",
+            "v_air/v_water=(d/t_air)/(d/t_water)=t_water/t_air.",
+            "That ratio is 1/4.5=2/9."
+          ],
+          "answer": "v_air:v_water=2:9."
+        },
+        {
+          "title": "Frequency changes but speed does not",
+          "question": "A 500 Hz sound has λ=0.68 m in air. What λ will a 1000 Hz sound have in the same conditions?",
+          "steps": [
+            "Original speed=500×0.68=340 m/s.",
+            "New frequency doubles; medium and speed stay 340 m/s.",
+            "New λ=340/1000=0.34 m."
+          ],
+          "answer": "0.34 m; speed remains 340 m/s."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What do Greek ν and Latin v mean?",
+          "answer": "ν or f is frequency (Hz); v is speed (m/s)."
+        },
+        {
+          "question": "Does a higher frequency make a sound faster in the same air conditions?",
+          "answer": "No; it shortens λ."
+        },
+        {
+          "question": "When thunder takes five seconds at 340 m/s, what is d?",
+          "answer": "1700 m (one-way)."
+        },
+        {
+          "question": "Table 10.1: which is fastest among air, water and steel?",
+          "answer": "Steel."
+        },
+        {
+          "question": "For an equal cliff round-trip path, if one time is 3 times another, what is its speed?",
+          "answer": "One-third the other's speed."
+        }
+      ],
+      "tip": "Check one-way versus round-trip. In wave-speed problems v=λν; in echo problems the measured time usually covers 2d.",
+      "visual": "speed"
+    },
+    {
+      "title": "Human hearing: pitch, loudness, audible limits, ear and safe listening",
+      "paragraphs": [
+        "Human sound PERCEPTION is not identical to a wave's objective physical measurements. Frequency ν, period T, wavelength λ, amplitude and intensity are physical quantities measurable with instruments; PITCH, LOUDNESS and TIMBRE describe how a listener experiences sound. The mapping can depend on frequency, hearing sensitivity and sound complexity.",
+        "PITCH is the perceptual quality usually determined primarily by fundamental frequency. High-frequency sounds are normally perceived as shriller or higher; lower-frequency sounds as deeper. Changing loudness without changing frequency does not automatically change pitch. Different age groups and individuals may perceive some sounds differently due to hearing sensitivity and ear physiology.",
+        "LOUDNESS is how strong or soft a sound seems. It correlates with physical sound intensity and amplitude, but is also frequency dependent and listener dependent. Sound pressure level is conventionally expressed in decibels dB, a logarithmic scale; an increase of 10 dB corresponds to a tenfold increase in sound INTENSITY (under the standard level definition), not a fixed tenfold increase in perceived loudness.",
+        "NCERT states the rough hearing range for young humans as 20 Hz to 20,000 Hz (20 kHz). Below 20 Hz is INFRASOUND; above 20 kHz is ULTRASOUND. Actual hearing cutoffs differ among listeners and change with age. 'Inaudible to humans' does not mean no energy or no effect on animals; elephants can perceive some infrasound and bats/dolphins perceive ultrasound.",
+        "Sound enters the outer ear and ear canal, causing the eardrum to vibrate. Tiny middle-ear bones help transmit/amplify those vibrations to the inner ear; the cochlea converts mechanical signals to nerve impulses, which travel to the brain. Having TWO ears helps estimate the sound direction from small timing and level differences across the ears.",
+        "NCERT Activity 10.8 is a teacher-facilitated demonstration of changes in pitch as frequency varies. It is unnecessary to use very high volume or extreme frequencies for learning. Prolonged loud noise can affect hearing, attention and sleep; maintain comfortable sound levels and take listening breaks.",
+        "The chapter's voice discussion notes that vocal fold dimensions and resonances change with development, affecting voice pitch. Voice timbre also depends on how a person's throat, mouth and nasal cavities shape sound. Neither pitch nor voice timbre is a reliable measure of a person's gender identity; this lesson focuses on the acoustic mechanism.",
+        "The important exam distinction is: higher ν normally means higher pitch; bigger wave amplitude or intensity often means more loudness, while distance generally reduces intensity. No simple universal formula converts one decibel number directly into 'how loud' every listener finds a sound."
+      ],
+      "examples": [
+        {
+          "title": "Compare frequency and pitch",
+          "question": "Two sounds have ν_A=600 Hz, ν_B=300 Hz. Which is usually higher pitched?",
+          "steps": [
+            "Pitch tracks fundamental frequency for these simple tones.",
+            "600 Hz is twice 300 Hz.",
+            "Thus A is higher pitched."
+          ],
+          "answer": "A."
+        },
+        {
+          "title": "Compare amplitude and loudness",
+          "question": "Two similar-frequency sound waves differ only in amplitude. Which generally sounds louder?",
+          "steps": [
+            "A larger disturbance generally transports greater energy.",
+            "Greater energy flow often means greater intensity.",
+            "Listeners typically perceive the larger-amplitude sound as louder."
+          ],
+          "answer": "The one with larger amplitude."
+        },
+        {
+          "title": "Classify a 10 Hz wave",
+          "question": "Is a 10 Hz sound infrasonic, audible-range or ultrasonic for young humans?",
+          "steps": [
+            "The approximate audible lower limit is 20 Hz.",
+            "10 Hz lies below 20 Hz.",
+            "Thus it is infrasonic."
+          ],
+          "answer": "Infrasound."
+        },
+        {
+          "title": "Classify 40 kHz",
+          "question": "Is a 40,000 Hz wave within ordinary human hearing?",
+          "steps": [
+            "Convert 40,000 Hz=40 kHz.",
+            "The typical upper limit is 20 kHz.",
+            "40 kHz exceeds it."
+          ],
+          "answer": "Ultrasonic."
+        },
+        {
+          "title": "10 dB intensity comparison",
+          "question": "Two sounds differ by 10 dB of physical sound intensity level. What is the ratio of their INTENSITIES?",
+          "steps": [
+            "Sound intensity level change ΔL=10log₁₀(I₂/I₁).",
+            "Set ΔL=10 dB; divide by 10 gives log₁₀ ratio=1.",
+            "Take 10 to the power 1."
+          ],
+          "answer": "Intensity ratio 10:1; perceived loudness need not scale by ten."
+        },
+        {
+          "title": "Pathway to hearing",
+          "question": "List the structures from outer ear to perception.",
+          "steps": [
+            "Sound enters ear canal.",
+            "It vibrates eardrum and middle-ear bones.",
+            "Cochlea converts vibrations into signals, then auditory nerve carries information to brain."
+          ],
+          "answer": "Ear canal → eardrum → middle-ear bones → cochlea → auditory nerve → brain."
+        },
+        {
+          "title": "Two-ear location",
+          "question": "A sound reaches the left ear slightly before the right. What can the brain infer?",
+          "steps": [
+            "Both ears receive related sound waveforms.",
+            "The small arrival-time difference offers a directional cue.",
+            "The brain combines timing with other cues to locate the source."
+          ],
+          "answer": "The sound source is more likely on the side reached first (with context)."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is the rough human hearing range?",
+          "answer": "20–20,000 Hz (20 Hz–20 kHz)."
+        },
+        {
+          "question": "Is pitch a physical variable identical to frequency?",
+          "answer": "No; it is a perception closely related to frequency."
+        },
+        {
+          "question": "Why can hearing a sound with both ears help localisation?",
+          "answer": "Small arrival-time and level differences provide direction cues."
+        },
+        {
+          "question": "Is dB a simple linear scale for physical intensity?",
+          "answer": "No; it is logarithmic."
+        }
+      ],
+      "tip": "Use Hz for frequency, W/m² for intensity, and dB for sound intensity level. Do not use one quantity's unit for another.",
+      "visual": "hearing"
+    },
+    {
+      "title": "Musical notes, timbre, octave and Indian acoustics",
+      "paragraphs": [
+        "A TONE is an approximately single-frequency sound, often illustrated by a tuning fork or careful whistle. Most musical instruments and human voices produce a mixture of frequencies. A NOTE has a lowest frequency called the FUNDAMENTAL and additional higher components called OVERTONES. In many instruments harmonics appear at integer multiples of the fundamental.",
+        "An OCTAVE is a musical interval between notes whose fundamental frequencies differ by a factor of two: 200 Hz and 400 Hz, or 260 Hz and 520 Hz. The perceived musical relationship of an octave is recognisable even though the sound may have different patterns of overtones.",
+        "TIMBRE (tone quality) explains why a flute, sitar and tabla can sound different even when producing notes of approximately the same pitch and loudness. Timbre depends on the strengths and timing of overtones, the attack and decay of the note, and physical details of the instrument. Describing timbre as 'frequency' alone misses these distinctions.",
+        "NCERT Activity 10.7 uses an acoustic spectrum display to study Sa, Re, Ga, Ma, Pa, Dha, Ni, Sa in Indian music. Adjacent notes usually have ascending fundamental frequencies in an ascending scale; instruments and tuning systems can vary in ratios. A spectrum peak can reflect a harmonic of the fundamental, so the tallest peak is not invariably the perceived note frequency.",
+        "Sir C. V. Raman explored acoustics of Indian instruments including tabla and mridangam, in addition to his celebrated work on the Raman effect in light. NCERT highlights the black central loading patch on a drum membrane called SYAAHI. It alters vibrational modes and helps generate a characteristic pattern of partial tones and richer musical sound.",
+        "The chapter's Threads of Curiosity also connects local culture and acoustic communication: the Jingrwai Iawbei tune-name tradition in Kongthong, Meghalaya. It provides a useful real-world reason to distinguish sound's fundamental frequency, changing sequence, duration and other patterns.",
+        "The shape and construction of an instrument matter. A vibrating membrane's modes differ from an air column's standing-wave modes or a taut string's modes; each provides a distinct combination of frequencies and thus a characteristic timbre. Detailed advanced mode equations are beyond Class 9.",
+        "A loud sound is not necessarily a high-pitched sound, and a high-pitched sound is not necessarily a single pure tone. A flute playing a note can have high pitch, low volume and rich harmonic content simultaneously."
+      ],
+      "examples": [
+        {
+          "title": "Octave relation",
+          "question": "A note's fundamental is 220 Hz. What is the fundamental one octave above?",
+          "steps": [
+            "An octave above means frequency doubled.",
+            "2×220=440.",
+            "Units remain hertz."
+          ],
+          "answer": "440 Hz."
+        },
+        {
+          "title": "One octave below",
+          "question": "A note is 500 Hz. What is its fundamental frequency one octave below?",
+          "steps": [
+            "An octave below halves the frequency.",
+            "500/2=250.",
+            "That interval is an octave."
+          ],
+          "answer": "250 Hz."
+        },
+        {
+          "title": "Same pitch, different instrument",
+          "question": "Why can flute and sitar sound different on the same 440 Hz note?",
+          "steps": [
+            "Both can share the same fundamental frequency.",
+            "They produce different combinations of overtones and different time envelopes.",
+            "Perceived timbre differs."
+          ],
+          "answer": "Timbre or sound quality differs."
+        },
+        {
+          "title": "Single tone versus note",
+          "question": "Which is closer to a pure tone: a tuning fork or a plucked guitar string?",
+          "steps": [
+            "A tuning fork vibrates mainly at one dominant frequency.",
+            "A plucked string normally excites multiple resonant modes.",
+            "Their spectral compositions differ."
+          ],
+          "answer": "A tuning fork."
+        },
+        {
+          "title": "Tabla syaahi science",
+          "question": "What physical feature does the black syaahi patch modify?",
+          "steps": [
+            "It changes the mass distribution of a stretched drumhead.",
+            "This changes its vibrational modes and sound spectrum.",
+            "Those modes contribute to musical timbre."
+          ],
+          "answer": "The drum membrane's vibrational modes, influencing overtones and timbre."
+        },
+        {
+          "title": "Sa sequence and frequency",
+          "question": "In a simple ascending scale Sa→Re→Ga, what trend is expected in fundamental pitch?",
+          "steps": [
+            "Ascending notes are arranged in increasing perceived pitch.",
+            "Their fundamentals normally become higher.",
+            "Loudness is an independent variable."
+          ],
+          "answer": "Fundamental frequency generally increases."
+        },
+        {
+          "title": "Can timbre vary without pitch change?",
+          "question": "A teacher plays the same note with two different instruments. Must the notes have different frequencies?",
+          "steps": [
+            "Same musical pitch can correspond to equal fundamental frequency.",
+            "Their overtones, resonances and attack patterns can differ.",
+            "These differences change timbre, not necessarily fundamental pitch."
+          ],
+          "answer": "No; the fundamental frequencies may match."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is an overtone?",
+          "answer": "A higher-frequency component above a note's fundamental."
+        },
+        {
+          "question": "What is an octave in terms of frequencies?",
+          "answer": "A doubling or halving of fundamental frequency."
+        },
+        {
+          "question": "Why do instruments playing the same pitch sound different?",
+          "answer": "Different timbres due to overtones and resonance properties."
+        },
+        {
+          "question": "What is syaahi?",
+          "answer": "The black central loading patch on tabla/mridangam drum membrane."
+        }
+      ],
+      "tip": "Keep pitch, loudness and timbre distinct: fundamental, intensity and spectral/envelope qualities respectively.",
+      "visual": "music"
+    },
+    {
+      "title": "Sound reflection: echoes, reverberation and acoustic design",
+      "paragraphs": [
+        "Sound waves REFLECT from a surface, like other waves. The angle of incidence relative to the NORMAL equals the angle of reflection relative to that normal, and incident ray, reflected ray and normal lie in the same plane in the textbook ray picture. Hard, smooth surfaces often give strong direct reflections; soft porous surfaces absorb energy and rough surfaces scatter some sound.",
+        "An ECHO is a reflected sound heard distinctly as a repetition. The textbook uses about 0.1 s as a human temporal-separation criterion for an echo under ordinary conditions. If the returning sound takes 0.1 s, the wave travels OUT to the surface and BACK for a total path vt. At v=340 m/s, total 34 m means the reflector lies about 17 m away.",
+        "NCERT Example 10.5: a clap echo arrives 0.5 s later in a corridor where v=340 m/s. One-way wall distance d=vt/2=340×0.5/2=85 m. Mistakenly writing 170 m counts the outward and return paths as if they were one-way distance.",
+        "NCERT Pause and Ponder 12 asks for reflection at least 0.2 s later with v=343 m/s: d=343×0.2/2=34.3 m. The threshold varies with sound speed: the familiar approximately 17 m example assumes v=340 m/s and 0.1 s, not a universal fixed reflector distance.",
+        "REVERBERATION is persistence of sound due to overlapping repeated reflections in enclosed spaces. NCERT mentions closely spaced reflections less than about 0.05 s apart. A reflection 0.05 s after the original is too early to be a distinct echo under the 0.1 s criterion; in the exercise context it contributes to overlapping reflected sound, called reverberation. These numbers are approximations rather than a razor-sharp universal switch at exactly 0.05 s.",
+        "Too much reverberation can make speech hard to understand, while an appropriate amount adds fullness to music. Auditoriums use upholstered seats, wall panels, carpets and curtains to absorb unwanted reflections. Gol Gumbaz in Bijapur/Vijayapura, Karnataka, has a Whispering Gallery where dome acoustics carry and repeat soft sounds.",
+        "The speed of light is much greater than speed of sound. A distant visible lightning flash usually appears before thunder arrives. This is not a reflection/echo problem unless the sound is actually returned from an obstacle; for a lightning-thunder delay, use one-way d≈vt.",
+        "The reflection law geometry asks you to measure both angles from the normal (perpendicular to the reflecting surface), not from the surface itself. If a ray makes 30° with the normal, it also reflects at 30° to the normal, even though each makes 60° with the surface."
+      ],
+      "examples": [
+        {
+          "title": "Derive 17 m minimum reflector distance",
+          "question": "An audible echo needs return lag 0.1 s; v=340 m/s. How far should a reflector be?",
+          "steps": [
+            "Round-trip path=v t=340×0.1=34 m.",
+            "The wall is halfway along the out-and-back route.",
+            "d=34/2=17 m."
+          ],
+          "answer": "Approximately 17 m."
+        },
+        {
+          "title": "NCERT Example 10.5: corridor echo",
+          "question": "Echo delay 0.5 s; air speed 340 m/s. Find wall distance.",
+          "steps": [
+            "Two-way path=340×0.5=170 m.",
+            "Wall distance d=170/2.",
+            "d=85 m."
+          ],
+          "answer": "85 m."
+        },
+        {
+          "title": "Pause and Ponder 12: 0.2 s",
+          "question": "What minimum distance gives a return time 0.2 s at v=343 m/s?",
+          "steps": [
+            "Round-trip path =343×0.2=68.6 m.",
+            "Divide by two for reflector distance.",
+            "d=34.3 m."
+          ],
+          "answer": "34.3 m."
+        },
+        {
+          "title": "NCERT Q4: 0.05 s reflection",
+          "question": "A reflection returns 0.05 s after sound production. Is it a distinct echo?",
+          "steps": [
+            "0.05 s is shorter than the ≈0.1 s needed to hear separate sounds.",
+            "It therefore overlaps perceptually with the original sound.",
+            "In the textbook's options, classify the overlapping reflections as reverberation rather than a distinct echo."
+          ],
+          "answer": "Not a distinct echo; consistent with reverberation/overlapping sound."
+        },
+        {
+          "title": "Incidence and reflection angle",
+          "question": "A sound ray strikes a wall at 30° to its normal. What angle does the reflected ray make with the normal?",
+          "steps": [
+            "The angles are measured to the normal, not to the wall.",
+            "Apply angle of incidence equals angle of reflection.",
+            "Reflection angle is 30°."
+          ],
+          "answer": "30°."
+        },
+        {
+          "title": "Hard versus soft wall",
+          "question": "Why may an echo be less distinct in a heavily curtained room?",
+          "steps": [
+            "Soft porous surfaces absorb and scatter sound.",
+            "Less sound returns as a clear strong reflection.",
+            "The reflected signal is weaker and/or diffused."
+          ],
+          "answer": "Less distinct echo from sound absorption/scattering."
+        },
+        {
+          "title": "Incorrect echo distance",
+          "question": "A student uses d=340×0.5=170 m for a corridor echo after 0.5 s. Correct it.",
+          "steps": [
+            "170 m is TOTAL distance travelled, out and back.",
+            "Reflector lies one leg away.",
+            "170/2=85 m."
+          ],
+          "answer": "85 m."
+        },
+        {
+          "title": "Gol Gumbaz application",
+          "question": "What acoustic feature is highlighted by the Whispering Gallery?",
+          "steps": [
+            "Curved surfaces can guide and reflect sound.",
+            "Some whispered sounds travel or repeat around the dome.",
+            "The structure illustrates architectural acoustic effects."
+          ],
+          "answer": "Reflected sound and repeated travel in a designed space."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is the round-trip echo formula for wall distance?",
+          "answer": "d=vt/2."
+        },
+        {
+          "question": "What is the approximate minimum return delay for a distinct echo?",
+          "answer": "0.1 s in the textbook model."
+        },
+        {
+          "question": "Why do curtains help auditorium acoustics?",
+          "answer": "They absorb some reflected sound and reduce excessive reverberation."
+        },
+        {
+          "question": "Are reflection angles measured to the wall or to its normal?",
+          "answer": "To the normal."
+        }
+      ],
+      "tip": "Always divide by TWO when a timing measurement is the wave's out-and-back journey.",
+      "visual": "reflection"
+    },
+    {
+      "title": "Beyond hearing: infrasound, ultrasound, echolocation and SONAR",
+      "paragraphs": [
+        "Sound frequencies BELOW 20 Hz are called INFRASONIC; those ABOVE 20,000 Hz (20 kHz) are ULTRASONIC. These mechanical pressure waves still need a medium and obey wave relationships; the classification is based on the approximate human hearing range, not on whether the wave is 'sound' at all.",
+        "Many elephants can sense low-frequency acoustic communication, and earthquakes/volcanoes may generate infrasonic waves. Bats emit bursts of high-frequency ultrasound, hear reflected returns, and infer the distance and location of obstacles or prey. Dolphins and some other animals also use sound for echolocation.",
+        "ECHOLOCATION means finding objects using a sound pulse and the timing and/or direction of its reflected echo. A signal sent at time 0 returning after t travels the outgoing leg d and incoming leg d, so 2d=vt and d=vt/2. This is the same geometric reasoning for sonar and vehicle parking sensors.",
+        "SONAR stands for Sound Navigation and Ranging. Underwater systems send sound pulses into water and detect reflected signals to estimate distances to objects or the seabed. Sound is useful underwater because it often propagates over substantial distances even where light is attenuated strongly.",
+        "NCERT Example 10.6 gives a sonar echo arriving after 0.90 s in seawater with wave speed 1530 m/s. The total path=1530×0.90=1377 m and one-way distance=1377/2=688.5 m. The audit's alternate 5.0 s, 1525 m/s shipwreck case is actually NCERT end EXERCISE Q10, not Example 10.6; both should be studied but clearly labelled.",
+        "NCERT end exercise Q10: t=5.0 s and v=1525 m/s → wreck distance=1525×5/2=3812.5 m. Q11: ultrasonic reverse sensor detects an obstacle 1.2 m away, v=345 m/s → t=2×1.2/345≈0.00696 s=6.96 ms.",
+        "NCERT Pause and Ponder 13 asks depth when seawater sonar returns after 4 s and v=1500 m/s: d=1500×4/2=3000 m. Compare the three cases to learn why changing t and v changes the result; do not memorise one number as the meaning of SONAR.",
+        "Ultrasound has medical and industrial applications. Ultrasound imaging uses reflected high-frequency acoustic waves to form images of tissues; clinicians can use therapeutic acoustic methods in kidney-stone treatment; industrial inspection can locate internal flaws in a material. These are professionally controlled applications, not experiments to attempt at home.",
+        "NCERT's Bridging Science and Society describes using low-frequency acoustic detection in some airspace monitoring of drones/aircraft, and its closing discussion mentions measuring environmental sounds on Mars, ocean acoustic monitoring and listening to biological activity. These contexts demonstrate that recognising, timing and interpreting sound patterns are useful in science."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Example 10.6: sonar actual numbers",
+          "question": "Naval sonar echo time=0.90 s, speed=1530 m/s. Find the one-way object distance.",
+          "steps": [
+            "Round-trip distance=1530×0.90=1377 m.",
+            "One-way distance=1377/2=688.5 m.",
+            "Label 0.90 s as the full return time."
+          ],
+          "answer": "688.5 m."
+        },
+        {
+          "title": "NCERT Q10: shipwreck",
+          "question": "Echo returns in 5.0 s; underwater speed 1525 m/s. Find wreck distance.",
+          "steps": [
+            "Total path=1525×5=7625 m.",
+            "Divide by 2 for one-way depth/distance.",
+            "d=3812.5 m."
+          ],
+          "answer": "3812.5 m (≈3.81 km)."
+        },
+        {
+          "title": "NCERT Q11: parking sensor",
+          "question": "An obstacle is 1.2 m away and wave speed 345 m/s. Find round-trip ultrasonic echo time.",
+          "steps": [
+            "Round-trip path=2×1.2=2.4 m.",
+            "t=2.4/345≈0.0069565 s.",
+            "Convert ×1000 to ms."
+          ],
+          "answer": "≈0.00696 s or 6.96 ms."
+        },
+        {
+          "title": "Pause and Ponder 13: ocean depth",
+          "question": "An echo arrives after 4 s at 1500 m/s in seawater. Find depth.",
+          "steps": [
+            "Round-trip path=1500×4=6000 m.",
+            "The bottom is half this distance away.",
+            "Depth=3000 m."
+          ],
+          "answer": "3000 m."
+        },
+        {
+          "title": "Bats and echolocation",
+          "question": "How can a bat infer an obstacle distance from an ultrasound echo?",
+          "steps": [
+            "It emits an ultrasonic pulse and starts a timer.",
+            "It detects the reflected sound after delay t.",
+            "With sound speed v, obstacle distance d=vt/2."
+          ],
+          "answer": "By timing returning echoes."
+        },
+        {
+          "title": "Infrasound and ultrasound classification",
+          "question": "Classify 12 Hz, 1500 Hz and 35,000 Hz.",
+          "steps": [
+            "Below 20 Hz → infra, so 12 Hz is infrasonic.",
+            "20–20,000 Hz → audible-range, so 1500 Hz is ordinary audible sound.",
+            "Above 20,000 Hz → ultrasonic, so 35,000 Hz is ultrasound."
+          ],
+          "answer": "12 Hz infra; 1500 Hz audible; 35,000 Hz ultra."
+        },
+        {
+          "title": "Separate example from Q10",
+          "question": "Which of these is the textbook's labelled Example 10.6: 0.90 s/1530 m/s or 5 s/1525 m/s?",
+          "steps": [
+            "Locate Example 10.6 immediately after the SONAR section.",
+            "It states 0.90 s in seawater with 1530 m/s.",
+            "The 5 s and 1525 m/s values appear as end exercise Q10."
+          ],
+          "answer": "Example 10.6 is 0.90 s at 1530 m/s."
+        },
+        {
+          "title": "Round-trip versus one-way time",
+          "question": "A sensor has pulse return time 0.2 s and v=340 m/s. Compute one-way distance.",
+          "steps": [
+            "Round-trip path=340×0.2=68 m.",
+            "One-way path = 68/2.",
+            "d=34 m."
+          ],
+          "answer": "34 m."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is the sonar depth formula for a returning pulse?",
+          "answer": "d=vt/2."
+        },
+        {
+          "question": "Which is ultrasonic: 40 kHz or 4 kHz?",
+          "answer": "40 kHz."
+        },
+        {
+          "question": "Does ultrasound need a material medium?",
+          "answer": "Yes; ultrasound is a mechanical wave."
+        },
+        {
+          "question": "What is NCERT Example 10.6's one-way result?",
+          "answer": "688.5 m."
+        },
+        {
+          "question": "Why is ultrasound medically useful?",
+          "answer": "High-frequency pulses can reflect from tissues to produce diagnostic images under professional conditions."
+        }
+      ],
+      "tip": "Differentiate NCERT Example 10.6 (688.5 m) from exercise Q10 (3812.5 m); both measure one-way distance from round-trip times.",
+      "visual": "ultrasound"
+    },
+    {
+      "title": "NCERT end exercises and mixed reasoning: an exam-ready problem method",
+      "paragraphs": [
+        "NCERT's 15 final 'Revise, Reflect, Refine' questions test whether you can move between a source, a physical wave, a graph and a measured number. First identify whether the problem is about propagation, periodic waves, pitch/loudness, or reflected waves. Then define quantities, convert units, and show each step.",
+        "Q1 asks what best supports sound being mechanical: its NEED for a medium. Reflection, frequency and energy carrying are not exclusive to mechanical waves, but absence of propagation in vacuum distinguishes ordinary sound from electromagnetic radiation.",
+        "Q2 at fixed medium conditions: increasing source frequency ν increases compressions passing a point per second; wavelength shortens and period decreases, while speed remains essentially unchanged. The correct answer is the number of compressions per second, not speed.",
+        "Q3 yields 5 Hz from 20 compressions in 4 s. Q4 with a return in 0.05 s fails the distinct echo criterion and belongs to overlapping/reverberant sound, recognising NCERT's approximate timing definitions.",
+        "Q5/6 compare graph amplitude, wavelengths and frequency using SAME axis scales. Q7 asks you to draw amplitude 3 density units and λ=4 cm, while Q13/14 require carefully counting graphical cycles—not substituting an unexamined label from a model-generated audit.",
+        "Q8 tests the medium requirement in a spacecraft scene. Q9 uses T=λ/v=3.44/344=0.01 s. Q10 and Q11 require round-trip 2d=vt or t=2d/v; Q12 asks a sound-speed change from 344 to 331 m/s; Q15 asks inverse time-to-speed ratio for equal distances.",
+        "Graph corrections from the actual textbook: Fig. 10.32 has four full wavelengths within 8 cm, so λ=2 cm, ν=17000 Hz at 340 m/s. Fig. 10.33 has TWO wavelengths of wave A within 5 cm (λ_A=2.5 cm) and ONE wavelength of wave B (λ_B=5 cm), hence at 345 m/s ν_A=13800 Hz > ν_B=6900 Hz.",
+        "A useful speed check: if frequency rises while λ stays unchanged in a *fixed medium*, v=λν would change; in real air under same conditions λ instead adjusts, keeping v almost constant. A useful unit check: multiplying frequency Hz (s⁻¹) by wavelength m gives m/s.",
+        "Use NCERT's original book for the exact figures and question wording. Our original diagrams illustrate the same relationships but intentionally do not reproduce the textbook's copyrighted figures. Independent teacher and visual review remains desirable before claiming that the notes alone are flawless."
+      ],
+      "examples": [
+        {
+          "title": "NCERT Q1: mechanical nature",
+          "question": "Which observation best shows sound is mechanical: reflection, frequency, energy or medium requirement?",
+          "steps": [
+            "Light also reflects, has frequency and transports energy.",
+            "Light is electromagnetic and can cross vacuum.",
+            "Sound requires particles of a medium."
+          ],
+          "answer": "Requirement of a medium."
+        },
+        {
+          "title": "NCERT Q2: increase frequency",
+          "question": "In unchanged air, what increases when a sound's frequency rises?",
+          "steps": [
+            "Frequency is cycles per second, so more compressions pass each second.",
+            "Period decreases because T=1/ν.",
+            "Wavelength decreases since v stays approximately constant."
+          ],
+          "answer": "Number of compressions per second."
+        },
+        {
+          "title": "NCERT Q3: count compression arrivals",
+          "question": "20 compression events in 4 s. Calculate ν.",
+          "steps": [
+            "ν=number/time.",
+            "ν=20/4.",
+            "Result 5 Hz."
+          ],
+          "answer": "5 Hz."
+        },
+        {
+          "title": "NCERT Q4: reflection at 0.05 s",
+          "question": "Distinct echo or reverberant reflection?",
+          "steps": [
+            "A clearly separated echo requires about 0.1 s.",
+            "0.05 s is shorter than that.",
+            "Reflections merge with original, as in reverberation."
+          ],
+          "answer": "Reverberant/overlapping sound, not a distinct echo."
+        },
+        {
+          "title": "NCERT Q6: three graphs",
+          "question": "A, B and C are assigned to three same-speed waves in decreasing frequency. How do wavelength spacings rank?",
+          "steps": [
+            "ν=v/λ.",
+            "Maximum ν ↔ minimum λ.",
+            "Minimum ν ↔ maximum λ."
+          ],
+          "answer": "A should have shortest λ; C longest, for equivalent graph scales."
+        },
+        {
+          "title": "NCERT Q7: draw prescribed sound graph",
+          "question": "Construct the labels for density amplitude 3 units, λ=4 cm.",
+          "steps": [
+            "Mark horizontal distance axis with a 4 cm span between consecutive crests.",
+            "Draw average-density line across middle.",
+            "Crests rise 3 density units and troughs fall 3 units below line."
+          ],
+          "answer": "Amplitude 3 density units, crest separation 4 cm."
+        },
+        {
+          "title": "NCERT Q9: time period",
+          "question": "λ=3.44 m, v=344 m/s. Find T.",
+          "steps": [
+            "T=λ/v.",
+            "3.44/344=0.01 s.",
+            "Cross-check ν=100 Hz."
+          ],
+          "answer": "0.01 s."
+        },
+        {
+          "title": "NCERT Q10 versus Q11",
+          "question": "State distances or times from Q10 wreckage 5s/1525m/s and Q11 sensor 1.2m/345m/s.",
+          "steps": [
+            "Q10 d=1525×5/2=3812.5 m.",
+            "Q11 t=2×1.2/345=0.0069565 s.",
+            "Convert Q11 to ≈6.96 ms."
+          ],
+          "answer": "3812.5 m; 6.96 ms."
+        },
+        {
+          "title": "NCERT Q13: calculate wave λ and ν",
+          "question": "Four full compression cycles span 8 cm, speed 340 m/s.",
+          "steps": [
+            "λ=8/4=2 cm =0.02 m.",
+            "ν=v/λ=340/0.02.",
+            "ν=17,000 Hz."
+          ],
+          "answer": "λ=2 cm; ν=17 kHz."
+        },
+        {
+          "title": "NCERT Q14: identify actual A and B",
+          "question": "Wave A has two cycles in 5 cm, wave B has one, with speed 345 m/s. Find λ and ν for both.",
+          "steps": [
+            "λ_A=5/2=2.5 cm, λ_B=5 cm.",
+            "Convert 0.025 and 0.05 m.",
+            "ν_A=345/0.025=13800 Hz, ν_B=345/0.05=6900 Hz."
+          ],
+          "answer": "Wave A: 2.5 cm/13.8 kHz; Wave B: 5.0 cm/6.9 kHz."
+        },
+        {
+          "title": "NCERT Q15: air–water cliff speed ratio",
+          "question": "Equal out-and-back paths; time through air is 4.5 times the water time. Find ratio.",
+          "steps": [
+            "v_air/v_water=t_water/t_air.",
+            "This equals 1/4.5.",
+            "Rewrite as 2/9."
+          ],
+          "answer": "2:9."
+        },
+        {
+          "title": "Mixed review: identify formulas",
+          "question": "Match ν, T, λ, v, d and t with ν=1/T, v=λν and d=vt/2.",
+          "steps": [
+            "ν and T relate one complete cycle in time.",
+            "v, λ and ν relate spatial and time cycles.",
+            "d=vt/2 is valid when t is travel time OUT and BACK."
+          ],
+          "answer": "Use ν=1/T for oscillations, v=λν for wave propagation, d=vt/2 for echoes."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Which end exercise compares equal-distance air and water time ratios?",
+          "answer": "Q15."
+        },
+        {
+          "question": "Which end exercise has a 40 kHz reverse sensor?",
+          "answer": "Q11."
+        },
+        {
+          "question": "What is the correct A/B wavelength ranking in Fig. 10.33?",
+          "answer": "Wave A shorter, wave B longer."
+        },
+        {
+          "question": "Why does sound travel through a medium rather than vacuum?",
+          "answer": "Its mechanical pressure disturbance requires matter."
+        }
+      ],
+      "tip": "Write the equation that matches the path before inserting numbers; graph problems begin with counting repeating patterns.",
+      "visual": "review"
     }
   ]
 };

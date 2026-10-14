@@ -147,3 +147,13 @@
  .science-ch08-figure{margin:20px auto}
  .science-ch08-figure figcaption{font-size:.85rem}
 }
+
+/* NCERT Class 9 Science Chapter 9: original accessible chemistry diagrams. */
+.science-ch09-figure{max-width:780px;width:100%;margin:24px auto}
+.science-ch09-figure svg{display:block;width:100%;max-width:750px;height:auto;margin:auto}
+.science-ch09-figure figcaption{line-height:1.68}
+.science-ch09-self-check{margin-top:24px}
+@media(max-width:550px){
+ .science-ch09-figure{margin:20px auto}
+ .science-ch09-figure figcaption{font-size:.85rem}
+}

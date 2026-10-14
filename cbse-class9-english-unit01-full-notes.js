@@ -582,6 +582,835 @@ const chapter={
         }
       ],
       "tip": "Vocabulary answers should match the function of the expression in the actual sentence, not just repeat dictionary synonyms."
+    },
+    {
+      "title": "Grammar in context: simple past and past perfect",
+      "paragraphs": [
+        "NCERT's Unit 1 grammar exercise contrasts SIMPLE PAST (a completed past action or event) and PAST PERFECT (had + past participle, often marking the earlier of two past events). For example, an action completed BEFORE another past event may take past perfect for clarity.",
+        "Example: 'The seminar had started before Mira arrived.' Starting happened first; arriving happened second. The sequence is clearer than two unconnected past-tense sentences.",
+        "Form: affirmative 'had read'; negative 'had not read'; question 'Had she read?'. 'Had' remains the same with I, you, he, she and they. A regular verb often takes -ed, but irregular participles must be learned (go→gone, write→written, begin→begun).",
+        "Do not use past perfect automatically in every story with two past events. When order is already explicit and no earlier-past perspective is needed, simple past may be sufficient. Use the form when the sequencing or result benefits from marking one action as already complete.",
+        "Time links such as by the time, before, after, already and when can signal the sequence. The verb after a clause beginning 'after' is not forced to be past perfect; the speaker's meaning determines the form.",
+        "Many textbook blanks about financial planning and cybersecurity test both sequence and irregular participles. Work from an event timeline, not by selecting the most complex-sounding tense.",
+        "Reported speech is part of the broader CBSE syllabus, but Unit 1 specifically teaches past sequencing. Do not confuse past perfect in a narrative with simple present used for universal truths.",
+        "Correction method: underline all time expressions; draw arrows between events; decide which event is earlier; choose had + participle if needed; read the complete sentence aloud to ensure agreement and natural meaning."
+      ],
+      "examples": [
+        {
+          "title": "Past sequence",
+          "question": "Choose verbs: When Kavya ___ (arrive), the show ___ (begin).",
+          "steps": [
+            "The show began before Kavya arrived.",
+            "Use simple past arrived for the later event.",
+            "Use past perfect had begun for the earlier event."
+          ],
+          "answer": "When Kavya arrived, the show had begun."
+        },
+        {
+          "title": "Recognise participle",
+          "question": "What is wrong with 'She had wrote the letter before dawn'?",
+          "steps": [
+            "Past perfect requires had + past participle.",
+            "The participle of write is written, not wrote.",
+            "Replace wrote with written."
+          ],
+          "answer": "She had written the letter before dawn."
+        },
+        {
+          "title": "Negative form",
+          "question": "Change 'The student had practised' into a negative.",
+          "steps": [
+            "Keep auxiliary had.",
+            "Place not after had.",
+            "Use the same past participle."
+          ],
+          "answer": "The student had not practised."
+        },
+        {
+          "title": "Exam timeline",
+          "question": "Explain the difference between 'They left before I reached' and 'They had left before I reached'.",
+          "steps": [
+            "Both can convey a sequence using before.",
+            "Past perfect explicitly presents the departure as complete at the reference point.",
+            "It adds perspective, not a new event."
+          ],
+          "answer": "The second more explicitly places their departure earlier than my arrival."
+        },
+        {
+          "title": "Two past actions",
+          "question": "Complete: By the time the club ___ (meet), the volunteers ___ (finish) the poster.",
+          "steps": [
+            "Meeting is the later reference event.",
+            "Poster completion occurred before that meeting.",
+            "Use met, had finished."
+          ],
+          "answer": "By the time the club met, the volunteers had finished the poster."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is the formula for past perfect?",
+          "answer": "had + past participle."
+        },
+        {
+          "question": "What is the past participle of begin?",
+          "answer": "begun."
+        },
+        {
+          "question": "Is 'had went' correct?",
+          "answer": "No; use had gone."
+        },
+        {
+          "question": "Can simple past appear after 'before' when chronology is clear?",
+          "answer": "Yes; tense choice depends on time perspective and context."
+        }
+      ],
+      "tip": "In gap-fill questions determine which action happened first before choosing verb forms."
+    },
+    {
+      "title": "Prose comprehension, critical reflection and original model answers",
+      "paragraphs": [
+        "NCERT Unit 1 includes cause–effect, true–false, extract-based inference and open-ended critical reflection. Its first set examines the grandmother's literacy, her connection with the magazine, the narrator's absence and the historical reasons she had not been educated.",
+        "Cause–effect problems are solved by linking an observed event to its immediate explanation. Example: the narrator stays a week at a wedding → the grandmother misses her usual reader → she recognises her dependence. Do not skip the intermediate event.",
+        "True–false exercises assess exact details. The grandmother wanted independence (true), did not actually ask someone else to read during the narrator's absence (true description of her choice), believed learning remained possible at any age (true), and was not disappointed by the eventual success.",
+        "Extract inference asks more than memory: identify a tone, character trait or unstated motivation and locate a supporting detail in the situation. The moonlit terrace scene supports a tender atmosphere through gentle conversation and concern.",
+        "Distinguish character voice from narrator voice. The narrator's early laughter reflects the child's assumption; the grandmother's response conveys mature determination. A claim that the author endorses the laughter would ignore the rest of the story.",
+        "Short answers of 40–50 words should address the question directly, cite a specific action and explain significance. Long answers of 120–150 words should have a thesis, two reasoned arguments and a conclusion rather than a lengthy chronological recap.",
+        "For 'How effectively does the story show the value of education?', weigh accessibility and emotional independence, the practical process of learning and the mutual respect that results. Avoid the unsupported assertion that learning guarantees success for everyone.",
+        "Model answers here are original explanations of the source's concepts, not copies of a published answer key. A student should check the wording demanded by the specific exam."
+      ],
+      "examples": [
+        {
+          "title": "True or false with correction",
+          "question": "'The grandmother asked another villager to read the next serial episode.'",
+          "steps": [
+            "In the narrator's absence she considered asking others.",
+            "She felt embarrassed and did not follow through.",
+            "Correct any false statement by stating what happened."
+          ],
+          "answer": "False. She was too embarrassed to request another reader."
+        },
+        {
+          "title": "Inference question",
+          "question": "What does the granddaughter's initial laughter suggest?",
+          "steps": [
+            "She sees her grandmother's age as an obstacle.",
+            "She assumes capability from appearance and age.",
+            "The grandmother's progress later challenges that assumption."
+          ],
+          "answer": "It reveals a youthful age-based assumption that the story ultimately overturns."
+        },
+        {
+          "title": "Extract scene",
+          "question": "Give two details creating tenderness in the night conversation.",
+          "steps": [
+            "Grandmother speaks privately and gently.",
+            "The narrator notices her distress and shows concern.",
+            "Affection is conveyed through their closeness and supportive interaction."
+          ],
+          "answer": "The quiet conversation and the granddaughter's concern create a tender atmosphere."
+        },
+        {
+          "title": "Explain significance",
+          "question": "Why is touching feet an especially important final action?",
+          "steps": [
+            "The narrative establishes a teacher–learner role reversal.",
+            "Touching feet is a conventional mark of respect.",
+            "The grandmother deliberately honours the young teacher and her learning."
+          ],
+          "answer": "It demonstrates that knowledge, not age alone, deserves respect."
+        },
+        {
+          "title": "Long-answer outline",
+          "question": "Plan a 5-mark response about education and dignity in the prose.",
+          "steps": [
+            "Claim: education increases personal choice and self-respect.",
+            "Evidence 1: reading dependence at the wedding; interpret shame.",
+            "Evidence 2: weekly practice, Dassara reading and reciprocal respect.",
+            "Conclude: education can occur across generations and throughout life."
+          ],
+          "answer": "Organise as claim → evidence and interpretation → contrasting evidence → conclusion."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is the key cause of the wedding crisis?",
+          "answer": "The only usual reader was absent when the serial arrived."
+        },
+        {
+          "question": "Was the narrator the grandmother's only teacher at that time?",
+          "answer": "Yes, in the events described."
+        },
+        {
+          "question": "Which event most clearly proves the learning outcome?",
+          "answer": "Reading identifying information from the gifted Kashi Yatre book."
+        },
+        {
+          "question": "Does the chapter's conclusion argue against respecting elders?",
+          "answer": "No; it affirms respect for teachers regardless of age."
+        }
+      ],
+      "tip": "For extract-based answers: specific evidence matters more than a generic moral statement."
+    },
+    {
+      "title": "Poetry: Bharat Our Land — speaker, structure and core message",
+      "paragraphs": [
+        "Subramania Bharati's Bharat Our Land is presented in the English Kaveri textbook as an ODE—a poem of praise or admiration. Its speaker celebrates India's physical landscape, cultural achievements, intellectual history, music and spiritual traditions.",
+        "The opening stanza centres on the Himalayan range (called Himavant), the Ganga river and the Upanishads. These are not random facts: the mountain suggests strength, the river is described through generous qualities, and the philosophical works represent intellectual heritage.",
+        "The poem uses elevated address, exclamatory praise and rhetorical questions to imply that India's achievements stand beyond comparison. Analyse the purpose of the rhetorical questions rather than treating them as genuine requests for information.",
+        "A later stanza evokes warriors and sages as contributors through courage and wisdom. It also honours music and auspicious cultural activities. This widens national identity beyond geography to include human achievements.",
+        "The poem's references to Brahma-knowledge and the Buddha's dhamma link India's heritage to philosophical and spiritual inquiry. The poem brings these distinct strands together in a celebratory portrait; a sound interpretation does not pretend they are all the same doctrine.",
+        "The speaker repeatedly returns to the judgement that the country deserves extraordinary admiration. The repeated claim creates a REFRAIN, reinforcing the speaker's enthusiastic and confident tone.",
+        "Like many translated or adapted poems, the English version does not need a strict end-rhyme pattern to be lyrical. Its parallel phrasing, repeated assertions and emphatic pauses create rhythm. Do not invent a neat ABAB rhyme scheme without actually checking the line endings.",
+        "A good theme statement: the poem offers an expansive tribute to India's natural resources, history and cultural legacy, seeking to inspire appreciation of a diverse inheritance.",
+        "The speaker's praise is a literary stance. Questions about it should identify the attitude from the words and images of the poem, not demand agreement with every absolute comparison as a literal geographical fact."
+      ],
+      "examples": [
+        {
+          "title": "Identify the genre",
+          "question": "What makes Bharat Our Land an ode?",
+          "steps": [
+            "An ode praises a person, place or idea.",
+            "This poem lists qualities of a beloved land with elevated admiration.",
+            "Repeated direct praise sustains its celebratory purpose."
+          ],
+          "answer": "It is an ode praising India's land and heritage."
+        },
+        {
+          "title": "Theme versus inventory",
+          "question": "Improve 'The poem is about mountains and rivers'.",
+          "steps": [
+            "Mountains and rivers are images.",
+            "They are selected because they stand for national beauty and identity.",
+            "Other stanzas add wisdom, courage and music."
+          ],
+          "answer": "The poem celebrates India's varied natural and cultural heritage through emblematic images."
+        },
+        {
+          "title": "Rhetorical questions",
+          "question": "Why ask if another river could equal the Ganga rather than simply describing it?",
+          "steps": [
+            "The poet does not require a factual list of rivers.",
+            "The question implies a confident answer.",
+            "It intensifies admiration."
+          ],
+          "answer": "A rhetorical question emphasises the river's valued stature."
+        },
+        {
+          "title": "Rhyme caution",
+          "question": "Does a poem have to end its lines with matching sounds to count as an ode?",
+          "steps": [
+            "Ode describes purpose and elevated tone.",
+            "Rhythm can arise through repetition and parallel construction.",
+            "End-rhyme is not mandatory."
+          ],
+          "answer": "No; genre is determined by its praise and lyrical qualities, not a compulsory scheme."
+        },
+        {
+          "title": "Speaker and author",
+          "question": "Can we claim every emotional assertion in the poem is an objective fact?",
+          "steps": [
+            "Literary speakers use figurative and emphatic language.",
+            "Hyperbole strengthens admiration.",
+            "Analyse the rhetoric rather than treating praise as a scientific measurement."
+          ],
+          "answer": "No; a poem expresses a perspective through artistic language."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Who wrote Bharat Our Land?",
+          "answer": "Subramania Bharati."
+        },
+        {
+          "question": "Which mountains are called Himavant?",
+          "answer": "The Himalayas."
+        },
+        {
+          "question": "Which river is central to the opening images?",
+          "answer": "The Ganga."
+        },
+        {
+          "question": "What is an ode?",
+          "answer": "A lyric poem that expresses elevated admiration or praise."
+        },
+        {
+          "question": "What is the general tone of this poem?",
+          "answer": "Proud, admiring and celebratory."
+        }
+      ],
+      "tip": "Mention at least one geographic and one cultural image when explaining the poem's central theme."
+    },
+    {
+      "title": "Poetic devices: refrain, personification, symbolism and hyperbole",
+      "paragraphs": [
+        "REFRAIN is a recurring line or phrase that gains force each time it returns. In this poem, praise of the land as exceptional recurs as a unifying declaration. Its effect is cumulative admiration and a strong lyrical rhythm.",
+        "PERSONIFICATION assigns human qualities or roles to something nonhuman. The land is referred to as a female figure, and the Ganga is endowed with traits such as generosity or grace. An examiner may ask how these traits invite an emotional relationship with place.",
+        "SYMBOLISM: Himavant stands for scale, strength and permanence; Ganga for cultural and life-giving abundance; the Upanishads for knowledge and philosophical thought; warriors for courage; sages for wisdom. Interpret symbols within the poem, not as a complete statement of all Indian history.",
+        "The 'sunny golden land' description uses colour and light imagery to convey abundance and splendour. A response should link the visual impression to an attitude of admiration rather than asserting that India is literally covered in gold.",
+        "HYPERBOLE is deliberate exaggeration for emphasis. Claims that there is no equal anywhere in the world should be understood as the speaker's exuberant admiration, not a comparison backed by global measurements.",
+        "RHETORICAL QUESTIONS make assertions in question form. When the speaker asks what other object could match an Indian treasure, the expected answer is implied; the construction heightens persuasion and emphasis.",
+        "PARALLELISM repeats sentence patterns to build rhythm and present several examples as parts of a collective argument. The pattern of naming a cherished object and immediately praising it makes the opening stanza feel ceremonial.",
+        "PUNCTUATION: dashes and hyphens can create marked pauses, separate an image from its emphatic comment, and lend a chant-like rhythm. Their function is not primarily hesitation in this poem.",
+        "TONE, MOOD and MESSAGE differ: tone describes the speaker's attitude (admiration); mood the feeling encouraged in readers (pride/enthusiasm); message the broader idea (valuing cultural and natural inheritance)."
+      ],
+      "examples": [
+        {
+          "title": "Device identification",
+          "question": "'Our city welcomed the travellers.' Which poetic device appears?",
+          "steps": [
+            "A city is not literally a human greeter.",
+            "Welcoming is a human action.",
+            "The place is treated as if it could act."
+          ],
+          "answer": "Personification."
+        },
+        {
+          "title": "Refrain function",
+          "question": "Why repeat an approving judgement about the land?",
+          "steps": [
+            "Repetition keeps the central evaluation prominent.",
+            "It helps listeners remember the poem's refrain.",
+            "The mood becomes cumulative and celebratory."
+          ],
+          "answer": "The refrain reinforces national pride and a lyrical quality."
+        },
+        {
+          "title": "Symbol matching",
+          "question": "Which image better symbolises spiritual and philosophical legacy: the Upanishads or a racing medal?",
+          "steps": [
+            "The poem names revered philosophical texts.",
+            "A medal belongs to a different subject.",
+            "Interpret within poem context."
+          ],
+          "answer": "The Upanishads."
+        },
+        {
+          "title": "Hyperbole or literal?",
+          "question": "If the poet declares a mountain range unequalled, is that necessarily a scientific height claim?",
+          "steps": [
+            "The ode is a form of celebration.",
+            "Comparisons may be intentionally absolute.",
+            "Hyperbole communicates emotion rather than verified ranking."
+          ],
+          "answer": "It can be hyperbole emphasising admiration."
+        },
+        {
+          "title": "Tone vs mood",
+          "question": "Label these: poet feels admiration; reader feels inspired.",
+          "steps": [
+            "Tone belongs to the speaking voice or attitude.",
+            "Mood is the emotional atmosphere experienced by the audience.",
+            "They may align but are different terms."
+          ],
+          "answer": "Tone: admiring; mood: inspired/proud."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What literary device gives a river human traits?",
+          "answer": "Personification."
+        },
+        {
+          "question": "What is a refrain?",
+          "answer": "A repeatedly recurring phrase or line."
+        },
+        {
+          "question": "What is hyperbole?",
+          "answer": "Intentional overstatement for emphasis."
+        },
+        {
+          "question": "What is the symbolic role of a sage in the poem?",
+          "answer": "Wisdom and spiritual/intellectual traditions."
+        },
+        {
+          "question": "Does a rhetorical question always expect an answer from the audience?",
+          "answer": "No; it often implies its answer for emphasis."
+        }
+      ],
+      "tip": "State the device, identify the relevant image without copying a full stanza, and describe its effect."
+    },
+    {
+      "title": "Poetic allusion, stanza-based understanding and vocabulary",
+      "paragraphs": [
+        "ALLUSION refers to a familiar historical, cultural, literary or religious person, event or idea. The poem's named references to the Upanishads, Brahma-knowledge and the Buddha's teachings invite readers to supply cultural knowledge beyond the immediately stated words.",
+        "The Upanishads function as signs of philosophical inquiry and sacred textual heritage. The Buddha's dhamma invokes ethical and spiritual teaching. Mentioning both within a tribute broadens the picture of intellectual and spiritual history.",
+        "IMAGERY uses sensory language to form mental pictures. Mountains convey visual height, the river suggests motion and generosity, and references to golden sunlight create an impression of richness. Identifying imagery is incomplete until its effect is explained.",
+        "STANZA ONE chiefly links geography with philosophical heritage: the mountains, the Ganga, ancient scriptures and the luminous land. It starts by presenting the physical country as worthy of admiration.",
+        "STANZA TWO brings human contributions into focus: warriors, sages, music and favourable cultural life. Its purpose is to show cultural vitality and the contributions of people across generations.",
+        "STANZA THREE continues with spiritual traditions, remembrance of ancient heritage and the returning praise motif. The close joins geographic, cultural and philosophical dimensions in one statement of admiration.",
+        "KEY WORDS: peerless means without equal; sanctified means regarded as made sacred or honoured; hoary antiquity refers to a very ancient past; auspicious refers to something seen as favourable or fortunate; gallant describes courage.",
+        "SUFFIXES form new meanings or parts of speech: -ous often makes adjectives ('courageous'); -ity often forms nouns ('antiquity'); -est marks superlative degree ('greatest'); -less can express absence ('peerless' = having no equal). Recognise the word's actual context before segmenting it.",
+        "Not every line is figurative in the same way: a reference to Ganga names a real river; attributing generosity to it adds personification; using it for a cultural ideal adds symbolism. Literary devices can overlap."
+      ],
+      "examples": [
+        {
+          "title": "Allusion exercise",
+          "question": "Name two spiritual or philosophical references in the poem and explain their role.",
+          "steps": [
+            "The poem names the Upanishads.",
+            "It also mentions Buddha's dhamma or Brahma-knowledge.",
+            "They invoke cultural traditions familiar beyond the poem."
+          ],
+          "answer": "They serve as allusions to India's philosophical and spiritual heritage."
+        },
+        {
+          "title": "Stanza movement",
+          "question": "How does the poem broaden its subject from beginning to middle?",
+          "steps": [
+            "Beginning depicts mountains, river and sacred texts.",
+            "Middle recognises warriors, sages and music.",
+            "This moves from place to human accomplishments."
+          ],
+          "answer": "It expands the tribute from nature to historical and cultural achievement."
+        },
+        {
+          "title": "Word meaning",
+          "question": "What does 'peerless' communicate in the speaker's praise?",
+          "steps": [
+            "Peer means an equal.",
+            "The suffix -less suggests without.",
+            "In context, the speaker asserts exceptional distinction."
+          ],
+          "answer": "Unmatched or without equal."
+        },
+        {
+          "title": "Imagery effect",
+          "question": "How can the image of a great mountain support the poem's mood?",
+          "steps": [
+            "A mountain suggests height, stability and power.",
+            "Those qualities become associated with the land.",
+            "The image invites awe and pride."
+          ],
+          "answer": "It conveys grandeur and permanence."
+        },
+        {
+          "title": "Device overlap",
+          "question": "Can Ganga be both literal river and a symbol in the same poem?",
+          "steps": [
+            "It is a real geographical feature.",
+            "The description adds human-like qualities.",
+            "It also represents nourishing natural heritage."
+          ],
+          "answer": "Yes; literal reference, personification and symbolism can operate together."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What does hoary antiquity mean?",
+          "answer": "A very distant or ancient past."
+        },
+        {
+          "question": "What does sanctified suggest?",
+          "answer": "Made or regarded as sacred or honoured."
+        },
+        {
+          "question": "What does allusion require from a reader?",
+          "answer": "Knowledge of the cultural or historical reference being evoked."
+        },
+        {
+          "question": "Name one suffix used by the poem's vocabulary activities.",
+          "answer": "Examples include -ous, -ity, -est and -less."
+        }
+      ],
+      "tip": "Stanza-wise notes should connect each image cluster to a central effect, not simply list the nouns."
+    },
+    {
+      "title": "Poetry critical reflection: original solved questions and exam technique",
+      "paragraphs": [
+        "NCERT follows the ode with exercises on theme, tone, mood, rhythmic structure, literary devices and symbol matching. These questions expect both identification and interpretation.",
+        "For the Ganga image, an explanation of generosity should connect the river's life-supporting role to the poet's image of grace. A literal scientific statement about river discharge does not answer the question about poetic language.",
+        "The opening rhetorical questions are emphatic rather than doubtful. Their question marks call readers into agreement with the speaker's praise; they do not mean the speaker has forgotten the names of other rivers.",
+        "The hyphen/dash activity asks how punctuation shapes oral performance. Deliberate pauses emphasise a treasured element and its praised quality, supporting measured cadence.",
+        "The refrain creates cohesion across stanzas. Repetition alone is not enough as an analysis: say what idea recurs and what emotional effect it reinforces.",
+        "A good response to 'How does the poem foster pride?' should name nature, philosophical wisdom and human achievements, then explain that the speaker assembles them into a shared cultural inheritance.",
+        "In extract-based answers, define an image in context and cite its precise function. Avoid wandering into unrelated contemporary political claims; the question is about how this poem communicates admiration.",
+        "Long answers should recognise both the elevated voice and its figurative features: an ode may exaggerate as a way of expressing affection, without requiring objective proof of every comparison."
+      ],
+      "examples": [
+        {
+          "title": "Answer the Ganga prompt",
+          "question": "Why can the Ganga be described as generous in the poem?",
+          "steps": [
+            "A river nourishes settlements and ecosystems.",
+            "Generosity is a human quality attributed to it.",
+            "The personification frames nature as giving and graceful."
+          ],
+          "answer": "The Ganga is imagined as generously sustaining life and culture, which deepens admiration."
+        },
+        {
+          "title": "Interpret punctuation",
+          "question": "What is the likely function of a rhetorical question at the end of a line?",
+          "steps": [
+            "It follows a celebrated Indian image.",
+            "The speaker expects agreement rather than information.",
+            "The device emphasises exceptional value."
+          ],
+          "answer": "It strengthens the assertion through rhetorical emphasis."
+        },
+        {
+          "title": "Summarise mood and tone",
+          "question": "Give a fitting tone and expected mood.",
+          "steps": [
+            "The speaker praises India consistently.",
+            "The reader is encouraged to feel inspired admiration.",
+            "Tone and mood can be distinguished in one sentence."
+          ],
+          "answer": "Tone: admiring; mood: proud and uplifted."
+        },
+        {
+          "title": "Analytical 40–50 words",
+          "question": "How does Bharat Our Land construct an image of cultural heritage?",
+          "steps": [
+            "Name natural images and intellectual traditions.",
+            "Add courage, sages or music.",
+            "Explain how the image groups reinforce one another."
+          ],
+          "answer": "The speaker celebrates mountains and rivers alongside sacred learning, sages, warriors and music. These images present India as a land whose physical richness is joined to cultural and philosophical achievement. The repeated praise unites the images and invites readers to value this inheritance."
+        },
+        {
+          "title": "Long answer strategy",
+          "question": "Plan a 120–150-word response on figurative language in the ode.",
+          "steps": [
+            "Claim: figurative language intensifies admiration.",
+            "Explain personification of land/river and symbolic mountains/texts.",
+            "Explain hyperbole, refrain and rhetorical questions.",
+            "Connect devices to celebratory tone and coherent message."
+          ],
+          "answer": "Develop 3 evidence-and-effect paragraphs with a concise introduction and conclusion; do not reproduce whole stanzas."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Are the poem's rhetorical questions mainly expressions of uncertainty?",
+          "answer": "No, they emphasise admiration."
+        },
+        {
+          "question": "What effect do the pauses and dashes create?",
+          "answer": "They mark emphatic pauses and add a measured lyrical rhythm."
+        },
+        {
+          "question": "Which three kinds of heritage can a strong theme answer include?",
+          "answer": "Natural, cultural/historical and spiritual/philosophical."
+        },
+        {
+          "question": "Should a literary-device answer simply name the device?",
+          "answer": "No; explain its effect on meaning and tone."
+        }
+      ],
+      "tip": "For 5-mark answers combine 2–3 images or devices and relate each to the speaker's attitude."
+    },
+    {
+      "title": "Prose and poetry comparison: meaningful learning and shared heritage",
+      "paragraphs": [
+        "Although the prose and ode differ in form, both value connections across generations. The prose makes the connection personal: a grandmother passes on affection while a child passes on literacy. The ode treats inherited landscapes, writings and cultural achievements as resources recognised by later generations.",
+        "The prose is primarily narrative and progresses through a conflict and its resolution. The poem is primarily lyrical and persuasive in its praise, moving through images and repeated judgments rather than a character's changing sequence of events.",
+        "In the prose, KNOWLEDGE is practical: the grandmother learns letters and gains the independence to read. In the poem, knowledge is part of cultural history: philosophical writing, teachers and sages become symbols of an intellectual inheritance.",
+        "Respect is central to both. The grandmother shows respect for her younger teacher; the poet invites respect for the country's natural environment and human accomplishments.",
+        "Another useful contrast is scale: one person's dignity and learning versus a collective sense of identity. Do not claim the texts send exactly the same message; compare a shared value while preserving each form's unique emphasis.",
+        "To answer across texts, use the pattern CONNECTION → EVIDENCE FROM PROSE → EVIDENCE FROM POEM → MEANINGFUL DIFFERENCE. Merely writing that 'both teach good values' is too vague.",
+        "The same unit also builds linguistic awareness: the story highlights Kannada and vernacular literacy; the poem is presented in English, drawing on recognisable cultural and historical references. Shared heritage can coexist with multilingual diversity.",
+        "For critical discussion, note that the works are situated in specific voices and values. A strong literary reading analyses these voices faithfully without assuming every reader must have the same personal reaction."
+      ],
+      "examples": [
+        {
+          "title": "Compare two kinds of knowledge",
+          "question": "How is knowledge portrayed differently?",
+          "steps": [
+            "Story: ability to read independently changes everyday action.",
+            "Poem: philosophical works and sages represent inherited cultural wisdom.",
+            "Both value learning but at different scales."
+          ],
+          "answer": "The story highlights practical personal agency; the ode celebrates collective intellectual heritage."
+        },
+        {
+          "title": "Common thread",
+          "question": "What does respect look like in each work?",
+          "steps": [
+            "The grandmother honours her young teacher.",
+            "The poet honours valued features of India.",
+            "Both attach respect to something beyond social status."
+          ],
+          "answer": "Respect for teaching and learning in prose; admiration for inherited cultural and natural riches in poetry."
+        },
+        {
+          "title": "Avoid false equivalence",
+          "question": "Explain why both works are NOT identical despite related values.",
+          "steps": [
+            "One has events, a crisis and character development.",
+            "The other uses recurring praise and clustered imagery.",
+            "Form, speaker and purpose differ."
+          ],
+          "answer": "They share concern for meaningful knowledge but use distinct narrative and lyric strategies."
+        },
+        {
+          "title": "Cross-text answer",
+          "question": "Write an outline for how the two texts encourage learning across generations.",
+          "steps": [
+            "Prose: older person learns from child, age stereotypes challenged.",
+            "Poem: literary/historical learning is passed across time.",
+            "Connect without merging the narratives."
+          ],
+          "answer": "They value learning as both individual capability and inherited cultural knowledge, transmitted across generations."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Which work includes a personal chronological conflict?",
+          "answer": "How I Taught My Grandmother to Read."
+        },
+        {
+          "question": "Which work is an ode?",
+          "answer": "Bharat Our Land."
+        },
+        {
+          "question": "Is the grandmother's literacy the same theme as national identity?",
+          "answer": "No, though both texts value meaningful knowledge and respect."
+        },
+        {
+          "question": "What is the best cross-text answer structure?",
+          "answer": "Comparison claim, relevant evidence from each, explanation and meaningful distinction."
+        }
+      ],
+      "tip": "Use evidence from both works before asserting a theme they supposedly share."
+    },
+    {
+      "title": "Writing: formal letter to the editor on adult literacy",
+      "paragraphs": [
+        "Kaveri Unit 1 asks students to write to the EDITOR of a local newspaper encouraging student volunteers in adult-literacy programmes. This task connects the story's concern for adult learners with real-world persuasive writing.",
+        "A formal letter needs sender's address, date, editor/addressee and newspaper details, a short descriptive subject, appropriate salutation, focused paragraphs, and a respectful sign-off. Follow instructions in the actual examination prompt.",
+        "Paragraph 1 identifies the public problem or opportunity. Avoid invented statistics: if a prompt does not give measured data, use a concrete example or clearly framed general observation.",
+        "Paragraph 2 explains why the issue matters and how students might contribute. Practical proposals include voluntary reading sessions with accessible materials, support in local languages, and respectful coordination with community organisations.",
+        "Paragraph 3 requests action and states the desired result. The tone should be concise, courteous and constructive rather than commanding or accusing the editor.",
+        "Under CBSE 2026–27 Class 9 R1, letter-to-editor and formal email tasks use a guideline of 120–150 words for the given issue. R2 also includes letters to editors/formal emails in a similar word range. Distinguish these from notices with very short word limits.",
+        "Model structure is not a copyrighted textbook response; practise producing an original letter for your chosen scenario. Edit for clarity, avoid clichés and ensure the subject accurately reflects the request.",
+        "A good letter identifies WHO should act (schools, organisations or readers), WHAT action to take and HOW progress could be evaluated (participation records and feedback from adult learners)."
+      ],
+      "examples": [
+        {
+          "title": "Draft letter plan",
+          "question": "Organise a three-paragraph response about adult literacy volunteer camps.",
+          "steps": [
+            "Intro: explain why adult literacy matters to choice and everyday independence.",
+            "Body: describe respectful peer volunteers, time slots, materials and support.",
+            "Close: request publicity and coordination, without invented figures."
+          ],
+          "answer": "Opening: public need; development: actionable student programmes; closing: clear request."
+        },
+        {
+          "title": "Subject-line refinement",
+          "question": "Which subject is better: 'Important Matter' or 'Student Volunteers for Literacy Camps'?",
+          "steps": [
+            "A subject should identify the real issue.",
+            "'Important Matter' gives no useful information.",
+            "The second names the target and purpose."
+          ],
+          "answer": "Student Volunteers for Literacy Camps."
+        },
+        {
+          "title": "Tone correction",
+          "question": "Improve 'Your newspaper must fix all illiteracy immediately'.",
+          "steps": [
+            "An editor can raise awareness but cannot single-handedly deliver literacy.",
+            "A respectful request is more credible.",
+            "Name practical partners and opportunities."
+          ],
+          "answer": "Please highlight local adult-literacy drives and encourage schools to coordinate volunteer participation."
+        },
+        {
+          "title": "Addressing a paragraph",
+          "question": "What should the final paragraph of a letter to editor do?",
+          "steps": [
+            "State a practical request.",
+            "Tie it to the public benefit.",
+            "Maintain a courteous ending."
+          ],
+          "answer": "Ask the editor to publish awareness and invite support for literacy initiatives."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What is the standard R1 word range for a formal letter-to-editor task?",
+          "answer": "120–150 words."
+        },
+        {
+          "question": "Should a letter invent survey data not supplied by the question?",
+          "answer": "No."
+        },
+        {
+          "question": "What should the letter's subject do?",
+          "answer": "Name its public issue clearly and concisely."
+        },
+        {
+          "question": "Is a letter to editor informal chat?",
+          "answer": "No, use appropriate formal format and tone."
+        }
+      ],
+      "tip": "Write from a precise purpose and audience; ensure examples are realistic rather than made-up statistics."
+    },
+    {
+      "title": "Reading comprehension, digital literacy and speaking practice",
+      "paragraphs": [
+        "Unit 1 includes a LISTENING exercise on digital literacy, with teacher audio/transcript, as well as speaking and writing tasks. Listening blanks must be answered from the supplied recording; written notes cannot legitimately guess the precise missing words.",
+        "Digital literacy includes operating devices, recognising reliable sources, managing accounts responsibly and protecting personal data. It extends, rather than replaces, the story's central idea that literacy helps a person act independently.",
+        "Unseen comprehension requires careful separation of explicitly stated facts, reasonable inferences, main idea and author's stance. A line about a character's feeling may support inference, but not arbitrary predictions unrelated to the passage.",
+        "CBSE English R1 reading carries 20 marks: one descriptive/discursive passage around 400–450 words and one case-based passage with possible numerical or visual information around 200–250 words. R2 specifies a factual/literary passage and a case-based verbal passage with different mark distribution.",
+        "When reading a chart or table, identify units, categories and the comparison actually supported. Do not insert explanations for differences unless the passage gives evidence or the question explicitly calls for speculation.",
+        "Turncoat debate: one speaker discusses a proposition on both sides, switching sides at a designated time. Prepare a concise claim, a reason and a relevant example for each side, then switch with an explicit transition.",
+        "The chapter's speaking examples concern the value of learning other languages and whether older people can learn. Arguments should be charitable: acknowledging learning challenges does not justify denying opportunities.",
+        "Practice reading a new passage once for the broad message and again for targeted evidence; answer in your own concise words with reference to the text. Avoid unnecessary retelling.",
+        "Do not supply copyrighted book paragraphs as sample reading passages. StudyAI provides original questions and skill explanations; students can consult the linked official NCERT PDF for the original material."
+      ],
+      "examples": [
+        {
+          "title": "Listening honesty",
+          "question": "Can the blanks in an audio transcript exercise be solved from the chapter title alone?",
+          "steps": [
+            "A listening assessment tests what is actually said.",
+            "Different recordings can use different precise phrases.",
+            "Do not invent exact answers without hearing the specified clip."
+          ],
+          "answer": "No; listen to the actual recording or verify the supplied transcript."
+        },
+        {
+          "title": "Main idea vs detail",
+          "question": "A passage includes one statistic and several points about adult learning. What makes a good central idea?",
+          "steps": [
+            "Look for the focus of several paragraphs.",
+            "One number may be supporting evidence.",
+            "Summarise the repeated argument rather than an isolated detail."
+          ],
+          "answer": "A statement covering the passage's main purpose and key reasoning."
+        },
+        {
+          "title": "Chart question",
+          "question": "A chart shows registrations rising from 80 to 100. What percentage increase is actually supported?",
+          "steps": [
+            "Increase=100−80=20.",
+            "Divide by initial 80.",
+            "20/80×100=25%."
+          ],
+          "answer": "25%, without inventing a cause."
+        },
+        {
+          "title": "Turncoat practice",
+          "question": "Give one claim for and against 'Learning can happen only when young'.",
+          "steps": [
+            "In favour: youth may have more uninterrupted schooling opportunities.",
+            "Against: adults can learn with adequate time, support and purpose.",
+            "Explain that the grandmother's experience challenges a strict age bar."
+          ],
+          "answer": "Present a reasoned case for each side; conclude that opportunity should remain open."
+        },
+        {
+          "title": "Inference discipline",
+          "question": "The narrator worries when she finds her grandmother crying. Can one infer the narrator is concerned?",
+          "steps": [
+            "Worry is directly described or clearly implied by behaviour.",
+            "The emotional response supports concern.",
+            "Do not infer unrelated events."
+          ],
+          "answer": "Yes, supported by the narrator's reaction."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "Can you fill listening exercise blanks without hearing the recording?",
+          "answer": "No; use the audio or verified teacher transcript."
+        },
+        {
+          "question": "What kind of passage may the R1 case-based task contain?",
+          "answer": "Verbal and/or visual data such as statistics or charts."
+        },
+        {
+          "question": "What is the first goal of reading an unseen passage?",
+          "answer": "Understand the central purpose before hunting details."
+        },
+        {
+          "question": "Why should evidence-backed inferences differ from guesses?",
+          "answer": "An inference must follow reasonably from textual details."
+        }
+      ],
+      "tip": "Do not treat the teacher's listening transcript as public domain or paste it into student notes."
+    },
+    {
+      "title": "2026–27 CBSE English examination framework and revision plan",
+      "paragraphs": [
+        "CBSE prescribes Kaveri for Class IX English in 2026–27, with R1 and R2 routes using the same textbook but somewhat different reading and writing question formats. A student should follow the route set by their school, not assume that the previous year's Beehive/Moments syllabus applies unchanged.",
+        "The published R1 scheme allocates 20 marks to reading, 30 to writing and grammar, 30 to literature, plus 20 for internal assessment. R2 carries the same broad 20/30/30/20 division but changes details such as passage type, some writing tasks and literature extract mark distribution.",
+        "Core GRAMMAR capacities include sequence of tenses, modals, reported speech, Type 1 conditionals, subject–verb concord, determiners, noun/relative clauses, editing and sentence transformation/rearrangement. Unit 1's specific simple past/past perfect exercise is a beginning, not complete grammar preparation.",
+        "R1 WRITING includes notice/informal invitation (up to 50 words), letter/editorial email (120–150), factual description/magazine article (120–150), and descriptive/narrative essay (200–250). R2 sets some different tasks and word limits, including poster/speech and a 150–180-word narrative essay. Always check which route applies.",
+        "LITERATURE questions include extract-based comprehension, shorter constructed responses of about 40–50 words, and more extended analysis in roughly 120–150 words. The best responses use details from the work rather than memorised generic moral claims.",
+        "REVISION ROUTINE: (1) recount prose events in a clear causal order; (2) write a paragraph on character change; (3) name a poetic image/device and its effect; (4) finish 5 tense questions; (5) write a short critical response; (6) review your own repeated errors.",
+        "StudyAI's completion checklist tracks whether a subtopic has been studied, not an official exam grade. Solving unseen passages and writing under time constraints is necessary alongside reading the notes.",
+        "Progress must be honest: checking off a page records study completion, not that a teacher independently verified every answer. The curriculum and source links remain visible for checking."
+      ],
+      "examples": [
+        {
+          "title": "CBSE marks arithmetic",
+          "question": "How do the four headline assessment allocations produce 100 marks?",
+          "steps": [
+            "Reading 20.",
+            "Writing+grammar 30 and literature 30.",
+            "Internal assessment 20."
+          ],
+          "answer": "20+30+30+20=100 marks."
+        },
+        {
+          "title": "Select writing format",
+          "question": "A task requests a 45-word public announcement. Which genre is plausible?",
+          "steps": [
+            "Short public informational messages suit notice format.",
+            "A full essay is too long.",
+            "Include who/what/when/where accurately."
+          ],
+          "answer": "Notice, subject to the prompt."
+        },
+        {
+          "title": "R1 vs R2",
+          "question": "Does the common prescribed textbook imply exactly identical exam questions?",
+          "steps": [
+            "CBSE prescribes the same Kaveri source.",
+            "R1 and R2 have different question-paper patterns.",
+            "Keep route-aware writing and extract practice."
+          ],
+          "answer": "No; the textbook is shared, but assessment arrangements differ."
+        },
+        {
+          "title": "Evidence and marks",
+          "question": "How to strengthen a 5-mark response about Krishtakka without quoting long passages?",
+          "steps": [
+            "Make a defensible thesis.",
+            "Explain two precise incidents in your own words.",
+            "Link each to the character's agency and growth.",
+            "Write a conclusion directly answering the prompt."
+          ],
+          "answer": "A concise evidence-driven analytical response."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "question": "What book is prescribed for CBSE Class 9 English 2026–27?",
+          "answer": "Kaveri."
+        },
+        {
+          "question": "How many marks are allocated to R1 literature?",
+          "answer": "30 marks."
+        },
+        {
+          "question": "Is the internal assessment worth 20 marks?",
+          "answer": "Yes."
+        },
+        {
+          "question": "Do R1 and R2 use distinct textbooks?",
+          "answer": "No; both use Kaveri."
+        },
+        {
+          "question": "Does checking a StudyAI page equal proven mastery?",
+          "answer": "No; apply the learning in original questions and timed practice."
+        }
+      ],
+      "tip": "Use your school's R1/R2 designation to select the right assessment pattern; do not mix their task lists."
     }
   ]
 };

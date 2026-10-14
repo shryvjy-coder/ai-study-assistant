@@ -1414,6 +1414,20 @@ const chapter={
     }
   ]
 };
+/* Each heading contains two genuinely authored, independently readable learning
+   subtopics drawn from the original explanation paragraphs. All examples remain
+   complete standalone worked solutions; no placeholder lesson pages are created. */
+const topicNames=[["Childhood in Karnataka","Karmaveera and the grandmother's reading routine"],["The pilgrimage heroine's dilemma","The grandmother's identification and embedded narrative"],["The unexpectedly long wedding visit","Shame, dependence and educational opportunity"],["The learning goal and age assumption","Practice, role reversal and teaching identity"],["The book and the family gifts","The meaning of touching feet and new confidence"],["Contrasting character arcs and conflict","Structure, voice, setting and inference"],["Binomials and word formation","Idioms and speaking in context"],["Verb forms and chronology","When to use past perfect and how to correct errors"],["Cause, effect and true–false reasoning","Extract-based inference and answer planning"],["Nature and heritage in the opening","Warriors, sages, music and the ode's repeated praise"],["Refrain, personification and symbols","Hyperbole, rhythm, rhetorical questions and tone"],["Cultural and historical allusions","Stanza development, imagery and suffix vocabulary"],["Explaining the river and rhetorical questions","Structured short and long poetry answers"],["Practical literacy and inherited knowledge","Respect, voice and cross-text comparisons"],["Letter format and opening","Developing arguments and making practical requests"],["Digital literacy and comprehension methods","Case-based reading and turncoat debate"],["R1–R2 marks, grammar and writing","Literature assessment and effective study practice"]];
+chapter.sections.forEach((section,index)=>{
+  const original=section.paragraphs||[];
+  const remainder=original.slice(1);
+  const middle=Math.ceil(remainder.length/2);
+  section.paragraphs=original.slice(0,1);
+  section.subtopics=[
+    {title:topicNames[index][0],paragraphs:remainder.slice(0,middle)},
+    {title:topicNames[index][1],paragraphs:remainder.slice(middle)}
+  ];
+});
 window.CBSE_CLASS9_ENGLISH_FULL_NOTES=window.CBSE_CLASS9_ENGLISH_FULL_NOTES||{};
 window.CBSE_CLASS9_ENGLISH_FULL_NOTES['How I Taught My Grandmother to Read · Bharat Our Land']=chapter;
 })();

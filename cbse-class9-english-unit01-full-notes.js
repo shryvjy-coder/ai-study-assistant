@@ -1195,7 +1195,7 @@ const chapter={
             "Body: describe respectful peer volunteers, time slots, materials and support.",
             "Close: request publicity and coordination, without invented figures."
           ],
-          "answer": "Opening: public need; development: actionable student programmes; closing: clear request."
+          "answer": "23 Orchard Road, Mysuru\n14 October 2026\nThe Editor, The Local Herald, Mysuru\nSubject: Students Supporting Adult Literacy\nSir/Madam,\nI wish to highlight the need for accessible adult-literacy classes in our neighbourhood. Many adults want to read notices, forms and useful information independently but have had few opportunities to learn.\nSchools could collaborate with community groups to organise voluntary weekend reading sessions. Students can prepare easy bilingual learning cards, help learners practise everyday texts and encourage families to provide a supportive environment. Volunteers must be patient and respect learners' privacy and different starting levels.\nKindly use your newspaper to publicise existing literacy centres and invite local institutions to offer suitable spaces and learning resources. Such cooperation could build confidence among adult learners while developing empathy and responsibility in young volunteers.\nYours truly,\nA Concerned Student"
         },
         {
           "title": "Subject-line refinement",
@@ -1337,7 +1337,7 @@ const chapter={
       "title": "2026–27 CBSE English examination framework and revision plan",
       "paragraphs": [
         "CBSE prescribes Kaveri for Class IX English in 2026–27, with R1 and R2 routes using the same textbook but somewhat different reading and writing question formats. A student should follow the route set by their school, not assume that the previous year's Beehive/Moments syllabus applies unchanged.",
-        "The published R1 scheme allocates 20 marks to reading, 30 to writing and grammar, 30 to literature, plus 20 for internal assessment. R2 carries the same broad 20/30/30/20 division but changes details such as passage type, some writing tasks and literature extract mark distribution.",
+        "The published R1 scheme has an 80 marks written assessment: 20 marks reading, 30 marks writing and grammar, and 30 marks literature; an additional 20 marks are allocated to internal assessment. R2 has the same broad 20/30/30/20 mark split but different passage types, some writing tasks and extract-question distributions.",
         "Core GRAMMAR capacities include sequence of tenses, modals, reported speech, Type 1 conditionals, subject–verb concord, determiners, noun/relative clauses, editing and sentence transformation/rearrangement. Unit 1's specific simple past/past perfect exercise is a beginning, not complete grammar preparation.",
         "R1 WRITING includes notice/informal invitation (up to 50 words), letter/editorial email (120–150), factual description/magazine article (120–150), and descriptive/narrative essay (200–250). R2 sets some different tasks and word limits, including poster/speech and a 150–180-word narrative essay. Always check which route applies.",
         "LITERATURE questions include extract-based comprehension, shorter constructed responses of about 40–50 words, and more extended analysis in roughly 120–150 words. The best responses use details from the work rather than memorised generic moral claims.",

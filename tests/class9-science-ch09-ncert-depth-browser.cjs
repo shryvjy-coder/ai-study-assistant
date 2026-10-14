@@ -77,8 +77,8 @@ const check=(condition,message)=>{assert.ok(condition,message);console.log('PASS
   'NCERT textbook reference and human-editorial-review status preserved');
  check(result.curated===1&&result.headings.length===11&&new Set(result.headings).size===11,
   'eleven original substantial lesson sections render once');
- check(result.pCount>=83&&result.examples===90&&result.tips===11,
-  '83 explanatory paragraphs, 90 worked examples and 11 lesson-specific exam tips render');
+ check(result.pCount>=83&&result.examples===91&&result.tips===11,
+  '83 explanatory paragraphs, 91 worked examples and 11 lesson-specific exam tips render');
  const req=['Activity 9.1','Activity 9.2','Activity 9.3','Activity 9.4',
    'Example 9.1','Example 9.2','Example 9.3','Example 9.4','Example 9.5','Example 9.6','Example 9.7',
    'Pause and Ponder','Fig. 9.18','Table 9.1','Table 9.3','Lavoisier','Proust','Dalton',

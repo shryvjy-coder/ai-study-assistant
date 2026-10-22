@@ -54,8 +54,8 @@ const check=(ok,msg)=>{assert.ok(ok,msg);console.log('PASS',msg)};
   return snapshot;
  });
  check(baseline.englishCount===8&&new Set(baseline.ids).size===8&&
-  baseline.fullKeys.length===1&&baseline.pdf==='iebe101.pdf',
-  'all eight original Kaveri unit identifiers remain; only unit 1 upgraded');
+  baseline.fullKeys.length===2&&baseline.pdf==='iebe101.pdf',
+  'all eight Kaveri identifiers remain; units 1 and 2 now have detailed modules');
  check(baseline.count===11&&baseline.paragraphs===82&&baseline.worked===72,
   '11 long-form teaching lessons, 82 paragraphs and 72 independent worked models');
  check(await page.locator('#study.studyai-progress-active').count()===1&&
@@ -131,15 +131,77 @@ const check=(ok,msg)=>{assert.ok(ok,msg);console.log('PASS',msg)};
  },example.key);
  check((await page.evaluate(id=>StudyAIProgress.summary(id).done,baseline.id))===0,
   'English saved checkbox can be unchecked');
+
+ const unit2=await page.evaluate(()=>{
+   const entry=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&
+     x.subject==='English'&&x.title.startsWith('The Pot Maker'));
+   const bank=CBSE_CLASS9_ENGLISH_FULL_NOTES?.[entry?.title];
+   if(!bank)throw new Error('Kaveri Unit 2 authored bank missing');
+   current={board:entry.board,grade:entry.grade,subject:entry.subject,
+     topic:entry.title,topicId:entry.id,component:'All components'};
+   renderFilters();openTopic(entry.title,entry.id);
+   return {id:entry.id,sectionCount:bank.sections.length,
+     paragraphs:bank.sections.reduce((n,x)=>n+x.paragraphs.length,0),
+     worked:bank.sections.reduce((n,x)=>n+x.examples.length,0),
+     pdf:bank.sourcePdf,keys:bank.sections.map(x=>x.title)};
+ });
+ check(unit2.sectionCount===10&&unit2.paragraphs===45&&unit2.worked===61&&
+   unit2.pdf==='iebe102.pdf'&&new Set(unit2.keys).size===10,
+   'Kaveri Unit 2 loads ten distinct authored lessons with 45 explanations and 61 worked answers');
+ const prose2=await page.locator('#detailed-notes').textContent();
+ check(['Temsula Ao','Sentila','Arenla','Mesoba','Onula','Galsworthy',
+   'The Lamplighter','determiners','relative clauses','Quality','Career Mela',
+   'horticulturist','rhyme scheme','vocations'].every(x=>
+      prose2.toLowerCase().includes(x.toLowerCase())),
+   'Unit 2 includes source-specific prose, poetry, grammar and extension analysis');
+ check(await page.locator('#study.studyai-progress-active').count()===1&&
+    await page.locator('.studyai-lesson-rail .studyai-lesson-row').count()===10&&
+    await page.locator('#detailed-notes .actual-note-topic').count()===10&&
+    await page.locator('#detailed-notes .worked-box').count()===61,
+   'Unit 2 has ten lesson checklists and 61 separately rendered worked answers');
+ const progress2=await page.evaluate(id=>StudyAIProgress.summary(id),unit2.id);
+ check(progress2.lessonCount===10&&progress2.total===71&&progress2.done===0,
+   'Unit 2 completion total counts only actual authored lesson and worked-answer leaves');
+ check(await page.locator('#detailed-notes .actual-note-topic:not([hidden])').count()===1,
+   'Unit 2 displays one lesson at a time');
+ const unit2Example=await page.evaluate(id=>StudyAIProgress.outline(id)[0].leaves.find(x=>x.kind==='example'),unit2.id);
+ check(!!unit2Example,'Unit 2 has real independent worked examples');
+ await page.evaluate(key=>StudyAILessonReader.goToLeaf(key),unit2Example.key);
+ await page.evaluate(key=>{
+   const row=[...document.querySelectorAll('.studyai-sublesson-row')]
+     .find(x=>x.dataset.leafKey===key);
+   if(!row)throw new Error('Unit 2 example row not found');
+   row.querySelector('.studyai-sublesson-toggle').click();
+ },unit2Example.key);
+ check((await page.evaluate(id=>StudyAIProgress.summary(id).done,unit2.id))===1,
+   'Unit 2 model-answer checklist can be completed');
+ await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>!!window.StudyAIProgress&&
+   !!window.CBSE_CLASS9_ENGLISH_FULL_NOTES?.['The Pot Maker · Gifts of Grace: Honouring Our Vocations']);
+ check((await page.evaluate(id=>StudyAIProgress.completedKeys(id),unit2.id)).includes(unit2Example.key),
+   'Unit 2 completion persists across page reloads');
+ await page.evaluate(id=>{
+   const e=STUDY_DATA.find(x=>x.id===id);
+   current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};
+   renderFilters();openTopic(e.title,e.id);
+ },unit2.id);
+ await page.evaluate(key=>{
+   const row=[...document.querySelectorAll('.studyai-sublesson-row')]
+     .find(x=>x.dataset.leafKey===key);
+   row.querySelector('.studyai-sublesson-toggle').click();
+ },unit2Example.key);
+ check((await page.evaluate(id=>StudyAIProgress.summary(id).done,unit2.id))===0,
+   'Unit 2 independent completion may also be undone');
+
  const oldUnit=await page.evaluate(()=>{
   const e=STUDY_DATA.find(e=>e.board==='CBSE'&&e.grade==='Class 9'&&e.subject==='English'&&
-    e.title.startsWith('The Pot Maker'));
+    e.title.startsWith('Winds of Change'));
   current={board:e.board,grade:e.grade,subject:e.subject,topic:e.title,topicId:e.id};
   renderFilters();openTopic(e.title,e.id);return e.id;
  });
  check(!!oldUnit&&await page.locator('#study.studyai-progress-active').count()===0&&
   await page.locator('#detailed-notes .english-full-notes').count()===0,
-  'other seven existing English units retain traditional notes until separately upgraded');
+  'English units 3–8 retain traditional notes until separately upgraded');
  const restored=await page.evaluate(()=>{
   const math=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Mathematics'&&x.title==='The World of Numbers');
   const science=STUDY_DATA.find(x=>x.board==='CBSE'&&x.grade==='Class 9'&&x.subject==='Science'&&x.title==='Earth as a System: Energy, Matter, and Life');
